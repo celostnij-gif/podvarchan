@@ -1,0 +1,75 @@
+import { notFound } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
+import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
+import { getBlogPost, getAllBlogSlugs, formatDate } from '@/lib/content'
+import { articleSchema } from '@/lib/schema'
+import { SITE } from '@/constants'
+import { ClientBlogPost } from './client-page'
+
+export const dynamicParams = false
+
+interface Props {
+  params: Promise<{ slug: string; locale: string }>
+}
+
+export async function generateStaticParams() {
+  const slugs = getAllBlogSlugs()
+  return slugs.map((slug) => ({ slug }))
+}
+
+export async function generateMetadata({ params }: Props) {
+  const { slug, locale } = await params
+  const post = getBlogPost(slug)
+  if (!post) return {}
+  const t = await getTranslations({ locale, namespace: 'common' })
+
+  return seoMetadata({
+    title: post.title,
+    description: post.metaDescription,
+    keywords: post.keywords,
+    path: `/blog/${slug}`,
+    type: 'article',
+    publishedTime: post.datePublished,
+    modifiedTime: post.dateModified,
+    author: post.author,
+    locale,
+  })
+}
+
+export default async function BlogPostPage({ params }: Props) {
+  const { slug, locale } = await params
+  const post = getBlogPost(slug)
+  if (!post) notFound()
+
+  const jsonLd = articleSchema({
+    headline: post.title,
+    description: post.description,
+    url: `/blog/${slug}/`,
+    datePublished: post.datePublished,
+    dateModified: post.dateModified,
+    authorName: post.author,
+    locale,
+  })
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <ClientBlogPost
+        title={post.title}
+        body={post.body ?? ''}
+        date={formatDate(post.datePublished)}
+        category={post.categoryName}
+        categorySlug={post.categorySlug}
+        author={post.author}
+        readingTime={post.readingTime}
+        slug={slug}
+        image={post.image}
+        imageAlt={post.imageAlt}
+        locale={locale}
+      />
+    </>
+  )
+}
