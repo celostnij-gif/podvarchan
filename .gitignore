@@ -39,5 +39,14 @@ next-env.d.ts
 # exported/build output
 /SITEPOD/
 
+# open-next (Cloudflare Workers build)
+/.open-next/
+
+# cloudflare
+.wrangler/
+
 # generated images
 public/images/logo/
+
+# windows reserved filename
+nul

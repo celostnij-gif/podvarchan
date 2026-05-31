@@ -294,8 +294,9 @@ function DesktopDropdown({ item, pathname, t }: { item: NavItem; pathname: strin
             variants={dropdown}
             initial="initial" animate="animate" exit="exit"
             className="absolute top-full mt-3 w-72 p-2 rounded-2xl
-                       bg-bg-surface/97 backdrop-blur-2xl border border-border-light shadow-2xl
-                       shadow-black/40 before:absolute before:-top-[6px] before:left-1/2 before:-translate-x-1/2
+                       bg-bg-surface backdrop-blur-2xl border border-border-light shadow-2xl
+                       shadow-black/40 z-[60]
+                       before:absolute before:-top-[6px] before:left-1/2 before:-translate-x-1/2
                        before:w-3 before:h-3 before:rotate-45 before:bg-border-light before:border-l before:border-t
                        before:border-border-light"
             style={{ transformOrigin: 'top center', left: 'calc(50% - 130px)' }}
