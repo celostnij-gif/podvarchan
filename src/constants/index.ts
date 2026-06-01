@@ -36,18 +36,7 @@ export const MAIN_NAV: NavItem[] = [
   { label: 'Об авторе', href: '/ob-avtore/' },
   { label: 'Метод', href: '/metod/' },
   { label: 'FAQ', href: '/faq/' },
-  { label: 'Контакты', href: '/kontakty/' },
-]
-
-export const FOOTER_NAV: NavItem[] = [
-  { label: 'Услуги', href: '/uslugi/' },
-  { label: 'Блог', href: '/blog/' },
-  { label: 'Об авторе', href: '/ob-avtore/' },
-  { label: 'Метод', href: '/metod/' },
-  { label: 'FAQ', href: '/faq/' },
-  { label: 'Контакты', href: '/kontakty/' },
-  { label: 'Политика конфиденциальности', href: '/politika-konfidentsialnosti/' },
-  { label: 'Дисклеймер', href: '/disclaimer/' },
+  { label: 'Цены', href: '/tseny/' },
 ]
 
 /* ── Services ── */
@@ -224,6 +213,7 @@ export const STATIC_PAGES = [
   { slug: 'kontakty/',          priority: 0.7, changefreq: 'monthly' as const },
   { slug: 'politika-konfidentsialnosti/', priority: 0.3, changefreq: 'yearly' as const },
   { slug: 'disclaimer/',        priority: 0.3, changefreq: 'yearly' as const },
+  { slug: 'tseny/',             priority: 0.8, changefreq: 'monthly' as const },
 ]
 
 /* ── Author info ── */

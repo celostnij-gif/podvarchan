@@ -133,18 +133,6 @@ export const childVariants = {
   },
 }
 
-/** Delayed child variant (adds a custom delay) */
-export function delayedChild(delay: number = 0) {
-  return {
-    hidden: { opacity: 0, y: 16 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { delay, duration: 0.5, ease: easePremium },
-    },
-  }
-}
-
 /**
  * Reusable animated section wrapper.
  * Wraps children in a motion element with scroll-triggered animation.

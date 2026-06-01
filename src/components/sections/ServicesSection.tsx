@@ -64,7 +64,7 @@ export default function ServicesSection() {
   if (services.length === 0) return null
 
   return (
-    <section className="relative py-20 md:py-28 bg-bg-base/85 overflow-hidden" aria-label={t('ariaLabel')}>
+    <section className="relative py-20 md:py-28 overflow-hidden" aria-label={t('ariaLabel')}>
       <div className="relative z-10 max-w-container mx-auto px-gutter">
         {/* Heading */}
         <motion.div
@@ -74,7 +74,7 @@ export default function ServicesSection() {
           viewport={{ once: true, margin: '-60px' }}
           className="text-center"
         >
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-display text-text-primary">{t('heading')}</h2>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-display text-gold-premium">{t('heading')}</h2>
           <p className="mt-4 text-base text-text-secondary max-w-2xl mx-auto">{t('subtitle')}</p>
         </motion.div>
 
@@ -88,8 +88,9 @@ export default function ServicesSection() {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: '-30px' }}
+              className="h-full"
             >
-              <TiltCard tiltDegree={4} scale={1.015} className="rounded-xl">
+              <TiltCard tiltDegree={4} scale={1.015} className="rounded-xl h-full">
                 <Link
                   href={`/uslugi/${service.slug}/`}
                   className="group block p-6 bg-bg-surface border border-border-base

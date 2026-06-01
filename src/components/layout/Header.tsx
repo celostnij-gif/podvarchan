@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { LogoImage } from '@/components/ui/LogoImage'
 import { MAIN_NAV } from '@/constants'
 import { Link } from '@/i18n/routing'
+import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
 import type { NavItem } from '@/types'
 
 /* ── Nav label key mapping ── */
@@ -18,6 +19,7 @@ const NAV_LABEL_KEYS: Record<string, string> = {
   '/ob-avtore/': 'nav.about',
   '/metod/': 'nav.method',
   '/faq/': 'nav.faq',
+  '/tseny/': 'nav.prices',
   '/kontakty/': 'nav.contacts',
   '/uslugi/gipnoterapiya-onlayn/': 'nav.gipnoterapiya',
   '/uslugi/trevoga-i-panicheskiye-ataki/': 'nav.trevoga',
@@ -296,9 +298,10 @@ function DesktopDropdown({ item, pathname, t }: { item: NavItem; pathname: strin
             className="absolute top-full mt-3 w-72 p-2 rounded-2xl
                        bg-bg-surface backdrop-blur-2xl border border-border-light shadow-2xl
                        shadow-black/40 z-[60]
-                       before:absolute before:-top-[6px] before:left-1/2 before:-translate-x-1/2
-                       before:w-3 before:h-3 before:rotate-45 before:bg-border-light before:border-l before:border-t
-                       before:border-border-light"
+                       before:absolute before:-top-2 before:left-[calc(50%+16px)] before:-translate-x-1/2
+                       before:w-0 before:h-0
+                       before:border-l-[7px] before:border-r-[7px] before:border-b-[7px]
+                       before:border-l-transparent before:border-r-transparent before:border-b-gold/30"
             style={{ transformOrigin: 'top center', left: 'calc(50% - 130px)' }}
           >
             <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" aria-hidden="true" />
@@ -505,6 +508,7 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [pageTop, setPageTop] = useState(true)
+  const { isMobile } = useDeviceCapabilities()
 
   const isHome = pathname === '/' || pathname === '/ru' || pathname === '/uk'
   const shouldBeSolid = !isHome || scrolled
@@ -556,7 +560,7 @@ export default function Header() {
           ${shouldBeTransparent
             ? 'bg-transparent'
             : shouldBeSolid
-              ? 'bg-bg-base/85 backdrop-blur-2xl border-b border-border-base/80 shadow-[0_4px_30px_rgba(0,0,0,0.3)]'
+              ? `bg-bg-base/85 ${isMobile ? 'backdrop-blur-md' : 'backdrop-blur-2xl'} border-b border-border-base/80 shadow-[0_4px_30px_rgba(0,0,0,0.3)]`
               : 'bg-gradient-to-b from-bg-base/40 to-transparent backdrop-blur-sm'
           }`}
       >

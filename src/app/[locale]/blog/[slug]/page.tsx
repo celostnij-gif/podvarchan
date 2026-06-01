@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
-import { getBlogPost, getAllBlogSlugs, formatDate } from '@/lib/content'
+import { getBlogPost, getAllBlogSlugs, getAllBlogPosts, formatDate } from '@/lib/content'
 import { articleSchema } from '@/lib/schema'
 import { SITE } from '@/constants'
 import { ClientBlogPost } from './client-page'
@@ -41,6 +41,13 @@ export default async function BlogPostPage({ params }: Props) {
   const post = getBlogPost(slug)
   if (!post) notFound()
 
+  /* ── Related posts from same category (excluding current) ── */
+  const allPosts = getAllBlogPosts()
+  const relatedPosts = allPosts
+    .filter(p => p.categorySlug === post.categorySlug && p.slug !== slug)
+    .slice(0, 2)
+    .map(p => ({ slug: p.slug, title: p.title }))
+
   const jsonLd = articleSchema({
     headline: post.title,
     description: post.description,
@@ -69,6 +76,7 @@ export default async function BlogPostPage({ params }: Props) {
         image={post.image}
         imageAlt={post.imageAlt}
         locale={locale}
+        relatedPosts={relatedPosts}
       />
     </>
   )

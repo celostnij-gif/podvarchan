@@ -1,10 +1,12 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslations, useMessages } from 'next-intl'
 import { TiltCard } from '@/components/ui'
 import type { Testimonial } from '@/types'
+
+const AUTO_PLAY_INTERVAL = 4000 // ms
 
 const variants = {
   enter: (direction: number) => ({
@@ -14,12 +16,12 @@ const variants = {
   center: {
     x: 0,
     opacity: 1,
-    transition: { duration: 0.45, ease: [0.25, 0.1, 0, 1] as const },
+    transition: { duration: 0.5, ease: [0.25, 0.1, 0, 1] as const },
   },
   exit: (direction: number) => ({
     x: direction > 0 ? -300 : 300,
     opacity: 0,
-    transition: { duration: 0.35, ease: [0.25, 0.1, 0, 1] as const },
+    transition: { duration: 0.4, ease: [0.25, 0.1, 0, 1] as const },
   }),
 }
 
@@ -28,17 +30,24 @@ export default function TestimonialsSection() {
   const messages = useMessages()
   const items = (messages?.testimonials?.items as Testimonial[]) ?? []
   const [[page, direction], setPage] = useState([0, 0])
-  const itemIndex = page % (items.length || 1)
+  const itemIndex = Math.abs(page) % (items.length || 1)
 
   const paginate = useCallback(
     (newDirection: number) => setPage(([prev]) => [prev + newDirection, newDirection]),
     []
   )
 
+  /* ── Auto-play ── */
+  useEffect(() => {
+    if (items.length < 2) return
+    const timer = setInterval(() => paginate(1), AUTO_PLAY_INTERVAL)
+    return () => clearInterval(timer)
+  }, [items.length, paginate])
+
   const item = items[itemIndex] || { name: '', text: '', result: '' }
 
   return (
-    <section className="relative py-20 md:py-28 bg-bg-base/85 overflow-hidden" aria-label={t('ariaLabel')}>
+    <section className="relative py-20 md:py-28 overflow-hidden" aria-label={t('ariaLabel')}>
       <div className="max-w-container mx-auto px-gutter">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -47,7 +56,11 @@ export default function TestimonialsSection() {
           transition={{ duration: 0.5, ease: [0.25, 0.1, 0, 1] as const }}
           className="text-center"
         >
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-display text-text-primary">{t('heading')}</h2>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-display text-gold-premium">
+            {t.rich('heading', {
+              gold: (chunks: any) => <>{chunks}</>,
+            })}
+          </h2>
         </motion.div>
 
         {/* Section-level disclaimer */}
@@ -97,45 +110,19 @@ export default function TestimonialsSection() {
             </TiltCard>
           </AnimatePresence>
 
-          {/* Navigation */}
-          <div className="mt-8 flex items-center justify-center gap-3">
-            <button
-              onClick={() => paginate(-1)}
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-bg-surface
-                         border border-border-base text-text-muted hover:text-gold
-                         hover:border-gold-muted transition-all duration-200"
-              aria-label={t('previous')}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                <path d="M15 18l-6-6 6-6" />
-              </svg>
-            </button>
-            <div className="flex items-center gap-2">
-              {items.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setPage([i, i > itemIndex ? 1 : -1])}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    i === itemIndex ? 'bg-gold w-5' : 'bg-white/10 hover:bg-white/20'
-                  }`}
-                  aria-label={t('reviewLabel', { number: i + 1 })}
-                />
-              ))}
-            </div>
-            <button
-              onClick={() => paginate(1)}
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-bg-surface
-                         border border-border-base text-text-muted hover:text-gold
-                         hover:border-gold-muted transition-all duration-200"
-              aria-label={t('next')}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                <path d="M9 18l6-6-6-6" />
-              </svg>
-            </button>
+          {/* Dots */}
+          <div className="mt-8 flex items-center justify-center gap-2">
+            {items.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setPage([i, i > itemIndex ? 1 : -1])}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  i === itemIndex ? 'bg-gold w-5' : 'bg-white/10 hover:bg-white/20'
+                }`}
+                aria-label={t('reviewLabel', { number: i + 1 })}
+              />
+            ))}
           </div>
-
-
         </div>
       </div>
     </section>

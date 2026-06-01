@@ -4,7 +4,7 @@ import { useTranslations, useMessages } from 'next-intl'
 import { motion } from 'framer-motion'
 import { Link } from '@/i18n/routing'
 import { SERVICE_ICONS } from '@/constants'
-import { MedicalDisclaimer, TiltCard } from '@/components/ui'
+import { MedicalDisclaimer, TiltCard, FaqAccordion } from '@/components/ui'
 
 interface ServiceData {
   slug: string
@@ -306,7 +306,7 @@ function SymptomsSection({ service }: { service: ServiceData }) {
 
         <div className="mt-10 md:mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {symptoms.map((symptom, i) => (
-            <TiltCard key={i} tiltDegree={4} scale={1.015} className="rounded-2xl">
+            <TiltCard key={i} tiltDegree={4} scale={1.015} className="rounded-2xl h-full">
               <motion.div
                 variants={cardUp(i)}
                 initial="hidden"
@@ -315,7 +315,7 @@ function SymptomsSection({ service }: { service: ServiceData }) {
                 className="group relative p-5 md:p-6 bg-white/[0.02] border border-white/[0.05]
                            hover:bg-white/[0.04] hover:border-gold/20
                            hover:shadow-[0_0_30px_rgba(201,169,110,0.04)]
-                           transition-all duration-500 rounded-2xl"
+                           transition-all duration-500 rounded-2xl h-full flex flex-col"
               >
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg
                                  ${i % 2 === 0 ? 'bg-gold/[0.08]' : 'bg-green/[0.08]'}
@@ -323,7 +323,7 @@ function SymptomsSection({ service }: { service: ServiceData }) {
                   <span className="leading-none" role="img" aria-hidden="true">{symptom.icon}</span>
                 </div>
                 <h3 className="mt-3 text-base font-display text-text-primary">{symptom.title}</h3>
-                <p className="mt-1.5 text-sm text-text-muted leading-relaxed">{symptom.desc}</p>
+                <p className="mt-1.5 text-sm text-text-muted leading-relaxed flex-1">{symptom.desc}</p>
               </motion.div>
             </TiltCard>
           ))}
@@ -384,14 +384,14 @@ function MethodSection({ service }: { service: ServiceData }) {
 
         <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {steps.map((step, i) => (
-            <TiltCard key={i} tiltDegree={4} scale={1.015} className="rounded-xl">
+            <TiltCard key={i} tiltDegree={4} scale={1.015} className="rounded-xl h-full">
               <motion.div
                 variants={cardUp(i)}
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
                 className="group relative p-6 bg-bg-surface border border-border-base
-                           hover:border-gold/20 transition-all duration-400 rounded-xl"
+                           hover:border-gold/20 transition-all duration-400 rounded-xl h-full flex flex-col"
               >
                 <span className="text-4xl font-display text-gold/20 group-hover:text-gold/40 transition-colors duration-300"
                       aria-hidden="true">
@@ -400,7 +400,7 @@ function MethodSection({ service }: { service: ServiceData }) {
                 <h3 className="mt-3 text-lg font-display text-text-primary group-hover:text-gold transition-colors duration-300">
                   {step.title}
                 </h3>
-                <p className="mt-2 text-sm text-text-muted leading-relaxed">
+                <p className="mt-2 text-sm text-text-muted leading-relaxed flex-1">
                   {step.desc}
                 </p>
               </motion.div>
@@ -446,36 +446,15 @@ function FAQSection({ service }: { service: ServiceData }) {
 
         <div className="mt-10 max-w-2xl mx-auto space-y-3" role="list">
           {faqs.slice(0, 5).map((item, index) => (
-            <motion.article
+            <motion.div
               key={index}
               variants={faqItem(index)}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              role="listitem"
-              className="rounded-xl border border-border-base bg-bg-surface overflow-hidden"
             >
-              <details className="group">
-                <summary
-                  className="flex items-center justify-between w-full px-5 py-5 text-left cursor-pointer
-                             text-text-primary font-medium
-                             hover:bg-bg-elevated transition-colors duration-200
-                             [&::-webkit-details-marker]:hidden list-none"
-                >
-                  <span className="text-base font-body pr-4">{item.question}</span>
-                  <span
-                    className="shrink-0 mt-0.5 text-gold transition-transform duration-300
-                               group-open:rotate-180"
-                    aria-hidden="true"
-                  >
-                    ▼
-                  </span>
-                </summary>
-                <div className="px-5 pb-5">
-                  <p className="text-sm text-text-muted leading-relaxed">{item.answer}</p>
-                </div>
-              </details>
-            </motion.article>
+              <FaqAccordion question={item.question} answer={item.answer} />
+            </motion.div>
           ))}
         </div>
       </div>

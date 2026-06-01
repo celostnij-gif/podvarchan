@@ -6,6 +6,7 @@ import { useTranslations, useMessages } from 'next-intl'
 import { Link } from '@/i18n/routing'
 import { SERVICE_ICONS } from '@/constants'
 import TiltCard from '@/components/ui/TiltCard'
+import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
 
 interface ServiceItem {
   slug: string
@@ -52,6 +53,7 @@ const floatingOrb = (delay: number) => ({
 
 function BackgroundDecorations() {
   const { scrollY } = useScroll()
+  const { shouldReduceAnimations } = useDeviceCapabilities()
   const orbY = useTransform(scrollY, [0, 600], [0, -40])
   const orb2Y = useTransform(scrollY, [0, 600], [0, 30])
 
@@ -60,45 +62,49 @@ function BackgroundDecorations() {
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-      {/* Ambient glow */}
+      {/* Ambient glow — static CSS, lightweight, keep */}
       <div className="absolute top-0 left-1/3 w-[600px] h-[600px] bg-gradient-radial from-gold/[0.03] via-transparent to-transparent blur-[120px]" />
 
-      <motion.div style={{ y: orbY }}>
-        <motion.div
-          variants={orb0}
-          initial="hidden"
-          animate="visible"
-          className="absolute -top-24 -right-24 w-96 h-96 bg-gradient-to-bl from-green/[0.03] via-transparent to-transparent rounded-full blur-3xl"
-        />
-      </motion.div>
+      {!shouldReduceAnimations && (
+        <>
+          <motion.div style={{ y: orbY }}>
+            <motion.div
+              variants={orb0}
+              initial="hidden"
+              animate="visible"
+              className="absolute -top-24 -right-24 w-96 h-96 bg-gradient-to-bl from-green/[0.03] via-transparent to-transparent rounded-full blur-3xl"
+            />
+          </motion.div>
 
-      <motion.div style={{ y: orb2Y }}>
-        <motion.div
-          variants={orb1}
-          initial="hidden"
-          animate="visible"
-          className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-gold/[0.02] via-transparent to-transparent rounded-full blur-3xl"
-        />
-      </motion.div>
+          <motion.div style={{ y: orb2Y }}>
+            <motion.div
+              variants={orb1}
+              initial="hidden"
+              animate="visible"
+              className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-gold/[0.02] via-transparent to-transparent rounded-full blur-3xl"
+            />
+          </motion.div>
 
-      {/* Dot pattern */}
+          {/* Decorative rings */}
+          <svg className="absolute top-1/4 right-1/6 w-48 h-48 opacity-[0.03]" viewBox="0 0 200 200" fill="none">
+            <circle cx="100" cy="100" r="70" stroke="url(#ringGrad)" strokeWidth="0.5" />
+            <circle cx="100" cy="100" r="50" stroke="url(#ringGrad)" strokeWidth="0.3" />
+            <defs>
+              <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="#C9A96E" stopOpacity="0" />
+                <stop offset="50%" stopColor="#C9A96E" stopOpacity="0.2" />
+                <stop offset="100%" stopColor="#C9A96E" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </>
+      )}
+
+      {/* Dot pattern — lightweight, keep */}
       <div
         className="absolute inset-0 opacity-[0.02]"
         style={{ backgroundImage: 'radial-gradient(circle, rgba(201,169,110,0.4) 1px, transparent 1px)', backgroundSize: '40px 40px' }}
       />
-
-      {/* Decorative rings */}
-      <svg className="absolute top-1/4 right-1/6 w-48 h-48 opacity-[0.03]" viewBox="0 0 200 200" fill="none">
-        <circle cx="100" cy="100" r="70" stroke="url(#ringGrad)" strokeWidth="0.5" />
-        <circle cx="100" cy="100" r="50" stroke="url(#ringGrad)" strokeWidth="0.3" />
-        <defs>
-          <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#C9A96E" stopOpacity="0" />
-            <stop offset="50%" stopColor="#C9A96E" stopOpacity="0.2" />
-            <stop offset="100%" stopColor="#C9A96E" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-      </svg>
     </div>
   )
 }

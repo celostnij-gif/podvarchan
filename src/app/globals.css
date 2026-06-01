@@ -90,17 +90,14 @@
 
   body {
     overflow-x: hidden;
+    position: relative;
+    z-index: 0;
     background-color: var(--color-bg-base);
     background-image:
-      /* Edge fade (vignette) — dots растворяются к краям экрана */
-      radial-gradient(ellipse 85% 80% at 50% 50%, transparent 20%, var(--color-bg-base) 75%),
-      /* 3D dot pattern — offset gradient создаёт иллюзию объёма */
-      radial-gradient(circle at 2px 2px, rgba(236, 235, 242, 0.25) 0px, rgba(236, 235, 242, 0.12) 0.7px, transparent 1px);
-    background-size:
-      auto,
-      15px 15px;
+      radial-gradient(circle at 2px 2px, rgba(201, 169, 110, 0.15) 0px, rgba(201, 169, 110, 0.05) 0.8px, transparent 1px);
+    background-size: 15px 15px;
+    background-repeat: repeat;
     background-attachment: fixed;
-    background-repeat: no-repeat, repeat;
     color: var(--color-text-primary);
     font-family: var(--font-sans);
     line-height: 1.75;
@@ -138,35 +135,15 @@
     scrollbar-color: var(--color-border-base) var(--color-bg-deep);
   }
 
-  /* ── Details / Summary (FAQ) ── */
-  details > summary {
-    list-style: none;
-    cursor: pointer;
-  }
-
-  details > summary::-webkit-details-marker {
-    display: none;
-  }
-
-  details > summary::marker {
-    display: none;
-    content: '';
-  }
-
-  .faq-answer {
-    animation: faq-open 250ms ease-out;
-  }
-
-  @keyframes faq-open {
-    from {
-      opacity: 0;
-      transform: translateY(-8px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
+  @media (max-width: 768px) {
+    body {
+      background-attachment: scroll;
     }
   }
+
+  /* ── FAQ animations handled by framer-motion FaqAccordion component ── */
+
+
 
   /* ── Scroll margin for anchor links ── */
   section[id],
@@ -460,16 +437,12 @@
     text-wrap: pretty;
   }
 
-  /* 3D volumetric dot pattern — можно применить на любой секции */
+  /* Статичний точечний фон — 2px золоті точки з кроком 12px */
   .bg-dot-3d {
     background-image:
-      radial-gradient(ellipse 85% 80% at 50% 50%, transparent 20%, var(--color-bg-base) 75%),
-      radial-gradient(circle at 1px 1px, rgba(236, 235, 242, 0.18) 0px, rgba(236, 235, 242, 0.08) 0.7px, transparent 1px);
-    background-size:
-      auto,
-      15px 15px;
-    background-attachment: fixed;
-    background-repeat: no-repeat, repeat;
+      radial-gradient(circle at 2px 2px, rgba(201, 169, 110, 0.18) 0px, rgba(201, 169, 110, 0.06) 0.8px, transparent 1px);
+    background-size: 12px 12px;
+    background-repeat: repeat;
   }
 
   .bg-dot-pattern {

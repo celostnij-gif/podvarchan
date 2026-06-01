@@ -5,6 +5,7 @@ import { motion, useScroll, useTransform } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { Link } from '@/i18n/routing'
+import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
 
 
 /* ── Variants ── */
@@ -44,15 +45,17 @@ const scrollIndicatorVariants = {
 
 function HeroBackgroundImage() {
   const { scrollY } = useScroll()
+  const { shouldReduceAnimations } = useDeviceCapabilities()
 
   // Parallax: image moves down (positive Y) as scroll increases —
   // this makes it scroll *slower* than the rest of the page content,
   // creating the "delayed / lingering" effect.
+  // Disabled on mobile for performance.
   const y = useTransform(scrollY, [0, 800], [0, 200])
 
   return (
     <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
-      <motion.div className="relative w-full h-full" style={{ y }}>
+      <motion.div className="relative w-full h-full" style={{ y: shouldReduceAnimations ? 0 : y }}>
         {/*
           Desktop offset via pure CSS — server-rendered, no hydration jump.
           Parallax (motion.div) applies on top of this offset.
@@ -79,9 +82,13 @@ function HeroBackgroundImage() {
 /* ── Floating Orbs ── */
 
 function FloatingOrbs() {
+  const { shouldReduceAnimations } = useDeviceCapabilities()
   const orb0 = useMemo(() => floatingOrb(0), [])
   const orb1 = useMemo(() => floatingOrb(3), [])
   const orb2 = useMemo(() => floatingOrb(5), [])
+
+  // Hide decorative orbs on mobile for performance (large blur-3xl elements are GPU-intensive)
+  if (shouldReduceAnimations) return null
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
@@ -126,41 +133,47 @@ const DECORATION_POINTS = [
 ] as const
 
 function BackgroundDecorations() {
+  const { shouldReduceAnimations } = useDeviceCapabilities()
+
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-      {/* Dot pattern overlay */}
+      {/* Dot pattern overlay — lightweight, keep on all devices */}
       <div className="absolute inset-0 opacity-[0.03]"
            style={{ backgroundImage: 'radial-gradient(circle, rgba(201,169,110,0.5) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
 
-      {/* Ambient glow top */}
+      {/* Ambient glow top — keep, it's just CSS */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-gradient-hero opacity-30 blur-[120px]" />
 
-      {/* Decorative rings */}
-      <svg className="absolute top-1/4 right-1/6 w-64 h-64 opacity-[0.04]" viewBox="0 0 200 200" fill="none">
-        <circle cx="100" cy="100" r="80" stroke="url(#ringGrad)" strokeWidth="0.5" />
-        <circle cx="100" cy="100" r="60" stroke="url(#ringGrad)" strokeWidth="0.3" />
-        <circle cx="100" cy="100" r="95" stroke="url(#ringGrad)" strokeWidth="0.2" />
-        <defs>
-          <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#C9A96E" stopOpacity="0" />
-            <stop offset="50%" stopColor="#C9A96E" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="#C9A96E" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-      </svg>
+      {!shouldReduceAnimations && (
+        <>
+          {/* Decorative rings — SVG is lightweight, but motion is not needed on mobile */}
+          <svg className="absolute top-1/4 right-1/6 w-64 h-64 opacity-[0.04]" viewBox="0 0 200 200" fill="none">
+            <circle cx="100" cy="100" r="80" stroke="url(#ringGrad)" strokeWidth="0.5" />
+            <circle cx="100" cy="100" r="60" stroke="url(#ringGrad)" strokeWidth="0.3" />
+            <circle cx="100" cy="100" r="95" stroke="url(#ringGrad)" strokeWidth="0.2" />
+            <defs>
+              <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="#C9A96E" stopOpacity="0" />
+                <stop offset="50%" stopColor="#C9A96E" stopOpacity="0.3" />
+                <stop offset="100%" stopColor="#C9A96E" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+          </svg>
 
-      {/* Decorative rhombus */}
-      <motion.svg
-        initial={{ rotate: 0, scale: 0.8 }} animate={{ rotate: 360, scale: 1 }}
-        transition={{ duration: 120, ease: 'linear', repeat: Infinity }}
-        className="absolute bottom-1/3 left-1/6 w-32 h-32 opacity-[0.03]"
-        viewBox="0 0 100 100"
-      >
-        <rect x="10" y="10" width="80" height="80" rx="4"
-              stroke="url(#ringGrad)" strokeWidth="0.5" fill="none" transform="rotate(45 50 50)" />
-      </motion.svg>
+          {/* Decorative rhombus with rotation animation */}
+          <motion.svg
+            initial={{ rotate: 0, scale: 0.8 }} animate={{ rotate: 360, scale: 1 }}
+            transition={{ duration: 120, ease: 'linear', repeat: Infinity }}
+            className="absolute bottom-1/3 left-1/6 w-32 h-32 opacity-[0.03]"
+            viewBox="0 0 100 100"
+          >
+            <rect x="10" y="10" width="80" height="80" rx="4"
+                  stroke="url(#ringGrad)" strokeWidth="0.5" fill="none" transform="rotate(45 50 50)" />
+          </motion.svg>
+        </>
+      )}
 
-      {/* Scattered dots — deterministic, no Math.random */}
+      {/* Scattered dots — lightweight, keep */}
       {DECORATION_POINTS.map((point, i) => (
         <div
           key={i}

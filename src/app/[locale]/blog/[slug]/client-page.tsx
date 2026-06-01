@@ -1,8 +1,17 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
+import { useMessages } from 'next-intl'
 import { AnimatedText, SectionContainer, Button } from '@/components/ui'
 import { Link } from '@/i18n/routing'
+import ServiceCTA from '@/components/blog/ServiceCTA'
+import { getServiceSlugByCategory } from '@/lib/serviceMapping'
+import type { BlogCategory } from '@/types'
+
+interface RelatedPost {
+  slug: string
+  title: string
+}
 
 interface Props {
   title: string
@@ -16,11 +25,20 @@ interface Props {
   image?: string
   imageAlt?: string
   locale: string
+  relatedPosts: RelatedPost[]
 }
 
-export function ClientBlogPost({ title, body, date, category, categorySlug, author, readingTime, slug, image, imageAlt }: Props) {
+export function ClientBlogPost({ title, body, date, category, categorySlug, author, readingTime, slug, image, imageAlt, locale, relatedPosts }: Props) {
   const t = useTranslations('blog')
   const commonT = useTranslations('common')
+  const messages = useMessages()
+
+  /* ── Service CTA data from category mapping ── */
+  const servicesData = (messages?.servicesData as Array<{ slug: string; title: string; description: string }>) ?? []
+  const blogCategories = (messages?.blogCategories as BlogCategory[]) ?? []
+  const serviceSlug = getServiceSlugByCategory(categorySlug)
+  const serviceData = serviceSlug ? servicesData.find(s => s.slug === serviceSlug) : null
+  const categoryData = blogCategories.find(c => c.slug === categorySlug)
 
   return (
     <SectionContainer size="xs">
@@ -102,6 +120,51 @@ export function ClientBlogPost({ title, body, date, category, categorySlug, auth
                    max-w-none"
         dangerouslySetInnerHTML={{ __html: body }}
       />
+
+      {/* ── Service CTA ── */}
+      {serviceData && (
+        <AnimatedText direction="up" className="mt-12">
+          <ServiceCTA
+            serviceName={serviceData.title}
+            serviceSlug={serviceSlug!}
+            headline={t('ctaService', { service: categoryData?.name || serviceData.title })}
+            description={t('ctaServiceDescription', { serviceName: (categoryData?.name || serviceData.title).toLowerCase() })}
+          />
+        </AnimatedText>
+      )}
+
+      {/* ── Related posts ── */}
+      {relatedPosts.length > 0 && (
+        <div className="mt-12">
+          <AnimatedText direction="up">
+            <h3 className="text-xl font-display text-text-primary mb-6">{t('moreOnTopic')}</h3>
+          </AnimatedText>
+          <div className="grid gap-4 md:grid-cols-2">
+            {relatedPosts.map((post, i) => (
+              <AnimatedText key={post.slug} direction="up" delay={i * 100}>
+                <Link
+                  href={`/blog/${post.slug}/`}
+                  className="group block p-5 rounded-xl bg-bg-surface border border-border-base
+                             hover:border-gold/30 hover:-translate-y-0.5
+                             transition-all duration-300"
+                >
+                  <h4 className="text-base font-display text-text-primary group-hover:text-gold transition-colors duration-200">
+                    {post.title}
+                  </h4>
+                  <span className="mt-2 inline-flex items-center gap-1 text-sm text-gold">
+                    {commonT('readMore')}
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                         strokeLinejoin="round">
+                      <path d="M5 12h14" /><path d="M12 5l7 7-7 7" />
+                    </svg>
+                  </span>
+                </Link>
+              </AnimatedText>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Author bio */}
       <div className="mt-16 p-6 rounded-xl bg-bg-surface border border-border-base">

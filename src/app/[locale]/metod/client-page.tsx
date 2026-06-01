@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { AnimatedText, AnimatedSection, SectionContainer, Button, MedicalDisclaimer, TiltCard, childVariants } from '@/components/ui'
 import { Link } from '@/i18n/routing'
+import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
 
 /* ── Animation presets ── */
 
@@ -19,14 +20,16 @@ const fadeUp = {
 
 function HeroBackgroundImage() {
   const { scrollY } = useScroll()
+  const { shouldReduceAnimations } = useDeviceCapabilities()
   // Параллакс: изображение смещается вниз при скролле (как на главной) —
   // фон движется медленнее контента, создавая эффект глубины
+  // Disabled on mobile for performance.
   const imgY = useTransform(scrollY, [0, 800], [0, 200])
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       {/* Image — positioned on the right side */}
-      <motion.div style={{ y: imgY }} className="absolute inset-y-0 right-0 w-full lg:w-[60%]">
+      <motion.div style={{ y: shouldReduceAnimations ? 0 : imgY }} className="absolute inset-y-0 right-0 w-full lg:w-[60%]">
         <Image
           src="/images/metod-hero.webp"
           alt=""
@@ -117,7 +120,7 @@ export default function MetodClient() {
             </AnimatedText>
 
             <AnimatedText as="p" direction="up" delay={200} className="mt-6 text-lg text-text-secondary leading-relaxed max-w-2xl">
-              <span className="bg-bg-deep/60 backdrop-blur-sm px-2 py-1 rounded-lg inline [box-decoration-break:clone]">
+              <span className="bg-bg-deep/60 backdrop-blur-sm px-4 py-3 rounded-xl block">
                 {t('heroSubtitle')}
               </span>
             </AnimatedText>
@@ -291,10 +294,10 @@ export default function MetodClient() {
 
           <div className="mt-12 grid md:grid-cols-2 gap-6">
             {sessionFlow.map((step, i) => (
-              <TiltCard key={i} tiltDegree={4} scale={1.015} className="rounded-xl">
+              <TiltCard key={i} tiltDegree={4} scale={1.015} className="rounded-xl h-full">
               <motion.div
                 variants={childVariants}
-                className="relative p-6 bg-bg-base border border-border-base hover:border-gold/20 transition-all duration-400 group rounded-xl"
+                className="relative p-6 bg-bg-base border border-border-base hover:border-gold/20 transition-all duration-400 group rounded-xl h-full flex flex-col"
               >
                 <span className="absolute -top-2.5 -left-2.5 w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center text-xs font-display text-gold">
                   {i + 1}
@@ -302,7 +305,7 @@ export default function MetodClient() {
                 <h3 className="mt-1 text-lg font-display text-text-primary group-hover:text-gold transition-colors duration-300">
                   {step.title}
                 </h3>
-                <p className="mt-2 text-sm text-text-muted leading-relaxed">
+                <p className="mt-2 text-sm text-text-muted leading-relaxed flex-1">
                   {step.desc}
                 </p>
               </motion.div>
@@ -331,16 +334,16 @@ export default function MetodClient() {
 
         <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-5xl mx-auto">
           {safetyItems.map((item, i) => (
-            <TiltCard key={i} tiltDegree={3} scale={1.015} className="rounded-xl">
+            <TiltCard key={i} tiltDegree={3} scale={1.015} className="rounded-xl h-full">
             <motion.div
               variants={childVariants}
               className="p-6 bg-bg-surface border border-border-base text-center
-                         hover:border-gold/20 transition-all duration-400 group rounded-xl"
+                         hover:border-gold/20 transition-all duration-400 group rounded-xl h-full flex flex-col"
             >
               <h3 className="text-base font-display text-gold group-hover:text-gold-light transition-colors duration-300">
                 {item.title}
               </h3>
-              <p className="mt-2 text-xs text-text-muted leading-relaxed">
+              <p className="mt-2 text-xs text-text-muted leading-relaxed flex-1">
                 {item.desc}
               </p>
             </motion.div>

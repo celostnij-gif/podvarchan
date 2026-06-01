@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { AnimatedText, AnimatedSection, SectionContainer, TiltCard, childVariants } from '@/components/ui'
 import { Link } from '@/i18n/routing'
 import { AUTHOR } from '@/constants'
+import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
 
 /* ── Animation presets ── */
 
@@ -27,10 +28,11 @@ const cardSlide = (i: number) => ({
 
 function HeroBackgroundParallax() {
   const { scrollY } = useScroll()
+  const { shouldReduceAnimations } = useDeviceCapabilities()
   const shadeY = useTransform(scrollY, [0, 400], [0, -80])
 
   return (
-    <motion.div style={{ y: shadeY }} className="absolute inset-0">
+    <motion.div style={{ y: shouldReduceAnimations ? 0 : shadeY }} className="absolute inset-0">
       <div className="absolute inset-0 bg-gradient-to-b from-gold/5 via-transparent to-bg-deep pointer-events-none" />
       <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-gold/[0.03] to-transparent pointer-events-none" />
     </motion.div>
@@ -53,7 +55,7 @@ export function ClientAboutPage() {
            HERO — Фото + Имя + Регалии
            ════════════════════════════════════════ */}
       <section
-        className="relative overflow-hidden bg-bg-deep"
+        className="relative overflow-hidden"
         aria-label={t('heading')}
       >
         <HeroBackgroundParallax />
@@ -347,11 +349,11 @@ export function ClientAboutPage() {
 
           <div className="mt-10 grid gap-4 md:grid-cols-2 max-w-3xl mx-auto">
             {specializationItems.map((item, i) => (
-              <TiltCard key={i} tiltDegree={2} scale={1.01} glowOpacity={0.04} className="rounded-lg">
+              <TiltCard key={i} tiltDegree={2} scale={1.01} glowOpacity={0.04} className="rounded-lg h-full">
                 <motion.div
                   variants={childVariants}
                   className="flex items-start gap-3 p-4 bg-bg-surface border border-border-base
-                             hover:border-gold/15 transition-all duration-300 group rounded-lg"
+                             hover:border-gold/15 transition-all duration-300 group rounded-lg h-full"
                 >
                   <span className="text-gold mt-0.5 shrink-0 text-lg group-hover:scale-110 transition-transform duration-300" aria-hidden="true">
                     ✦

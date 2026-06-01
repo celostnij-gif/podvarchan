@@ -30,6 +30,9 @@ export const viewport: Viewport = {
 /* ── Icons ── */
 
 export const metadata: Metadata = {
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION ?? '',
+  },
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
@@ -71,7 +74,10 @@ export default async function RootLayout({
       className={`${cormorant.variable} ${inter.variable}`}
       suppressHydrationWarning
     >
-      <body className="bg-bg-base text-text-primary font-body antialiased flex flex-col min-h-screen">
+      <body
+        className="bg-bg-base text-text-primary font-body antialiased flex flex-col min-h-screen"
+        suppressHydrationWarning
+      >
         {children}
       </body>
     </html>

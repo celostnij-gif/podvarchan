@@ -1,7 +1,5 @@
-'use client'
-
 import type { ReactNode } from 'react'
-import { useTranslations, useMessages } from 'next-intl'
+import { getTranslations, getMessages } from 'next-intl/server'
 import { Link } from '@/i18n/routing'
 import { SERVICES } from '@/constants'
 import type { BlogCategory } from '@/types'
@@ -29,13 +27,12 @@ function FooterLink({ href, children }: { href: string; children: ReactNode }) {
 
 /* ── Footer Component ── */
 
-export default function Footer() {
-  const t = useTranslations('common')
-  const t_services = useTranslations('services')
-  const t_blog = useTranslations('blog')
-  const messages = useMessages()
+export default async function Footer({ locale }: { locale: string }) {
+  const t = await getTranslations({ locale, namespace: 'common' })
+  const t_services = await getTranslations({ locale, namespace: 'services' })
+  const t_blog = await getTranslations({ locale, namespace: 'blog' })
+  const messages = await getMessages()
   const blogCategories = (messages?.blogCategories as BlogCategory[]) ?? []
-  const currentYear = new Date().getFullYear()
 
   return (
     <footer className="relative border-t border-border-base bg-bg-deep/85 overflow-hidden" role="contentinfo">
@@ -136,7 +133,7 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="mt-12 pt-8 border-t border-border-base flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-text-muted">© {currentYear} {t('copyright')}</p>
+          <p className="text-xs text-text-muted">© {new Date().getFullYear()} {t('copyright')}</p>
           <nav className="flex items-center gap-4" aria-label={t('aria.legal')}>
             <Link href="/politika-konfidentsialnosti/"
                   className="text-xs text-text-muted hover:text-gold transition-colors duration-200">

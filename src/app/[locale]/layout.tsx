@@ -6,11 +6,11 @@ import { personSchema, medicalBusinessSchema } from '@/lib/schema'
 import { buildCanonical } from '@/lib/seo/metadata'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
-import PageTransition from '@/components/layout/PageTransition'
+
 import GoogleAnalytics from '@/components/GoogleAnalytics'
 import { ToastProvider } from '@/components/Toast'
 import ScrollProgress from '@/components/ui/ScrollProgress'
-import CursorFollower from '@/components/ui/CursorFollower'
+
 import { routing } from '@/i18n/routing'
 
 /* ── Generate static params for locales ── */
@@ -109,19 +109,16 @@ export default async function LocaleLayout({
       </a>
 
       <ScrollProgress />
-      <CursorFollower />
 
       <ToastProvider>
         <Header />
 
         <main id="main-content" className="flex-1 pt-16 md:pt-20">
-          <PageTransition>
-            {children}
-          </PageTransition>
+          {children}
         </main>
       </ToastProvider>
 
-      <Footer />
+      <Footer locale={locale} />
 
       <GoogleAnalytics />
     </NextIntlClientProvider>

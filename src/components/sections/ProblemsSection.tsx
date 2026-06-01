@@ -5,6 +5,7 @@ import { motion, useScroll, useTransform } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/routing'
 import TiltCard from '@/components/ui/TiltCard'
+import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
 
 /* ── Variants ── */
 
@@ -38,6 +39,7 @@ const floatingOrb = (delay: number) => ({
 
 function BackgroundDecorations() {
   const { scrollY } = useScroll()
+  const { shouldReduceAnimations } = useDeviceCapabilities()
   const orbY = useTransform(scrollY, [0, 800], [0, -50])
   const orb2Y = useTransform(scrollY, [0, 800], [0, 35])
   const ringY = useTransform(scrollY, [0, 800], [0, -20])
@@ -46,30 +48,34 @@ function BackgroundDecorations() {
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-      {/* Ambient glow — fixed center */}
+      {/* Ambient glow — fixed center, lightweight, keep */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-gold/[0.02] via-transparent to-transparent blur-[100px]" />
 
-      {/* Floating orbs with parallax scroll */}
-      <motion.div style={{ y: orbY }}>
-        <motion.div variants={orb0} initial="initial" animate="animate" className="absolute -top-20 right-0 w-72 h-72 bg-gradient-to-bl from-gold/[0.03] via-transparent to-transparent rounded-full blur-2xl" />
-      </motion.div>
-      <motion.div style={{ y: orb2Y }}>
-        <motion.div variants={orb1} initial="initial" animate="animate" className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-green/[0.02] via-transparent to-transparent rounded-full blur-2xl" />
-      </motion.div>
+      {!shouldReduceAnimations && (
+        <>
+          {/* Floating orbs with parallax scroll — disabled on mobile */}
+          <motion.div style={{ y: orbY }}>
+            <motion.div variants={orb0} initial="initial" animate="animate" className="absolute -top-20 right-0 w-72 h-72 bg-gradient-to-bl from-gold/[0.03] via-transparent to-transparent rounded-full blur-2xl" />
+          </motion.div>
+          <motion.div style={{ y: orb2Y }}>
+            <motion.div variants={orb1} initial="initial" animate="animate" className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-green/[0.02] via-transparent to-transparent rounded-full blur-2xl" />
+          </motion.div>
 
-      {/* Dot pattern */}
+          {/* Decorative rings with parallax */}
+          <motion.div style={{ y: ringY }}>
+            <svg className="absolute top-1/6 right-1/5 w-40 h-40 opacity-[0.03]" viewBox="0 0 200 200" fill="none">
+              <circle cx="100" cy="100" r="70" stroke="#C9A96E" strokeWidth="0.5" />
+              <circle cx="100" cy="100" r="50" stroke="#C9A96E" strokeWidth="0.3" />
+            </svg>
+          </motion.div>
+        </>
+      )}
+
+      {/* Dot pattern — lightweight CSS, keep */}
       <div className="absolute inset-0 opacity-[0.02]"
            style={{ backgroundImage: 'radial-gradient(circle, rgba(201,169,110,0.4) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
-      {/* Decorative rings with parallax */}
-      <motion.div style={{ y: ringY }}>
-        <svg className="absolute top-1/6 right-1/5 w-40 h-40 opacity-[0.03]" viewBox="0 0 200 200" fill="none">
-          <circle cx="100" cy="100" r="70" stroke="#C9A96E" strokeWidth="0.5" />
-          <circle cx="100" cy="100" r="50" stroke="#C9A96E" strokeWidth="0.3" />
-        </svg>
-      </motion.div>
-
-      {/* Scattered dots */}
+      {/* Scattered dots — lightweight, keep */}
       {[...Array(8)].map((_, i) => (
         <div key={i} className="absolute w-1 h-1 rounded-full bg-gold/20"
              style={{ top: `${10 + i * 11}%`, left: `${5 + i * 12}%`, opacity: 0.05 + (i % 4) * 0.06 }} />
@@ -94,14 +100,14 @@ function ProblemCard({
   const color = colors[index % 2]
 
   return (
-    <TiltCard tiltDegree={4} scale={1.015} className="overflow-hidden rounded-2xl">
+    <TiltCard tiltDegree={4} scale={1.015} className="overflow-hidden rounded-2xl h-full">
       <motion.div
         variants={cardVariants}
         custom={index}
         className={`group relative p-6 md:p-7 bg-white/[0.02] border border-white/[0.05]
                     hover:bg-white/[0.04] ${color.border}
                     hover:shadow-[0_0_30px_rgba(201,169,110,0.04)]
-                    transition-all duration-500`}
+                    transition-all duration-500 h-full flex flex-col`}
       >
         {/* Number badge */}
         <div className="absolute top-4 right-4 text-[10px] font-semibold text-white/[0.08] tracking-widest select-none"
@@ -125,7 +131,7 @@ function ProblemCard({
         </h3>
 
         {/* Description */}
-        <p className="mt-2 text-sm text-text-muted leading-relaxed group-hover:text-text-secondary/90 transition-colors duration-300">
+        <p className="mt-2 text-sm text-text-muted leading-relaxed group-hover:text-text-secondary/90 transition-colors duration-300 flex-1">
           {item.description}
         </p>
 
@@ -152,7 +158,7 @@ export default function ProblemsSection() {
   ]
 
   return (
-    <section aria-label={t('ariaLabel')} className="relative py-20 md:py-28 bg-bg-base/85 overflow-hidden">
+    <section aria-label={t('ariaLabel')} className="relative py-20 md:py-28 overflow-hidden">
       <BackgroundDecorations />
 
       <motion.div
@@ -169,9 +175,9 @@ export default function ProblemsSection() {
             <span className="text-[10px] font-semibold tracking-[0.25em] uppercase text-gold">{t('decorativeLabel')}</span>
             <span className="w-8 h-px bg-gold/40" aria-hidden="true" />
           </div>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-display text-text-primary leading-tight">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-display text-gold-premium leading-tight">
             {t.rich('problemsTitle', {
-              gold: (chunks: any) => <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold to-gold-light">{chunks}</span>,
+              gold: (chunks: any) => <>{chunks}</>,
             })}
           </h2>
         </motion.div>

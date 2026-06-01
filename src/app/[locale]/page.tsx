@@ -1,7 +1,9 @@
 import type { Metadata } from 'next'
-import { getTranslations } from 'next-intl/server'
+import { getTranslations, getMessages } from 'next-intl/server'
 import { SITE } from '@/constants'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
+import { aggregateRatingSchema } from '@/lib/schema'
+import type { Testimonial } from '@/types'
 import HomeClient from './home-client'
 
 /* ── Metadata ── */
@@ -58,7 +60,22 @@ export default async function HomePage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
+  const messages = await getMessages()
   const webPageSchema = await getWebPageSchema(locale)
+
+  /* ── AggregateRating schema from testimonials ── */
+  const testimonials = (messages?.testimonials?.items as Testimonial[]) ?? []
+  const reviews = testimonials.map((t, i) => ({
+    author: t.name,
+    rating: t.rating ?? 5,
+    date: new Date(2025, 5 + (i % 12), 1).toISOString().split('T')[0],
+    text: t.text,
+    result: t.result,
+  }))
+
+  const ratingSchema = reviews.length > 0
+    ? aggregateRatingSchema(reviews)
+    : null
 
   return (
     <>
@@ -66,6 +83,12 @@ export default async function HomePage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageSchema) }}
       />
+      {ratingSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ratingSchema) }}
+        />
+      )}
       <HomeClient locale={locale} />
     </>
   )

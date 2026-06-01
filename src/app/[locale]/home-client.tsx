@@ -1,13 +1,23 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
+import dynamic from 'next/dynamic'
 import Hero from '@/components/sections/Hero'
 import ProblemsSection from '@/components/sections/ProblemsSection'
 import MethodSection from '@/components/sections/MethodSection'
-import ServicesSection from '@/components/sections/ServicesSection'
-import AuthorPreviewSection from '@/components/sections/AuthorPreviewSection'
-import TestimonialsSection from '@/components/sections/TestimonialsSection'
-import FAQSection from '@/components/sections/FAQSection'
+
+const ServicesSection = dynamic(() => import('@/components/sections/ServicesSection'), {
+  loading: () => <div className="h-48 md:h-64" aria-hidden="true" />,
+})
+const AuthorPreviewSection = dynamic(() => import('@/components/sections/AuthorPreviewSection'), {
+  loading: () => null,
+})
+const TestimonialsSection = dynamic(() => import('@/components/sections/TestimonialsSection'), {
+  loading: () => null,
+})
+const FAQSection = dynamic(() => import('@/components/sections/FAQSection'), {
+  loading: () => null,
+})
 import { motion } from 'framer-motion'
 import { AnimatedText, SectionContainer } from '@/components/ui'
 import { Link } from '@/i18n/routing'

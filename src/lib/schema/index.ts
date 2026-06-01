@@ -8,3 +8,5 @@ export { articleSchema } from './article'
 export { breadcrumbSchema } from './breadcrumb'
 
 export { faqSchema } from './faq'
+
+export { aggregateRatingSchema } from './review'
