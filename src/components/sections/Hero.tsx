@@ -134,7 +134,7 @@ function BackgroundDecorations() {
       {DECORATION_POINTS.map((point, i) => (
         <div
           key={i}
-          className="absolute w-1 h-1 rounded-full bg-gold/20"
+          className="absolute w-0.5 h-0.5 rounded-full bg-gold/40"
           style={{
             top: `${point.y}%`,
             left: `${point.x}%`,
@@ -189,8 +189,8 @@ export default function Hero() {
 
   return (
     <section
-      className="relative min-h-[90vh] md:min-h-screen flex items-center overflow-hidden
-                 bg-gradient-to-b from-bg-deep via-bg-base to-bg-base pt-16 pb-16 md:pt-20 md:pb-20"
+      className="relative min-h-[90vh] md:min-h-screen flex flex-col justify-center overflow-hidden
+                 bg-gradient-to-b from-bg-deep via-bg-base to-bg-base pt-[72px] pb-16 md:pt-[92px] md:pb-20"
       aria-label={t('ariaLabel')}
     >
       {/* Background layers */}

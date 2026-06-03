@@ -6,11 +6,11 @@ import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 /* ── Scattered decoration dots (deterministic) ── */
 
 const SCATTERED_DOTS = [
-  { top: 20, left: 20, size: 'w-1 h-1', opacity: 'bg-gold/20' },
-  { top: 60, left: 10, size: 'w-1.5 h-1.5', opacity: 'bg-gold/15' },
-  { top: 35, left: 5, size: 'w-1 h-1', opacity: 'bg-gold/25' },
-  { bottom: 25, right: 8, size: 'w-1 h-1', opacity: 'bg-gold/20' },
-  { bottom: 15, right: 15, size: 'w-1.5 h-1.5', opacity: 'bg-gold/15' },
+  { top: 20, left: 20, size: 'w-0.5 h-0.5', opacity: 'bg-gold/40' },
+  { top: 60, left: 10, size: 'w-1 h-1', opacity: 'bg-gold/30' },
+  { top: 35, left: 5, size: 'w-0.5 h-0.5', opacity: 'bg-gold/45' },
+  { bottom: 25, right: 8, size: 'w-0.5 h-0.5', opacity: 'bg-gold/40' },
+  { bottom: 15, right: 15, size: 'w-1 h-1', opacity: 'bg-gold/30' },
 ] as const
 
 /* ── Types ── */
