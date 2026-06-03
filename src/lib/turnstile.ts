@@ -7,7 +7,7 @@
 export function getTurnstileToken(): string | null {
   if (typeof window === 'undefined') return null
 
-  const turnstile = (window as any).turnstile
+  const turnstile = window.turnstile
   if (!turnstile?.getResponse) return null
 
   const token = turnstile.getResponse() as string | undefined
@@ -20,7 +20,7 @@ export function getTurnstileToken(): string | null {
 export function resetTurnstile(): void {
   if (typeof window === 'undefined') return
 
-  const turnstile = (window as any).turnstile
+  const turnstile = window.turnstile
   if (!turnstile?.reset) return
 
   turnstile.reset()

@@ -11,6 +11,7 @@ export const CATEGORY_TO_SERVICE: Record<string, string> = {
   vygoraniye: 'emotsionalnoye-vygoraniye',
   neyverennost: 'neyverennost-i-strakh-provala',
   krizis: 'lichnostnyy-krizis',
+  'tsifrovoy-detoks': 'tsifrovoy-detoks-i-gadzhet-zavisimost',
 }
 
 /**

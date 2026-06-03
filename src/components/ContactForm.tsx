@@ -61,12 +61,12 @@ export default function ContactForm() {
       )
 
       function renderWidget() {
-        if (!widgetContainerRef.current || !(window as any).turnstile) return
+        if (!widgetContainerRef.current || !window.turnstile) return
 
-        widgetIdRef.current = (window as any).turnstile.render(
+        widgetIdRef.current = window.turnstile!.render(
           widgetContainerRef.current,
           {
-            sitekey: TURNSTILE_SITE_KEY,
+            sitekey: TURNSTILE_SITE_KEY!,
             callback: () => setTurnstileReady(true),
             'expired-callback': () => setTurnstileReady(false),
             'error-callback': () => setTurnstileReady(false),
@@ -75,7 +75,7 @@ export default function ContactForm() {
         )
       }
 
-      if (script && (window as any).turnstile) {
+      if (script && window.turnstile) {
         renderWidget()
       } else {
         const newScript = document.createElement('script')
@@ -89,8 +89,8 @@ export default function ContactForm() {
 
     return () => {
       clearTimeout(timer)
-      if (widgetContainerRef.current && (window as any).turnstile?.remove) {
-        ;(window as any).turnstile.remove(widgetContainerRef.current)
+      if (widgetContainerRef.current && window.turnstile?.remove) {
+        window.turnstile.remove(widgetContainerRef.current)
       }
     }
   }, [])

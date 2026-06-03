@@ -1,21 +1,28 @@
 'use client'
 
-import { AnimatedText, SectionContainer } from '@/components/ui'
+import { AnimatedText, SectionContainer, PageHero } from '@/components/ui'
+import type { BreadcrumbItem } from '@/components/ui/Breadcrumbs'
 
 interface Props {
   title: string
   content: string
+  breadcrumbItems?: BreadcrumbItem[]
+  clean?: boolean
 }
 
-export function MetadataPage({ title, content }: Props) {
+export function MetadataPage({ title, content, breadcrumbItems, clean }: Props) {
   return (
-    <SectionContainer size="xs">
-      <AnimatedText as="h1" direction="up" className="text-3xl md:text-4xl font-display text-gold-premium">
-        {title}
-      </AnimatedText>
-      <AnimatedText direction="up" delay={200} className="mt-6 text-text-muted leading-relaxed whitespace-pre-line">
-        {content}
-      </AnimatedText>
-    </SectionContainer>
+    <>
+      <PageHero title={title} breadcrumbItems={breadcrumbItems} clean={clean} />
+
+      {/* ────── Content ────── */}
+      <SectionContainer size="xs">
+        <div className="max-w-3xl mx-auto">
+          <AnimatedText direction="up" className="text-text-muted leading-relaxed whitespace-pre-line">
+            {content}
+          </AnimatedText>
+        </div>
+      </SectionContainer>
+    </>
   )
 }

@@ -12,7 +12,7 @@ import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const OUT_DIR = join(__dirname, '..', 'src', 'img', 'blog picture')
+const OUT_DIR = join(__dirname, '..', 'public', 'images', 'blog')
 
 // Дизайн-токены из tailwind.config
 const COLORS = {
@@ -125,6 +125,30 @@ const IMAGES = [
     gradient: ['#0F1B2D', '#1B3A4B'],
     symbol: '💻',
     accent: COLORS.accentBlue,
+  },
+  {
+    slug: 'priznaki-gadzhet-zavisimosti',
+    title: 'Признаки',
+    sub: 'гаджетозависимости',
+    gradient: ['#1B1B2D', '#3A2A4A'],
+    symbol: '📱',
+    accent: COLORS.accentPurple,
+  },
+  {
+    slug: 'tsifrovoy-detoks-poshagovoe-rukovodstvo',
+    title: 'Цифровой детокс',
+    sub: 'Пошаговое руководство',
+    gradient: ['#1B2D2D', '#2A4A4A'],
+    symbol: '🔋',
+    accent: COLORS.accentTeal,
+  },
+  {
+    slug: 'detskaya-gadzhet-zavisimost',
+    title: 'Детская',
+    sub: 'гаджетозависимость',
+    gradient: ['#2D1B10', '#4A2A1A'],
+    symbol: '👶',
+    accent: COLORS.accentCoral,
   },
 ]
 

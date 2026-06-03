@@ -3,6 +3,7 @@
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 import TiltCard from '@/components/ui/TiltCard'
+import { AnimatedSection, SectionContainer } from '@/components/ui'
 import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
 
 /* ── Premium easing ── */
@@ -83,10 +84,10 @@ export default function MethodSection() {
   ]
 
   return (
-    <section className="relative py-20 md:py-28 bg-bg-surface/85 overflow-hidden" aria-label={t('ariaLabel')}>
+    <AnimatedSection as="section" variant="fadeUp" className="relative overflow-hidden" aria-label={t('ariaLabel')}>
       <BackgroundDecorations />
 
-      <div className="relative z-10 max-w-container mx-auto px-gutter">
+      <SectionContainer size="md" background="default">
         {/* Heading */}
         <motion.div
           variants={headingVariants}
@@ -138,7 +139,7 @@ export default function MethodSection() {
         >
           <p className="text-sm text-text-muted">{t('onlineBadge')}</p>
         </motion.div>
-      </div>
-    </section>
+      </SectionContainer>
+    </AnimatedSection>
   )
 }

@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion'
 import { useTranslations, useMessages } from 'next-intl'
 import { Link } from '@/i18n/routing'
-import { FaqAccordion } from '@/components/ui'
+import { FaqAccordion, AnimatedSection, SectionContainer } from '@/components/ui'
 import type { FAQItem } from '@/types'
 
 const easePremium = [0.25, 0.1, 0, 1] as const
@@ -32,11 +32,9 @@ export default function FAQSection() {
   const messages = useMessages()
   const faqItems = (messages?.faqData as FAQItem[]) ?? []
 
-  return (      <section
-      className="relative py-20 md:py-28 bg-bg-surface/85 overflow-hidden"
-      aria-labelledby="faq-heading"
-    >
-      <div className="relative z-10 max-w-container mx-auto px-gutter">
+  return (
+    <AnimatedSection as="section" variant="fadeUp" aria-labelledby="faq-heading">
+      <SectionContainer size="md" background="default">
         {/* Heading */}
         <motion.div
           variants={headingVariants}
@@ -45,7 +43,7 @@ export default function FAQSection() {
           viewport={{ once: true, margin: '-60px' }}
           className="text-center"
         >
-          <h2 id="faq-heading" className="text-3xl md:text-4xl lg:text-5xl font-display text-text-primary">
+          <h2 id="faq-heading" className="text-3xl md:text-4xl lg:text-5xl font-display text-gold-premium">
             {faqT('heading')}
           </h2>
         </motion.div>
@@ -81,7 +79,7 @@ export default function FAQSection() {
           </Link>
         </motion.div>
 
-      </div>
-    </section>
+      </SectionContainer>
+    </AnimatedSection>
   )
 }

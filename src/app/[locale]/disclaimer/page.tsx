@@ -26,11 +26,17 @@ export default async function DisclaimerPage({
 }) {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'disclaimer' })
+  const commonT = await getTranslations({ locale, namespace: 'common' })
 
   return (
     <MetadataPage
       title={t('pageTitle')}
       content={t('content')}
+      breadcrumbItems={[
+        { label: commonT('nav.home'), href: '/' },
+        { label: t('pageTitle') },
+      ]}
+      clean
     />
   )
 }

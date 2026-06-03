@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Cormorant_Garamond, Inter } from 'next/font/google'
 import { getLocale } from 'next-intl/server'
 import { SITE } from '@/constants'
+import Script from 'next/script'
 import './globals.css'
 
 /* ── Fonts ── */
@@ -78,6 +79,31 @@ export default async function RootLayout({
         className="bg-bg-base text-text-primary font-body antialiased flex flex-col min-h-screen"
         suppressHydrationWarning
       >
+        <Script
+          id="cleanup-extension-attributes"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function(){
+                try {
+                  document.querySelectorAll('[bis_skin_checked]').forEach(function(el){
+                    el.removeAttribute('bis_skin_checked');
+                  });
+                  new MutationObserver(function(mutations) {
+                    for (var i = 0; i < mutations.length; i++) {
+                      var el = mutations[i].target;
+                      if (el.removeAttribute) el.removeAttribute('bis_skin_checked');
+                    }
+                  }).observe(document.documentElement, {
+                    attributes: true,
+                    subtree: true,
+                    attributeFilter: ['bis_skin_checked']
+                  });
+                } catch(e) {}
+              })();
+            `,
+          }}
+        />
         {children}
       </body>
     </html>

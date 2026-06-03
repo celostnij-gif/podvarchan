@@ -3,7 +3,9 @@
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
-import { AnimatedText, AnimatedSection, SectionContainer, TiltCard, childVariants } from '@/components/ui'
+import { AnimatedText, AnimatedSection, SectionContainer, TiltCard, childVariants, DiplomaShowcase } from '@/components/ui'
+import { useSetBreadcrumbs } from '@/providers/BreadcrumbsProvider'
+import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 import { Link } from '@/i18n/routing'
 import { AUTHOR } from '@/constants'
 import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
@@ -45,6 +47,11 @@ export function ClientAboutPage() {
   const t = useTranslations('pages.about')
   const commonT = useTranslations('common')
 
+  useSetBreadcrumbs([
+    { label: commonT('nav.home'), href: '/' },
+    { label: commonT('nav.about') },
+  ])
+
   const specializationItems = t.raw('specializationItems') as string[]
   const educationCreds = AUTHOR.credentials.filter((c) => c.category === 'degree')
   const certCreds = AUTHOR.credentials.filter((c) => c.category === 'certification')
@@ -60,21 +67,10 @@ export function ClientAboutPage() {
       >
         <HeroBackgroundParallax />
 
-        <SectionContainer size="sm" background="transparent">
+        <div className="max-w-container mx-auto px-gutter pt-16 pb-10 md:pt-20 md:pb-14">
           <div className="relative z-10">
-            {/* Breadcrumb */}
-            <AnimatedText
-              direction="up"
-              delay={50}
-              className="flex items-center gap-2 text-xs text-text-muted mb-6"
-            >
-              <Link href="/" className="hover:text-gold transition-colors">
-                {commonT('nav.home')}
-              </Link>
-              <span aria-hidden="true">/</span>
-              <span className="text-gold">{commonT('nav.about')}</span>
-            </AnimatedText>
-
+            {/* Breadcrumbs */}
+            <HeroBreadcrumbs />
             <div className="grid md:grid-cols-5 gap-8 md:gap-12 items-center">
               {/* Photo */}
               <motion.div
@@ -124,17 +120,17 @@ export function ClientAboutPage() {
                   <Link
                     href="/kontakty/"
                     className="inline-flex items-center justify-center px-7 py-3 md:px-9 md:py-3.5 rounded-full
-                               bg-gold text-bg-deep font-semibold shadow-glow-gold
+                               bg-gold text-bg-deep font-semibold tracking-wide shadow-glow-gold
                                hover:brightness-110 hover:shadow-lg hover:-translate-y-0.5
                                transition-all duration-400 text-sm md:text-base"
                   >
-                    {commonT('bookingCta')}
+                    <span className="drop-shadow-[0_1px_2px_rgba(5,5,8,0.5)]">{commonT('bookingCta')}</span>
                   </Link>
                 </AnimatedText>
               </div>
             </div>
           </div>
-        </SectionContainer>
+        </div>
       </section>
 
       {/* ════════════════════════════════════════
@@ -301,6 +297,11 @@ export function ClientAboutPage() {
       </AnimatedSection>
 
       {/* ════════════════════════════════════════
+           DIPLOMAS — Визуальная демонстрация дипломов
+           ════════════════════════════════════════ */}
+      <DiplomaShowcase />
+
+      {/* ════════════════════════════════════════
            METHOD — Описание метода
            ════════════════════════════════════════ */}
       <AnimatedSection as="div" variant="fadeUp">
@@ -397,11 +398,11 @@ export function ClientAboutPage() {
               <Link
                 href="/kontakty/"
                 className="inline-flex items-center justify-center px-9 py-3.5 rounded-full
-                           bg-gold text-bg-deep font-semibold shadow-glow-gold
+                           bg-gold text-bg-deep font-semibold tracking-wide shadow-glow-gold
                            hover:brightness-110 hover:shadow-lg hover:-translate-y-0.5
                            transition-all duration-400 text-base"
               >
-                {t('cta')}
+                <span className="drop-shadow-[0_1px_2px_rgba(5,5,8,0.5)]">{t('cta')}</span>
               </Link>
             </AnimatedText>
           </div>

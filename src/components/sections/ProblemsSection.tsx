@@ -5,6 +5,7 @@ import { motion, useScroll, useTransform } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/routing'
 import TiltCard from '@/components/ui/TiltCard'
+import { AnimatedSection, SectionContainer } from '@/components/ui'
 import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
 
 /* ── Variants ── */
@@ -38,48 +39,62 @@ const floatingOrb = (delay: number) => ({
 /* ── Background Decorations ── */
 
 function BackgroundDecorations() {
-  const { scrollY } = useScroll()
   const { shouldReduceAnimations } = useDeviceCapabilities()
+
+  // ── Hooks must be called before early return (Rules of Hooks) ──
+  const { scrollY } = useScroll()
   const orbY = useTransform(scrollY, [0, 800], [0, -50])
   const orb2Y = useTransform(scrollY, [0, 800], [0, 35])
   const ringY = useTransform(scrollY, [0, 800], [0, -20])
   const orb0 = useMemo(() => floatingOrb(0), [])
   const orb1 = useMemo(() => floatingOrb(2.5), [])
 
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-      {/* Ambient glow — fixed center, lightweight, keep */}
+  // Shared static elements — used in both mobile and desktop
+  const staticElements = (
+    <>
+      {/* Ambient glow — fixed center */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-gold/[0.02] via-transparent to-transparent blur-[100px]" />
-
-      {!shouldReduceAnimations && (
-        <>
-          {/* Floating orbs with parallax scroll — disabled on mobile */}
-          <motion.div style={{ y: orbY }}>
-            <motion.div variants={orb0} initial="initial" animate="animate" className="absolute -top-20 right-0 w-72 h-72 bg-gradient-to-bl from-gold/[0.03] via-transparent to-transparent rounded-full blur-2xl" />
-          </motion.div>
-          <motion.div style={{ y: orb2Y }}>
-            <motion.div variants={orb1} initial="initial" animate="animate" className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-green/[0.02] via-transparent to-transparent rounded-full blur-2xl" />
-          </motion.div>
-
-          {/* Decorative rings with parallax */}
-          <motion.div style={{ y: ringY }}>
-            <svg className="absolute top-1/6 right-1/5 w-40 h-40 opacity-[0.03]" viewBox="0 0 200 200" fill="none">
-              <circle cx="100" cy="100" r="70" stroke="#C9A96E" strokeWidth="0.5" />
-              <circle cx="100" cy="100" r="50" stroke="#C9A96E" strokeWidth="0.3" />
-            </svg>
-          </motion.div>
-        </>
-      )}
-
-      {/* Dot pattern — lightweight CSS, keep */}
+      {/* Dot pattern */}
       <div className="absolute inset-0 opacity-[0.02]"
            style={{ backgroundImage: 'radial-gradient(circle, rgba(201,169,110,0.4) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-
-      {/* Scattered dots — lightweight, keep */}
+      {/* Scattered dots */}
       {[...Array(8)].map((_, i) => (
         <div key={i} className="absolute w-1 h-1 rounded-full bg-gold/20"
              style={{ top: `${10 + i * 11}%`, left: `${5 + i * 12}%`, opacity: 0.05 + (i % 4) * 0.06 }} />
       ))}
+    </>
+  )
+
+  // Static background for mobile — no framer-motion, no parallax
+  if (shouldReduceAnimations) {
+    return (
+      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        {staticElements}
+        <div className="absolute -top-20 right-0 w-72 h-72 bg-gradient-to-bl from-gold/[0.03] via-transparent to-transparent rounded-full blur-2xl" />
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-green/[0.02] via-transparent to-transparent rounded-full blur-2xl" />
+      </div>
+    )
+  }
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+      {staticElements}
+
+      {/* Floating orbs with parallax scroll */}
+      <motion.div style={{ y: orbY }}>
+        <motion.div variants={orb0} initial="initial" animate="animate" className="absolute -top-20 right-0 w-72 h-72 bg-gradient-to-bl from-gold/[0.03] via-transparent to-transparent rounded-full blur-2xl" />
+      </motion.div>
+      <motion.div style={{ y: orb2Y }}>
+        <motion.div variants={orb1} initial="initial" animate="animate" className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-green/[0.02] via-transparent to-transparent rounded-full blur-2xl" />
+      </motion.div>
+
+      {/* Decorative rings with parallax */}
+      <motion.div style={{ y: ringY }}>
+        <svg className="absolute top-1/6 right-1/5 w-40 h-40 opacity-[0.03]" viewBox="0 0 200 200" fill="none">
+          <circle cx="100" cy="100" r="70" stroke="#C9A96E" strokeWidth="0.5" />
+          <circle cx="100" cy="100" r="50" stroke="#C9A96E" strokeWidth="0.3" />
+        </svg>
+      </motion.div>
     </div>
   )
 }
@@ -158,16 +173,10 @@ export default function ProblemsSection() {
   ]
 
   return (
-    <section aria-label={t('ariaLabel')} className="relative py-20 md:py-28 overflow-hidden">
+    <AnimatedSection as="section" variant="fadeUp" className="relative overflow-hidden" aria-label={t('ariaLabel')}>
       <BackgroundDecorations />
 
-      <motion.div
-        variants={sectionVariants}
-        initial="initial"
-        whileInView="animate"
-        viewport={{ once: true, margin: '-80px' }}
-        className="relative z-10 max-w-container mx-auto px-gutter"
-      >
+      <SectionContainer size="md" background="surface">
         {/* Header */}
         <motion.div variants={headingVariants} className="text-center">
           <div className="inline-flex items-center gap-3 mb-4">
@@ -177,7 +186,7 @@ export default function ProblemsSection() {
           </div>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-display text-gold-premium leading-tight">
             {t.rich('problemsTitle', {
-              gold: (chunks: any) => <>{chunks}</>,
+              gold: (chunks: React.ReactNode) => <>{chunks}</>,
             })}
           </h2>
         </motion.div>
@@ -204,7 +213,7 @@ export default function ProblemsSection() {
               href="/kontakty/"
               data-analytics-booking="problems-cta"
               className="group relative inline-flex items-center justify-center px-7 py-3 rounded-full
-                         text-sm font-semibold overflow-hidden
+                         text-sm font-semibold tracking-wide overflow-hidden
                          bg-gradient-to-r from-gold to-gold-light text-bg-deep
                          shadow-[0_0_20px_rgba(201,169,110,0.15)]
                          hover:shadow-[0_0_30px_rgba(201,169,110,0.25)]
@@ -214,7 +223,7 @@ export default function ProblemsSection() {
               <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full
                                transition-transform duration-700 bg-gradient-to-r
                                from-transparent via-white/20 to-transparent" aria-hidden="true" />
-              <span className="relative z-10 flex items-center gap-2">
+              <span className="relative z-10 flex items-center gap-2 drop-shadow-[0_1px_2px_rgba(5,5,8,0.5)]">
                 {commonT('cta.booking')}
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
@@ -226,7 +235,7 @@ export default function ProblemsSection() {
             </Link>
           </div>
         </motion.div>
-      </motion.div>
-    </section>
+      </SectionContainer>
+    </AnimatedSection>
   )
 }

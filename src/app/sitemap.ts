@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next'
 import { SITE, SERVICES, BLOG_CATEGORIES, STATIC_PAGES } from '@/constants'
+import { getAllBlogPosts } from '@/lib/content'
 
 const BASE = SITE.url
 
@@ -11,15 +12,17 @@ const BASE = SITE.url
 function makeLocalized(
   path: string,
   priority: number,
-  changefreq: MetadataRoute.Sitemap[number]['changeFrequency']
+  changefreq: MetadataRoute.Sitemap[number]['changeFrequency'],
+  lastModified?: Date
 ): [MetadataRoute.Sitemap[number], MetadataRoute.Sitemap[number]] {
   const cleanPath = path === '/' ? '' : path
   const ruUrl = `${BASE}/ru${cleanPath}`
   const ukUrl = `${BASE}/uk${cleanPath}`
+  const date = lastModified ?? new Date()
 
   const ru: MetadataRoute.Sitemap[number] = {
     url: ruUrl,
-    lastModified: new Date(),
+    lastModified: date,
     changeFrequency: changefreq,
     priority,
     alternates: {
@@ -33,7 +36,7 @@ function makeLocalized(
 
   const uk: MetadataRoute.Sitemap[number] = {
     url: ukUrl,
-    lastModified: new Date(),
+    lastModified: date,
     changeFrequency: changefreq,
     priority,
     alternates: {
@@ -69,6 +72,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
   /* ── Категории блога ── */
   for (const category of BLOG_CATEGORIES) {
     const [ru, uk] = makeLocalized(`/blog/kategoriya/${category.slug}/`, 0.6, 'weekly')
+    entries.push(ru, uk)
+  }
+
+  /* ── Статьи блога ── */
+  const blogPosts = getAllBlogPosts()
+  for (const post of blogPosts) {
+    const modDate = new Date(post.dateModified ?? post.datePublished)
+    const [ru, uk] = makeLocalized(`/blog/${post.slug}/`, 0.8, 'weekly', modDate)
     entries.push(ru, uk)
   }
 

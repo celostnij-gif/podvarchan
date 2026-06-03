@@ -1,12 +1,13 @@
 'use client'
 
-import { useMemo } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useTranslations, useMessages } from 'next-intl'
 import { Link } from '@/i18n/routing'
 import { SERVICE_ICONS } from '@/constants'
 import TiltCard from '@/components/ui/TiltCard'
-import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
+import { AnimatedSection, AnimatedText, SectionContainer } from '@/components/ui'
+import { useSetBreadcrumbs } from '@/providers/BreadcrumbsProvider'
+import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 
 interface ServiceItem {
   slug: string
@@ -40,74 +41,6 @@ const cardUp = (i: number) => ({
     transition: { delay: i * 0.06, duration: 0.5, ease: [0.25, 0.1, 0, 1] as const },
   },
 })
-
-const floatingOrb = (delay: number) => ({
-  hidden: { y: 0 },
-  visible: {
-    y: [0, -10, 0],
-    transition: { duration: 5, ease: 'easeInOut' as const, repeat: Infinity, delay },
-  },
-})
-
-/* ── Background Decorations ── */
-
-function BackgroundDecorations() {
-  const { scrollY } = useScroll()
-  const { shouldReduceAnimations } = useDeviceCapabilities()
-  const orbY = useTransform(scrollY, [0, 600], [0, -40])
-  const orb2Y = useTransform(scrollY, [0, 600], [0, 30])
-
-  const orb0 = useMemo(() => floatingOrb(0), [])
-  const orb1 = useMemo(() => floatingOrb(2.5), [])
-
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-      {/* Ambient glow — static CSS, lightweight, keep */}
-      <div className="absolute top-0 left-1/3 w-[600px] h-[600px] bg-gradient-radial from-gold/[0.03] via-transparent to-transparent blur-[120px]" />
-
-      {!shouldReduceAnimations && (
-        <>
-          <motion.div style={{ y: orbY }}>
-            <motion.div
-              variants={orb0}
-              initial="hidden"
-              animate="visible"
-              className="absolute -top-24 -right-24 w-96 h-96 bg-gradient-to-bl from-green/[0.03] via-transparent to-transparent rounded-full blur-3xl"
-            />
-          </motion.div>
-
-          <motion.div style={{ y: orb2Y }}>
-            <motion.div
-              variants={orb1}
-              initial="hidden"
-              animate="visible"
-              className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-gold/[0.02] via-transparent to-transparent rounded-full blur-3xl"
-            />
-          </motion.div>
-
-          {/* Decorative rings */}
-          <svg className="absolute top-1/4 right-1/6 w-48 h-48 opacity-[0.03]" viewBox="0 0 200 200" fill="none">
-            <circle cx="100" cy="100" r="70" stroke="url(#ringGrad)" strokeWidth="0.5" />
-            <circle cx="100" cy="100" r="50" stroke="url(#ringGrad)" strokeWidth="0.3" />
-            <defs>
-              <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#C9A96E" stopOpacity="0" />
-                <stop offset="50%" stopColor="#C9A96E" stopOpacity="0.2" />
-                <stop offset="100%" stopColor="#C9A96E" stopOpacity="0" />
-              </linearGradient>
-            </defs>
-          </svg>
-        </>
-      )}
-
-      {/* Dot pattern — lightweight, keep */}
-      <div
-        className="absolute inset-0 opacity-[0.02]"
-        style={{ backgroundImage: 'radial-gradient(circle, rgba(201,169,110,0.4) 1px, transparent 1px)', backgroundSize: '40px 40px' }}
-      />
-    </div>
-  )
-}
 
 /* ── Service Card ── */
 
@@ -199,19 +132,25 @@ export default function UslugiPage() {
   const messages = useMessages()
   const servicesData = (messages?.servicesData as ServiceItem[]) ?? []
 
+  // Set breadcrumbs via layout context
+  useSetBreadcrumbs([
+    { label: commonT('nav.home'), href: '/' },
+    { label: commonT('nav.services') },
+  ])
+
   return (
     <>
       {/* ── Hero Section ── */}
-      <section className="relative pt-24 pb-8 md:pt-32 md:pb-12 bg-bg-base overflow-hidden">
-        <BackgroundDecorations />
-
+      <section className="relative overflow-hidden pt-16 pb-10 md:pt-20 md:pb-14">
         <motion.div
           variants={sectionContainer}
           initial="hidden"
           animate="visible"
-          className="relative z-10 max-w-container mx-auto px-gutter"
+          className="relative z-10 w-full max-w-container mx-auto px-gutter text-left"
         >
           <div className="max-w-3xl">
+            {/* Breadcrumbs */}
+            <HeroBreadcrumbs />
             {/* Section label */}
             <motion.div variants={fadeUp} className="inline-flex items-center gap-3">
               <span className="w-8 h-px bg-gold/40" aria-hidden="true" />
@@ -247,36 +186,36 @@ export default function UslugiPage() {
       </section>
 
       {/* ── Services Grid ── */}
-      <section className="relative py-12 md:py-16 bg-gradient-to-b from-bg-base to-bg-surface overflow-hidden">
-        <div className="max-w-container mx-auto px-gutter">
+      <AnimatedSection as="div" variant="fadeUp" staggerDelay={0.04}>
+        <SectionContainer size="md" background="surface">
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-2">
             {servicesData.map((service, index) => (
               <ServiceCard key={service.slug} service={service} index={index} />
             ))}
           </div>
+        </SectionContainer>
+      </AnimatedSection>
 
-          {/* Bottom CTA */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-            className="mt-14 p-8 md:p-10 rounded-2xl text-center
-                       bg-gradient-to-br from-gold/[0.06] to-gold/[0.02]
-                       border border-gold/[0.12]"
-          >
-            <p className="text-xl font-display text-text-primary">
+      {/* ── CTA ── */}
+      <AnimatedSection as="div" variant="fadeUp">
+        <SectionContainer size="md" background="deep">
+          <div className="relative max-w-3xl mx-auto text-center">
+            <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-96 h-96 bg-gold/5 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
+
+            <AnimatedText as="h2" direction="up" className="relative text-3xl md:text-4xl font-display text-text-primary">
               {t('notSure') || 'Не уверены, что подходит?'}
-            </p>
-            <p className="mt-2 text-sm text-text-muted">
+            </AnimatedText>
+
+            <AnimatedText as="p" direction="up" delay={150} className="relative mt-6 text-base text-text-secondary leading-relaxed max-w-xl mx-auto">
               {t('freeConsultation') || 'Запишитесь на бесплатную консультацию — я помогу разобраться'}
-            </p>
-            <div className="mt-6">
+            </AnimatedText>
+
+            <AnimatedText direction="up" delay={250} className="relative mt-8">
               <Link
                 href="/kontakty/"
                 data-analytics-booking="services-listing-cta"
-                className="group relative inline-flex items-center justify-center px-7 py-3 rounded-full
-                           text-sm font-semibold overflow-hidden
+                className="group relative inline-flex items-center justify-center px-7 py-3 md:px-9 md:py-3.5 rounded-full
+                           text-sm md:text-base font-semibold tracking-wide overflow-hidden
                            bg-gradient-to-r from-gold to-gold-light text-bg-deep
                            shadow-[0_0_20px_rgba(201,169,110,0.15)]
                            hover:shadow-[0_0_30px_rgba(201,169,110,0.25)]
@@ -286,9 +225,9 @@ export default function UslugiPage() {
                 <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full
                                  transition-transform duration-700 bg-gradient-to-r
                                  from-transparent via-white/20 to-transparent" aria-hidden="true" />
-                <span className="relative z-10 flex items-center gap-2">
+                <span className="relative z-10 flex items-center gap-2 drop-shadow-[0_1px_2px_rgba(5,5,8,0.5)]">
                   {commonT('cta.booking')}
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                        stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
                        strokeLinejoin="round"
                        className="transition-transform duration-300 group-hover:translate-x-0.5" aria-hidden="true">
@@ -296,10 +235,10 @@ export default function UslugiPage() {
                   </svg>
                 </span>
               </Link>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+            </AnimatedText>
+          </div>
+        </SectionContainer>
+      </AnimatedSection>
     </>
   )
 }

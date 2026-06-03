@@ -8,10 +8,14 @@ import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 
 import GoogleAnalytics from '@/components/GoogleAnalytics'
+import CookieBanner from '@/components/CookieBanner'
 import { ToastProvider } from '@/components/Toast'
 import ScrollProgress from '@/components/ui/ScrollProgress'
 
 import { routing } from '@/i18n/routing'
+import { DeviceProvider } from '@/providers/DeviceProvider'
+import { BreadcrumbsProvider } from '@/providers/BreadcrumbsProvider'
+import { PageSchemaRenderer } from './schema-and-breadcrumbs'
 
 /* ── Generate static params for locales ── */
 
@@ -56,6 +60,8 @@ export async function generateMetadata({
 }
 
 /* ── Locale Layout ── */
+
+
 
 export default async function LocaleLayout({
   children,
@@ -110,17 +116,23 @@ export default async function LocaleLayout({
 
       <ScrollProgress />
 
-      <ToastProvider>
-        <Header />
+      <DeviceProvider>
+        <ToastProvider>
+          <Header />
 
-        <main id="main-content" className="flex-1 pt-16 md:pt-20">
-          {children}
-        </main>
-      </ToastProvider>
+          <main id="main-content" className="flex-1">
+            <BreadcrumbsProvider>
+              <PageSchemaRenderer />
+              {children}
+            </BreadcrumbsProvider>
+          </main>
+        </ToastProvider>
 
-      <Footer locale={locale} />
+        <Footer locale={locale} />
+      </DeviceProvider>
 
       <GoogleAnalytics />
+      <CookieBanner />
     </NextIntlClientProvider>
   )
 }

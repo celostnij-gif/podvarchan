@@ -1,23 +1,35 @@
-'use client'
+import { type ReactNode, type ElementType, useRef, useEffect, useState } from 'react'
 
-import { type ReactNode } from 'react'
-import { motion, type Variants } from 'framer-motion'
+/* ── Tag map for rendering ── */
 
-// Motion components keyed by tag name
-const motionComponents = {
-  section: motion.section,
-  div: motion.div,
-  article: motion.article,
-  header: motion.header,
-} as const
+type AnimatedSectionTag = 'section' | 'div' | 'article' | 'header'
 
-type AnimatedSectionTag = keyof typeof motionComponents
+const TAG_MAP: Record<AnimatedSectionTag, ElementType> = {
+  section: 'section',
+  div: 'div',
+  article: 'article',
+  header: 'header',
+}
+
+/* ── Animation variant → CSS animation class ── */
+
+const VARIANT_CLASSES: Record<string, string> = {
+  fadeUp: 'animate-fade-in-up',
+  fadeIn: 'animate-fade-in',
+  slideLeft: 'animate-slide-in-left',
+  slideRight: 'animate-slide-in-right',
+  scaleIn: 'animate-scale-in',
+  zoomIn: 'animate-fade-in-up',   // fallback — scale+blur not in Tailwind, use fade-up
+  clipReveal: 'animate-fade-in',  // fallback — clipPath not in Tailwind, use fade-in
+}
+
+/* ── Types ── */
 
 interface AnimatedSectionProps {
   children: ReactNode
   /** Animation variant preset (default: fadeUp) */
   variant?: 'fadeUp' | 'fadeIn' | 'slideLeft' | 'slideRight' | 'scaleIn' | 'zoomIn' | 'clipReveal'
-  /** Stagger delay between children in seconds (default: 0.08) */
+  /** Stagger delay between children in seconds (default: 0.08) — CSS custom property for children */
   staggerDelay?: number
   /** Delay before animation starts in seconds */
   delay?: number
@@ -33,110 +45,20 @@ interface AnimatedSectionProps {
   ariaLabel?: string
 }
 
-/* ── Premium easing curve ── */
-const easePremium = [0.25, 0.1, 0, 1] as const
-
-/* ── Variant presets ── */
-
-const variants: Record<string, Variants> = {
-  fadeUp: {
-    hidden: { opacity: 0, y: 24 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        staggerChildren: 0.08,
-        delayChildren: 0.1,
-      },
-    },
-  },
-  fadeIn: {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.08,
-        delayChildren: 0.1,
-      },
-    },
-  },
-  slideLeft: {
-    hidden: { opacity: 0, x: 40 },
-    visible: {
-      opacity: 1,
-      x: 0,
-      transition: {
-        staggerChildren: 0.08,
-        delayChildren: 0.1,
-      },
-    },
-  },
-  slideRight: {
-    hidden: { opacity: 0, x: -40 },
-    visible: {
-      opacity: 1,
-      x: 0,
-      transition: {
-        staggerChildren: 0.08,
-        delayChildren: 0.1,
-      },
-    },
-  },
-  scaleIn: {
-    hidden: { opacity: 0, scale: 0.95 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      transition: {
-        staggerChildren: 0.08,
-        delayChildren: 0.1,
-      },
-    },
-  },
-  zoomIn: {
-    hidden: { opacity: 0, scale: 0.85, filter: 'blur(4px)' },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      filter: 'blur(0px)',
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.15,
-        duration: 0.7,
-        ease: easePremium,
-      },
-    },
-  },
-  clipReveal: {
-    hidden: { opacity: 0, y: 30, clipPath: 'inset(0 0 100% 0)' },
-    visible: {
-      opacity: 1,
-      y: 0,
-      clipPath: 'inset(0 0 0% 0)',
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.15,
-        duration: 0.8,
-        ease: [0.65, 0, 0.35, 1] as const,
-      },
-    },
-  },
-}
-
-/** Child animation variant that can be used on children of AnimatedSection */
+/** Child animation variant — works with AnimatedSection stagger via CSS custom property */
 export const childVariants = {
   hidden: { opacity: 0, y: 16 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: easePremium },
+    transition: { duration: 0.5, ease: [0.25, 0.1, 0, 1] as const },
   },
 }
 
 /**
  * Reusable animated section wrapper.
- * Wraps children in a motion element with scroll-triggered animation.
- * Children can use `motion.div variants={childVariants}` for staggered animation.
+ * Uses IntersectionObserver to trigger CSS animation when element enters viewport.
+ * Children can use `--stagger-index` CSS custom property for staggered delays.
  */
 export default function AnimatedSection({
   children,
@@ -149,32 +71,47 @@ export default function AnimatedSection({
   as: tag = 'section',
   ariaLabel,
 }: AnimatedSectionProps) {
-  const variantConfig = variants[variant]
-  const MotionTag = motionComponents[tag]
+  const ref = useRef<HTMLElement>(null)
+  const [isVisible, setIsVisible] = useState(false)
 
-  // Merge custom config into the variant
-  const mergedVariants: Variants = {
-    hidden: variantConfig.hidden,
-    visible: {
-      ...variantConfig.visible,
-      transition: {
-        ...(variantConfig.visible as any)?.transition,
-        staggerChildren: staggerDelay,
-        delayChildren: delay,
+  const Tag = TAG_MAP[tag]
+
+  useEffect(() => {
+    const element = ref.current
+    if (!element) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          if (once) {
+            observer.unobserve(element)
+          }
+        } else if (!once) {
+          setIsVisible(false)
+        }
       },
-    },
-  }
+      { rootMargin: margin, threshold: 0.05 }
+    )
+
+    observer.observe(element)
+
+    return () => observer.disconnect()
+  }, [once, margin])
+
+  const animationClass = VARIANT_CLASSES[variant] ?? 'animate-fade-in-up'
 
   return (
-    <MotionTag
-      variants={mergedVariants}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once, margin }}
-      className={className}
+    <Tag
+      ref={ref as React.Ref<HTMLDivElement>}
+      className={`${className} ${isVisible ? animationClass : 'opacity-0'}`}
+      style={{
+        ...(delay > 0 && isVisible ? { animationDelay: `${delay}s` } : {}),
+        '--stagger-delay': `${staggerDelay}s`,
+      } as React.CSSProperties}
       aria-label={ariaLabel}
     >
       {children}
-    </MotionTag>
+    </Tag>
   )
 }

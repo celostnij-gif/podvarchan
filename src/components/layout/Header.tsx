@@ -29,19 +29,14 @@ const NAV_LABEL_KEYS: Record<string, string> = {
   '/uslugi/neyverennost-i-strakh-provala/': 'nav.neyverennost',
   '/uslugi/psikhosomatika/': 'nav.psikhosomatika',
   '/uslugi/lichnostnyy-krizis/': 'nav.krizis',
+  '/uslugi/tsifrovoy-detoks-i-gadzhet-zavisimost/': 'nav.tsifrovoy-detoks',
 }
 
 function getNavLabelKey(href: string): string {
   return NAV_LABEL_KEYS[href] ?? 'nav.home'
 }
 
-/* ── Animation Variants ── */
-
-const fadeInDown = {
-  initial: { opacity: 0, y: -16 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.1, 0, 1] as const } },
-}
-
+// Mobile menu overlay & panel variants (still need framer-motion for exit animations)
 const mobileOverlay = {
   initial: { opacity: 0 },
   animate: { opacity: 1, transition: { duration: 0.35 } },
@@ -335,12 +330,12 @@ function DesktopDropdown({ item, pathname, t }: { item: NavItem; pathname: strin
               <Link
                 href="/kontakty/"
                 data-analytics-booking="header-dropdown"
-                className="group flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl text-sm font-medium
+                className="group flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl text-sm font-medium tracking-wide
                            bg-gradient-to-r from-gold/[0.12] to-gold/[0.06] text-gold
                            hover:from-gold/[0.18] hover:to-gold/[0.1] active:from-gold/[0.08]
                            transition-all duration-300"
               >
-                <span>{t('cta.booking')}</span>
+                <span className="drop-shadow-[0_1px_2px_rgba(5,5,8,0.5)]">{t('cta.booking')}</span>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" strokeWidth="2" strokeLinecap="round"
                      strokeLinejoin="round"
@@ -552,17 +547,15 @@ export default function Header() {
 
   return (
     <>
-      <motion.header
-        variants={fadeInDown}
-        initial="initial"
-        animate="animate"
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 animate-fade-in-down
           ${shouldBeTransparent
             ? 'bg-transparent'
             : shouldBeSolid
               ? `bg-bg-base/85 ${isMobile ? 'backdrop-blur-md' : 'backdrop-blur-2xl'} border-b border-border-base/80 shadow-[0_4px_30px_rgba(0,0,0,0.3)]`
               : 'bg-gradient-to-b from-bg-base/40 to-transparent backdrop-blur-sm'
           }`}
+        style={{ animationDelay: '0s' }}
       >
         {shouldBeSolid && (
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold/25 to-transparent" aria-hidden="true" />
@@ -644,7 +637,7 @@ export default function Header() {
             </div>
           </div>
         </div>
-      </motion.header>
+      </header>
 
       {/* ── Mobile Menu ── */}
 
@@ -708,7 +701,7 @@ export default function Header() {
                     data-analytics-booking="header-mobile"
                     onClick={() => setMobileOpen(false)}
                     className="group relative flex items-center justify-center w-full px-5 py-3.5 rounded-2xl
-                               text-sm font-semibold overflow-hidden
+                               text-sm font-semibold tracking-wide overflow-hidden
                                bg-gradient-to-r from-gold to-gold-light text-bg-deep
                                shadow-[0_0_20px_rgba(201,169,110,0.15)]
                                hover:shadow-[0_0_30px_rgba(201,169,110,0.25)]

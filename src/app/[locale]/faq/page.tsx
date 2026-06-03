@@ -32,13 +32,5 @@ export default async function FaqPage({
 
   const schema = faqSchema(faqItems)
 
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-      />
-      <ClientFaqPage items={faqItems} />
-    </>
-  )
+  return <ClientFaqPage items={faqItems} schemas={[schema]} />
 }

@@ -63,13 +63,5 @@ export default async function TsenyPage({
   const t = await getTranslations({ locale, namespace: 'tseny' })
   const offerSchema = await getOfferSchema(locale)
 
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(offerSchema) }}
-      />
-      <TsenyClient />
-    </>
-  )
+  return <TsenyClient schemas={[offerSchema]} />
 }

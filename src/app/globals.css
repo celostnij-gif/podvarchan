@@ -141,10 +141,6 @@
     }
   }
 
-  /* ── FAQ animations handled by framer-motion FaqAccordion component ── */
-
-
-
   /* ── Scroll margin for anchor links ── */
   section[id],
   div[id],
@@ -162,103 +158,20 @@
     }
   }
 
-  /* ── Focus ring ── */
-
-  /* Prose styles for blog content */
-  .prose-blog {
-    max-width: 40rem;
-    font-size: 1rem;
-    line-height: 1.75;
-    color: var(--color-text-secondary);
+  /* ── Hero-specific animations ── */
+  @keyframes hero-orb {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
   }
 
-  .prose-blog h2 {
-    font-family: var(--font-serif);
-    font-size: 1.75rem;
-    color: var(--color-text-primary);
-    margin-top: 2.5rem;
-    margin-bottom: 1rem;
-    font-weight: 500;
-    line-height: 1.3;
+  @keyframes rotate-slow {
+    0% { transform: rotate(0deg) scale(0.8); }
+    100% { transform: rotate(360deg) scale(1); }
   }
 
-  .prose-blog h3 {
-    font-family: var(--font-serif);
-    font-size: 1.375rem;
-    color: var(--color-text-primary);
-    margin-top: 2rem;
-    margin-bottom: 0.75rem;
-    font-weight: 500;
-    line-height: 1.3;
-  }
-
-  .prose-blog p {
-    margin-bottom: 1.25rem;
-  }
-
-  .prose-blog ul, .prose-blog ol {
-    margin-bottom: 1.25rem;
-  }
-
-  .prose-blog li {
-    margin-bottom: 0.5rem;
-  }
-
-  .prose-blog a {
-    color: var(--color-gold);
-    text-decoration: underline;
-    text-decoration-color: rgba(139, 115, 85, 0.3);
-    text-underline-offset: 3px;
-    transition: color 0.3s ease, text-decoration-color 0.3s ease;
-  }
-
-  .prose-blog a:hover {
-    color: var(--color-gold-light);
-    text-decoration-color: rgba(227, 196, 122, 0.5);
-  }
-
-  .prose-blog blockquote {
-    border-left: 2px solid var(--color-gold-muted);
-    padding-left: 1.5rem;
-    margin: 1.5rem 0;
-    color: var(--color-text-muted);
-    font-style: italic;
-  }
-
-  .prose-blog hr {
-    border: 0;
-    height: 1px;
-    background: var(--color-border-base);
-    margin: 2.5rem 0;
-  }
-
-  /* ── Wide-screen header: prevent nav overflow by scaling down font ── */
-  @media (min-width: 2024px) and (max-width: 2300px) {
-    header nav li a,
-    header nav li button {
-      font-size: 0.8125rem !important;
-      padding-left: 0.5rem !important;
-      padding-right: 0.5rem !important;
-    }
-    header nav li button svg {
-      width: 8px !important;
-      height: 8px !important;
-    }
-    header [class*="text-xl"] {
-      font-size: 1.125rem !important;
-    }
-    header [class*="text-2xl"] {
-      font-size: 1.25rem !important;
-    }
-    header a[href*="kontakty"] {
-      font-size: 0.8125rem !important;
-      padding-left: 0.75rem !important;
-      padding-right: 0.75rem !important;
-    }
-    header [class*="tracking-wider"],
-    header [class*="tracking-wide"] {
-      letter-spacing: 0.05em !important;
-    }
+  @keyframes scroll-indicator {
+    0%, 100% { opacity: 0.3; transform: translateY(0); }
+    50% { opacity: 1; transform: translateY(6px); }
   }
 
   /* ── Focus ring ── */
@@ -422,6 +335,295 @@
   .border-subtle-light {
     border: 1px solid var(--color-border-light);
   }
+
+  /* ════════════════════════════════════════
+     BLOG PROSE — Premium читабельна верстка
+     ════════════════════════════════════════ */
+
+  /* ── Blockquote with decorative gold quote mark ── */
+  .blog-content blockquote {
+    position: relative;
+    border: none;
+    border-left: 2px solid var(--color-gold-muted);
+    padding: 1.25rem 1.5rem 1.25rem 2.5rem;
+    margin: 1.75rem 0;
+    background: linear-gradient(135deg, rgba(201, 169, 110, 0.04) 0%, transparent 60%);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    color: var(--color-text-muted);
+    font-style: italic;
+    font-size: 1.05rem;
+    line-height: 1.7;
+  }
+
+  .blog-content blockquote::before {
+    content: '"';
+    position: absolute;
+    top: 0.5rem;
+    left: 0.75rem;
+    font-size: 2.5rem;
+    line-height: 1;
+    color: var(--color-gold-muted);
+    font-family: var(--font-serif);
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .blog-content blockquote p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* ── Lists with gold accent bullets ── */
+  .blog-content ul {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .blog-content ul li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 0.625rem;
+  }
+
+  .blog-content ul li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.7em;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--color-gold-muted);
+    opacity: 0.6;
+  }
+
+  /* Вкладені списки — менша крапка */
+  .blog-content ul ul {
+    padding-left: 0;
+    margin-bottom: 0;
+  }
+
+  .blog-content ul ul li::before {
+    width: 3px;
+    height: 3px;
+    top: 0.65em;
+    opacity: 0.4;
+  }
+
+  .blog-content ol {
+    padding-left: 1.5rem;
+    counter-reset: blog-counter;
+    list-style: none;
+  }
+
+  .blog-content ol li {
+    position: relative;
+    padding-left: 0.5rem;
+    margin-bottom: 0.625rem;
+    counter-increment: blog-counter;
+  }
+
+  .blog-content ol li::before {
+    content: counter(blog-counter) ".";
+    position: absolute;
+    left: -1.5rem;
+    color: var(--color-gold-muted);
+    font-weight: 500;
+    font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Вкладені списки для ol */
+  .blog-content ol ol {
+    counter-reset: sub-counter;
+    padding-left: 1.5rem;
+    margin-bottom: 0;
+  }
+
+  .blog-content ol ol li {
+    counter-increment: sub-counter;
+  }
+
+  .blog-content ol ol li::before {
+    content: counter(sub-counter);
+    font-size: 0.8rem;
+    opacity: 0.6;
+  }
+
+  /* ── Tables ── */
+  .blog-content table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 1.5rem 0;
+    font-size: 0.9rem;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--color-border-base);
+  }
+
+  .blog-content thead {
+    background: var(--color-bg-surface);
+  }
+
+  .blog-content thead th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    font-size: 0.85rem;
+    letter-spacing: 0.03em;
+    border-bottom: 1px solid var(--color-border-base);
+  }
+
+  .blog-content tbody td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-border-base);
+    color: var(--color-text-secondary);
+    vertical-align: top;
+  }
+
+  .blog-content tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .blog-content tbody tr:hover td {
+    background: rgba(201, 169, 110, 0.02);
+  }
+
+  /* ── Images within blog content ── */
+  .blog-content img {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border-base);
+    margin: 1.5rem 0;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  /* ── Code blocks ── */
+  .blog-content pre {
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border-base);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.5rem;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+    font-size: 0.875rem;
+    line-height: 1.7;
+  }
+
+  .blog-content pre code {
+    background: none;
+    padding: 0;
+    font-size: inherit;
+    color: var(--color-text-secondary);
+  }
+
+  .blog-content code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em;
+    background: rgba(201, 169, 110, 0.08);
+    padding: 0.125rem 0.5rem;
+    border-radius: 3px;
+    color: var(--color-gold-light);
+  }
+
+  /* ── Horizontal rule with decorative gold dot ── */
+  .blog-content hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--color-border-light), transparent);
+    margin: 2.5rem 0;
+    position: relative;
+  }
+
+  .blog-content hr::after {
+    display: none;
+  }
+
+  /* ── Links with gold underline ── */
+  .blog-content a {
+    color: var(--color-gold);
+    text-decoration: underline;
+    text-decoration-color: rgba(139, 115, 85, 0.3);
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+    transition: color 0.3s ease, text-decoration-color 0.3s ease;
+  }
+
+  .blog-content a:hover {
+    color: var(--color-gold-light);
+    text-decoration-color: rgba(227, 196, 122, 0.5);
+    text-decoration-thickness: 1.5px;
+  }
+
+  /* ── Bold/strong with slight gold tint ── */
+  .blog-content strong {
+    color: var(--color-text-primary);
+    font-weight: 600;
+  }
+
+  /* ── Headings in blog content ── */
+  .blog-content h2 {
+    font-family: var(--font-serif);
+    font-size: 1.75rem;
+    line-height: 1.25;
+    color: var(--color-text-primary);
+    margin-top: 2.75rem;
+    margin-bottom: 1rem;
+    font-weight: 500;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(201, 169, 110, 0.08);
+  }
+
+  @media (min-width: 768px) {
+    .blog-content h2 {
+      font-size: 2rem;
+      margin-top: 3rem;
+    }
+  }
+
+  .blog-content h3 {
+    font-family: var(--font-serif);
+    font-size: 1.35rem;
+    line-height: 1.3;
+    color: var(--color-gold-light);
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+  }
+
+  @media (min-width: 768px) {
+    .blog-content h3 {
+      font-size: 1.5rem;
+    }
+  }
+
+  /* ── Paragraphs ── */
+  .blog-content p {
+    color: var(--color-text-secondary);
+    line-height: 1.8;
+    margin-bottom: 1.25rem;
+    font-size: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .blog-content p {
+      font-size: 1.0625rem;
+      line-height: 1.85;
+    }
+  }
+
+  /* ── First paragraph larger (lead) ── */
+  .blog-content > p:first-of-type {
+    font-size: 1.1rem;
+    color: var(--color-text-secondary);
+    line-height: 1.8;
+  }
+
+  @media (min-width: 768px) {
+    .blog-content > p:first-of-type {
+      font-size: 1.15rem;
+    }
+  }
 }
 
 /* ============================================
@@ -448,6 +650,19 @@
   .bg-dot-pattern {
     background-image: radial-gradient(var(--color-border-base) 1px, transparent 1px);
     background-size: 24px 24px;
+  }
+
+  /* ── Hero animations (keyframes defined in @layer base) ── */
+  .animate-hero-orb {
+    animation: hero-orb 6s ease-in-out infinite;
+  }
+
+  .animate-rotate-slow {
+    animation: rotate-slow 120s linear infinite;
+  }
+
+  .animate-scroll-indicator {
+    animation: scroll-indicator 2.5s ease-in-out infinite;
   }
 
 }

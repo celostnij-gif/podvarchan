@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/routing'
+import { AnimatedSection, SectionContainer } from '@/components/ui'
 
 const fadeUp = {
   initial: { opacity: 0, y: 20 },
@@ -21,8 +22,8 @@ export default function AuthorPreviewSection() {
   ]
 
   return (
-    <section className="relative py-20 md:py-28 bg-bg-surface/85" aria-label={t('ariaLabel')}>
-      <div className="max-w-container mx-auto px-gutter">
+    <AnimatedSection as="section" variant="fadeUp" aria-label={t('ariaLabel')}>
+      <SectionContainer size="md" background="default">
         <div className="grid gap-10 md:grid-cols-2 items-center">
           {/* Photo */}
           <motion.div
@@ -92,7 +93,7 @@ export default function AuthorPreviewSection() {
             </div>
           </motion.div>
         </div>
-      </div>
-    </section>
+      </SectionContainer>
+    </AnimatedSection>
   )
 }

@@ -1,6 +1,5 @@
 import { getTranslations } from 'next-intl/server'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
-import { personSchema } from '@/lib/schema'
 import { ClientAboutPage } from './client-page'
 
 export async function generateMetadata({
@@ -20,22 +19,6 @@ export async function generateMetadata({
   })
 }
 
-export default async function AboutPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>
-}) {
-  const { locale } = await params
-  const t = await getTranslations({ locale, namespace: 'common' })
-  const schema = personSchema({ jobTitle: t('authorTitle') })
-
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-      />
-      <ClientAboutPage />
-    </>
-  )
+export default async function AboutPage() {
+  return <ClientAboutPage />
 }

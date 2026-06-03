@@ -4,7 +4,9 @@ import { useTranslations, useMessages } from 'next-intl'
 import { motion } from 'framer-motion'
 import { Link } from '@/i18n/routing'
 import { SERVICE_ICONS } from '@/constants'
-import { MedicalDisclaimer, TiltCard, FaqAccordion } from '@/components/ui'
+import { AnimatedSection, AnimatedText, SectionContainer, MedicalDisclaimer, TiltCard, FaqAccordion } from '@/components/ui'
+import { useSetBreadcrumbs, useRegisterSchemas } from '@/providers/BreadcrumbsProvider'
+import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 
 interface ServiceData {
   slug: string
@@ -19,6 +21,7 @@ interface ServiceData {
 interface Props {
   service: ServiceData
   locale: string
+  schemas?: Record<string, unknown>[]
 }
 
 /* ── Service-specific symptoms ── */
@@ -88,6 +91,14 @@ const SYMPTOMS: Record<string, Array<{ icon: string; title: string; desc: string
     { icon: '🗺️', title: 'Потеря направления', desc: 'Не знаете, чего хотите. Потеряны ориентиры и понимание, куда идти.' },
     { icon: '💔', title: 'Разочарование', desc: 'Разочаровались в карьере, отношениях или образе жизни. Хотите перемен.' },
   ],
+  'tsifrovoy-detoks-i-gadzhet-zavisimost': [
+    { icon: '📱', title: 'Постоянная проверка телефона', desc: 'Проверяете телефон каждые 5–10 минут без реальной необходимости. Рука сама тянется к экрану.' },
+    { icon: '🔄', title: 'Думскроллинг', desc: 'Бесконечно листаете ленту, хотя понимаете, что это не приносит пользы. Остановиться сложно.' },
+    { icon: '😰', title: 'Тревога без телефона', desc: 'Когда телефон не под рукой, чувствуете беспокойство, страх что-то пропустить (FOMO).' },
+    { icon: '📊', title: 'Потеря времени', desc: 'Проводите 4–6+ часов в день в соцсетях и приложениях. Планировали на 15 минут — очнулись через 2 часа.' },
+    { icon: '😴', title: 'Нарушение сна', desc: 'Перед сном листаете телефон. Качество сна ухудшилось, чувствуете разбитость по утрам.' },
+    { icon: '🧠', title: 'Снижение концентрации', desc: 'Не можете сосредоточиться на одной задаче дольше 10 минут. Мозг привык к постоянной смене стимулов.' },
+  ],
 }
 
 /* ── Service-specific FAQs ── */
@@ -123,19 +134,10 @@ const RELATED_SERVICES: Record<string, string[]> = {
   'neyverennost-i-strakh-provala': ['samosabotazh-i-bloki', 'gipnoterapiya-onlayn', 'rabota-s-podsoznaniem'],
   'psikhosomatika': ['gipnoterapiya-onlayn', 'trevoga-i-panicheskiye-ataki', 'lichnostnyy-krizis'],
   'lichnostnyy-krizis': ['gipnoterapiya-onlayn', 'rabota-s-podsoznaniem', 'emotsionalnoye-vygoraniye'],
+  'tsifrovoy-detoks-i-gadzhet-zavisimost': ['gipnoterapiya-onlayn', 'samosabotazh-i-bloki', 'lichnostnyy-krizis'],
 }
 
 /* ── Animation Variants ── */
-
-const sectionVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.1 } },
-}
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.1, 0, 1] as const } },
-}
 
 const cardUp = (i: number) => ({
   hidden: { opacity: 0, y: 24, scale: 0.97 },
@@ -144,14 +146,6 @@ const cardUp = (i: number) => ({
     transition: { delay: i * 0.06, duration: 0.5, ease: [0.25, 0.1, 0, 1] as const },
   },
 })
-
-const fadeUpScale = {
-  hidden: { opacity: 0, y: 20, scale: 0.98 },
-  visible: {
-    opacity: 1, y: 0, scale: 1,
-    transition: { duration: 0.5, ease: [0.25, 0.1, 0, 1] as const },
-  },
-}
 
 const faqItem = (i: number) => ({
   hidden: { opacity: 0, y: 16, scale: 0.98 },
@@ -164,38 +158,29 @@ const faqItem = (i: number) => ({
 /* ── Hero Section ── */
 
 function HeroSection({ service }: { service: ServiceData }) {
+  useSetBreadcrumbs([
+    { label: 'Главная', href: '/' },
+    { label: 'Услуги', href: '/uslugi/' },
+    { label: service.shortTitle },
+  ])
+
   return (
-    <section className="relative min-h-[60vh] md:min-h-[65vh] flex items-center overflow-hidden
-                        bg-gradient-to-b from-bg-deep via-bg-base to-bg-base">
-      {/* Background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-gradient-hero opacity-20 blur-[120px]" />
-        <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-gold/[0.03] via-transparent to-transparent blur-3xl" />
-        <div className="absolute inset-0 opacity-[0.02]"
-             style={{ backgroundImage: 'radial-gradient(circle, rgba(201,169,110,0.5) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
-      </div>
-
-      <div className="relative z-10 w-full max-w-container mx-auto px-gutter pt-24 pb-12 md:pt-32 md:pb-16">
+    <section className="relative overflow-hidden">
+      <div className="relative z-10 w-full max-w-container mx-auto px-gutter pt-16 pb-10 md:pt-20 md:pb-14 text-left">
         <div className="max-w-3xl">
-          {/* Breadcrumb */}
-          <nav className="inline-flex items-center gap-2 text-xs text-text-muted mb-6" aria-label="Breadcrumb">
-            <Link href="/" className="hover:text-gold transition-colors">{'Главная'}</Link>
-            <span aria-hidden="true">/</span>
-            <Link href="/uslugi/" className="hover:text-gold transition-colors">{'Услуги'}</Link>
-            <span aria-hidden="true">/</span>
-            <span className="text-text-secondary">{service.shortTitle}</span>
-          </nav>
-
-          {/* Badge */}
+          {/* Breadcrumbs */}
+          <HeroBreadcrumbs />
+          {/* Section label */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.25, 0.1, 0, 1] }}
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full
-                       bg-white/[0.04] border border-white/[0.06] backdrop-blur-sm"
+            className="inline-flex items-center gap-3"
           >
-            <span className="text-lg leading-none" role="img" aria-hidden="true">{SERVICE_ICONS[service.slug] || '✨'}</span>
-            <span className="text-xs text-text-muted tracking-wide">{service.shortTitle}</span>
+            <span className="w-8 h-px bg-gold/40" aria-hidden="true" />
+            <span className="text-[10px] font-semibold tracking-[0.25em] uppercase text-gold">
+              {service.shortTitle}
+            </span>
           </motion.div>
 
           {/* Title */}
@@ -213,7 +198,7 @@ function HeroSection({ service }: { service: ServiceData }) {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.5, ease: [0.25, 0.1, 0, 1] }}
-            className="mt-4 text-lg text-text-secondary leading-relaxed"
+            className="mt-4 text-lg text-text-secondary leading-relaxed max-w-2xl"
           >
             {service.description}
           </motion.p>
@@ -223,13 +208,13 @@ function HeroSection({ service }: { service: ServiceData }) {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.5, ease: [0.25, 0.1, 0, 1] }}
-            className="mt-8 flex flex-col sm:flex-row items-start sm:items-center gap-4"
+            className="mt-8 flex flex-col sm:flex-row items-start gap-4"
           >
             <Link
               href="/kontakty/"
               data-analytics-booking={`service-${service.slug}-hero`}
               className="group relative inline-flex items-center justify-center px-7 py-3.5 rounded-full
-                         text-sm font-semibold overflow-hidden
+                         text-sm font-semibold tracking-wide overflow-hidden
                          bg-gradient-to-r from-gold to-gold-light text-bg-deep
                          shadow-[0_0_25px_rgba(201,169,110,0.15)]
                          hover:shadow-[0_0_40px_rgba(201,169,110,0.25)]
@@ -239,7 +224,7 @@ function HeroSection({ service }: { service: ServiceData }) {
               <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full
                                transition-transform duration-700 bg-gradient-to-r
                                from-transparent via-white/20 to-transparent" aria-hidden="true" />
-              <span className="relative z-10 flex items-center gap-2">
+              <span className="relative z-10 flex items-center gap-2 drop-shadow-[0_1px_2px_rgba(5,5,8,0.5)]">
                 {service.cta}
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
@@ -275,34 +260,24 @@ function SymptomsSection({ service }: { service: ServiceData }) {
   const symptoms = SYMPTOMS[service.slug] || SYMPTOMS['gipnoterapiya-onlayn']
 
   return (
-    <section className="relative py-20 md:py-28 bg-bg-base overflow-hidden" aria-label="Признаки и симптомы">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-gold/[0.015] via-transparent to-transparent blur-[100px]" />
-      </div>
-
-      <motion.div
-        variants={sectionVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: '-80px' }}
-        className="relative z-10 max-w-container mx-auto px-gutter"
-      >
-        <motion.div variants={fadeUp} className="text-center">
+    <AnimatedSection as="section" variant="fadeUp" aria-label="Признаки и симптомы">
+      <SectionContainer size="md" background="default">
+        <AnimatedText direction="up" as="div" className="text-center">
           <div className="inline-flex items-center gap-3 mb-4">
             <span className="w-8 h-px bg-gold/40" aria-hidden="true" />
             <span className="text-[10px] font-semibold tracking-[0.25em] uppercase text-gold">Вам знакомо?</span>
             <span className="w-8 h-px bg-gold/40" aria-hidden="true" />
           </div>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-display text-text-primary leading-tight">
-            Признаки, с которыми{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold to-gold-light">
-              я работаю
-            </span>
-          </h2>
-          <p className="mt-4 text-base text-text-secondary max-w-xl mx-auto">
-            Если вы узнаёте себя в этих состояниях — вы пришли по адресу
-          </p>
-        </motion.div>
+        </AnimatedText>
+        <AnimatedText direction="up" delay={150} as="h2" className="mt-4 text-3xl md:text-4xl lg:text-5xl font-display text-text-primary leading-tight text-center">
+          Признаки, с которыми{' '}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold to-gold-light">
+            я работаю
+          </span>
+        </AnimatedText>
+        <AnimatedText direction="up" delay={250} as="p" className="mt-4 text-base text-text-secondary max-w-xl mx-auto text-center">
+          Если вы узнаёте себя в этих состояниях — вы пришли по адресу
+        </AnimatedText>
 
         <div className="mt-10 md:mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {symptoms.map((symptom, i) => (
@@ -328,8 +303,8 @@ function SymptomsSection({ service }: { service: ServiceData }) {
             </TiltCard>
           ))}
         </div>
-      </motion.div>
-    </section>
+      </SectionContainer>
+    </AnimatedSection>
   )
 }
 
@@ -362,25 +337,17 @@ function MethodSection({ service }: { service: ServiceData }) {
   ]
 
   return (
-    <section className="relative py-20 md:py-28 bg-bg-surface overflow-hidden" aria-label="Как я работаю">
-      <motion.div
-        variants={sectionVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: '-80px' }}
-        className="relative z-10 max-w-container mx-auto px-gutter"
-      >
-        <motion.div variants={fadeUp} className="text-center">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-display text-text-primary leading-tight">
-            Как я работаю с{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold to-gold-light">
-              {label}
-            </span>
-          </h2>
-          <p className="mt-4 text-base text-text-secondary max-w-2xl mx-auto">
-            Процесс одинаково эффективен для всех направлений — меняются только акценты
-          </p>
-        </motion.div>
+    <AnimatedSection as="section" variant="fadeUp" aria-label="Как я работаю">
+      <SectionContainer size="md" background="surface">
+        <AnimatedText direction="up" as="h2" className="text-3xl md:text-4xl lg:text-5xl font-display text-text-primary leading-tight text-center">
+          Как я работаю с{' '}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold to-gold-light">
+            {label}
+          </span>
+        </AnimatedText>
+        <AnimatedText direction="up" delay={150} as="p" className="mt-4 text-base text-text-secondary max-w-2xl mx-auto text-center">
+          Процесс одинаково эффективен для всех направлений — меняются только акценты
+        </AnimatedText>
 
         <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {steps.map((step, i) => (
@@ -409,16 +376,13 @@ function MethodSection({ service }: { service: ServiceData }) {
         </div>
 
         {/* Online badge */}
-        <motion.div
-          variants={fadeUp}
-          className="mt-10 p-5 rounded-xl bg-bg-elevated/50 border border-border-base text-center"
-        >
+        <AnimatedText direction="up" delay={250} as="div" className="mt-10 p-5 rounded-xl bg-bg-elevated/50 border border-border-base text-center">
           <p className="text-sm text-text-muted">
             Онлайн — так же эффективно, как и очные сессии. Нужен только компьютер или телефон с камерой.
           </p>
-        </motion.div>
-      </motion.div>
-    </section>
+        </AnimatedText>
+      </SectionContainer>
+    </AnimatedSection>
   )
 }
 
@@ -428,21 +392,11 @@ function FAQSection({ service }: { service: ServiceData }) {
   const faqs = FAQS[service.slug] || DEFAULT_FAQS
 
   return (
-    <section className="relative py-20 md:py-28 bg-bg-base overflow-hidden" aria-label="Часто задаваемые вопросы">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 w-[400px] h-[400px] bg-gradient-radial from-gold/[0.01] via-transparent to-transparent blur-[100px]" />
-      </div>
-
-      <div className="relative z-10 max-w-container mx-auto px-gutter">
-        <motion.div
-          variants={fadeUpScale}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="text-center"
-        >
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-display text-text-primary">Часто задаваемые вопросы</h2>
-        </motion.div>
+    <AnimatedSection as="section" variant="fadeUp" aria-label="Часто задаваемые вопросы">
+      <SectionContainer size="md" background="default">
+        <AnimatedText direction="up" as="h2" className="text-3xl md:text-4xl lg:text-5xl font-display text-text-primary text-center">
+          Часто задаваемые вопросы
+        </AnimatedText>
 
         <div className="mt-10 max-w-2xl mx-auto space-y-3" role="list">
           {faqs.slice(0, 5).map((item, index) => (
@@ -457,8 +411,8 @@ function FAQSection({ service }: { service: ServiceData }) {
             </motion.div>
           ))}
         </div>
-      </div>
-    </section>
+      </SectionContainer>
+    </AnimatedSection>
   )
 }
 
@@ -466,42 +420,29 @@ function FAQSection({ service }: { service: ServiceData }) {
 
 function CTASection({ service }: { service: ServiceData }) {
   return (
-    <section className="relative py-20 md:py-28 bg-bg-surface overflow-hidden">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-gradient-hero opacity-30 blur-[120px]" />
-      </div>
+    <AnimatedSection as="div" variant="fadeUp">
+      <SectionContainer size="md" background="deep">
+        <div className="relative max-w-3xl mx-auto text-center">
+          <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-96 h-96 bg-gold/5 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
 
-      <div className="relative z-10 max-w-container mx-auto px-gutter text-center">
-        <motion.div
-          variants={fadeUpScale}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-        >
-          <div className="inline-flex items-center gap-3 mb-4">
-            <span className="w-8 h-px bg-gold/40" aria-hidden="true" />
-            <span className="text-[10px] font-semibold tracking-[0.25em] uppercase text-gold">Готовы начать?</span>
-            <span className="w-8 h-px bg-gold/40" aria-hidden="true" />
-          </div>
-
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-display text-text-primary leading-tight">
+          <AnimatedText as="h2" direction="up" className="relative text-3xl md:text-4xl font-display text-text-primary leading-tight">
             Запишитесь на{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold to-gold-light">
               бесплатную консультацию
             </span>
-          </h2>
+          </AnimatedText>
 
-          <p className="mt-4 text-lg text-text-secondary max-w-xl mx-auto">
+          <AnimatedText as="p" direction="up" delay={150} className="relative mt-6 text-base text-text-secondary leading-relaxed max-w-xl mx-auto">
             На первой встрече мы познакомимся, обсудим ваш запрос, и вы поймёте, подходит ли вам этот метод.
             Никаких обязательств.
-          </p>
+          </AnimatedText>
 
-          <div className="mt-8">
+          <AnimatedText direction="up" delay={250} className="relative mt-8">
             <Link
               href="/kontakty/"
               data-analytics-booking={`service-${service.slug}-cta`}
               className="group relative inline-flex items-center justify-center px-8 py-3.5 md:px-10 md:py-4 rounded-full
-                         text-sm md:text-base font-semibold overflow-hidden
+                         text-sm md:text-base font-semibold tracking-wide overflow-hidden
                          bg-gradient-to-r from-gold to-gold-light text-bg-deep
                          shadow-[0_0_25px_rgba(201,169,110,0.15)]
                          hover:shadow-[0_0_40px_rgba(201,169,110,0.25)]
@@ -511,7 +452,7 @@ function CTASection({ service }: { service: ServiceData }) {
               <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full
                                transition-transform duration-700 bg-gradient-to-r
                                from-transparent via-white/20 to-transparent" aria-hidden="true" />
-              <span className="relative z-10 flex items-center gap-2">
+              <span className="relative z-10 flex items-center gap-2 drop-shadow-[0_1px_2px_rgba(5,5,8,0.5)]">
                 {service.cta}
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
@@ -521,10 +462,10 @@ function CTASection({ service }: { service: ServiceData }) {
                 </svg>
               </span>
             </Link>
-          </div>
-        </motion.div>
-      </div>
-    </section>
+          </AnimatedText>
+        </div>
+      </SectionContainer>
+    </AnimatedSection>
   )
 }
 
@@ -537,19 +478,11 @@ function RelatedServicesSection({ service, allServices }: { service: ServiceData
   if (related.length === 0) return null
 
   return (
-    <section className="relative py-20 md:py-28 bg-bg-base overflow-hidden" aria-label="Похожие услуги">
-      <div className="max-w-container mx-auto px-gutter">
-        <motion.div
-          variants={fadeUpScale}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="text-center"
-        >
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-display text-text-primary">
-            Похожие направления
-          </h2>
-        </motion.div>
+    <AnimatedSection as="section" variant="fadeUp" aria-label="Похожие услуги">
+      <SectionContainer size="md" background="default">
+        <AnimatedText direction="up" as="h2" className="text-3xl md:text-4xl lg:text-5xl font-display text-text-primary text-center">
+          Похожие направления
+        </AnimatedText>
 
         <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {related.map((item, i) => (
@@ -577,16 +510,18 @@ function RelatedServicesSection({ service, allServices }: { service: ServiceData
             </motion.div>
           ))}
         </div>
-      </div>
-    </section>
+      </SectionContainer>
+    </AnimatedSection>
   )
 }
 
 /* ── Main Component ── */
 
-export function ClientServicePage({ service }: Props) {
+export function ClientServicePage({ service, schemas }: Props) {
   const messages = useMessages()
   const allServices = (messages?.servicesData as ServiceData[]) ?? []
+
+  useRegisterSchemas(schemas ?? [])
 
   return (
     <>
@@ -596,22 +531,6 @@ export function ClientServicePage({ service }: Props) {
       <FAQSection service={service} />
       <CTASection service={service} />
       <RelatedServicesSection service={service} allServices={allServices} />
-
-      {/* Breadcrumb Schema */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'BreadcrumbList',
-            itemListElement: [
-              { '@type': 'ListItem', position: 1, name: 'Главная', item: 'https://podvarchan.com' },
-              { '@type': 'ListItem', position: 2, name: 'Услуги', item: 'https://podvarchan.com/uslugi/' },
-              { '@type': 'ListItem', position: 3, name: service.title, item: `https://podvarchan.com/uslugi/${service.slug}/` },
-            ],
-          }),
-        }}
-      />
     </>
   )
 }

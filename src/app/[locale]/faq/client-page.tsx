@@ -2,15 +2,19 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { AnimatedText, SectionContainer, TiltCard } from '@/components/ui'
+import { AnimatedText, SectionContainer, TiltCard, PageHero } from '@/components/ui'
 import type { FAQItem } from '@/types'
+import { useRegisterSchemas } from '@/providers/BreadcrumbsProvider'
 
 interface Props {
   items: FAQItem[]
+  schemas?: Record<string, unknown>[]
 }
 
-export function ClientFaqPage({ items }: Props) {
+export function ClientFaqPage({ items, schemas }: Props) {
+  useRegisterSchemas(schemas ?? [])
   const t = useTranslations('faq')
+  const commonT = useTranslations('common')
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
   function toggle(index: number) {
@@ -18,12 +22,21 @@ export function ClientFaqPage({ items }: Props) {
   }
 
   return (
-    <SectionContainer size="sm">
-      <AnimatedText as="h1" direction="up" className="text-4xl md:text-5xl font-display text-gold-premium">
-        {t('pageTitle')}
-      </AnimatedText>
+    <>
+      <PageHero
+        label="FAQ"
+        title={t('pageTitle')}
+        description={t('pageDescription')}
+        breadcrumbItems={[
+          { label: commonT('nav.home'), href: '/' },
+          { label: 'FAQ' },
+        ]}
+        clean
+      />
 
-      <div className="mt-10 space-y-3">
+      {/* ────── FAQ Content ────── */}
+      <SectionContainer size="sm">
+        <div className="mt-10 space-y-3">
         {items.map((item, index) => {
           const isOpen = openIndex === index
           const id = `faq-${index}`
@@ -65,5 +78,6 @@ export function ClientFaqPage({ items }: Props) {
         })}
       </div>
     </SectionContainer>
+    </>
   )
 }

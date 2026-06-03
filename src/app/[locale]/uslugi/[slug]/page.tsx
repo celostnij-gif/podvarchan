@@ -43,13 +43,5 @@ export default async function ServicePage({ params }: Props) {
     locale,
   })
 
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-      />
-      <ClientServicePage service={service} locale={locale} />
-    </>
-  )
+  return <ClientServicePage service={service} locale={locale} schemas={[schema]} />
 }

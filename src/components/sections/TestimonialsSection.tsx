@@ -3,10 +3,11 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslations, useMessages } from 'next-intl'
-import { TiltCard } from '@/components/ui'
+import { TiltCard, AnimatedSection, SectionContainer } from '@/components/ui'
+import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
 import type { Testimonial } from '@/types'
 
-const AUTO_PLAY_INTERVAL = 4000 // ms
+const AUTO_PLAY_INTERVAL = 6000 // ms — slower for lower CPU load
 
 const variants = {
   enter: (direction: number) => ({
@@ -28,6 +29,7 @@ const variants = {
 export default function TestimonialsSection() {
   const t = useTranslations('testimonials')
   const messages = useMessages()
+  const { shouldReduceAnimations } = useDeviceCapabilities()
   const items = (messages?.testimonials?.items as Testimonial[]) ?? []
   const [[page, direction], setPage] = useState([0, 0])
   const itemIndex = Math.abs(page) % (items.length || 1)
@@ -37,18 +39,18 @@ export default function TestimonialsSection() {
     []
   )
 
-  /* ── Auto-play ── */
+  /* ── Auto-play (disabled on mobile for performance) ── */
   useEffect(() => {
-    if (items.length < 2) return
+    if (items.length < 2 || shouldReduceAnimations) return
     const timer = setInterval(() => paginate(1), AUTO_PLAY_INTERVAL)
     return () => clearInterval(timer)
-  }, [items.length, paginate])
+  }, [items.length, shouldReduceAnimations, paginate])
 
   const item = items[itemIndex] || { name: '', text: '', result: '' }
 
   return (
-    <section className="relative py-20 md:py-28 overflow-hidden" aria-label={t('ariaLabel')}>
-      <div className="max-w-container mx-auto px-gutter">
+    <AnimatedSection as="section" variant="fadeUp" className="relative overflow-hidden" aria-label={t('ariaLabel')}>
+      <SectionContainer size="md" background="surface">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -58,7 +60,7 @@ export default function TestimonialsSection() {
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-display text-gold-premium">
             {t.rich('heading', {
-              gold: (chunks: any) => <>{chunks}</>,
+              gold: (chunks: React.ReactNode) => <>{chunks}</>,
             })}
           </h2>
         </motion.div>
@@ -72,7 +74,7 @@ export default function TestimonialsSection() {
 
         <div className="mt-6 max-w-2xl mx-auto relative">
           <AnimatePresence mode="wait" custom={direction}>
-            <TiltCard key={page} tiltDegree={3} scale={1.01} glowOpacity={0.05} className="rounded-2xl">
+            <TiltCard key={page} tiltDegree={3} scale={1.01} glowOpacity={0.05} disabled={shouldReduceAnimations} className="rounded-2xl">
             <motion.div
               custom={direction}
               variants={variants}
@@ -124,7 +126,7 @@ export default function TestimonialsSection() {
             ))}
           </div>
         </div>
-      </div>
-    </section>
+      </SectionContainer>
+    </AnimatedSection>
   )
 }

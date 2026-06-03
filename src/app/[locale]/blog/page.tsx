@@ -4,20 +4,12 @@ import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { useTranslations, useMessages } from 'next-intl'
 import { AnimatedText, SectionContainer, AnimatedSection, childVariants, Button } from '@/components/ui'
+import { useSetBreadcrumbs } from '@/providers/BreadcrumbsProvider'
+import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
+import { Link } from '@/i18n/routing'
 import BlogCard from '@/components/blog/BlogCard'
 import { getAllBlogPostMetas } from '@/lib/content'
-import { Link } from '@/i18n/routing'
 import type { BlogCategory } from '@/types'
-
-/* ── Decorative dots (deterministic) ── */
-
-const DECO_DOTS = [
-  { x: 85, y: 12, size: 1, opacity: 0.3 },
-  { x: 10, y: 18, size: 2, opacity: 0.2 },
-  { x: 92, y: 55, size: 1, opacity: 0.25 },
-  { x: 15, y: 75, size: 1.5, opacity: 0.2 },
-  { x: 78, y: 88, size: 1, opacity: 0.3 },
-]
 
 export default function BlogPage() {
   const t = useTranslations('blog')
@@ -25,6 +17,11 @@ export default function BlogPage() {
   const messages = useMessages()
   const blogCategories = (messages?.blogCategories as BlogCategory[]) ?? []
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
+
+  useSetBreadcrumbs([
+    { label: commonT('nav.home'), href: '/' },
+    { label: commonT('nav.blog') },
+  ])
 
   const allPosts = getAllBlogPostMetas()
 
@@ -42,67 +39,95 @@ export default function BlogPage() {
   return (
     <>
       {/* ────── Hero ────── */}
-      <section className="relative pt-28 pb-16 md:pt-32 md:pb-20 overflow-hidden">
-        {/* Background decoration */}
-        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-gradient-hero opacity-20 blur-[120px]" />
-          <div className="absolute -top-40 -right-40 w-[400px] h-[400px] rounded-full bg-gold/[0.03] blur-3xl" />
-          <div className="absolute -bottom-40 -left-40 w-[350px] h-[350px] rounded-full bg-green/[0.02] blur-3xl" />
-          {DECO_DOTS.map((dot, i) => (
-            <div
-              key={i}
-              className="absolute rounded-full bg-gold/30"
-              style={{
-                top: `${dot.y}%`,
-                left: `${dot.x}%`,
-                width: `${dot.size}px`,
-                height: `${dot.size}px`,
-                opacity: dot.opacity,
-              }}
-            />
-          ))}
-        </div>
-
-        <SectionContainer>
+      <section className="relative overflow-hidden pt-16 pb-10 md:pt-20 md:pb-14">
+        <div className="relative z-10 w-full max-w-container mx-auto px-gutter text-left">
           <div className="max-w-3xl">
-            <AnimatedText as="h1" direction="up" className="text-4xl md:text-5xl lg:text-6xl font-display text-gold-premium leading-tight">
+            {/* Breadcrumbs */}
+            <HeroBreadcrumbs />
+            {/* Section label */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: [0.25, 0.1, 0, 1] }}
+              className="inline-flex items-center gap-3"
+            >
+              <span className="w-8 h-px bg-gold/40" aria-hidden="true" />
+              <span className="text-[10px] font-semibold tracking-[0.25em] uppercase text-gold">
+                {commonT('nav.blog')}
+              </span>
+            </motion.div>
+
+            {/* Heading with gold gradient accent */}
+            <motion.h1
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.7, ease: [0.25, 0.1, 0, 1] }}
+              className="mt-4 text-4xl md:text-5xl lg:text-6xl font-display text-gold-premium leading-tight tracking-tight"
+            >
               {t('pageTitle')}
-            </AnimatedText>
-            <AnimatedText as="p" direction="up" delay={200} className="mt-4 text-lg md:text-xl text-text-secondary max-w-2xl leading-relaxed">
+            </motion.h1>
+
+            {/* Description */}
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.5, ease: [0.25, 0.1, 0, 1] }}
+              className="mt-4 text-lg md:text-xl text-text-secondary max-w-2xl leading-relaxed"
+            >
               {t('pageDescription')}
-            </AnimatedText>
+            </motion.p>
+
+            {/* Stats */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.5, ease: [0.25, 0.1, 0, 1] }}
+              className="mt-6 flex items-center gap-4 text-sm text-text-muted"
+            >
+              <span className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-gold" />
+                {allPosts.length > 0 && t('totalArticles', { count: allPosts.length })}
+              </span>
+              <span className="w-px h-4 bg-border-base" aria-hidden="true" />
+              <span className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-green" />
+                {blogCategories.length} {blogCategories.length === 1 ? 'категория' : 'категорий'}
+              </span>
+            </motion.div>
           </div>
-        </SectionContainer>
+        </div>
       </section>
 
       {/* ────── Category Filter ────── */}
-      <SectionContainer>
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => setActiveCategory(null)}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300
-              ${!activeCategory
-                ? 'bg-gold text-bg-base shadow-glow-gold'
-                : 'bg-bg-surface text-text-muted hover:text-text-primary border border-border-base hover:border-gold-muted/40'
-              }`}
-          >
-            {t('allArticles')}
-          </button>
-          {blogCategories.map((cat) => (
+      <AnimatedSection as="div" variant="fadeUp">
+        <SectionContainer>
+          <div className="flex flex-wrap gap-2">
             <button
-              key={cat.slug}
-              onClick={() => setActiveCategory(cat.slug)}
+              onClick={() => setActiveCategory(null)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300
-                ${activeCategory === cat.slug
+                ${!activeCategory
                   ? 'bg-gold text-bg-base shadow-glow-gold'
                   : 'bg-bg-surface text-text-muted hover:text-text-primary border border-border-base hover:border-gold-muted/40'
                 }`}
             >
-              {cat.name}
+              {t('allArticles')}
             </button>
-          ))}
-        </div>
-      </SectionContainer>
+            {blogCategories.map((cat) => (
+              <button
+                key={cat.slug}
+                onClick={() => setActiveCategory(cat.slug)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300
+                  ${activeCategory === cat.slug
+                    ? 'bg-gold text-bg-base shadow-glow-gold'
+                    : 'bg-bg-surface text-text-muted hover:text-text-primary border border-border-base hover:border-gold-muted/40'
+                  }`}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
+        </SectionContainer>
+      </AnimatedSection>
 
       {/* ────── Posts Grid ────── */}
       {allPosts.length > 0 && !isEmptyFiltered && (
@@ -177,29 +202,29 @@ export default function BlogPage() {
       )}
 
       {/* ────── CTA Section ────── */}
-      <SectionContainer className="mt-8 mb-16">
-        <AnimatedText direction="up" className="text-center">
-          <div className="p-10 md:p-14 rounded-2xl bg-gradient-to-br from-gold/[0.07] to-gold/[0.02] border border-gold/15 relative overflow-hidden">
-            {/* Decorative glow */}
-            <div className="absolute -top-40 -right-40 w-[300px] h-[300px] rounded-full bg-gold/[0.06] blur-3xl" aria-hidden="true" />
-            <div className="absolute -bottom-40 -left-40 w-[250px] h-[250px] rounded-full bg-green/[0.04] blur-3xl" aria-hidden="true" />
+      <AnimatedSection as="div" variant="fadeUp">
+        <SectionContainer size="md" background="deep">
+          <div className="relative max-w-3xl mx-auto text-center">
+            <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-96 h-96 bg-gold/5 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
 
-            <div className="relative z-10">
-              <p className="text-2xl md:text-3xl font-display text-text-primary">
-                {t('ctaTitle')}
-              </p>
-              <p className="mt-3 text-text-muted max-w-lg mx-auto">
-                {t('ctaDescription')}
-              </p>
+            <AnimatedText as="h2" direction="up" className="relative text-3xl md:text-4xl font-display text-text-primary">
+              {t('ctaTitle')}
+            </AnimatedText>
+
+            <AnimatedText as="p" direction="up" delay={150} className="relative mt-6 text-base text-text-secondary leading-relaxed max-w-xl mx-auto">
+              {t('ctaDescription')}
+            </AnimatedText>
+
+            <AnimatedText direction="up" delay={250} className="relative mt-8">
               <Link href="/kontakty/">
-                <Button variant="primary" size="lg" className="mt-8">
+                <Button variant="primary" size="lg">
                   {commonT('cta.booking')}
                 </Button>
               </Link>
-            </div>
+            </AnimatedText>
           </div>
-        </AnimatedText>
-      </SectionContainer>
+        </SectionContainer>
+      </AnimatedSection>
     </>
   )
 }

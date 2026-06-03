@@ -77,19 +77,9 @@ export default async function HomePage({
     ? aggregateRatingSchema(reviews)
     : null
 
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageSchema) }}
-      />
-      {ratingSchema && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(ratingSchema) }}
-        />
-      )}
-      <HomeClient locale={locale} />
-    </>
-  )
+  const pageSchemas = ratingSchema
+    ? [webPageSchema, ratingSchema]
+    : [webPageSchema]
+
+  return <HomeClient locale={locale} schemas={pageSchemas} />
 }

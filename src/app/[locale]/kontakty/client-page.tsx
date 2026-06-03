@@ -1,31 +1,24 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { AnimatedText, SectionContainer } from '@/components/ui'
+import { AnimatedText, SectionContainer, PageHero } from '@/components/ui'
 import ContactForm from '@/components/ContactForm'
 
 export default function KontaktyClient() {
   const t = useTranslations('contacts')
+  const commonT = useTranslations('common')
 
   return (
     <>
-      {/* ── Hero ── */}
-      <section className="relative pt-28 pb-12 md:pt-36 md:pb-16 overflow-hidden">
-        <div className="container mx-auto px-4 text-center">
-          <AnimatedText as="h1" direction="up" className="text-3xl md:text-4xl lg:text-5xl font-display text-gold-premium">
-            {t('pageTitle')}
-          </AnimatedText>
-
-          <AnimatedText
-            as="p"
-            direction="up"
-            delay={150}
-            className="mt-4 text-base md:text-lg text-text-muted max-w-xl mx-auto"
-          >
-            {t('pageDescription')}
-          </AnimatedText>
-        </div>
-      </section>
+      <PageHero
+        title={t('pageTitle')}
+        description={t('pageDescription')}
+        breadcrumbItems={[
+          { label: commonT('nav.home'), href: '/' },
+          { label: t('pageTitle') },
+        ]}
+        clean
+      />
 
       {/* ── Content ── */}
       <SectionContainer size="sm">

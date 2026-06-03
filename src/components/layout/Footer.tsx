@@ -35,7 +35,7 @@ export default async function Footer({ locale }: { locale: string }) {
   const blogCategories = (messages?.blogCategories as BlogCategory[]) ?? []
 
   return (
-    <footer className="relative border-t border-border-base bg-bg-deep/85 overflow-hidden" role="contentinfo">
+    <footer className="relative border-t border-border-base bg-bg-deep overflow-hidden" role="contentinfo">
 
       <div className="relative z-10 max-w-container mx-auto px-gutter py-12 md:py-16">
 
@@ -100,7 +100,7 @@ export default async function Footer({ locale }: { locale: string }) {
           <FooterColumn title={t('footerServices')}>
             {SERVICES.slice(0, 5).map((s) => (
               <FooterLink key={s.slug} href={`/uslugi/${s.slug}/`}>
-                {t_services(`${s.slug}.shortTitle` as any)}
+                {t_services(`${s.slug}.shortTitle` as `${string}.shortTitle`)}
               </FooterLink>
             ))}
             <FooterLink href="/uslugi/">{t('footerAllServices')} <span aria-hidden="true">→</span></FooterLink>

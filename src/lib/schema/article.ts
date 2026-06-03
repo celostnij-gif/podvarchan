@@ -8,6 +8,8 @@ interface ArticleSchemaParams {
   datePublished: string
   dateModified: string
   image?: string
+  imageAlt?: string
+  imageCaption?: string
   authorName?: string
   locale?: string
 }
@@ -25,9 +27,23 @@ export function articleSchema(params: ArticleSchemaParams): Record<string, unkno
     datePublished,
     dateModified,
     image,
+    imageAlt,
+    imageCaption,
     authorName = SITE.authorName,
     locale,
   } = params
+
+  /* ── Image: если есть alt-текст, используем ImageObject ── */
+  const imageSchema = image
+    ? imageAlt
+      ? {
+          '@type': 'ImageObject' as const,
+          url: cleanUrl(SITE.url, image),
+          caption: imageCaption ?? imageAlt,
+          description: imageAlt,
+        }
+      : cleanUrl(SITE.url, image)
+    : undefined
 
   return {
     '@context': 'https://schema.org',
@@ -55,6 +71,6 @@ export function articleSchema(params: ArticleSchemaParams): Record<string, unkno
     },
     datePublished,
     dateModified,
-    image: image ? cleanUrl(SITE.url, image) : undefined,
+    image: imageSchema,
   }
 }

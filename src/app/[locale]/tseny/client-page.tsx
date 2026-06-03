@@ -3,21 +3,13 @@
 import { motion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/routing'
-import { FaqAccordion } from '@/components/ui'
+import { AnimatedSection, AnimatedText, SectionContainer, FaqAccordion, PageHero } from '@/components/ui'
+import { useRegisterSchemas } from '@/providers/BreadcrumbsProvider'
 
 /* ── Animation variants ── */
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1, delayChildren: 0.1 },
-  },
-}
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.1, 0, 1] as const } },
+interface TsenyClientProps {
+  schemas?: Record<string, unknown>[]
 }
 
 const cardVariants = {
@@ -110,13 +102,15 @@ function PricingCard({
       <Link
         href="/kontakty/"
         data-analytics-booking="tseny-card"
-        className={`mt-8 inline-flex items-center justify-center w-full px-6 py-3 rounded-full text-sm font-semibold transition-all duration-400 ${
+        className={`mt-8 inline-flex items-center justify-center w-full px-6 py-3 rounded-full text-sm font-semibold tracking-wide transition-all duration-400 ${
           highlighted
             ? 'bg-gradient-to-r from-gold to-gold-light text-bg-deep shadow-glow-gold hover:shadow-[0_0_30px_rgba(201,169,110,0.25)] hover:-translate-y-0.5'
             : 'bg-bg-elevated border border-border-light text-text-primary hover:bg-gold/10 hover:border-gold/30 hover:text-gold'
         } active:translate-y-0`}
       >
-        {index === 0 ? 'Записаться' : 'Выбрать курс'}
+        <span className={highlighted ? 'drop-shadow-[0_1px_2px_rgba(5,5,8,0.5)]' : ''}>
+          {index === 0 ? 'Записаться' : 'Выбрать курс'}
+        </span>
       </Link>
     </motion.div>
   )
@@ -124,8 +118,10 @@ function PricingCard({
 
 /* ── Main Component ── */
 
-export function TsenyClient() {
+export function TsenyClient({ schemas }: TsenyClientProps) {
   const t = useTranslations('tseny')
+  const commonT = useTranslations('common')
+  useRegisterSchemas(schemas ?? [])
 
   const pricingPlans = [
     {
@@ -173,35 +169,20 @@ export function TsenyClient() {
 
   return (
     <>
-      {/* ── Hero ── */}
-      <section className="relative pt-28 pb-12 md:pt-32 md:pb-16 overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-hero opacity-20 blur-[100px]" />
-          <div className="absolute -top-40 -right-40 w-[400px] h-[400px] rounded-full bg-gold/[0.03] blur-3xl" />
-        </div>
-
-        <div className="relative z-10 max-w-container mx-auto px-gutter text-center">
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            <motion.span variants={fadeUp} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold/10 border border-gold/20 text-[10px] font-semibold tracking-[0.2em] uppercase text-gold mb-4">
-              {t('badgeLabel')}
-            </motion.span>
-            <motion.h1 variants={fadeUp} className="text-4xl md:text-5xl lg:text-6xl font-display text-gold-premium leading-tight">
-              {t('pageTitle')}
-            </motion.h1>
-            <motion.p variants={fadeUp} className="mt-4 text-lg text-text-secondary max-w-xl mx-auto">
-              {t('pageDescription')}
-            </motion.p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        label={t('badgeLabel')}
+        title={t('pageTitle')}
+        description={t('pageDescription')}
+        breadcrumbItems={[
+          { label: commonT('nav.home'), href: '/' },
+          { label: t('badgeLabel') },
+        ]}
+        clean
+      />
 
       {/* ── Pricing Cards ── */}
-      <section className="pb-16 md:pb-24">
-        <div className="max-w-container mx-auto px-gutter">
+      <AnimatedSection as="div" variant="fadeUp">
+        <SectionContainer size="md">
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4 items-stretch">
             {pricingPlans.map((plan, i) => (
               <PricingCard key={i} {...plan} index={i} />
@@ -217,67 +198,56 @@ export function TsenyClient() {
           >
             {t('disclaimer')}
           </motion.p>
-        </div>
-      </section>
+        </SectionContainer>
+      </AnimatedSection>
 
       {/* ── FAQ ── */}
-      <section className="pb-20 md:pb-28">
-        <div className="max-w-container mx-auto px-gutter">
+      <AnimatedSection as="div" variant="fadeUp">
+        <SectionContainer size="md" background="surface">
           <div className="max-w-2xl mx-auto">
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-2xl md:text-3xl font-display text-text-primary text-center mb-8"
-            >
+            <AnimatedText as="h2" direction="up" className="text-2xl md:text-3xl font-display text-text-primary text-center mb-8">
               {t('faqTitle')}
-            </motion.h2>
+            </AnimatedText>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.15 }}
-              className="space-y-3"
-            >
-              {faqItems.map((item, i) => (
-                <FaqAccordion key={i} question={item.question} answer={item.answer} compact />
-              ))}
-            </motion.div>
+            <AnimatedText direction="up" delay={150} as="div">
+              <div className="space-y-3">
+                {faqItems.map((item, i) => (
+                  <FaqAccordion key={i} question={item.question} answer={item.answer} compact />
+                ))}
+              </div>
+            </AnimatedText>
           </div>
-        </div>
-      </section>
+        </SectionContainer>
+      </AnimatedSection>
 
       {/* ── CTA ── */}
-      <section className="pb-20 md:pb-28">
-        <div className="max-w-container mx-auto px-gutter">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="p-8 md:p-12 rounded-2xl text-center bg-gradient-to-br from-gold/[0.06] to-gold/[0.02] border border-gold/15 relative overflow-hidden"
-          >
-            <div className="absolute -top-40 -right-40 w-[300px] h-[300px] rounded-full bg-gold/[0.06] blur-3xl" aria-hidden="true" />
-            <div className="relative z-10">
-              <p className="text-xl md:text-2xl font-display text-text-primary">
-                {t('ctaTitle')}
-              </p>
-              <p className="mt-2 text-sm text-text-muted max-w-md mx-auto">
-                {t('ctaDescription')}
-              </p>
+      <AnimatedSection as="div" variant="fadeUp">
+        <SectionContainer size="md" background="deep">
+          <div className="relative max-w-3xl mx-auto text-center">
+            <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-96 h-96 bg-gold/5 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
+
+            <AnimatedText as="h2" direction="up" className="relative text-3xl md:text-4xl font-display text-text-primary">
+              {t('ctaTitle')}
+            </AnimatedText>
+
+            <AnimatedText as="p" direction="up" delay={150} className="relative mt-6 text-base text-text-secondary leading-relaxed max-w-xl mx-auto">
+              {t('ctaDescription')}
+            </AnimatedText>
+
+            <AnimatedText direction="up" delay={250} className="relative mt-8">
               <Link
                 href="/kontakty/"
                 data-analytics-booking="tseny-cta"
                 className="group relative inline-flex items-center justify-center px-7 py-3 md:px-9 md:py-3.5 rounded-full
-                           bg-gradient-to-r from-gold to-gold-light text-bg-deep font-semibold shadow-glow-gold
+                           bg-gradient-to-r from-gold to-gold-light text-bg-deep font-semibold tracking-wide shadow-glow-gold
                            hover:shadow-[0_0_40px_rgba(201,169,110,0.25)] hover:-translate-y-0.5
                            active:brightness-95 active:translate-y-0
-                           transition-all duration-400 text-sm md:text-base gap-2.5 overflow-hidden mt-6"
+                           transition-all duration-400 text-sm md:text-base gap-2.5 overflow-hidden"
               >
                 <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full
                                  transition-transform duration-700 bg-gradient-to-r
                                  from-transparent via-white/20 to-transparent" />
-                <span className="relative z-10 flex items-center gap-2.5">
+                <span className="relative z-10 flex items-center gap-2.5 drop-shadow-[0_1px_2px_rgba(5,5,8,0.5)]">
                   {t('ctaButton')}
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                        stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
@@ -287,10 +257,10 @@ export function TsenyClient() {
                   </svg>
                 </span>
               </Link>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+            </AnimatedText>
+          </div>
+        </SectionContainer>
+      </AnimatedSection>
     </>
   )
 }

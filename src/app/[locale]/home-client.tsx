@@ -2,9 +2,16 @@
 
 import { useTranslations } from 'next-intl'
 import dynamic from 'next/dynamic'
-import Hero from '@/components/sections/Hero'
-import ProblemsSection from '@/components/sections/ProblemsSection'
-import MethodSection from '@/components/sections/MethodSection'
+
+const Hero = dynamic(() => import('@/components/sections/Hero'), {
+  loading: () => <div className="min-h-[90vh] md:min-h-screen" aria-hidden="true" />,
+})
+const ProblemsSection = dynamic(() => import('@/components/sections/ProblemsSection'), {
+  loading: () => <div className="h-48 md:h-64" aria-hidden="true" />,
+})
+const MethodSection = dynamic(() => import('@/components/sections/MethodSection'), {
+  loading: () => <div className="h-48 md:h-64" aria-hidden="true" />,
+})
 
 const ServicesSection = dynamic(() => import('@/components/sections/ServicesSection'), {
   loading: () => <div className="h-48 md:h-64" aria-hidden="true" />,
@@ -18,34 +25,13 @@ const TestimonialsSection = dynamic(() => import('@/components/sections/Testimon
 const FAQSection = dynamic(() => import('@/components/sections/FAQSection'), {
   loading: () => null,
 })
-import { motion } from 'framer-motion'
-import { AnimatedText, SectionContainer } from '@/components/ui'
+import { AnimatedText, AnimatedSection, SectionContainer } from '@/components/ui'
 import { Link } from '@/i18n/routing'
+import { useRegisterSchemas } from '@/providers/BreadcrumbsProvider'
 
-/* ── CTA animation variants ── */
-
-const ctaContainerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0.1,
-    },
-  },
-}
-
-const ctaChildVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: [0.25, 0.1, 0, 1] as const },
-  },
-}
-
-export default function HomeClient({ locale }: { locale: string }) {
+export default function HomeClient({ locale, schemas }: { locale: string; schemas?: Record<string, unknown>[] }) {
   const t = useTranslations('home')
+  useRegisterSchemas(schemas ?? [])
 
   return (
     <>
@@ -71,40 +57,20 @@ export default function HomeClient({ locale }: { locale: string }) {
       <FAQSection />
 
       {/* ── CTA ── */}
-      <SectionContainer background="deep" className="text-center relative overflow-hidden">
-        {/* Background glow with parallax */}
-        <motion.div
-          className="absolute -top-40 left-1/2 -translate-x-1/2 w-[600px] h-[400px]
-                     bg-gradient-to-br from-gold/[0.04] via-transparent to-transparent
-                     rounded-full blur-[100px]"
-          initial={{ opacity: 0, scale: 0.5 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1.2, ease: [0.25, 0.1, 0, 1] }}
-          aria-hidden="true"
-        />
+      <AnimatedSection as="div" variant="fadeUp">
+        <SectionContainer size="md" background="deep">
+          <div className="relative max-w-3xl mx-auto text-center">
+            <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-96 h-96 bg-gold/5 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
 
-        <motion.div
-          className="relative z-10"
-          variants={ctaContainerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: '-40px' }}
-        >
-          <motion.div variants={ctaChildVariants}>
-            <AnimatedText as="h2" direction="up" className="text-3xl md:text-4xl font-display text-text-primary">
+            <AnimatedText as="h2" direction="up" className="relative text-3xl md:text-4xl font-display text-text-primary">
               {t('ctaTitle')}
             </AnimatedText>
-          </motion.div>
 
-          <motion.div variants={ctaChildVariants}>
-            <AnimatedText as="p" direction="up" delay={200} className="mt-4 text-lg text-text-secondary max-w-xl mx-auto">
+            <AnimatedText as="p" direction="up" delay={150} className="relative mt-6 text-base text-text-secondary leading-relaxed max-w-xl mx-auto">
               {t('ctaDescription')}
             </AnimatedText>
-          </motion.div>
 
-          <motion.div variants={ctaChildVariants}>
-            <AnimatedText direction="up" delay={400} className="mt-8">
+            <AnimatedText direction="up" delay={250} className="relative mt-8">
               <Link
                 href="/kontakty/"
                 data-analytics-booking="home-cta"
@@ -128,9 +94,9 @@ export default function HomeClient({ locale }: { locale: string }) {
                 </span>
               </Link>
             </AnimatedText>
-          </motion.div>
-        </motion.div>
-      </SectionContainer>
+          </div>
+        </SectionContainer>
+      </AnimatedSection>
     </>
   )
 }

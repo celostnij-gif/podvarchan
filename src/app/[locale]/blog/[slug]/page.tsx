@@ -29,6 +29,7 @@ export async function generateMetadata({ params }: Props) {
     keywords: post.keywords,
     path: `/blog/${slug}`,
     type: 'article',
+    ogImage: post.image,
     publishedTime: post.datePublished,
     modifiedTime: post.dateModified,
     author: post.author,
@@ -54,30 +55,28 @@ export default async function BlogPostPage({ params }: Props) {
     url: `/blog/${slug}/`,
     datePublished: post.datePublished,
     dateModified: post.dateModified,
+    image: post.image,
+    imageAlt: post.imageAlt,
+    imageCaption: post.title,
     authorName: post.author,
     locale,
   })
 
   return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <ClientBlogPost
-        title={post.title}
-        body={post.body ?? ''}
-        date={formatDate(post.datePublished)}
-        category={post.categoryName}
-        categorySlug={post.categorySlug}
-        author={post.author}
-        readingTime={post.readingTime}
-        slug={slug}
-        image={post.image}
-        imageAlt={post.imageAlt}
-        locale={locale}
-        relatedPosts={relatedPosts}
-      />
-    </>
+    <ClientBlogPost
+      title={post.title}
+      body={post.body ?? ''}
+      date={formatDate(post.datePublished)}
+      category={post.categoryName}
+      categorySlug={post.categorySlug}
+      author={post.author}
+      readingTime={post.readingTime}
+      slug={slug}
+      image={post.image}
+      imageAlt={post.imageAlt}
+      locale={locale}
+      relatedPosts={relatedPosts}
+      schemas={[jsonLd]}
+    />
   )
 }

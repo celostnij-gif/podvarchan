@@ -4,6 +4,8 @@ import { motion, useScroll, useTransform } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { AnimatedText, AnimatedSection, SectionContainer, Button, MedicalDisclaimer, TiltCard, childVariants } from '@/components/ui'
+import { useSetBreadcrumbs } from '@/providers/BreadcrumbsProvider'
+import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 import { Link } from '@/i18n/routing'
 import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
 
@@ -70,6 +72,11 @@ export default function MetodClient() {
   const methodT = useTranslations('method')
   const commonT = useTranslations('common')
 
+  useSetBreadcrumbs([
+    { label: commonT('nav.home'), href: '/' },
+    { label: t('breadcrumb') },
+  ])
+
   const components = t.raw('items') as Array<{
     title: string
     desc: string
@@ -101,17 +108,10 @@ export default function MetodClient() {
       >
         <HeroBackgroundImage />
 
-        <SectionContainer size="sm" background="transparent">
+        <div className="max-w-container mx-auto px-gutter pt-16 pb-10 md:pt-20 md:pb-14">
           <div className="relative z-10 max-w-3xl">
-            {/* Breadcrumb */}
-            <AnimatedText direction="up" delay={50} className="flex items-center gap-2 text-xs text-text-muted mb-6">
-              <Link href="/" className="hover:text-gold transition-colors">
-                {commonT('nav.home')}
-              </Link>
-              <span aria-hidden="true">/</span>
-              <span className="text-gold">{t('breadcrumb')}</span>
-            </AnimatedText>
-
+            {/* Breadcrumbs */}
+            <HeroBreadcrumbs />
             {/* Heading */}
             <AnimatedText as="h1" direction="up" delay={100} className="relative">
               <span className="block text-4xl md:text-5xl lg:text-6xl font-display text-gold-premium leading-tight">
@@ -139,19 +139,15 @@ export default function MetodClient() {
               </Link>
             </AnimatedText>
           </div>
-        </SectionContainer>
+        </div>
       </section>
 
       {/* ════════════════════════════════════════
            PHILOSOPHY — premium redesign
            ════════════════════════════════════════ */}
-      <section className="relative overflow-hidden bg-bg-deep">
-        {/* Subtle ambient glow */}
-        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-gold/[0.03] rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-40 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-amber-500/[0.03] rounded-full blur-3xl pointer-events-none" />
-
+      <section className="relative">
         <SectionContainer size="md" background="transparent">
-          <div className="relative max-w-4xl mx-auto">
+          <div className="relative max-w-3xl mx-auto">
             {/* Opening decorative asterism */}
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -283,7 +279,7 @@ export default function MetodClient() {
            ════════════════════════════════════════ */}
       <AnimatedSection as="div" variant="fadeUp">
       <SectionContainer size="md" background="surface">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-3xl mx-auto">
           <AnimatedText as="h2" direction="up" className="text-3xl md:text-4xl font-display text-text-primary text-center">
             {t('howItWorksTitle')}
           </AnimatedText>
@@ -332,7 +328,7 @@ export default function MetodClient() {
           {t('safetyTitle')}
         </AnimatedText>
 
-        <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-5xl mx-auto">
+        <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {safetyItems.map((item, i) => (
             <TiltCard key={i} tiltDegree={3} scale={1.015} className="rounded-xl h-full">
             <motion.div

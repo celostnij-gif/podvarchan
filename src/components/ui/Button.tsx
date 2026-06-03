@@ -21,7 +21,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    'bg-gold text-bg-deep font-semibold ' +
+    'bg-gold text-bg-deep font-semibold tracking-wide ' +
     'shadow-glow-gold ' +
     'hover:brightness-110 hover:shadow-lg hover:-translate-y-0.5 ' +
     'active:brightness-95 active:translate-y-0 ' +
@@ -29,7 +29,7 @@ const variantStyles: Record<ButtonVariant, string> = {
     'disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:brightness-100 disabled:hover:shadow-glow-gold disabled:hover:translate-y-0',
 
   secondary:
-    'bg-transparent text-text-primary font-medium ' +
+    'bg-transparent text-text-primary font-medium tracking-wide ' +
     'border border-border-light ' +
     'hover:bg-bg-surface hover:border-gold-muted hover:text-gold ' +
     'active:bg-bg-elevated ' +
@@ -37,14 +37,14 @@ const variantStyles: Record<ButtonVariant, string> = {
     'disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:border-border-light disabled:hover:text-text-primary',
 
   ghost:
-    'bg-transparent text-text-secondary font-medium ' +
+    'bg-transparent text-text-secondary font-medium tracking-wide ' +
     'hover:bg-bg-surface hover:text-gold ' +
     'active:bg-bg-elevated ' +
     'focus-visible:ring-2 focus-visible:ring-border-light focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base ' +
     'disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-text-secondary',
 
   danger:
-    'bg-error-bg text-error font-semibold ' +
+    'bg-error-bg text-error font-semibold tracking-wide ' +
     'border border-error/20 ' +
     'hover:bg-error/10 hover:border-error/40 hover:brightness-110 ' +
     'active:brightness-95 ' +
@@ -196,7 +196,11 @@ export default function Button({
       {!loading && icon && <span className="shrink-0">{icon}</span>}
 
       {/* Label (hidden while loading — only show spinner) */}
-      {!loading && children && <span>{children}</span>}
+      {!loading && children && (
+        <span className={variant === 'primary' ? 'drop-shadow-[0_1px_2px_rgba(5,5,8,0.5)]' : ''}>
+          {children}
+        </span>
+      )}
 
       {/* Screen-reader loading announcement */}
       {loading && <span className="sr-only">Загрузка...</span>}

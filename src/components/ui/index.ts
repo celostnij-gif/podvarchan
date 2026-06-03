@@ -19,6 +19,9 @@ export { default as ScrollProgress } from './ScrollProgress'
 
 export { default as FaqAccordion } from './FaqAccordion'
 
+export { default as DiplomaShowcase } from './DiplomaShowcase'
+export type { Diploma } from './DiplomaShowcase'
+
 export { default as AnimatedSection, childVariants } from './AnimatedSection'
 export type { default as AnimatedSectionType } from './AnimatedSection'
 
@@ -26,3 +29,11 @@ export { default as TiltCard } from './TiltCard'
 export type { TiltCardProps } from './TiltCard'
 
 export { LogoImage } from './LogoImage'
+
+export { default as PageHero } from './PageHero'
+export type { PageHeroProps } from './PageHero'
+
+export { default as Breadcrumbs } from './Breadcrumbs'
+export type { BreadcrumbItem } from './Breadcrumbs'
+
+export { default as HeroBreadcrumbs } from './HeroBreadcrumbs'

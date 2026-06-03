@@ -283,8 +283,6 @@ export async function sendContactNotification(
   const { name, email, message, phone } = params
 
   if (!process.env.RESEND_API_KEY) {
-    console.log('[Resend] RESEND_API_KEY not configured. Skipping email send.')
-    console.log('[Contact Form (fallback)]', { name, email, message, phone, timestamp: new Date().toISOString() })
     return { success: true }
   }
 
@@ -298,15 +296,14 @@ export async function sendContactNotification(
     })
 
     if (error) {
-      console.error('[Resend] Send error:', error)
+      console.error('[Resend] Send error')
       return { success: false, error: error.message }
     }
 
-    console.log('[Resend] Email sent:', data?.id)
     return { success: true }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
-    console.error('[Resend] Unexpected error:', err)
+    console.error('[Resend] Unexpected error')
     return { success: false, error: message }
   }
 }
@@ -319,7 +316,6 @@ export async function sendAutoReply(
   const { name, email } = params
 
   if (!process.env.RESEND_API_KEY) {
-    console.log('[Resend] RESEND_API_KEY not configured. Skipping auto-reply.')
     return { success: true }
   }
 
@@ -332,15 +328,14 @@ export async function sendAutoReply(
     })
 
     if (error) {
-      console.error('[Resend] Auto-reply error:', error)
+      console.error('[Resend] Auto-reply error')
       return { success: false, error: error.message }
     }
 
-    console.log('[Resend] Auto-reply sent:', data?.id)
     return { success: true }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
-    console.error('[Resend] Auto-reply unexpected:', err)
+    console.error('[Resend] Auto-reply unexpected')
     return { success: false, error: message }
   }
 }

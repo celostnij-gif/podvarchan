@@ -136,13 +136,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // ── Log ──
-    console.log(`[Contact API] ${new Date().toISOString()} | ${name} | ${maskEmail(email)}`)
-
-    // ── В dev-режиме — если нет API ключа, только логируем ──
+    // ── В dev-режимі — якщо немає API ключа, просто повертаємо success ──
     if (process.env.NODE_ENV === 'development' && !process.env.RESEND_API_KEY) {
-      console.log('[Contact API] Dev mode — RESEND_API_KEY not set, logging instead of sending email.')
-      console.log('[Contact API] Form data:', { name, email, message, phone })
       return NextResponse.json(
         { success: true, message: 'Заявка отправлена! (dev mode)' },
         { status: 200 },
@@ -153,7 +148,7 @@ export async function POST(request: NextRequest) {
     const notificationResult = await sendContactNotification({ name, email, message, phone })
 
     if (!notificationResult.success) {
-      console.error('[Contact API] Notification send failed:', notificationResult.error)
+      console.error('[Contact API] Notification send failed')
       return NextResponse.json(
         { error: 'Не удалось отправить сообщение. Попробуйте позже или напишите в Telegram.', field: 'form' },
         { status: 500 },
@@ -164,7 +159,7 @@ export async function POST(request: NextRequest) {
     const autoReplyResult = await sendAutoReply({ name, email, message })
 
     if (!autoReplyResult.success) {
-      console.warn('[Contact API] Auto-reply failed (non-critical):', autoReplyResult.error)
+      console.warn('[Contact API] Auto-reply failed (non-critical)')
     }
 
     return NextResponse.json(
@@ -172,7 +167,7 @@ export async function POST(request: NextRequest) {
       { status: 200 },
     )
   } catch (err) {
-    console.error('[Contact API] Unexpected error:', err)
+    console.error('[Contact API] Unexpected error')
     return NextResponse.json(
       { error: 'Произошла ошибка. Попробуйте позже или напишите в Telegram.', field: 'form' },
       { status: 500 },

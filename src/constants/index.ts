@@ -30,6 +30,7 @@ export const MAIN_NAV: NavItem[] = [
       { label: 'Неуверенность и страх провала', href: '/uslugi/neyverennost-i-strakh-provala/' },
       { label: 'Психосоматика', href: '/uslugi/psikhosomatika/' },
       { label: 'Личностный кризис', href: '/uslugi/lichnostnyy-krizis/' },
+      { label: 'Цифровой детокс', href: '/uslugi/tsifrovoy-detoks-i-gadzhet-zavisimost/' },
     ],
   },
   { label: 'Блог', href: '/blog/' },
@@ -146,6 +147,19 @@ export const SERVICES: Service[] = [
     cta: 'Вернуть ориентиры — бесплатная консультация',
     ctaLink: '/kontakty/',
   },
+  {
+    slug: 'tsifrovoy-detoks-i-gadzhet-zavisimost',
+    title: 'Цифровой детокс и гаджетозависимость',
+    shortTitle: 'Цифровой детокс',
+    description: 'Работа с гаджетозависимостью и цифровой перегрузкой через гипнотерапию. Помогу восстановить здоровые отношения с технологиями, убрать думскроллинг, тревогу от соцсетей и вернуть контроль над своим временем.',
+    metaDescription: 'Цифровой детокс и лечение гаджетозависимости через гипнотерапию онлайн. Работа с думскроллингом, FOMO, номофобией и тревогой от соцсетей.',
+    keywords: ['цифровой детокс', 'гаджетозависимость', 'зависимость от телефона', 'думскроллинг', 'номофобия', 'FOMO', 'цифровая гигиена'],
+    category: 'tsifrovoy-detoks',
+    priority: 3,
+    icon: '📱',
+    cta: 'Вернуть контроль — запись на консультацию',
+    ctaLink: '/kontakty/',
+  },
 ]
 
 /* ── Blog Categories ── */
@@ -199,6 +213,14 @@ export const BLOG_CATEGORIES: BlogCategory[] = [
     keywords: ['неуверенность в себе', 'как побороть неуверенность', 'синдром самозванца'],
     serviceSlug: 'neyverennost-i-strakh-provala',
   },
+  {
+    slug: 'tsifrovoy-detoks',
+    name: 'Цифровой детокс',
+    description: 'Как распознать гаджетозависимость, провести цифровой детокс и восстановить здоровые отношения с технологиями. Советы гипнотерапевта.',
+    metaDescription: 'Гаджетозависимость, цифровой детокс, думскроллинг, номофобия — статьи о том, как гипнотерапия помогает вернуть контроль над экранным временем.',
+    keywords: ['цифровой детокс', 'гаджетозависимость', 'зависимость от телефона', 'думскроллинг', 'номофобия'],
+    serviceSlug: 'tsifrovoy-detoks-i-gadzhet-zavisimost',
+  },
 ]
 
 /* ── Static pages ── */
@@ -229,6 +251,7 @@ export const SERVICE_ICONS: Record<string, string> = {
   'neyverennost-i-strakh-provala': '🌟',
   'psikhosomatika': '🌿',
   'lichnostnyy-krizis': '🌅',
+  'tsifrovoy-detoks-i-gadzhet-zavisimost': '📱',
 }
 
 export const AUTHOR = {

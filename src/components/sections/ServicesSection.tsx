@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { useTranslations, useMessages } from 'next-intl'
 import { Link } from '@/i18n/routing'
 import TiltCard from '@/components/ui/TiltCard'
+import { AnimatedSection, SectionContainer } from '@/components/ui'
 
 /* ── Emoji icons by slug (универсальные, не зависят от языка) ── */
 
@@ -16,6 +17,7 @@ const ICONS: Record<string, string> = {
   'neyverennost-i-strakh-provala': '🌟',
   'psikhosomatika': '🌿',
   'lichnostnyy-krizis': '🌅',
+  'tsifrovoy-detoks-i-gadzhet-zavisimost': '📱',
 }
 
 /* ── Тип для servicesData из переводов ── */
@@ -64,8 +66,8 @@ export default function ServicesSection() {
   if (services.length === 0) return null
 
   return (
-    <section className="relative py-20 md:py-28 overflow-hidden" aria-label={t('ariaLabel')}>
-      <div className="relative z-10 max-w-container mx-auto px-gutter">
+    <AnimatedSection as="section" variant="fadeUp" className="relative overflow-hidden" aria-label={t('ariaLabel')}>
+      <SectionContainer size="md" background="surface">
         {/* Heading */}
         <motion.div
           variants={headingVariants}
@@ -125,7 +127,7 @@ export default function ServicesSection() {
             {t('allLink')}
           </Link>
         </motion.div>
-      </div>
-    </section>
+      </SectionContainer>
+    </AnimatedSection>
   )
 }

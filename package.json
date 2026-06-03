@@ -3,13 +3,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "lint": "next lint",
     "deploy": "npx opennextjs-cloudflare build && npx wrangler deploy",
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv ./cloudflare-env.d.ts"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3",
     "@tailwindcss/typography": "^0.5.19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.6",
     "typescript": "^5.9.3",
     "wrangler": "^4.95.0"
   },

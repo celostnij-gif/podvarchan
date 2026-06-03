@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Script from 'next/script'
 import { usePathname } from 'next/navigation'
 import { analytics } from '@/lib/analytics'
+import { hasConsent } from '@/lib/consent'
 
 /**
  * Google Analytics 4 component.
@@ -21,8 +22,33 @@ export default function GoogleAnalytics() {
   const firstRender = useRef(true)
   const prevPath = useRef(pathname)
   const scrollFired = useRef<Set<string>>(new Set())
+  const [consented, setConsented] = useState(false)
 
   const gaId = process.env.NEXT_PUBLIC_GA_ID
+
+  // Wait for cookie consent before loading GA
+  useEffect(() => {
+    if (hasConsent()) {
+      setConsented(true)
+      return
+    }
+
+    // Listen for consent given via CookieBanner
+    function onConsent() {
+      setConsented(true)
+    }
+
+    window.addEventListener('cookie-consent-accepted', onConsent)
+    return () => window.removeEventListener('cookie-consent-accepted', onConsent)
+  }, [])
+
+  // Re-fire page view when consent is given mid-session (only on consent transition, not navigation)
+  useEffect(() => {
+    if (consented) {
+      analytics.pageView(pathname)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [consented])
 
   useEffect(() => {
     if (!gaId) return
@@ -82,7 +108,7 @@ export default function GoogleAnalytics() {
     return () => { cleanups.forEach((fn) => fn()) }
   }, [pathname, gaId])
 
-  if (!gaId) return null
+  if (!gaId || !consented) return null
 
   return (
     <>
