@@ -190,7 +190,7 @@ export default function Hero() {
   return (
     <section
       className="relative min-h-[90vh] md:min-h-screen flex items-center overflow-hidden
-                 bg-gradient-to-b from-bg-deep via-bg-base to-bg-base pt-8 pb-16"
+                 bg-gradient-to-b from-bg-deep via-bg-base to-bg-base pt-16 pb-16 md:pt-20 md:pb-20"
       aria-label={t('ariaLabel')}
     >
       {/* Background layers */}
