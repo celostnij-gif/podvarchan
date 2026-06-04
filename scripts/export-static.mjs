@@ -9,7 +9,7 @@
  * Запуск: node scripts/export-static.mjs
  */
 
-import { copyFileSync, existsSync, mkdirSync, rmSync, readdirSync, statSync, writeFileSync } from 'fs'
+import { existsSync, mkdirSync, rmSync, readdirSync, statSync, writeFileSync } from 'fs'
 import { execSync, spawn } from 'child_process'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
@@ -27,10 +27,6 @@ function log(msg) {
 
 function ok(msg) {
   console.log(`  ✅ ${msg}`)
-}
-
-function warn(msg) {
-  console.log(`  ⚠️  ${msg}`)
 }
 
 /* ── Список URL для краулинга ── */
@@ -190,7 +186,7 @@ function savePage(urlPath, html) {
 
 /* ── Извлечение asset-ов из HTML ── */
 
-function extractAssetUrls(html, baseUrl) {
+function extractAssetUrls(html) {
   const assets = new Set()
 
   // CSS from <link>
@@ -334,7 +330,7 @@ async function main() {
       timeout: 600000,
     })
     ok('Сборка завершена')
-  } catch (err) {
+  } catch {
     console.error('\n❌ Ошибка сборки!')
     process.exit(1)
   }
@@ -427,8 +423,8 @@ async function main() {
 
       process.stdout.write(' ✅\n')
       successCount++
-    } catch (err) {
-      process.stdout.write(` ❌ ${err.message}\n`)
+    } catch (err_) {
+      process.stdout.write(` ❌ ${err_.message}\n`)
       failCount++
     }
   }

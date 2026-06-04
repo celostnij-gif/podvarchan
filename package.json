@@ -7,31 +7,72 @@
     "deploy": "npx opennextjs-cloudflare build && npx wrangler deploy",
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "cf-typegen": "wrangler types --env-interface CloudflareEnv ./cloudflare-env.d.ts"
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv ./cloudflare-env.d.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate:local": "wrangler d1 migrations apply DB --local",
+    "db:migrate:prod": "wrangler d1 migrations apply DB",
+    "db:seed": "tsx src/db/seed.ts",
+    "db:studio": "drizzle-kit studio",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "**/*.{ts,tsx,mts,cts}": [
+      "eslint --fix",
+      "eslint --max-warnings 0"
+    ],
+    "**/*.{js,mjs,cjs}": [
+      "eslint --fix",
+      "eslint --max-warnings 0"
+    ]
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.19",
+    "@types/bcryptjs": "^2.4.6",
+    "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.7",
+    "tsx": "^4.22.4",
     "typescript": "^5.9.3",
     "wrangler": "^4.95.0"
   },
   "dependencies": {
+    "@auth/core": "^0.34.3",
+    "@hookform/resolvers": "^5.4.0",
     "@opennextjs/cloudflare": "^1.19.11",
     "@stablelib/nacl": "^2.0.1",
+    "@tiptap/extension-blockquote": "^3.25.0",
+    "@tiptap/extension-bullet-list": "^3.25.0",
+    "@tiptap/extension-code-block": "^3.25.0",
+    "@tiptap/extension-heading": "^3.25.0",
+    "@tiptap/extension-image": "^3.25.0",
+    "@tiptap/extension-link": "^3.25.0",
+    "@tiptap/extension-ordered-list": "^3.25.0",
+    "@tiptap/extension-placeholder": "^3.25.0",
+    "@tiptap/pm": "^3.25.0",
+    "@tiptap/react": "^3.25.0",
+    "@tiptap/starter-kit": "^3.25.0",
     "@types/node": "^25.9.1",
     "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10.5.0",
+    "bcryptjs": "^3.0.3",
+    "date-fns": "^4.4.0",
+    "drizzle-orm": "^0.45.2",
     "framer-motion": "^12.40.0",
+    "lucide-react": "^1.17.0",
     "next": "^15.5.18",
+    "next-auth": "^4.24.14",
     "next-intl": "^4.12.0",
     "next-mdx-remote": "^6.0.0",
     "postcss": "^8.5.15",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
+    "react-hook-form": "^7.77.0",
     "resend": "^6.12.4",
     "sharp": "^0.34.5",
-    "tailwindcss": "^3.4.19"
+    "tailwindcss": "^3.4.19",
+    "zod": "^4.4.3"
   }
 }

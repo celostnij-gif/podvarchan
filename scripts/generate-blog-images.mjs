@@ -155,7 +155,6 @@ const IMAGES = [
 function svgContent({ title, sub, gradient, symbol, accent }) {
   // Радиальный градиент
   const gradId = 'bg'
-  const accentHex = accent.replace('#', '')
 
   return `<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
   <defs>

@@ -1,9 +1,9 @@
 /* ── Minimal KVNamespace type (avoiding @cloudflare/workers-types dep) ── */
 interface KVNamespace {
   get(key: string, options?: { type: 'text' }): Promise<string | null>
-  get<Expected extends unknown = unknown>(
+  get<Expected = unknown>(
     key: string,
-    options: KVNamespaceGetOptions<Expected>
+    options: KVNamespaceGetOptions
   ): Promise<Expected | null>
   put(
     key: string,
@@ -18,9 +18,26 @@ interface KVNamespace {
   }): Promise<{ keys: { name: string; expiration?: number; metadata?: unknown }[]; list_complete: boolean; cursor?: string }>
 }
 
-interface KVNamespaceGetOptions<Expected> {
+interface KVNamespaceGetOptions {
   type: 'text' | 'json' | 'arrayBuffer' | 'stream'
   cacheTtl?: number
+}
+
+/* ── Cloudflare D1 Database type (без @cloudflare/workers-types) ── */
+
+interface D1Database {
+  prepare(query: string): D1PreparedStatement
+  dump(): Promise<ArrayBuffer>
+  batch<T = unknown>(statements: D1PreparedStatement[]): Promise<T[]>
+  exec(query: string): Promise<{ count: number }>
+}
+
+interface D1PreparedStatement {
+  bind(...values: unknown[]): D1PreparedStatement
+  first<T = unknown>(colName?: string): Promise<T | null>
+  run<T = unknown>(): Promise<{ results: T[]; success: boolean; meta: Record<string, unknown> }>
+  all<T = unknown>(): Promise<{ results: T[]; success: boolean; meta: Record<string, unknown> }>
+  raw<T = unknown>(): Promise<T[]>
 }
 
 interface __BaseEnv_CloudflareEnv {
