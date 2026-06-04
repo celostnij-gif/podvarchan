@@ -1,6 +1,6 @@
 'use client'
 
-import { useTranslations, useMessages } from 'next-intl'
+import { useMessages } from 'next-intl'
 import { motion } from 'framer-motion'
 import { Link } from '@/i18n/routing'
 import { SERVICE_ICONS } from '@/constants'

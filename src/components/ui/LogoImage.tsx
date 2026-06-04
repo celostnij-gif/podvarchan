@@ -83,6 +83,7 @@ export function LogoImage({ className = '', priority = false }: LogoImageProps) 
         sizes={SIZES_ATTR}
       />
       {/* Fallback — PNG */}
+      {/* eslint-disable-next-line jsx-a11y/alt-text -- alt is provided via imgProps spread */}
       <img {...imgProps} />
     </picture>
   )

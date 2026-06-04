@@ -87,7 +87,7 @@ export default function MethodSection() {
     <AnimatedSection as="section" variant="fadeUp" className="relative overflow-hidden" aria-label={t('ariaLabel')}>
       <BackgroundDecorations />
 
-      <SectionContainer size="md" background="default">
+      <SectionContainer size="md" background="transparent">
         {/* Heading */}
         <motion.div
           variants={headingVariants}

@@ -29,7 +29,7 @@ import { AnimatedText, AnimatedSection, SectionContainer } from '@/components/ui
 import { Link } from '@/i18n/routing'
 import { useRegisterSchemas } from '@/providers/BreadcrumbsProvider'
 
-export default function HomeClient({ locale, schemas }: { locale: string; schemas?: Record<string, unknown>[] }) {
+export default function HomeClient({ locale: _locale, schemas }: { locale: string; schemas?: Record<string, unknown>[] }) {
   const t = useTranslations('home')
   useRegisterSchemas(schemas ?? [])
 

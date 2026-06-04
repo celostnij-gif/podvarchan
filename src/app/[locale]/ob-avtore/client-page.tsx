@@ -167,7 +167,7 @@ export function ClientAboutPage() {
                 className="absolute -top-3 left-6 text-7xl text-gold/10 font-display leading-none pointer-events-none select-none"
                 aria-hidden="true"
               >
-                "
+                &ldquo;
               </span>
               <div className="relative">
                 <AnimatedText

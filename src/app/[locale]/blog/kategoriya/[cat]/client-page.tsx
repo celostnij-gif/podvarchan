@@ -7,10 +7,18 @@ import { useSetBreadcrumbs } from '@/providers/BreadcrumbsProvider'
 import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 import BlogCard from '@/components/blog/BlogCard'
 import { Link } from '@/i18n/routing'
-import type { BlogCategory, BlogPost } from '@/types'
+import type { BlogPost } from '@/types'
+
+/* ── Local type for blog category data from messages ── */
+interface BlogCategoryMsg {
+  slug: string
+  name: string
+  description: string
+  serviceSlug?: string
+}
 
 interface Props {
-  category: BlogCategory
+  category: BlogCategoryMsg
   posts: BlogPost[]
   locale: string
 }

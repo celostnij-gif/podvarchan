@@ -287,7 +287,7 @@ export async function sendContactNotification(
   }
 
   try {
-    const { data, error } = await getResend().emails.send({
+    const { error } = await getResend().emails.send({
       from: FROM_EMAIL_FULL,
       to: [CONTACT_EMAIL],
       replyTo: email,
@@ -320,7 +320,7 @@ export async function sendAutoReply(
   }
 
   try {
-    const { data, error } = await getResend().emails.send({
+    const { error } = await getResend().emails.send({
       from: FROM_EMAIL_FULL,
       to: [email],
       subject: 'Ваша заявка получена — podvarchan.com',

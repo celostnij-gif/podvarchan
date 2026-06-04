@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef, type FormEvent, type ChangeEvent } from 'react'
 import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui'
-import { Link } from '@/i18n/routing'
 import { getTurnstileToken, resetTurnstile, TURNSTILE_SITE_KEY } from '@/lib/turnstile'
 
 /* ── Types ── */
@@ -24,8 +23,6 @@ const MAX_MESSAGE_LENGTH = 2000
 
 export default function ContactForm() {
   const t = useTranslations('contactForm')
-  const commonT = useTranslations('common')
-
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -48,9 +45,11 @@ export default function ContactForm() {
     (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
 
   useEffect(() => {
+    const container = widgetContainerRef.current
+
     if (!TURNSTILE_SITE_KEY || isLocalhost) {
       // dev mode or localhost — no captcha needed
-      setTurnstileReady(true)
+      queueMicrotask(() => setTurnstileReady(true))
       return
     }
 
@@ -89,11 +88,11 @@ export default function ContactForm() {
 
     return () => {
       clearTimeout(timer)
-      if (widgetContainerRef.current && window.turnstile?.remove) {
-        window.turnstile.remove(widgetContainerRef.current)
+      if (container && window.turnstile?.remove) {
+        window.turnstile.remove(container)
       }
     }
-  }, [])
+  }, [isLocalhost])
 
   /* ── Validation ── */
 

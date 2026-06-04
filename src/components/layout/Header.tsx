@@ -399,7 +399,7 @@ function Logo({ authorName, authorTitle }: { authorName: string; authorTitle: st
       }))
     }
 
-    updateOffsets()
+    queueMicrotask(updateOffsets)
 
     const nameEl = nameRef.current
     const subtitleEl = subtitleRef.current
@@ -525,7 +525,7 @@ export default function Header() {
   /* ── Close mobile menu on route change ── */
 
   useEffect(() => {
-    setMobileOpen(false)
+    queueMicrotask(() => setMobileOpen(false))
   }, [pathname])
 
   /* ── Lock body scroll when mobile menu open ── */

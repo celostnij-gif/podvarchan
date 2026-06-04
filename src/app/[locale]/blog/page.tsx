@@ -9,13 +9,21 @@ import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 import { Link } from '@/i18n/routing'
 import BlogCard from '@/components/blog/BlogCard'
 import { getAllBlogPostMetas } from '@/lib/content'
-import type { BlogCategory } from '@/types'
+/* ── BlogCategory from messages has all localized fields ── */
+interface MessagesBlogCategory {
+  slug: string
+  name: string
+  description: string
+  metaDescription: string
+  keywords: string[]
+  serviceSlug: string
+}
 
 export default function BlogPage() {
   const t = useTranslations('blog')
   const commonT = useTranslations('common')
   const messages = useMessages()
-  const blogCategories = (messages?.blogCategories as BlogCategory[]) ?? []
+  const blogCategories = (messages?.blogCategories as MessagesBlogCategory[]) ?? []
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
 
   useSetBreadcrumbs([

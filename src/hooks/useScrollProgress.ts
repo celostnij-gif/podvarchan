@@ -45,7 +45,7 @@ export function useScrollProgress(): ScrollProgress {
 
     window.addEventListener('scroll', onScroll, { passive: true })
     // Initial calculation
-    update()
+    queueMicrotask(update)
 
     return () => {
       window.removeEventListener('scroll', onScroll)

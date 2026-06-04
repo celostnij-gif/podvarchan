@@ -22,6 +22,10 @@
 	},
 	"upload_source_maps": true,
 	"workers_dev": true,
+
+	"kv": [
+		{ "binding": "RATE_LIMIT_KV", "id": "2f39c831b94841b3b30d7b6246c2a221" }
+	],
 	"vars": {
 		"NEXTJS_ENV": "production",
 		"NEXT_PUBLIC_SITE_URL": "https://podvarchan.com",

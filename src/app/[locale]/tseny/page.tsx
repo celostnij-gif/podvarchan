@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
-import { SITE, AUTHOR } from '@/constants'
+import { SITE } from '@/constants'
 import { TsenyClient } from './client-page'
 
 export async function generateMetadata({
@@ -60,7 +60,6 @@ export default async function TsenyPage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
-  const t = await getTranslations({ locale, namespace: 'tseny' })
   const offerSchema = await getOfferSchema(locale)
 
   return <TsenyClient schemas={[offerSchema]} />

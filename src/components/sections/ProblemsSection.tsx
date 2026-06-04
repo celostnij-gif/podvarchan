@@ -10,11 +10,6 @@ import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
 
 /* ── Variants ── */
 
-const sectionVariants = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.15 } },
-}
-
 const headingVariants = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.1, 0, 1] as const } },
@@ -176,7 +171,7 @@ export default function ProblemsSection() {
     <AnimatedSection as="section" variant="fadeUp" className="relative overflow-hidden" aria-label={t('ariaLabel')}>
       <BackgroundDecorations />
 
-      <SectionContainer size="md" background="surface">
+      <SectionContainer size="md" background="surface" className="bg-bg-surface">
         {/* Header */}
         <motion.div variants={headingVariants} className="text-center">
           <div className="inline-flex items-center gap-3 mb-4">

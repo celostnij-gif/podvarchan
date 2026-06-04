@@ -42,7 +42,7 @@ export default function TiltCard({
 
   useEffect(() => {
     const mq = window.matchMedia('(pointer: fine) and (hover: hover)')
-    setIsDesktop(mq.matches)
+    queueMicrotask(() => setIsDesktop(mq.matches))
     const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches)
     mq.addEventListener('change', handler)
     return () => mq.removeEventListener('change', handler)

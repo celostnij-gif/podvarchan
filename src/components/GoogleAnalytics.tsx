@@ -29,7 +29,7 @@ export default function GoogleAnalytics() {
   // Wait for cookie consent before loading GA
   useEffect(() => {
     if (hasConsent()) {
-      setConsented(true)
+      queueMicrotask(() => setConsented(true))
       return
     }
 

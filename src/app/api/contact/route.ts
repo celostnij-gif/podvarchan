@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyTurnstileToken } from '@/lib/verifyTurnstile'
 import { sendContactNotification, sendAutoReply } from '@/lib/email'
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
 import type { SendContactEmailParams } from '@/lib/email'
 
 /* ── Types ── */
@@ -8,35 +9,6 @@ import type { SendContactEmailParams } from '@/lib/email'
 interface ValidationError {
   field: string
   error: string
-}
-
-/* ── Rate limiting (in-memory) ── */
-
-const RATE_LIMIT = new Map<string, { count: number; resetTime: number }>()
-const MAX_REQUESTS = 3
-const WINDOW_MS = 15 * 60 * 1000
-
-function getClientIp(request: NextRequest): string {
-  return (
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-    request.headers.get('x-real-ip') ??
-    '127.0.0.1'
-  )
-}
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now()
-  const entry = RATE_LIMIT.get(ip)
-
-  if (!entry || entry.resetTime < now) {
-    RATE_LIMIT.set(ip, { count: 1, resetTime: now + WINDOW_MS })
-    return true
-  }
-
-  if (entry.count >= MAX_REQUESTS) return false
-
-  entry.count++
-  return true
 }
 
 /* ── Validation ── */
@@ -85,21 +57,13 @@ function validate(body: unknown): { data?: SendContactEmailParams; errors?: Vali
   }
 }
 
-/* ── Helpers ── */
-
-function maskEmail(email: string): string {
-  const [local, domain] = email.split('@')
-  if (!local || !domain) return email
-  return `${local[0]}***@${domain}`
-}
-
 /* ── POST handler ── */
 
 export async function POST(request: NextRequest) {
   try {
-    // ── Rate limiting ──
+    // ── Rate limiting (KV, fallback to in-memory) ──
     const ip = getClientIp(request)
-    if (!checkRateLimit(ip)) {
+    if (!(await checkRateLimit(ip))) {
       return NextResponse.json(
         { error: 'Слишком много запросов. Попробуйте позже.', field: 'form' },
         { status: 429 },
@@ -166,7 +130,7 @@ export async function POST(request: NextRequest) {
       { success: true, message: 'Заявка отправлена! Я отвечу вам в ближайшее время.' },
       { status: 200 },
     )
-  } catch (err) {
+  } catch {
     console.error('[Contact API] Unexpected error')
     return NextResponse.json(
       { error: 'Произошла ошибка. Попробуйте позже или напишите в Telegram.', field: 'form' },

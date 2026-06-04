@@ -9,7 +9,15 @@ import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 import { Link } from '@/i18n/routing'
 import ServiceCTA from '@/components/blog/ServiceCTA'
 import { getServiceSlugByCategory } from '@/lib/serviceMapping'
-import type { BlogCategory } from '@/types'
+/* ── BlogCategory from messages has all localized fields ── */
+interface MessagesBlogCategory {
+  slug: string
+  name: string
+  description: string
+  metaDescription: string
+  keywords: string[]
+  serviceSlug: string
+}
 
 interface RelatedPost {
   slug: string
@@ -47,7 +55,7 @@ const heroFadeUp = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.1, 0, 1] as const } },
 }
 
-export function ClientBlogPost({ title, body, date, category, categorySlug, author, readingTime, slug, image, imageAlt, locale, relatedPosts, schemas }: Props) {
+export function ClientBlogPost({ title, body, date, category, categorySlug, author, readingTime, slug: _slug, image, imageAlt, locale: _locale, relatedPosts, schemas }: Props) {
   const t = useTranslations('blog')
   const commonT = useTranslations('common')
   const messages = useMessages()
@@ -62,7 +70,7 @@ export function ClientBlogPost({ title, body, date, category, categorySlug, auth
 
   /* ── Service CTA data from category mapping ── */
   const servicesData = (messages?.servicesData as Array<{ slug: string; title: string; description: string }>) ?? []
-  const blogCategories = (messages?.blogCategories as BlogCategory[]) ?? []
+  const blogCategories = (messages?.blogCategories as MessagesBlogCategory[]) ?? []
   const serviceSlug = getServiceSlugByCategory(categorySlug)
   const serviceData = serviceSlug ? servicesData.find(s => s.slug === serviceSlug) : null
   const categoryData = blogCategories.find(c => c.slug === categorySlug)
@@ -122,6 +130,7 @@ export function ClientBlogPost({ title, body, date, category, categorySlug, auth
             {/* Featured image */}
             {image && (
               <motion.div variants={heroFadeUp} className="mt-8 rounded-xl overflow-hidden border border-border-base shadow-lg shadow-black/20">
+                {/* eslint-disable-next-line @next/next/no-img-element -- dynamic external image */}
                 <img
                   src={image}
                   alt={imageAlt ?? title}

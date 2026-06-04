@@ -1,4 +1,5 @@
 import { ImageResponse } from 'next/og'
+import { getMessages } from 'next-intl/server'
 import { loadInterFonts, OGDecorations, OG_STYLES, SITE_URL_LABEL } from '@/lib/og/layout'
 import { SERVICES } from '@/constants'
 
@@ -7,13 +8,24 @@ export const revalidate = 604800 // 7 days — service pages rarely change
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
+interface ServiceMsg {
+  slug: string
+  title: string
+  description: string
+}
+
 interface Props {
   params: Promise<{ locale: string; slug: string }>
 }
 
 export default async function ServiceOGImage({ params }: Props) {
   const { locale, slug } = await params
-  const service = SERVICES.find((s) => s.slug === slug)
+
+  const messages = await getMessages({ locale })
+  const servicesData = (messages.servicesData as ServiceMsg[]) ?? []
+  const service = servicesData.find((s) => s.slug === slug)
+  const constantService = SERVICES.find((s) => s.slug === slug)
+
   const { regular, bold, all: fonts } = await loadInterFonts()
   const ff = regular ? 'Inter' : 'sans-serif'
   const ffBold = bold ? 'Inter' : 'sans-serif'
@@ -21,7 +33,7 @@ export default async function ServiceOGImage({ params }: Props) {
   const isUk = locale === 'uk'
   const title = service?.title ?? (isUk ? 'Послуга' : 'Услуга')
   const description = service?.description ?? ''
-  const icon = service?.icon ?? '✨'
+  const icon = constantService?.icon ?? '✨'
   const labelText = isUk ? 'Послуга' : 'Услуга'
 
   const image = new ImageResponse(

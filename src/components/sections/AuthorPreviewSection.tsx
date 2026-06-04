@@ -6,14 +6,8 @@ import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/routing'
 import { AnimatedSection, SectionContainer } from '@/components/ui'
 
-const fadeUp = {
-  initial: { opacity: 0, y: 20 },
-  whileInView: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.1, 0, 1] as const } },
-}
-
 export default function AuthorPreviewSection() {
   const t = useTranslations('authorPreview')
-  const commonT = useTranslations('common')
 
   const credentials = [
     { icon: '🎓', text: t('cert1') },
@@ -23,7 +17,7 @@ export default function AuthorPreviewSection() {
 
   return (
     <AnimatedSection as="section" variant="fadeUp" aria-label={t('ariaLabel')}>
-      <SectionContainer size="md" background="default">
+      <SectionContainer size="md" background="surface" className="bg-bg-surface">
         <div className="grid gap-10 md:grid-cols-2 items-center">
           {/* Photo */}
           <motion.div

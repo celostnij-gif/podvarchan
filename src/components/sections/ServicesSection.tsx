@@ -67,7 +67,7 @@ export default function ServicesSection() {
 
   return (
     <AnimatedSection as="section" variant="fadeUp" className="relative overflow-hidden" aria-label={t('ariaLabel')}>
-      <SectionContainer size="md" background="surface">
+      <SectionContainer size="md" background="transparent">
         {/* Heading */}
         <motion.div
           variants={headingVariants}

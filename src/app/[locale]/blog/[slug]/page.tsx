@@ -1,9 +1,7 @@
 import { notFound } from 'next/navigation'
-import { getTranslations } from 'next-intl/server'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getBlogPost, getAllBlogSlugs, getAllBlogPosts, formatDate } from '@/lib/content'
 import { articleSchema } from '@/lib/schema'
-import { SITE } from '@/constants'
 import { ClientBlogPost } from './client-page'
 
 export const dynamicParams = false
@@ -21,7 +19,6 @@ export async function generateMetadata({ params }: Props) {
   const { slug, locale } = await params
   const post = getBlogPost(slug)
   if (!post) return {}
-  const t = await getTranslations({ locale, namespace: 'common' })
 
   return seoMetadata({
     title: post.title,

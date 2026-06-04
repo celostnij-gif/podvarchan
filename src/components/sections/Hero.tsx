@@ -199,7 +199,7 @@ export default function Hero() {
       <BackgroundDecorations />
 
       {/* Content */}
-      <div className="relative z-10 w-full max-w-container mx-auto px-gutter">
+      <div className="relative z-10 w-full max-w-container mx-auto px-gutter md:mt-[120px]">
         <div className="max-w-3xl mx-auto text-center">
           {/* Welcome badge */}
           <WelcomeBadge t={t} commonT={commonT} />

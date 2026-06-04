@@ -1,4 +1,4 @@
-import { type ReactNode, type HTMLAttributes, type ElementType } from 'react'
+import { type ReactNode, type HTMLAttributes } from 'react'
 
 /* ── Types ── */
 

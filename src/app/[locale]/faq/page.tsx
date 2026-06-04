@@ -22,11 +22,10 @@ export async function generateMetadata({
 }
 
 export default async function FaqPage({
-  params,
+  params: _params,
 }: {
   params: Promise<{ locale: string }>
 }) {
-  const { locale } = await params
   const messages = await getMessages()
   const faqItems = (messages.faqData as FAQItem[]) ?? []
 

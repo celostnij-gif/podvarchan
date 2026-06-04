@@ -31,6 +31,7 @@ export const viewport: Viewport = {
 /* ── Icons ── */
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE.url),
   verification: {
     google: process.env.GOOGLE_SITE_VERIFICATION ?? '',
   },

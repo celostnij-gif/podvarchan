@@ -1,16 +1,10 @@
-/* ── Service (услуга) ── */
+/* ── Service (услуга) — тільки системні поля, тексти в messages/*.json ── */
 
 export interface Service {
   slug: string
-  title: string
-  shortTitle: string
-  description: string
-  metaDescription: string
-  keywords: string[]
   category: string
   priority: number
   icon?: string
-  cta: string
   ctaLink: string
   body?: string
 }
@@ -34,14 +28,10 @@ export interface BlogPost {
   body?: string
 }
 
-/* ── Blog Category ── */
+/* ── Blog Category — тільки системні поля, тексти в messages/*.json ── */
 
 export interface BlogCategory {
   slug: string
-  name: string
-  description: string
-  metaDescription: string
-  keywords: string[]
   serviceSlug?: string
 }
 

@@ -50,7 +50,7 @@ export default function TestimonialsSection() {
 
   return (
     <AnimatedSection as="section" variant="fadeUp" className="relative overflow-hidden" aria-label={t('ariaLabel')}>
-      <SectionContainer size="md" background="surface">
+      <SectionContainer size="md" background="transparent">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

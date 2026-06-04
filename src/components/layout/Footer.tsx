@@ -2,7 +2,12 @@ import type { ReactNode } from 'react'
 import { getTranslations, getMessages } from 'next-intl/server'
 import { Link } from '@/i18n/routing'
 import { SERVICES } from '@/constants'
-import type { BlogCategory } from '@/types'
+
+/* ── Local type for blog category data from messages ── */
+interface BlogCategoryMsg {
+  slug: string
+  name: string
+}
 
 /* ── Footer Column ── */
 
@@ -30,9 +35,8 @@ function FooterLink({ href, children }: { href: string; children: ReactNode }) {
 export default async function Footer({ locale }: { locale: string }) {
   const t = await getTranslations({ locale, namespace: 'common' })
   const t_services = await getTranslations({ locale, namespace: 'services' })
-  const t_blog = await getTranslations({ locale, namespace: 'blog' })
   const messages = await getMessages()
-  const blogCategories = (messages?.blogCategories as BlogCategory[]) ?? []
+  const blogCategories = (messages?.blogCategories as BlogCategoryMsg[]) ?? []
 
   return (
     <footer className="relative border-t border-border-base bg-bg-deep overflow-hidden" role="contentinfo">

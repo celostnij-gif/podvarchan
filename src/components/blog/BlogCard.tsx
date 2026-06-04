@@ -29,7 +29,7 @@ export default function BlogCard({
   title,
   description,
   categoryName,
-  categorySlug,
+  categorySlug: _categorySlug,
   datePublished,
   readingTime,
   image,
@@ -50,6 +50,7 @@ export default function BlogCard({
         {/* Image with shimmer overlay */}
         {image && (
           <div className={`relative overflow-hidden ${featured ? 'aspect-[2/1]' : 'aspect-video'}`}>
+            {/* eslint-disable-next-line @next/next/no-img-element -- dynamic external image */}
             <img
               src={image}
               alt={imageAlt ?? title}
