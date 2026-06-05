@@ -61,7 +61,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     entries.push(ru, uk)
   }
 
-  /* ── 2. Страницы услуг ── */
+  
   const servicePriorityMap: Record<number, number> = { 1: 0.8, 2: 0.7, 3: 0.6 }
 
   for (const service of SERVICES) {
