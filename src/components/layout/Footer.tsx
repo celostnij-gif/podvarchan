@@ -3,6 +3,18 @@ import { getTranslations, getMessages } from 'next-intl/server'
 import { Link } from '@/i18n/routing'
 import { SERVICES } from '@/constants'
 
+/* ── External props types ── */
+
+export interface FooterServiceItem {
+  slug: string
+  title: string
+}
+
+export interface FooterCategoryItem {
+  slug: string
+  name: string
+}
+
 /* ── Local type for blog category data from messages ── */
 interface BlogCategoryMsg {
   slug: string
@@ -32,11 +44,25 @@ function FooterLink({ href, children }: { href: string; children: ReactNode }) {
 
 /* ── Footer Component ── */
 
-export default async function Footer({ locale }: { locale: string }) {
+export default async function Footer({
+  locale,
+  services,
+  blogCategories: propCategories,
+}: {
+  locale: string
+  services?: FooterServiceItem[]
+  blogCategories?: FooterCategoryItem[]
+}) {
   const t = await getTranslations({ locale, namespace: 'common' })
   const t_services = await getTranslations({ locale, namespace: 'services' })
   const messages = await getMessages()
-  const blogCategories = (messages?.blogCategories as BlogCategoryMsg[]) ?? []
+
+  // D1 data takes precedence, otherwise fall back to static data
+  const displayServices = services ?? SERVICES.slice(0, 5).map(s => ({
+    slug: s.slug,
+    title: t_services(`${s.slug}.shortTitle` as `${string}.shortTitle`),
+  }))
+  const displayCategories = propCategories ?? ((messages?.blogCategories as BlogCategoryMsg[]) ?? [])
 
   return (
     <footer className="relative border-t border-border-base bg-bg-deep overflow-hidden" role="contentinfo">
@@ -102,9 +128,9 @@ export default async function Footer({ locale }: { locale: string }) {
 
           {/* Services */}
           <FooterColumn title={t('footerServices')}>
-            {SERVICES.slice(0, 5).map((s) => (
+            {displayServices.slice(0, 5).map((s) => (
               <FooterLink key={s.slug} href={`/uslugi/${s.slug}/`}>
-                {t_services(`${s.slug}.shortTitle` as `${string}.shortTitle`)}
+                {s.title}
               </FooterLink>
             ))}
             <FooterLink href="/uslugi/">{t('footerAllServices')} <span aria-hidden="true">→</span></FooterLink>
@@ -112,7 +138,7 @@ export default async function Footer({ locale }: { locale: string }) {
 
           {/* Blog */}
           <FooterColumn title={t('footerBlog')}>
-            {blogCategories.slice(0, 4).map((cat) => (
+            {displayCategories.slice(0, 4).map((cat) => (
               <FooterLink key={cat.slug} href={`/blog/kategoriya/${cat.slug}/`}>
                 {cat.name}
               </FooterLink>
@@ -132,6 +158,7 @@ export default async function Footer({ locale }: { locale: string }) {
             <FooterLink href="/faq/">FAQ</FooterLink>
             <FooterLink href="/ob-avtore/">{t('nav.about')}</FooterLink>
             <FooterLink href="/metod/">{t('nav.method')}</FooterLink>
+            <FooterLink href="/login/">{t('login')}</FooterLink>
           </FooterColumn>
         </div>
 

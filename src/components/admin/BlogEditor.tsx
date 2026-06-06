@@ -26,6 +26,7 @@ import {
 import type { BlogPost, BlogPostTranslation, BlogCategory } from '@/db/schema'
 import { createBlogPost, updateBlogPost, deleteBlogPost, updateBlogPostStatus } from '@/lib/actions/blog'
 import TipTapEditor from './TipTapEditor'
+import { useBeforeUnload } from '@/hooks/useBeforeUnload'
 
 /* ═══════════════════════════════════════
    Types
@@ -198,6 +199,10 @@ export default function BlogEditor({ mode, post }: BlogEditorProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [toast, setToast] = useState<ToastState | null>(null)
 
+  // ── Dirty tracking for useBeforeUnload ──
+  const [isDirty, setIsDirty] = useState(false)
+  useBeforeUnload(isDirty)
+
   // ── TipTap content state per locale ──
   const [editorContent, setEditorContent] = useState<Record<string, { json: string; html: string }>>({
     ru: { json: post?.translations.find((t) => t.locale === 'ru')?.contentJson ?? '', html: post?.translations.find((t) => t.locale === 'ru')?.contentHtml ?? '' },
@@ -237,6 +242,7 @@ export default function BlogEditor({ mode, post }: BlogEditorProps) {
     const idx = locale === 'ru' ? 0 : 1
     setValue(`translations.${idx}.contentJson`, json)
     setValue(`translations.${idx}.contentHtml`, html)
+    setIsDirty(true)
   }, [setValue])
 
   // ── Save ──
@@ -247,6 +253,7 @@ export default function BlogEditor({ mode, post }: BlogEditorProps) {
         const result = await createBlogPost(data)
         if (result.success) {
           showToast('success', 'Статья создана')
+          setIsDirty(false)
           router.push(`/admin/blog/${result.data.id}`)
           router.refresh()
         } else {
@@ -256,6 +263,7 @@ export default function BlogEditor({ mode, post }: BlogEditorProps) {
         const result = await updateBlogPost(post.id, data)
         if (result.success) {
           showToast('success', 'Статья сохранена')
+          setIsDirty(false)
           router.refresh()
         } else {
           showToast('error', result.error)

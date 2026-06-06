@@ -1,13 +1,14 @@
 /**
  * Перевірки ролей та дозволів для адмін-панелі.
  *
- * Ієрархія: OWNER > ADMIN > EDITOR > VIEWER
+ * Ієрархія: OWNER > ADMIN > EDITOR > VIEWER > USER
  * Кожна наступна роль включає дозволи попередньої.
  */
 
 import type { UserRole } from '@/types/auth'
 
 const ROLE_HIERARCHY: Record<UserRole, number> = {
+  USER: -1,
   VIEWER: 0,
   EDITOR: 1,
   ADMIN: 2,

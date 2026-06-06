@@ -26,6 +26,7 @@ import {
 import type { Service, ServiceTranslation } from '@/db/schema'
 import { createService, updateService, deleteService, publishService } from '@/lib/actions/services'
 import StatusBadge from './StatusBadge'
+import { useBeforeUnload } from '@/hooks/useBeforeUnload'
 
 /* ═══════════════════════════════════════
    Types
@@ -233,12 +234,15 @@ export default function ServiceEditor({ mode, service }: ServiceEditorProps) {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty: formDirty },
     watch,
   } = useForm<ServiceFormValues>({
     resolver: zodResolver(ServiceFormSchema),
     defaultValues,
   })
+
+  // ── Dirty tracking for useBeforeUnload (built-in react-hook-form) ──
+  useBeforeUnload(formDirty)
 
   const watchTranslations = watch('translations') // eslint-disable-line react-hooks/incompatible-library
 

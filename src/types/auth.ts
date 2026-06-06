@@ -9,7 +9,7 @@ import type { DefaultJWT } from 'next-auth/jwt'
 
 /* ── Ролі користувачів ── */
 
-export type UserRole = 'OWNER' | 'ADMIN' | 'EDITOR' | 'VIEWER'
+export type UserRole = 'USER' | 'VIEWER' | 'EDITOR' | 'ADMIN' | 'OWNER'
 
 /* ── Розширення типів NextAuth ── */
 

@@ -1,17 +1,26 @@
 /**
- * NextAuth (v4) конфігурація для адмін-панелі.
+ * NextAuth конфігурація для адмін-панелі.
  *
- * Використовує credentials provider (email + password).
+ * Використовує credentials provider (email + password) + Google OAuth (опціонально).
  * Користувачі зберігаються в D1 через Drizzle ORM.
  *
+ * ВАЖЛИВО: NextAuth v4 API — NextAuth(config) повертає функцію-обробник запитів,
+ * а НЕ об'єкт з методами auth/signIn/signOut.
+ * Для отримання сесії на сервері використовується getServerSession().
+ * Для клієнтського signIn/signOut — next-auth/react.
+ *
  * Експортує:
- * - `auth` — для Server Components / Server Actions
- * - `handlers` — для API Route (GET/POST /api/auth/*)
- * - `signIn`, `signOut` — для клієнтських компонентів
+ * - authConfig() — об'єкт конфігурації для NextAuth (для getServerSession)
+ * - getAuthHandler() — функція-обробник для API Route (/api/auth/[...nextauth])
+ *
+ * Лінива ініціалізація (lazy) — щоб уникнути падіння під час `next build`
+ * (Cloudflare Worker контекст недоступний на етапі збірки).
  */
 
-import NextAuth from 'next-auth'
+import NextAuth, { getServerSession } from 'next-auth'
+import type { AuthOptions } from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
+// import Google from 'next-auth/providers/google' // ⏸ Google OAuth — будет включено позже
 import { eq } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
 
@@ -66,98 +75,149 @@ function recordAttempt(email: string, success: boolean): void {
   loginAttempts.set(email, entry)
 }
 
-/* ── NextAuth конфіг ── */
+/** ⏸ Плейсхолдер пароля для Google-користувачів. Не використовується поки Google OAuth вимкнено */
+// const GOOGLE_PASSWORD_PLACEHOLDER = '__GOOGLE_AUTH__NO_PASSWORD__'
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
-  providers: [
-    Credentials({
-      name: 'credentials',
-      credentials: {
-        email: { label: 'Email', type: 'email' },
-        password: { label: 'Пароль', type: 'password' },
-      },
-      async authorize(credentials) {
-        const email = credentials?.email as string | undefined
-        const password = credentials?.password as string | undefined
+/* ── Лінива ініціалізація конфігурації ── */
 
-        if (!email || !password) return null
+type Cached = { config: AuthOptions; handler: (req: Request, res: unknown) => Promise<Response> }
 
-        // Rate limiting
-        if (!checkRateLimit(email)) return null
+let _cached: Cached | null = null
+let _initError: Error | null = null
 
-        // Отримуємо D1 binding
-        const binding = getDbBinding()
-        if (!binding) return null
+function buildConfig(): AuthOptions {
+  // ⏸ Google OAuth — будет включено позже (нужны AUTH_GOOGLE_ID + AUTH_GOOGLE_SECRET)
+  // const googleId = process.env.AUTH_GOOGLE_ID ?? ''
+  // const googleSecret = process.env.AUTH_GOOGLE_SECRET ?? ''
+  // const hasGoogleConfig = !!(googleId && googleSecret)
 
-        const db = drizzle(binding, { schema: dbSchema })
+  return {
+    providers: [
+      Credentials({
+        name: 'credentials',
+        credentials: {
+          email: { label: 'Email', type: 'email' },
+          password: { label: 'Пароль', type: 'password' },
+        },
+        async authorize(credentials) {
+          const email = credentials?.email as string | undefined
+          const password = credentials?.password as string | undefined
 
-        try {
-          // Шукаємо користувача
-          const [user] = await db
-            .select()
-            .from(dbSchema.users)
-            .where(eq(dbSchema.users.email, email))
-            .limit(1)
+          if (!email || !password) return null
 
-          if (!user || !user.isActive) {
-            recordAttempt(email, false)
+          if (!checkRateLimit(email)) return null
+
+          const binding = getDbBinding()
+          if (!binding) return null
+
+          const db = drizzle(binding, { schema: dbSchema })
+
+          try {
+            const [user] = await db
+              .select()
+              .from(dbSchema.users)
+              .where(eq(dbSchema.users.email, email))
+              .limit(1)
+
+            if (!user || !user.isActive) {
+              recordAttempt(email, false)
+              return null
+            }
+
+            const isValid = await bcrypt.compare(password, user.passwordHash)
+            if (!isValid) {
+              recordAttempt(email, false)
+              return null
+            }
+
+            await db
+              .update(dbSchema.users)
+              .set({ lastLoginAt: new Date() })
+              .where(eq(dbSchema.users.id, user.id))
+
+            recordAttempt(email, true)
+
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              role: user.role,
+            }
+          } catch {
             return null
           }
+        },
+      }),
+      // ⏸ Google OAuth — будет включено позже
+      // ...(hasGoogleConfig ? [Google({ clientId: googleId, clientSecret: googleSecret })] : []),
+    ],
 
-          // Перевіряємо пароль
-          const isValid = await bcrypt.compare(password, user.passwordHash)
-          if (!isValid) {
-            recordAttempt(email, false)
-            return null
-          }
+    callbacks: {
+      // ⏸ Google OAuth signIn callback — будет включено позже
+      // async signIn({ user, account }) { ... },
 
-          // Оновлюємо lastLoginAt
-          await db
-            .update(dbSchema.users)
-            .set({ lastLoginAt: new Date() })
-            .where(eq(dbSchema.users.id, user.id))
-
-          recordAttempt(email, true)
-
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role,
-          }
-        } catch {
-          return null
+      async jwt({ token, user }) {
+        if (user) {
+          token.id = user.id ?? ''
+          token.role = (user as { role: string }).role as dbSchema.User['role']
         }
+        return token
       },
-    }),
-  ],
 
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id ?? ''
-        token.role = (user as { role: string }).role as dbSchema.User['role']
-      }
-      return token
+      async session({ session, token }) {
+        if (session.user) {
+          session.user.id = token.id ?? ''
+          session.user.role = (token.role ?? 'VIEWER') as dbSchema.User['role']
+        }
+        return session
+      },
     },
-    async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id ?? ''
-        session.user.role = (token.role ?? 'VIEWER') as dbSchema.User['role']
-      }
-      return session
+
+    pages: {
+      signIn: '/admin/login',
+      error: '/admin/login',
     },
-  },
 
-  pages: {
-    signIn: '/admin/login',
-    error: '/admin/login',
-  },
+    session: {
+      strategy: 'jwt',
+      maxAge: 24 * 60 * 60,
+    },
+  }
+}
 
-  session: {
-    strategy: 'jwt',
-    maxAge: 24 * 60 * 60, // 24 hours
-  },
+function getOrInit(): Cached {
+  if (_cached) return _cached
+  if (_initError) throw _initError
 
-  // trustHost опція доступна в NextAuth v5 (@auth/core), не в v4
-})
+  try {
+    const config = buildConfig()
+    const handler = NextAuth(config) as unknown as Cached['handler']
+    _cached = { config, handler }
+    return _cached
+  } catch (err) {
+    _initError = err instanceof Error ? err : new Error('NextAuth initialization failed')
+    console.error('[Auth] Помилка ініціалізації NextAuth:', _initError)
+    throw _initError
+  }
+}
+
+/* ── Експорт лінивих обгорток ── */
+
+/** authConfig() — об'єкт конфігурації NextAuth (для getServerSession / API Route Handler) */
+export function authConfig(): AuthOptions {
+  return getOrInit().config
+}
+
+/** getAuthHandler() — функція-обробник для API Route (/api/auth/[...nextauth]) */
+export function getAuthHandler(): Cached['handler'] {
+  return getOrInit().handler
+}
+
+/**
+ * auth() — перевірка сесії (Server Components / Server Actions).
+ * Використовує getServerSession з NextAuth v4.
+ */
+export async function auth(): Promise<import('next-auth').Session | null> {
+  // getServerSession в next-auth v4 приймає (config) для RSC або (req, res, config)
+  return await getServerSession(authConfig())
+}

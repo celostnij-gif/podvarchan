@@ -1,8 +1,9 @@
 /**
  * /admin/login — сторінка входу в адмін-панель.
  *
- * Використовує:
- * - NextAuth signIn (credentials)
+ * Підтримує:
+ * - Email + пароль (credentials provider)
+ * - Google OAuth (якщо налаштовано)
  * - React Hook Form + zod
  * - Темна тема (Tailwind zinc)
  */
@@ -31,7 +32,6 @@ export default function AdminLoginPage() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-
   const {
     register,
     handleSubmit,
@@ -58,7 +58,6 @@ export default function AdminLoginPage() {
         return
       }
 
-      // Успішний вхід — редірект на дашборд
       router.push('/admin')
     } catch {
       setError('Произошла ошибка. Попробуйте позже.')
@@ -79,15 +78,15 @@ export default function AdminLoginPage() {
           </p>
         </div>
 
+        {/* Загальна помилка */}
+        {error && (
+          <div className="mb-5 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+            {error}
+          </div>
+        )}
+
         {/* Форма */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          {/* Загальна помилка */}
-          {error && (
-            <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-              {error}
-            </div>
-          )}
-
           {/* Email */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-zinc-300">

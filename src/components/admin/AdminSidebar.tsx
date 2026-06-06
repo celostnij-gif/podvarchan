@@ -37,6 +37,7 @@ interface NavGroup {
 export interface AdminSidebarProps {
   isOpen: boolean
   onClose: () => void
+  newLeadsCount?: number
 }
 
 /* ── Navigation config ── */
@@ -55,6 +56,7 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Блог', href: '/admin/blog', icon: FileText },
       { label: 'FAQ', href: '/admin/faq', icon: HelpCircle },
       { label: 'Отзывы', href: '/admin/testimonials', icon: MessageSquare },
+      { label: 'Главная', href: '/admin/home', icon: FileText },
       { label: 'Страницы', href: '/admin/pages', icon: FileText },
       { label: 'Медиа', href: '/admin/media', icon: Image },
     ],
@@ -62,7 +64,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: 'CRM',
     items: [
-      { label: 'Заявки', href: '/admin/leads', icon: Users },
+      { label: 'Заявки', href: '/admin/leads', icon: Users, badge: '' },
     ],
   },
   {
@@ -99,8 +101,13 @@ function Overlay({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
 
 /* ── Nav item ── */
 
-function NavItemComponent({ item, pathname }: { item: NavItem; pathname: string }) {
+function NavItemComponent({ item, pathname, newLeadsCount }: { item: NavItem; pathname: string; newLeadsCount?: number }) {
   const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+
+  // Badge: show new leads count for Заявки item
+  const badgeText = item.href === '/admin/leads' && newLeadsCount !== undefined && newLeadsCount > 0
+    ? String(newLeadsCount)
+    : item.badge
 
   return (
     <Link
@@ -120,9 +127,9 @@ function NavItemComponent({ item, pathname }: { item: NavItem; pathname: string 
       )}
       <item.icon className="relative z-10 w-4.5 h-4.5 shrink-0" aria-hidden="true" />
       <span className="relative z-10">{item.label}</span>
-      {item.badge && (
+      {badgeText && (
         <span className="relative z-10 ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gold/20 text-gold">
-          {item.badge}
+          {badgeText}
         </span>
       )}
     </Link>
@@ -131,7 +138,7 @@ function NavItemComponent({ item, pathname }: { item: NavItem; pathname: string 
 
 /* ── Nav group ── */
 
-function NavGroupComponent({ group, pathname }: { group: NavGroup; pathname: string }) {
+function NavGroupComponent({ group, pathname, newLeadsCount }: { group: NavGroup; pathname: string; newLeadsCount?: number }) {
   return (
     <div className="mb-4">
       <p className="px-3 mb-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-600">
@@ -139,7 +146,7 @@ function NavGroupComponent({ group, pathname }: { group: NavGroup; pathname: str
       </p>
       <div className="space-y-0.5">
         {group.items.map((item) => (
-          <NavItemComponent key={item.href} item={item} pathname={pathname} />
+          <NavItemComponent key={item.href} item={item} pathname={pathname} newLeadsCount={newLeadsCount} />
         ))}
       </div>
     </div>
@@ -148,7 +155,7 @@ function NavGroupComponent({ group, pathname }: { group: NavGroup; pathname: str
 
 /* ── Sidebar ── */
 
-export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
+export default function AdminSidebar({ isOpen, onClose, newLeadsCount }: AdminSidebarProps) {
   const pathname = usePathname()
 
   const sidebarContent = (
@@ -171,7 +178,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
       {/* Navigation */}
       <div className="flex-1 overflow-y-auto px-2.5 py-4 scrollbar-thin">
         {NAV_GROUPS.map((group) => (
-          <NavGroupComponent key={group.label} group={group} pathname={pathname} />
+          <NavGroupComponent key={group.label} group={group} pathname={pathname} newLeadsCount={newLeadsCount} />
         ))}
       </div>
     </nav>

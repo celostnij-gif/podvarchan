@@ -1,10 +1,12 @@
 'use client'
 
-import { useState, type ReactNode } from 'react'
+import { useState, useEffect, type ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
 import AdminSidebar from './AdminSidebar'
 import AdminTopbar from './AdminTopbar'
+import CommandPalette from './CommandPalette'
 import type { SessionWithRole } from '@/types/auth'
+import { getNewLeadCount } from '@/lib/actions/search'
 
 /* ── Props ── */
 
@@ -22,6 +24,18 @@ const PUBLIC_ADMIN_PATHS = ['/admin/login']
 export default function AdminShell({ children, session }: AdminShellProps) {
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [newLeadsCount, setNewLeadsCount] = useState<number | undefined>(undefined)
+
+  // ── Fetch new leads count (must be before early return due to hooks rules) ──
+  useEffect(() => {
+    getNewLeadCount().then((result) => {
+      if (result.success) {
+        setNewLeadsCount(result.data)
+      }
+    }).catch(() => {
+      // Silent fail
+    })
+  }, [])
 
   // Сторінки без shell (логін, помилки) — тільки контент на темному фоні
   if (PUBLIC_ADMIN_PATHS.some((p) => pathname.startsWith(p))) {
@@ -42,8 +56,11 @@ export default function AdminShell({ children, session }: AdminShellProps) {
 
   return (
     <div className="min-h-screen bg-zinc-950">
+      {/* Command Palette */}
+      <CommandPalette newLeadsCount={newLeadsCount} />
+
       {/* Sidebar — fixed on desktop, drawer on mobile */}
-      <AdminSidebar isOpen={sidebarOpen} onClose={handleCloseSidebar} />
+      <AdminSidebar isOpen={sidebarOpen} onClose={handleCloseSidebar} newLeadsCount={newLeadsCount} />
 
       {/* Main content area */}
       <div className="lg:pl-64 flex flex-col min-h-screen">

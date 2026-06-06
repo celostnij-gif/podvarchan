@@ -7,6 +7,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Search, ArrowRight, Eye, EyeOff } from 'lucide-react'
 import { getSeoMetaList } from '@/lib/actions/seo'
+import { calculateSeoScore } from '@/lib/seo/score'
 
 export const metadata: Metadata = {
   title: 'SEO',
@@ -92,6 +93,7 @@ export default async function SeoPage() {
                 <th className="text-center px-4 py-3 font-medium text-zinc-500 text-xs uppercase tracking-wider hidden sm:table-cell">Локаль</th>
                 <th className="text-left px-4 py-3 font-medium text-zinc-500 text-xs uppercase tracking-wider">Title</th>
                 <th className="text-left px-4 py-3 font-medium text-zinc-500 text-xs uppercase tracking-wider hidden md:table-cell">Description</th>
+                <th className="text-center px-4 py-3 font-medium text-zinc-500 text-xs uppercase tracking-wider hidden lg:table-cell">Score</th>
                 <th className="text-center px-4 py-3 font-medium text-zinc-500 text-xs uppercase tracking-wider">Robots</th>
                 <th className="w-12 px-4 py-3" />
               </tr>
@@ -126,6 +128,26 @@ export default async function SeoPage() {
                     <p className="text-zinc-400 truncate" title={meta.description ?? ''}>
                       {meta.description ?? <span className="text-amber-400/60 italic">Нет описания</span>}
                     </p>
+                  </td>
+                  <td className="px-4 py-3 text-center hidden lg:table-cell">
+                    {(() => {
+                      const scoreResult = calculateSeoScore({
+                        title: meta.title,
+                        description: meta.description,
+                        ogImageId: meta.ogImageId,
+                        canonicalPath: meta.canonicalPath,
+                        robotsIndex: meta.robotsIndex,
+                        robotsFollow: meta.robotsFollow,
+                      })
+                      const colorClass = scoreResult.score >= 80 ? 'text-green-400' : scoreResult.score >= 60 ? 'text-amber-400' : scoreResult.score >= 40 ? 'text-orange-400' : 'text-red-400'
+                      const dotColor = scoreResult.score >= 80 ? 'bg-green-500' : scoreResult.score >= 60 ? 'bg-amber-500' : scoreResult.score >= 40 ? 'bg-orange-500' : 'bg-red-500'
+                      return (
+                        <div className="inline-flex items-center gap-1.5" title={`${scoreResult.issues.length} проблем`}>
+                          <span className={`w-2 h-2 rounded-full ${dotColor}`} />
+                          <span className={`text-xs font-medium ${colorClass}`}>{scoreResult.score}</span>
+                        </div>
+                      )
+                    })()}
                   </td>
                   <td className="px-4 py-3 text-center">
                     <span className={`inline-flex items-center gap-1 text-xs ${

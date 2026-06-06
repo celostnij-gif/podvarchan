@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
-import { getBlogPost, getAllBlogSlugs, getAllBlogPosts, formatDate } from '@/lib/content'
+import { getBlogPost, getAllBlogSlugs, getAllBlogPosts, formatDate, getBlogPostBySlug } from '@/lib/content'
 import { articleSchema } from '@/lib/schema'
 import { ClientBlogPost } from './client-page'
 
@@ -34,15 +34,54 @@ export async function generateMetadata({ params }: Props) {
   })
 }
 
+/* ── Try to fetch blog post from D1, fall back to static data ── */
+
+async function getPostData(slug: string, locale: string) {
+  // Try D1 first (only available at runtime on Cloudflare)
+  try {
+    const fromDb = await getBlogPostBySlug(slug, locale)
+    if (fromDb && fromDb.translation) {
+      const t = fromDb.translation
+      // Convert TipTap JSON to HTML for rendering
+      const contentHtml = t.contentHtml ?? ''
+      const contentJson = t.contentJson ?? '{}'
+
+      return {
+        title: t.title,
+        body: contentHtml || contentJson,
+        description: t.excerpt ?? '',
+        author: '',
+        datePublished: fromDb.publishedAt?.toISOString() ?? '',
+        dateModified: fromDb.updatedAt?.toISOString() ?? '',
+        image: '',
+        imageAlt: '',
+        readingTime: fromDb.readingMinutes,
+        categoryName: '',
+        categorySlug: '',
+        keywords: [] as string[],
+        metaDescription: t.excerpt ?? '',
+      }
+    }
+  } catch {
+    // D1 not available, fall through to static
+  }
+
+  // Fallback to static data
+  const post = getBlogPost(slug)
+  if (!post) return null
+
+  return post
+}
+
 export default async function BlogPostPage({ params }: Props) {
   const { slug, locale } = await params
-  const post = getBlogPost(slug)
+  const post = await getPostData(slug, locale)
   if (!post) notFound()
 
   /* ── Related posts from same category (excluding current) ── */
   const allPosts = getAllBlogPosts()
   const relatedPosts = allPosts
-    .filter(p => p.categorySlug === post.categorySlug && p.slug !== slug)
+    .filter(p => p.categorySlug === (post as typeof allPosts[number]).categorySlug && p.slug !== slug)
     .slice(0, 2)
     .map(p => ({ slug: p.slug, title: p.title }))
 

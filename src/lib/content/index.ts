@@ -34,79 +34,89 @@ function getContentDb(): Db | null {
   }
 }
 
+/* ── Fallback helper ── */
+
+async function tryDb<T>(fn: (db: Db) => Promise<T>, fallback: T): Promise<T> {
+  try {
+    const db = getContentDb()
+    if (!db) return fallback
+    return await fn(db)
+  } catch {
+    return fallback
+  }
+}
+
 /* ═══════════════════════════════════════
    Services
    ═══════════════════════════════════════ */
 
 export async function getPublishedServices(locale: string = 'ru') {
-  const db = getContentDb()
-  if (!db) return []
+  return tryDb(async (db) => {
+    const rows = await db
+      .select()
+      .from(s.services)
+      .where(eq(s.services.status, 'PUBLISHED'))
+      .orderBy(asc(s.services.sortOrder))
 
-  const rows = await db
-    .select()
-    .from(s.services)
-    .where(eq(s.services.status, 'PUBLISHED'))
-    .orderBy(asc(s.services.sortOrder))
+    const result = []
+    for (const row of rows) {
+      const [translation] = await db
+        .select()
+        .from(s.serviceTranslations)
+        .where(and(
+          eq(s.serviceTranslations.serviceId, row.id),
+          eq(s.serviceTranslations.locale, locale as 'ru' | 'uk'),
+        ))
+        .limit(1)
 
-  const result = []
-  for (const row of rows) {
+      if (translation) {
+        result.push({
+          id: row.id,
+          slugBase: row.slugBase,
+          icon: row.icon,
+          category: row.category,
+          priority: row.priority,
+          featured: row.featured,
+          status: row.status,
+          sortOrder: row.sortOrder,
+          publishedAt: row.publishedAt,
+          createdAt: row.createdAt,
+          updatedAt: row.updatedAt,
+          translation,
+        })
+      }
+    }
+
+    return result
+  }, [])
+}
+
+export async function getServiceBySlug(slug: string, locale: string = 'ru') {
+  return tryDb(async (db) => {
     const [translation] = await db
       .select()
       .from(s.serviceTranslations)
       .where(and(
-        eq(s.serviceTranslations.serviceId, row.id),
-        eq(s.serviceTranslations.locale, locale as 'ru' | 'uk'),
+        eq(s.serviceTranslations.slug, slug),
+          eq(s.serviceTranslations.locale, locale as 'ru' | 'uk'),
       ))
       .limit(1)
 
-    if (translation) {
-      result.push({
-        id: row.id,
-        slugBase: row.slugBase,
-        icon: row.icon,
-        category: row.category,
-        priority: row.priority,
-        featured: row.featured,
-        status: row.status,
-        sortOrder: row.sortOrder,
-        publishedAt: row.publishedAt,
-        createdAt: row.createdAt,
-        updatedAt: row.updatedAt,
-        translation,
-      })
-    }
-  }
+    if (!translation) return null
 
-  return result
-}
+    const [service] = await db
+      .select()
+      .from(s.services)
+      .where(and(
+        eq(s.services.id, translation.serviceId),
+        eq(s.services.status, 'PUBLISHED'),
+      ))
+      .limit(1)
 
-export async function getServiceBySlug(slug: string, locale: string = 'ru') {
-  const db = getContentDb()
-  if (!db) return null
+    if (!service) return null
 
-  const [translation] = await db
-    .select()
-    .from(s.serviceTranslations)
-    .where(and(
-      eq(s.serviceTranslations.slug, slug),
-        eq(s.serviceTranslations.locale, locale as 'ru' | 'uk'),
-    ))
-    .limit(1)
-
-  if (!translation) return null
-
-  const [service] = await db
-    .select()
-    .from(s.services)
-    .where(and(
-      eq(s.services.id, translation.serviceId),
-      eq(s.services.status, 'PUBLISHED'),
-    ))
-    .limit(1)
-
-  if (!service) return null
-
-  return { ...service, translation }
+    return { ...service, translation }
+  }, null)
 }
 
 /* ═══════════════════════════════════════
@@ -114,74 +124,143 @@ export async function getServiceBySlug(slug: string, locale: string = 'ru') {
    ═══════════════════════════════════════ */
 
 export async function getPublishedBlogPosts(locale: string = 'ru') {
-  const db = getContentDb()
-  if (!db) return []
+  return tryDb(async (db) => {
+    const posts = await db
+      .select()
+      .from(s.blogPosts)
+      .where(eq(s.blogPosts.status, 'PUBLISHED'))
+      .orderBy(asc(s.blogPosts.publishedAt))
 
-  const posts = await db
-    .select()
-    .from(s.blogPosts)
-    .where(eq(s.blogPosts.status, 'PUBLISHED'))
-    .orderBy(asc(s.blogPosts.publishedAt))
+    const result = []
+    for (const post of posts) {
+      const [translation] = await db
+        .select()
+        .from(s.blogPostTranslations)
+        .where(and(
+          eq(s.blogPostTranslations.postId, post.id),
+          eq(s.blogPostTranslations.locale, locale as 'ru' | 'uk'),
+        ))
+        .limit(1)
 
-  const result = []
-  for (const post of posts) {
+      if (translation) {
+        let categoryName: string | null = null
+        if (post.categoryId) {
+          const [catTrans] = await db
+            .select()
+            .from(s.blogCategoryTranslations)
+            .where(and(
+              eq(s.blogCategoryTranslations.categoryId, post.categoryId),
+              eq(s.blogCategoryTranslations.locale, locale as 'ru' | 'uk'),
+            ))
+            .limit(1)
+          categoryName = catTrans?.name ?? null
+        }
+
+        result.push({ ...post, translation, categoryName })
+      }
+    }
+
+    return result
+  }, [])
+}
+
+export async function getBlogPostBySlug(slug: string, locale: string = 'ru') {
+  return tryDb(async (db) => {
     const [translation] = await db
       .select()
       .from(s.blogPostTranslations)
       .where(and(
-        eq(s.blogPostTranslations.postId, post.id),
+        eq(s.blogPostTranslations.slug, slug),
         eq(s.blogPostTranslations.locale, locale as 'ru' | 'uk'),
+    ))
+      .limit(1)
+
+    if (!translation) return null
+
+    const [post] = await db
+      .select()
+      .from(s.blogPosts)
+      .where(and(
+        eq(s.blogPosts.id, translation.postId),
+        eq(s.blogPosts.status, 'PUBLISHED'),
       ))
       .limit(1)
 
-    if (translation) {
-      let categoryName: string | null = null
-      if (post.categoryId) {
-        const [catTrans] = await db
-          .select()
-          .from(s.blogCategoryTranslations)
-          .where(and(
-            eq(s.blogCategoryTranslations.categoryId, post.categoryId),
-            eq(s.blogCategoryTranslations.locale, locale as 'ru' | 'uk'),
-          ))
-          .limit(1)
-        categoryName = catTrans?.name ?? null
-      }
+    if (!post) return null
 
-      result.push({ ...post, translation, categoryName })
-    }
-  }
-
-  return result
+    return { ...post, translation }
+  }, null)
 }
 
-export async function getBlogPostBySlug(slug: string, locale: string = 'ru') {
-  const db = getContentDb()
-  if (!db) return null
+/* ═══════════════════════════════════════
+   Blog Categories
+   ═══════════════════════════════════════ */
 
-  const [translation] = await db
-    .select()
-    .from(s.blogPostTranslations)
-    .where(and(
-      eq(s.blogPostTranslations.slug, slug),
-      eq(s.blogPostTranslations.locale, locale as 'ru' | 'uk'),
-    ))
-    .limit(1)
+export async function getPublishedBlogCategories(locale: string = 'ru') {
+  return tryDb(async (db) => {
+    const cats = await db
+      .select()
+      .from(s.blogCategories)
+      .where(eq(s.blogCategories.status, 'PUBLISHED'))
+      .orderBy(asc(s.blogCategories.sortOrder))
 
-  if (!translation) return null
+    const result = []
+    for (const cat of cats) {
+      const [translation] = await db
+        .select()
+        .from(s.blogCategoryTranslations)
+        .where(and(
+          eq(s.blogCategoryTranslations.categoryId, cat.id),
+          eq(s.blogCategoryTranslations.locale, locale as 'ru' | 'uk'),
+        ))
+        .limit(1)
 
-  const [post] = await db
-    .select()
-    .from(s.blogPosts)
-    .where(and(
-      eq(s.blogPosts.id, translation.postId),
-      eq(s.blogPosts.status, 'PUBLISHED'),
-    ))
-    .limit(1)
+      if (translation) {
+        result.push({ ...cat, translation })
+      }
+    }
 
-  if (!post) return null
+    return result
+  }, [])
+}
 
-  return { ...post, translation }
+/* ═══════════════════════════════════════
+   Navigation
+   ═══════════════════════════════════════ */
+
+export async function getPublishedNavigation(location: string = 'HEADER', locale: string = 'ru') {
+  return tryDb(async (db) => {
+    const items = await db
+      .select()
+      .from(s.navigationItems)
+      .where(and(
+        eq(s.navigationItems.location, location as 'HEADER' | 'FOOTER' | 'MOBILE'),
+        eq(s.navigationItems.isEnabled, true as never),
+      ))
+      .orderBy(asc(s.navigationItems.sortOrder))
+
+    // Build hierarchy from flat list
+    const labelKey = locale === 'uk' ? 'labelUk' as const : 'labelRu' as const
+
+    const topLevel = items.filter(i => !i.parentId)
+    return topLevel.map(item => ({
+      id: item.id,
+      label: item[labelKey],
+      href: item.href,
+      location: item.location,
+      sortOrder: item.sortOrder,
+      children: items
+        .filter(child => child.parentId === item.id)
+        .map(child => ({
+          id: child.id,
+          label: child[labelKey],
+          href: child.href,
+          location: child.location,
+          sortOrder: child.sortOrder,
+          children: [] as never[],
+        })),
+    }))
+  }, [])
 }
 
 /* ═══════════════════════════════════════
@@ -189,38 +268,38 @@ export async function getBlogPostBySlug(slug: string, locale: string = 'ru') {
    ═══════════════════════════════════════ */
 
 export async function getPublishedPage(type: string, locale: string = 'ru') {
-  const db = getContentDb()
-  if (!db) return null
+  return tryDb(async (db) => {
+    const [page] = await db
+      .select()
+      .from(s.pages)
+      .where(and(
+        eq(s.pages.type, type as 'HOME' | 'METHOD' | 'ABOUT' | 'FAQ' | 'CONTACTS' | 'PRIVACY' | 'DISCLAIMER' | 'PRICING' | 'CUSTOM'),
+        eq(s.pages.status, 'PUBLISHED'),
+      ))
+      .limit(1)
 
-  const [page] = await db
-    .select()
-    .from(s.pages)
-    .where(and(
-      eq(s.pages.type, type as 'HOME' | 'METHOD' | 'ABOUT' | 'FAQ' | 'CONTACTS' | 'PRIVACY' | 'DISCLAIMER' | 'PRICING' | 'CUSTOM'),
-      eq(s.pages.status, 'PUBLISHED'),
-    ))
-    .limit(1)
+    if (!page) return null
 
-  if (!page) return null
+    const [translation] = await db
+      .select()
+      .from(s.pageTranslations)
+      .where(and(
+        eq(s.pageTranslations.pageId, page.id),
+          eq(s.pageTranslations.locale, locale as 'ru' | 'uk'),
+      ))
+      .limit(1)
 
-  const [translation] = await db
-    .select()
-    .from(s.pageTranslations)
-    .where(and(
-      eq(s.pageTranslations.pageId, page.id),
-        eq(s.pageTranslations.locale, locale as 'ru' | 'uk'),
-    ))
-    .limit(1)
-
-  const sections = await db
-    .select()
-    .from(s.pageSections)      .where(and(
+    const sections = await db
+      .select()
+      .from(s.pageSections)
+      .where(and(
         eq(s.pageSections.pageId, page.id),
         eq(s.pageSections.enabled, true as never),
       ))
-    .orderBy(asc(s.pageSections.sortOrder))
+      .orderBy(asc(s.pageSections.sortOrder))
 
-  return { ...page, translation: translation ?? null, sections }
+    return { ...page, translation: translation ?? null, sections }
+  }, null)
 }
 
 /* ═══════════════════════════════════════
@@ -228,32 +307,31 @@ export async function getPublishedPage(type: string, locale: string = 'ru') {
    ═══════════════════════════════════════ */
 
 export async function getPublishedFaq(locale: string = 'ru') {
-  const db = getContentDb()
-  if (!db) return []
-
-  const items = await db
-    .select()
-    .from(s.faqItems)
-    .where(eq(s.faqItems.status, 'PUBLISHED'))
-    .orderBy(asc(s.faqItems.sortOrder))
-
-  const result = []
-  for (const item of items) {
-    const [translation] = await db
+  return tryDb(async (db) => {
+    const items = await db
       .select()
-      .from(s.faqItemTranslations)
-      .where(and(
-        eq(s.faqItemTranslations.faqItemId, item.id),
-        eq(s.faqItemTranslations.locale, locale as 'ru' | 'uk'),
-      ))
-      .limit(1)
+      .from(s.faqItems)
+      .where(eq(s.faqItems.status, 'PUBLISHED'))
+      .orderBy(asc(s.faqItems.sortOrder))
 
-    if (translation) {
-      result.push({ ...item, translation })
+    const result = []
+    for (const item of items) {
+      const [translation] = await db
+        .select()
+        .from(s.faqItemTranslations)
+        .where(and(
+          eq(s.faqItemTranslations.faqItemId, item.id),
+          eq(s.faqItemTranslations.locale, locale as 'ru' | 'uk'),
+        ))
+        .limit(1)
+
+      if (translation) {
+        result.push({ ...item, translation })
+      }
     }
-  }
 
-  return result
+    return result
+  }, [])
 }
 
 /* ═══════════════════════════════════════
@@ -261,32 +339,31 @@ export async function getPublishedFaq(locale: string = 'ru') {
    ═══════════════════════════════════════ */
 
 export async function getPublishedTestimonials(locale: string = 'ru') {
-  const db = getContentDb()
-  if (!db) return []
-
-  const items = await db
-    .select()
-    .from(s.testimonials)
-    .where(eq(s.testimonials.status, 'PUBLISHED'))
-    .orderBy(asc(s.testimonials.sortOrder))
-
-  const result = []
-  for (const item of items) {
-    const [translation] = await db
+  return tryDb(async (db) => {
+    const items = await db
       .select()
-      .from(s.testimonialTranslations)
-      .where(and(
-        eq(s.testimonialTranslations.testimonialId, item.id),
-        eq(s.testimonialTranslations.locale, locale as 'ru' | 'uk'),
-      ))
-      .limit(1)
+      .from(s.testimonials)
+      .where(eq(s.testimonials.status, 'PUBLISHED'))
+      .orderBy(asc(s.testimonials.sortOrder))
 
-    if (translation) {
-      result.push({ ...item, translation })
+    const result = []
+    for (const item of items) {
+      const [translation] = await db
+        .select()
+        .from(s.testimonialTranslations)
+        .where(and(
+          eq(s.testimonialTranslations.testimonialId, item.id),
+          eq(s.testimonialTranslations.locale, locale as 'ru' | 'uk'),
+        ))
+        .limit(1)
+
+      if (translation) {
+        result.push({ ...item, translation })
+      }
     }
-  }
 
-  return result
+    return result
+  }, [])
 }
 
 /* ═══════════════════════════════════════

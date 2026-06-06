@@ -43,6 +43,13 @@ const envSchema = z.object({
      АДМІН-ПАНЕЛЬ — AUTH
      ═══════════════════════ */
   AUTH_SECRET: z.string().min(32, 'AUTH_SECRET must be at least 32 characters'),
+  AUTH_GOOGLE_ID: z.string().min(1, 'AUTH_GOOGLE_ID is required').optional().default(''),
+  AUTH_GOOGLE_SECRET: z.string().min(1, 'AUTH_GOOGLE_SECRET is required').optional().default(''),
+
+  /* ═══════════════════════
+     АДМІН-ПАНЕЛЬ — REVALIDATION
+     ═══════════════════════ */
+  REVALIDATE_SECRET: z.string().min(16, 'REVALIDATE_SECRET must be at least 16 characters').optional(),
 
   /* ═══════════════════════
      АДМІН-ПАНЕЛЬ — SEED

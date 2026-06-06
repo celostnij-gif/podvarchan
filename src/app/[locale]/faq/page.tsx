@@ -1,6 +1,7 @@
 import { getTranslations, getMessages } from 'next-intl/server'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { faqSchema } from '@/lib/schema'
+import { getPublishedFaq } from '@/lib/content'
 import { ClientFaqPage } from './client-page'
 import type { FAQItem } from '@/types'
 
@@ -21,13 +22,33 @@ export async function generateMetadata({
   })
 }
 
+/* ── Try to fetch FAQ from D1, fall back to messages ── */
+
+async function getFaqItems(locale: string): Promise<FAQItem[]> {
+  try {
+    const fromDb = await getPublishedFaq(locale)
+    if (fromDb && fromDb.length > 0) {
+      return fromDb.map((item) => ({
+        question: item.translation.question,
+        answer: item.translation.answer,
+      }))
+    }
+  } catch {
+    // D1 not available, fall through to messages
+  }
+
+  // Fallback to messages
+  const messages = await getMessages({ locale })
+  return (messages.faqData as FAQItem[]) ?? []
+}
+
 export default async function FaqPage({
-  params: _params,
+  params,
 }: {
   params: Promise<{ locale: string }>
 }) {
-  const messages = await getMessages()
-  const faqItems = (messages.faqData as FAQItem[]) ?? []
+  const { locale } = await params
+  const faqItems = await getFaqItems(locale)
 
   const schema = faqSchema(faqItems)
 

@@ -4,7 +4,7 @@
  * Server Actions для модуля «Отзывы».
  */
 
-import { eq, desc } from 'drizzle-orm'
+import { eq, and, desc } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { getActionDb } from './db'
@@ -109,7 +109,38 @@ export const updateTestimonial = withRole('EDITOR', async (session, ...args) => 
     if (!existing) return fail('Відгук не знайдено')
 
     const input = TestimonialSchema.partial().parse(data)
-    await db.update(s.testimonials).set(input).where(eq(s.testimonials.id, id))
+
+    // Update main testimonial fields (without translations)
+    const { translations, ...testimonialFields } = input
+    await db.update(s.testimonials).set(testimonialFields).where(eq(s.testimonials.id, id))
+
+    // Upsert translations
+    if (translations) {
+      for (const t of translations) {
+        const [existingT] = await db
+          .select()
+          .from(s.testimonialTranslations)
+          .where(and(
+            eq(s.testimonialTranslations.testimonialId, id),
+            eq(s.testimonialTranslations.locale, t.locale),
+          ))
+          .limit(1)
+
+        if (existingT) {
+          await db.update(s.testimonialTranslations).set(t).where(eq(s.testimonialTranslations.id, existingT.id))
+        } else {
+          await db.insert(s.testimonialTranslations).values({
+            id: crypto.randomUUID(),
+            testimonialId: id,
+            locale: t.locale,
+            text: t.text,
+            problem: t.problem ?? null,
+            result: t.result ?? null,
+          })
+        }
+      }
+    }
+
     await writeAuditLog({ userId: session.user.id, action: 'UPDATE', entityType: 'TESTIMONIAL', entityId: id })
     revalidatePath('/admin/testimonials')
 

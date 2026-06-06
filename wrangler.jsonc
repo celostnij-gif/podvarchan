@@ -23,7 +23,12 @@
 	"upload_source_maps": true,
 	"workers_dev": true,
 
-	"kv": [
+
+	"d1_databases": [
+		{ "binding": "DB", "database_name": "podvarchan", "database_id": "TODO-REPLACE-WITH-PROD-DATABASE-ID" }
+	],
+
+	"kv_namespaces": [
 		{ "binding": "RATE_LIMIT_KV", "id": "2f39c831b94841b3b30d7b6246c2a221" }
 	],
 	"vars": {
@@ -32,5 +37,13 @@
 		"NEXT_PUBLIC_GA_ID": "G-42W6951F8L",
 		"NEXT_PUBLIC_TURNSTILE_SITE_KEY": "0x4AAAAAADYZ2z3RysEsBoQu",
 		"CONTACT_EMAIL": "podvarchan@gmail.com"
+	},
+
+	"env": {
+		"production": {
+			"vars": {
+				"REVALIDATE_URL": "https://podvarchan.com/api/revalidate"
+			}
+		}
 	}
 }

@@ -4,7 +4,7 @@
  * Server Actions для модуля «Страницы».
  */
 
-import { eq, asc } from 'drizzle-orm'
+import { eq, asc, and } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { getActionDb } from './db'
 import { ok, okVoid, fail } from './result'
@@ -72,5 +72,75 @@ export const togglePageSection = withRole('EDITOR', async (session, ...args) => 
     return okVoid(enabled ? 'Секцію увімкнено' : 'Секцію вимкнено')
   } catch (e) {
     return fail(e instanceof Error ? e.message : 'Не вдалося змінити секцію')
+  }
+})
+
+/* ═══════════════════════════════════════
+   Home Page Editor
+   ═══════════════════════════════════════ */
+
+export async function getHomePage(_locale?: string) {
+  try {
+    const db = getActionDb()
+    const [page] = await db.select().from(s.pages).where(eq(s.pages.type, 'HOME')).limit(1)
+    if (!page) return fail('Головну сторінку не знайдено')
+
+    const sections = await db.select().from(s.pageSections)
+      .where(eq(s.pageSections.pageId, page.id))
+      .orderBy(asc(s.pageSections.sortOrder))
+
+    // Fetch translations per section
+    const sectionsWithTranslations = await Promise.all(sections.map(async (section) => {
+      const translations = await db.select().from(s.pageSectionTranslations)
+        .where(eq(s.pageSectionTranslations.sectionId, section.id))
+      return { ...section, translations }
+    }))
+
+    // Get page translations
+    const pageTranslations = await db.select().from(s.pageTranslations)
+      .where(eq(s.pageTranslations.pageId, page.id))
+
+    return ok({ ...page, sections: sectionsWithTranslations, translations: pageTranslations })
+  } catch (e) {
+    return fail(e instanceof Error ? e.message : 'Не вдалося завантажити головну сторінку')
+  }
+}
+
+export const updateSectionSettings = withRole('EDITOR', async (session, ...args) => {
+  try {
+    const db = getActionDb()
+    const sectionId = args[0] as string
+    const settings = args[1] as Record<string, unknown>
+    await db.update(s.pageSections).set({ settingsJson: JSON.stringify(settings) }).where(eq(s.pageSections.id, sectionId))
+    await writeAuditLog({ userId: session.user.id, action: 'UPDATE', entityType: 'PAGE_SECTION', entityId: sectionId })
+    revalidatePath('/admin/home')
+    return okVoid('Налаштування секції збережено')
+  } catch (e) {
+    return fail(e instanceof Error ? e.message : 'Не вдалося зберегти налаштування секції')
+  }
+})
+
+export const updateSectionTranslation = withRole('EDITOR', async (session, ...args) => {
+  try {
+    const db = getActionDb()
+    const sectionId = args[0] as string
+    const locale = args[1] as 'ru' | 'uk'
+    const contentJson = args[2] as string
+
+    const [existing] = await db.select().from(s.pageSectionTranslations)
+      .where(and(eq(s.pageSectionTranslations.sectionId, sectionId), eq(s.pageSectionTranslations.locale, locale)))
+      .limit(1)
+
+    if (existing) {
+      await db.update(s.pageSectionTranslations).set({ contentJson }).where(eq(s.pageSectionTranslations.id, existing.id))
+    } else {
+      await db.insert(s.pageSectionTranslations).values({ id: crypto.randomUUID(), sectionId, locale, contentJson })
+    }
+
+    await writeAuditLog({ userId: session.user.id, action: 'UPDATE', entityType: 'PAGE_SECTION', entityId: sectionId })
+    revalidatePath('/admin/home')
+    return okVoid('Переклад секції збережено')
+  } catch (e) {
+    return fail(e instanceof Error ? e.message : 'Не вдалося зберегти переклад секції')
   }
 })

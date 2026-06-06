@@ -21,9 +21,13 @@ import {
   Search,
   Globe,
   Share2,
+  AlertCircle,
+  Info,
 } from 'lucide-react'
+import { SITE } from '@/constants'
 import type { SeoMeta } from '@/db/schema'
 import { updateSeoMeta, toggleSeoRobots } from '@/lib/actions/seo'
+import { calculateSeoScore, getScoreColor, getScoreBarColor, getScoreLabel } from '@/lib/seo/score'
 
 /* ═══════════════════════════════════════
    Types
@@ -191,7 +195,27 @@ export default function SeoEditor({ meta }: SeoEditorProps) {
   const titleVal = watch('title') // eslint-disable-line react-hooks/incompatible-library
   const descVal = watch('description')
   const ogTitleVal = watch('ogTitle')
+  const ogDescVal = watch('ogDescription')
+  const keywordsVal = watch('keywords')
+  const canonicalVal = watch('canonicalPath')
+  const ogImageIdVal = watch('ogImageId')
   const robotsIndexVal = watch('robotsIndex')
+  const robotsFollowVal = watch('robotsFollow')
+  const schemaTypeVal = watch('schemaType')
+
+  // Live SEO score
+  const seoResult = calculateSeoScore({
+    title: titleVal,
+    description: descVal,
+    keywords: keywordsVal,
+    canonicalPath: canonicalVal,
+    ogTitle: ogTitleVal,
+    ogDescription: ogDescVal,
+    ogImageId: ogImageIdVal,
+    robotsIndex: robotsIndexVal,
+    robotsFollow: robotsFollowVal,
+    schemaType: schemaTypeVal,
+  })
 
   // ── Save ──
   const onSave = handleSubmit(async (data) => {
@@ -378,6 +402,77 @@ export default function SeoEditor({ meta }: SeoEditorProps) {
               <span className="text-xs text-zinc-400 group-hover:text-zinc-300 transition-colors">follow</span>
             </label>
           </div>
+        </section>
+
+        {/* ═══════════════════════════════════════
+            Google Snippet Preview
+           ═══════════════════════════════════════ */}
+        <section className="rounded-xl border border-zinc-800/50 bg-zinc-900/30 p-6 space-y-3">
+          <h2 className="text-sm font-semibold text-zinc-200 flex items-center gap-2">
+            <Search className="w-4 h-4 text-zinc-500" />
+            Google Snippet Preview
+          </h2>
+          <div className="bg-white rounded-lg p-4 space-y-1 max-w-[600px]">
+            <p className="text-[14px] text-[#1a0dab] hover:underline cursor-pointer leading-5 truncate font-[arial,sans-serif]">
+              {(titleVal || meta.title) ?? 'Заголовок страницы'}
+            </p>
+            <p className="text-[12px] text-[#006621] font-[arial,sans-serif] leading-4 truncate">
+              {SITE.url}/{meta.locale}/{meta.canonicalPath?.replace(/^\//, '') ?? '...'}
+            </p>
+            <p className="text-[13px] text-[#545454] font-[arial,sans-serif] leading-5 line-clamp-2">
+              {(descVal || meta.description) ?? 'Описание страницы появится здесь...'}
+            </p>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════
+            SEO Score
+           ═══════════════════════════════════════ */}
+        <section className="rounded-xl border border-zinc-800/50 bg-zinc-900/30 p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-zinc-200 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-zinc-500" />
+              SEO Score
+            </h2>
+            <span className={`text-lg font-bold ${getScoreColor(seoResult.score)}`}>
+              {seoResult.score}/100
+            </span>
+          </div>
+
+          {/* Score bar */}
+          <div className="w-full h-2 rounded-full bg-zinc-800 overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ${getScoreBarColor(seoResult.score)}`}
+              style={{ width: `${seoResult.score}%` }}
+            />
+          </div>
+
+          <p className={`text-xs font-medium ${getScoreColor(seoResult.score)}`}>
+            {getScoreLabel(seoResult.score)}
+          </p>
+
+          {/* Issues list */}
+          {seoResult.issues.length > 0 ? (
+            <div className="space-y-2 mt-2">
+              {seoResult.issues.map((issue, i) => (
+                <div key={i} className={`flex items-start gap-2.5 px-3 py-2 rounded-lg text-xs ${
+                  issue.severity === 'error' ? 'bg-red-900/15 text-red-400' :
+                  issue.severity === 'warning' ? 'bg-amber-900/15 text-amber-400' :
+                  'bg-zinc-800/40 text-zinc-400'
+                }`}>
+                  {issue.severity === 'error' ? <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" /> :
+                   issue.severity === 'warning' ? <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" /> :
+                   <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />}
+                  <span>{issue.message}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-900/15 text-green-400 text-xs">
+              <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+              <span>Все SEO-критерии выполнены!</span>
+            </div>
+          )}
         </section>
 
         {/* ═══════════════════════════════════════

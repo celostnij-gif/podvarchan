@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "podvarchan-scheduler",
+  "main": "src/worker/scheduler.ts",
+  "compatibility_date": "2026-06-03",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "triggers": {
+    "crons": ["*/5 * * * *"]
+  },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "podvarchan", "database_id": "" }
+  ],
+  "vars": {
+    "REVALIDATE_URL": "https://podvarchan.com/api/revalidate",
+    "REVALIDATE_SECRET": ""
+  }
+}
