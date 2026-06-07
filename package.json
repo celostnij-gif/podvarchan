@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "predev": "node scripts/setup-local-db.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

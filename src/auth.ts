@@ -20,7 +20,7 @@
 import NextAuth, { getServerSession } from 'next-auth'
 import type { AuthOptions } from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
-// import Google from 'next-auth/providers/google' // ⏸ Google OAuth — будет включено позже
+import Google from 'next-auth/providers/google'
 import { eq } from 'drizzle-orm'
 import bcrypt from 'bcryptjs'
 
@@ -75,8 +75,8 @@ function recordAttempt(email: string, success: boolean): void {
   loginAttempts.set(email, entry)
 }
 
-/** ⏸ Плейсхолдер пароля для Google-користувачів. Не використовується поки Google OAuth вимкнено */
-// const GOOGLE_PASSWORD_PLACEHOLDER = '__GOOGLE_AUTH__NO_PASSWORD__'
+/** Плейсхолдер пароля для Google-користувачів (не можуть увійти через форму) */
+const GOOGLE_PASSWORD_PLACEHOLDER = '__GOOGLE_AUTH__NO_PASSWORD__'
 
 /* ── Лінива ініціалізація конфігурації ── */
 
@@ -86,10 +86,9 @@ let _cached: Cached | null = null
 let _initError: Error | null = null
 
 function buildConfig(): AuthOptions {
-  // ⏸ Google OAuth — будет включено позже (нужны AUTH_GOOGLE_ID + AUTH_GOOGLE_SECRET)
-  // const googleId = process.env.AUTH_GOOGLE_ID ?? ''
-  // const googleSecret = process.env.AUTH_GOOGLE_SECRET ?? ''
-  // const hasGoogleConfig = !!(googleId && googleSecret)
+  const googleId = process.env.AUTH_GOOGLE_ID ?? ''
+  const googleSecret = process.env.AUTH_GOOGLE_SECRET ?? ''
+  const hasGoogleConfig = !!(googleId && googleSecret)
 
   return {
     providers: [
@@ -149,15 +148,78 @@ function buildConfig(): AuthOptions {
         },
       }),
       // ⏸ Google OAuth — будет включено позже
-      // ...(hasGoogleConfig ? [Google({ clientId: googleId, clientSecret: googleSecret })] : []),
+      ...(hasGoogleConfig ? [Google({ clientId: googleId, clientSecret: googleSecret })] : []),
     ],
 
     callbacks: {
-      // ⏸ Google OAuth signIn callback — будет включено позже
-      // async signIn({ user, account }) { ... },
+      async signIn({ user, account }) {
+        if (account?.provider !== 'google') return true
 
-      async jwt({ token, user }) {
-        if (user) {
+        const binding = getDbBinding()
+        if (!binding) return false
+
+        const db = drizzle(binding, { schema: dbSchema })
+
+        try {
+          const email = user.email ?? ''
+          if (!email) return false
+
+          const [existing] = await db
+            .select()
+            .from(dbSchema.users)
+            .where(eq(dbSchema.users.email, email))
+            .limit(1)
+
+          if (existing) {
+            // Оновлюємо googleId, якщо його ще немає
+            if (!existing.googleId && account.providerAccountId) {
+              await db
+                .update(dbSchema.users)
+                .set({ googleId: account.providerAccountId })
+                .where(eq(dbSchema.users.id, existing.id))
+            }
+            return true
+          }
+
+          // Створюємо нового користувача з Google
+          await db.insert(dbSchema.users).values({
+            id: crypto.randomUUID(),
+            email,
+            name: user.name ?? email.split('@')[0],
+            googleId: account.providerAccountId,
+            passwordHash: GOOGLE_PASSWORD_PLACEHOLDER,
+            role: 'VIEWER',
+            isActive: true,
+          })
+
+          return true
+        } catch {
+          return false
+        }
+      },
+
+      async jwt({ token, account, user }) {
+        if (account) {
+          // OAuth (Google) — отримуємо id та role з БД
+          const binding = getDbBinding()
+          if (binding) {
+            const db = drizzle(binding, { schema: dbSchema })
+            try {
+              const [dbUser] = await db
+                .select()
+                .from(dbSchema.users)
+                .where(eq(dbSchema.users.email, user?.email ?? ''))
+                .limit(1)
+              if (dbUser) {
+                token.id = dbUser.id
+                token.role = dbUser.role
+              }
+            } catch {
+              // fall through
+            }
+          }
+        } else if (user) {
+          // Credentials
           token.id = user.id ?? ''
           token.role = (user as { role: string }).role as dbSchema.User['role']
         }

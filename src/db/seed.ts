@@ -393,7 +393,11 @@ async function main(): Promise<void> {
   await seedDatabase(binding)
 }
 
-main().catch((err: unknown) => {
-  console.error('[Seed] Помилка:', err)
-  process.exit(1)
-})
+// Авто-запуск тільки при прямому виконанні (npm run db:seed), а не при імпорті
+const isMainModule = process.argv[1]?.endsWith('seed.ts') || process.argv[1]?.endsWith('seed.js')
+if (isMainModule) {
+  main().catch((err: unknown) => {
+    console.error('[Seed] Помилка:', err)
+    process.exit(1)
+  })
+}

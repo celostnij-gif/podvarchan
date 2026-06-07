@@ -104,53 +104,66 @@
     line-height: 1.75;
   }
 
+  /* ── Суцільний темний оверлей поверх точкового патерну body.
+       Імітує bg-zinc-950 з адмін-панелі: ховає точки, але дозволяє
+       анімованим плямам світла з body::before просвічуватись зверху.
+       Так фон основного сайту виглядає точнісінько як сторінка входу в адмінку. */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-color: #09090b; /* zinc-950 — як в адмін-панелі */
+  }
+
   /* ── Glowing light patches ──
-     Warm gold radial gradients float across the screen via animated
-     background-position. Where they overlap the dot pattern below,
-     the dots appear to glow in soft, wandering patches — 1 to 5
-     chaotically reshaping spots at any moment. */
+     7 multi-colored radial gradients float across the screen via animated
+     background-position. Colors shift between gold, teal, purple, blue,
+     rose, amber, and emerald — each spot wanders independently so the
+     palette never repeats. */
   body::before {
     content: '';
     position: fixed;
-    top: -50px;
-    left: 0;
-    right: -50px;
-    bottom: -50px;
+    top: -150px;
+    left: -150px;
+    right: -150px;
+    bottom: -150px;
     z-index: 0;
     pointer-events: none;
-
     background: transparent;
 
-    /* 5 warm gold glow spots of varying size and intensity */
     background-image:
-      radial-gradient(ellipse 600px 450px at center, rgba(201, 169, 110, 0.35) 0%, transparent 48%),
-      radial-gradient(ellipse 450px 650px at center, rgba(201, 169, 110, 0.25) 0%, transparent 48%),
-      radial-gradient(circle 400px at center, rgba(201, 169, 110, 0.20) 0%, transparent 45%),
-      radial-gradient(ellipse 500px 350px at center, rgba(201, 169, 110, 0.15) 0%, transparent 45%),
-      radial-gradient(circle 280px at center, rgba(201, 169, 110, 0.12) 0%, transparent 42%);
+      radial-gradient(ellipse 600px 450px at center, rgba(201, 169, 110, 0.30) 0%, transparent 48%),
+      radial-gradient(ellipse 450px 650px at center, rgba(45, 168, 130, 0.22) 0%, transparent 48%),
+      radial-gradient(circle 400px at center, rgba(139, 92, 246, 0.20) 0%, transparent 45%),
+      radial-gradient(ellipse 500px 350px at center, rgba(59, 130, 246, 0.16) 0%, transparent 45%),
+      radial-gradient(circle 280px at center, rgba(244, 114, 182, 0.14) 0%, transparent 42%),
+      radial-gradient(ellipse 520px 380px at center, rgba(251, 191, 36, 0.15) 0%, transparent 46%),
+      radial-gradient(circle 340px at center, rgba(52, 211, 153, 0.16) 0%, transparent 44%);
 
     background-size:
-      600px 450px, 450px 650px, 400px 400px, 500px 350px, 280px 280px;
+      600px 450px, 450px 650px, 400px 300px, 500px 350px, 280px 580px, 520px 380px, 340px 340px;
 
     background-repeat:
-      no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+      no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
 
     background-position:
-      15% 25%, 75% 55%, 45% 15%, 90% 75%, 30% 85%;
+      15% 25%, 75% 55%, 45% 15%, 90% 75%, 30% 85%, 55% 40%, 10% 90%;
 
-    animation: glow-wander 50s ease-in-out infinite;
+    animation: glow-wander 60s ease-in-out infinite;
     will-change: background-position;
 
     /* Mask: glow only visible through the dot pattern, matching body's background dots.
-       Compensated by 50px on Y because body::before starts at top: -50px. */
+       Compensated by 150px on Y because body::before starts at top: -150px. */
     -webkit-mask-image: radial-gradient(circle at 2px 2px, white 0px, rgba(255,255,255,0.65) 0.6px, rgba(255,255,255,0.30) 1.2px, transparent 2px);
     -webkit-mask-size: 11px 11px;
     -webkit-mask-repeat: repeat;
-    -webkit-mask-position: 0 50px;
+    -webkit-mask-position: 0 150px;
     mask-image: radial-gradient(circle at 2px 2px, white 0px, rgba(255,255,255,0.65) 0.6px, rgba(255,255,255,0.30) 1.2px, transparent 2px);
     mask-size: 11px 11px;
     mask-repeat: repeat;
-    mask-position: 0 50px;
+    mask-position: 0 150px;
   }
 
   /* ── Selection ── */
@@ -212,45 +225,45 @@
   }
 
   /* ── Wandering glow spots ──
-     5 warm radial gradients wander independently across the full
-     screen, so 1–5 glow patches chaotically appear, overlap, split
-     and reshape as they drift — never repeating the same pattern. */
+     7 multi-colored radial gradients wander independently across the full
+     screen, so glow patches chaotically appear, overlap, split and reshape
+     as they drift — never repeating the same pattern. */
   @keyframes glow-wander {
     0% {
       background-position:
-        15% 25%, 75% 55%, 45% 15%, 90% 75%, 30% 85%;
+        15% 25%, 75% 55%, 45% 15%, 90% 75%, 30% 85%, 55% 40%, 10% 90%;
     }
     12% {
       background-position:
-        65% 15%, 18% 70%, 80% 42%, 8% 30%, 88% 62%;
+        65% 15%, 18% 70%, 80% 42%, 8% 30%, 88% 62%, 72% 15%, 40% 88%;
     }
     25% {
       background-position:
-        82% 58%, 42% 8%, 12% 80%, 72% 90%, 5% 25%;
+        82% 58%, 42% 8%, 12% 80%, 72% 90%, 5% 25%, 35% 68%, 85% 35%;
     }
     37% {
       background-position:
-        35% 85%, 62% 30%, 60% 22%, 88% 10%, 18% 60%;
+        35% 85%, 62% 30%, 60% 22%, 88% 10%, 18% 60%, 50% 92%, 22% 12%;
     }
     50% {
       background-position:
-        20% 32%, 55% 82%, 30% 68%, 10% 55%, 78% 12%;
+        20% 32%, 55% 82%, 30% 68%, 10% 55%, 78% 12%, 92% 48%, 68% 72%;
     }
     62% {
       background-position:
-        72% 42%, 15% 22%, 88% 72%, 42% 95%, 58% 35%;
+        72% 42%, 15% 22%, 88% 72%, 42% 95%, 58% 35%, 28% 62%, 82% 18%;
     }
     75% {
       background-position:
-        42% 68%, 78% 35%, 22% 32%, 78% 22%, 15% 78%;
+        42% 68%, 78% 35%, 22% 32%, 78% 22%, 15% 78%, 62% 88%, 95% 52%;
     }
     87% {
       background-position:
-        25% 55%, 65% 88%, 52% 25%, 32% 72%, 92% 42%;
+        25% 55%, 65% 88%, 52% 25%, 32% 72%, 92% 42%, 18% 32%, 75% 65%;
     }
     100% {
       background-position:
-        15% 25%, 75% 55%, 45% 15%, 90% 75%, 30% 85%;
+        15% 25%, 75% 55%, 45% 15%, 90% 75%, 30% 85%, 55% 40%, 10% 90%;
     }
   }
 
@@ -637,17 +650,17 @@
 
   /* ── Links with gold underline ── */
   .blog-content a {
-    color: var(--color-gold);
+    color: var(--color-green);
     text-decoration: underline;
-    text-decoration-color: rgba(139, 115, 85, 0.3);
+    text-decoration-color: var(--color-green-muted);
     text-underline-offset: 3px;
     text-decoration-thickness: 1px;
     transition: color 0.3s ease, text-decoration-color 0.3s ease;
   }
 
   .blog-content a:hover {
-    color: var(--color-gold-light);
-    text-decoration-color: rgba(227, 196, 122, 0.5);
+    color: var(--color-green-light);
+    text-decoration-color: var(--color-green-deep);
     text-decoration-thickness: 1.5px;
   }
 
@@ -745,6 +758,7 @@
     position: relative;
   }
 
+  /* Multi-colored glow spots for bg-dot-3d (matches body::before colors) */
   .bg-dot-3d::before {
     content: '';
     position: absolute;
@@ -752,11 +766,11 @@
     pointer-events: none;
     background: transparent;
     background-image:
-      radial-gradient(ellipse 600px 450px at center, rgba(201, 169, 110, 0.35) 0%, transparent 48%),
-      radial-gradient(ellipse 450px 650px at center, rgba(201, 169, 110, 0.25) 0%, transparent 48%),
-      radial-gradient(circle 400px at center, rgba(201, 169, 110, 0.20) 0%, transparent 45%),
-      radial-gradient(ellipse 500px 350px at center, rgba(201, 169, 110, 0.15) 0%, transparent 45%),
-      radial-gradient(circle 280px at center, rgba(201, 169, 110, 0.12) 0%, transparent 42%);
+      radial-gradient(ellipse 600px 450px at center, rgba(201, 169, 110, 0.30) 0%, transparent 48%),
+      radial-gradient(ellipse 450px 650px at center, rgba(45, 168, 130, 0.20) 0%, transparent 48%),
+      radial-gradient(circle 400px at center, rgba(139, 92, 246, 0.18) 0%, transparent 45%),
+      radial-gradient(ellipse 500px 350px at center, rgba(59, 130, 246, 0.14) 0%, transparent 45%),
+      radial-gradient(circle 280px at center, rgba(244, 114, 182, 0.12) 0%, transparent 42%);
     background-size:
       600px 450px, 450px 650px, 400px 400px, 500px 350px, 280px 280px;
     background-repeat:

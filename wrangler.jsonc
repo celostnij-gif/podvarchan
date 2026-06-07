@@ -25,7 +25,7 @@
 
 
 	"d1_databases": [
-		{ "binding": "DB", "database_name": "podvarchan", "database_id": "TODO-REPLACE-WITH-PROD-DATABASE-ID" }
+		{ "binding": "DB", "database_name": "podvarchan", "database_id": "e0b3655c34f090e1d6e4e9f04a2424f29ce8b496f43f1e9b9089400882d4b2f1" }
 	],
 
 	"kv_namespaces": [
