@@ -1,0 +1,9 @@
+{
+  "$schema": "https://agentskills.io/schemas/agents-index.json",
+  "version": "1.0",
+  "domain": "podvarchan.com",
+  "agents": {
+    "index": "/_a2a/index",
+    "mcp": "/.well-known/mcp/server-card.json"
+  }
+}

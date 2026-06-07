@@ -69,6 +69,16 @@ const nextConfig = {
     },
   ],
 
+  /** Rewrites — для A2A Agent-to-Agent роутів */
+  async rewrites() {
+    return [
+      {
+        source: '/_a2a/:path*',
+        destination: '/a2a/:path*',
+      },
+    ]
+  },
+
   /** Redirects */
   async redirects() {
     return [
