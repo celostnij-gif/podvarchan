@@ -3,6 +3,7 @@ import { Cormorant_Garamond, Inter } from 'next/font/google'
 import { getLocale } from 'next-intl/server'
 import { SITE } from '@/constants'
 import Script from 'next/script'
+import WebMCPProvider from '@/components/WebMCPProvider'
 import './globals.css'
 
 /* ── Fonts ── */
@@ -108,6 +109,7 @@ export default async function RootLayout({
 
 
         {children}
+        <WebMCPProvider />
       </body>
     </html>
   )

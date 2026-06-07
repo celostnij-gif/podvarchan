@@ -104,24 +104,11 @@
     line-height: 1.75;
   }
 
-  /* ── Суцільний темний оверлей поверх точкового патерну body.
-       Імітує bg-zinc-950 з адмін-панелі: ховає точки, але дозволяє
-       анімованим плямам світла з body::before просвічуватись зверху.
-       Так фон основного сайту виглядає точнісінько як сторінка входу в адмінку. */
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background-color: #09090b; /* zinc-950 — як в адмін-панелі */
-  }
-
   /* ── Glowing light patches ──
-     7 multi-colored radial gradients float across the screen via animated
-     background-position. Colors shift between gold, teal, purple, blue,
-     rose, amber, and emerald — each spot wanders independently so the
-     palette never repeats. */
+     Warm gold radial gradients float across the screen via animated
+     background-position. Where they overlap the dot pattern below,
+     the dots appear to glow in soft, wandering patches — 1 to 5
+     chaotically reshaping spots at any moment. */
   body::before {
     content: '';
     position: fixed;
@@ -164,6 +151,16 @@
     mask-size: 11px 11px;
     mask-repeat: repeat;
     mask-position: 0 150px;
+  }
+
+  /* ── Dark overlay over the glow — like the admin panel ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-color: #09090b; /* zinc-950 — як в адмін-панелі */
   }
 
   /* ── Selection ── */
@@ -225,9 +222,9 @@
   }
 
   /* ── Wandering glow spots ──
-     7 multi-colored radial gradients wander independently across the full
-     screen, so glow patches chaotically appear, overlap, split and reshape
-     as they drift — never repeating the same pattern. */
+     5 warm radial gradients wander independently across the full
+     screen, so 1–5 glow patches chaotically appear, overlap, split
+     and reshape as they drift — never repeating the same pattern. */
   @keyframes glow-wander {
     0% {
       background-position:
@@ -650,17 +647,17 @@
 
   /* ── Links with gold underline ── */
   .blog-content a {
-    color: var(--color-green);
+    color: var(--color-gold);
     text-decoration: underline;
-    text-decoration-color: var(--color-green-muted);
+    text-decoration-color: rgba(139, 115, 85, 0.3);
     text-underline-offset: 3px;
     text-decoration-thickness: 1px;
     transition: color 0.3s ease, text-decoration-color 0.3s ease;
   }
 
   .blog-content a:hover {
-    color: var(--color-green-light);
-    text-decoration-color: var(--color-green-deep);
+    color: var(--color-gold-light);
+    text-decoration-color: rgba(227, 196, 122, 0.5);
     text-decoration-thickness: 1.5px;
   }
 
@@ -758,7 +755,6 @@
     position: relative;
   }
 
-  /* Multi-colored glow spots for bg-dot-3d (matches body::before colors) */
   .bg-dot-3d::before {
     content: '';
     position: absolute;
