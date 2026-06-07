@@ -10,8 +10,8 @@ check() {
   URL=$1
   EXPECT=$2
   LABEL=$3
-  RESULT=$(curl -s -o /dev/null -w '%{http_code}' "$URL")
-  CT=$(curl -sI "$URL" | grep -i content-type | head -1)
+  RESULT=$(curl -sL -o /dev/null -w '%{http_code}' "$URL")
+  CT=$(curl -sIL "$URL" | grep -i content-type | head -1)
   if [ "$RESULT" = '200' ]; then
     echo "✅ $LABEL — $CT"
     PASS=$((PASS+1))
@@ -24,7 +24,7 @@ check() {
 check_markdown() {
   URL=$1
   LABEL=$2
-  CT=$(curl -s -I -H 'Accept: text/markdown' "$URL" | grep -i content-type)
+  CT=$(curl -sL -I -H 'Accept: text/markdown' "$URL" | grep -i content-type)
   if echo "$CT" | grep -q 'text/markdown'; then
     echo "✅ $LABEL — Markdown OK"
     PASS=$((PASS+1))
