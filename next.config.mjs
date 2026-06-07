@@ -23,6 +23,12 @@ const nextConfig = {
   /** Security headers */
   headers: async () => [
     {
+      source: '/_markdown/:path*',
+      headers: [
+        { key: 'Content-Type', value: 'text/markdown; charset=utf-8' },
+      ],
+    },
+    {
       source: '/(.*)',
       headers: [
         { key: 'X-Content-Type-Options', value: 'nosniff' },
@@ -69,12 +75,16 @@ const nextConfig = {
     },
   ],
 
-  /** Rewrites — для A2A Agent-to-Agent роутів */
+  /** Rewrites — для A2A Agent-to-Agent та Markdown роутів */
   async rewrites() {
     return [
       {
         source: '/_a2a/:path*',
         destination: '/a2a/:path*',
+      },
+      {
+        source: '/_markdown/:path*',
+        destination: '/markdown/:path*',
       },
     ]
   },
