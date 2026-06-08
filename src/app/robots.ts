@@ -3,8 +3,9 @@ import { SITE } from '@/constants'
 
 /**
  * Генерирует robots.txt.
- * Разрешает всем поисковым системам индексацию.
- * Указывает путь к sitemap.xml.
+ * Сайт максимально відкритий для всіх: пошукових систем, роботів та AI.
+ * Жодних обмежень для GPTBot, ChatGPT-User або інших ботів.
+ * API та адмінка виключені — там немає публічного контенту.
  */
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -12,20 +13,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: [
-          '/api/',           // API endpoints
-          '/_next/',         // Next.js internal
-          '/admin/',         // Admin (если будет)
-          '/*?*',            // URL-параметры (избегаем дублей)
-        ],
-      },
-      {
-        userAgent: 'GPTBot',
-        disallow: '/',
-      },
-      {
-        userAgent: 'ChatGPT-User',
-        disallow: '/',
+        disallow: ['/api/', '/_next/', '/admin/'],
       },
     ],
     sitemap: `${SITE.url}/sitemap.xml`,

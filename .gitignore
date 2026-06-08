@@ -56,5 +56,7 @@ nul
 /twilight-block-e1cd/
 *.log
 
-AGENT.md
+# uploaded media (from admin panel)
+public/uploads/
+
 README.md
