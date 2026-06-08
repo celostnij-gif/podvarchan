@@ -647,7 +647,7 @@
 
   /* ── Links with gold underline ── */
   .blog-content a {
-    color: var(--color-gold);
+    color: var(--color-green);
     text-decoration: underline;
     text-decoration-color: rgba(139, 115, 85, 0.3);
     text-underline-offset: 3px;
@@ -656,7 +656,7 @@
   }
 
   .blog-content a:hover {
-    color: var(--color-gold-light);
+    color: var(--color-green-light);
     text-decoration-color: rgba(227, 196, 122, 0.5);
     text-decoration-thickness: 1.5px;
   }

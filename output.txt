@@ -1,0 +1,41 @@
+
+ ⛅️ wrangler 4.97.0 (update available 4.98.0)
+─────────────────────────────────────────────
+Cloudflare agent skills are available for: Claude Code, Codex, GitHub Copilot, Gemini CLI, Antigravity, Pi. Run wrangler in an interactive terminal to install them, or use `--install-skills` to install without prompting.
+Using secrets defined in .env.local
+Your Worker has access to the following bindings:
+Binding                                                                    Resource                  Mode
+env.RATE_LIMIT_KV (2f39c831b94841b3b30d7b6246c2a221)                       KV Namespace              local
+env.DB (podvarchan)                                                        D1 Database               local
+env.WORKER_SELF_REFERENCE (podvarchan)                                     Worker                    local [connected]
+env.ASSETS                                                                 Assets                    local
+env.NEXTJS_ENV ("production")                                              Environment Variable      local
+env.NEXT_PUBLIC_SITE_URL ("(hidden)")                                      Environment Variable      local
+env.NEXT_PUBLIC_GA_ID ("(hidden)")                                         Environment Variable      local
+env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ("(hidden)")                            Environment Variable      local
+env.CONTACT_EMAIL ("(hidden)")                                             Environment Variable      local
+env.RESEND_API_KEY ("(hidden)")                                            Environment Variable      local
+env.TURNSTILE_SECRET_KEY ("(hidden)")                                      Environment Variable      local
+env.AUTH_GOOGLE_ID ("(hidden)")                                            Environment Variable      local
+env.AUTH_GOOGLE_SECRET ("(hidden)")                                        Environment Variable      local
+env.ADMIN_SEED_EMAIL ("(hidden)")                                          Environment Variable      local
+env.ADMIN_SEED_PASSWORD ("(hidden)")                                       Environment Variable      local
+env.AUTH_SECRET ("(hidden)")                                               Environment Variable      local
+env.NEXTAUTH_URL ("(hidden)")                                              Environment Variable      local
+
+
+Service bindings, Durable Object bindings, and Tail consumers connect to other Wrangler or Vite dev processes running locally, with their connection status indicated by [connected] or [not connected]. For more details, refer to https://developers.cloudflare.com/workers/runtime-apis/bindings/service-bindings/#local-development
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mBuild failed with 1 error:[0m
+
+  [31mX [41;31m[[41;97mERROR[41;31m][0m [1mCould not resolve "../src/db/seed"[0m
+  
+      temp-seed-worker.ts:6:29:
+  [37m      6 │ import { seedDatabase } from [32m'../src/db/seed'[37m
+          ╵                              [32m~~~~~~~~~~~~~~~~[0m
+  
+  
+
+
+🪵  Logs were written to "C:\Users\Kostayn\AppData\Roaming\xdg.config\.wrangler\logs\wrangler-2026-06-06_12-39-48_428.log"
+^C

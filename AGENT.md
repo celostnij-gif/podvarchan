@@ -1,162 +1,112 @@
-# Agent-Ready Infrastructure — podvarchan.com
+# AGENT.md: Core Guidelines and Workflow Protocol
 
-**Дата:** 07.06.2026  
-**Сесія:** Повна Agent-Ready інтеграція (10 комітів)
+Привет! Ты — ИИ-разработчик, интегрированный в проект **Podvarchan.com**.
+Этот документ содержит фундаментальные правила работы с проектом, структуру коммуникации и протокол отслеживания прогресса. **Читай этот файл при каждом новом запуске или перезапуске сессии.**
 
----
+## 🚨 ПРАВИЛО №1: Захист продакшну (НАЙГОЛОВНІШЕ)
 
-## ✅ Що реалізовано сьогодні
+**Категорично заборонено допускати деградацію проєкту в онлайні.**
 
-### 1. DNS-AID (Agent Discovery)
-- `public/.well-known/agents.json` — індекс AI-агентів (A2A + MCP)
-- `src/app/a2a/index/route.ts` + rewrite `/_a2a/:path*` — A2A metadata endpoint
-- `src/middleware.ts` — exclusions для `_a2a`, `a2a`
+Для цього створено дві гілки на GitHub:
 
-### 2. Markdown for Agents
-- `src/middleware.ts` — перехват `Accept: text/markdown` → rewrite на `/_markdown/`
-- `src/app/markdown/[[...slug]]/route.ts` — фетчить HTML, конвертує в Markdown
-- `src/lib/html-to-markdown.ts` — конвертер HTML→Markdown (0 dependencies, edge сумісний)
-- `next.config.mjs` — rewrite `/_markdown/:path*` → `/markdown/:path*`
+| Гілка | Призначення |
+|-------|------------|
+| **`master`** | Синхронізована з Cloudflare (продакшн). Ніколи не пушити зміни напряму в `master`. Зміни потрапляють сюди тільки через злиття (merge) з `main` після повної перевірки. |
+| **`main`** | Поточна робоча гілка. Всі правки, коригування, новий функціонал — тільки тут. Після завершення і тестування — merge в `master`. |
 
-### 3. HTML→Markdown конвертер
+**Наслідки порушення:** будь-який збій на сайті через пряму зміну `master` або неякісний код у продакшні вважається критичним інцидентом.
 
-- `src/lib/html-to-markdown.ts` — **кастомний конвертер** (0 dependencies)
-- **Чому не `turndown`:**
-  1. Встановлення `npm install turndown` провалилось (`Invalid Version`)
-  2. `turndown` потребує DOM API (`document`), якого немає на Cloudflare Workers edge runtime
-  3. Кастомний конвертер використовує string-based regex трансформацію — повністю edge-сумісний
+> Поточна ситуація: `main` — активна гілка. `master` — продакшн (Cloudflare). `origin/HEAD` вказує на `origin/master`.
 
-### 4. API Catalog (RFC 9727)
-- `src/app/.well-known/api-catalog/route.ts` — `Content-Type: application/linkset+json`
-- `src/app/api/health/route.ts` — `{ status: 'ok', timestamp }`
-- `src/app/api/openapi.json/route.ts` — OpenAPI 3.1 spec
+## 🚫 ПРАВИЛО №2: AGENT.md — ТІЛЬКИ ДОДАВАННЯ
 
-### 4. OAuth / OIDC Discovery
-- `src/app/.well-known/openid-configuration/route.ts` — OIDC Discovery
-- `src/app/.well-known/oauth-authorization-server/route.ts` — RFC 8414
-- `src/app/.well-known/jwks.json/route.ts` — JWKS (пустий — HS256 symmetric)
-- `src/app/.well-known/oauth-protected-resource/route.ts` — RFC 9728
+**Цей файл заборонено змінювати (редагувати, переписувати, видаляти існуючі секції).**
 
-### 5. Agent Authentication Guide
-- `src/app/auth.md/route.ts` — Markdown route handler (inline const, без fs)
-- `public/auth.md` — source of truth для AI-агентів
+Нові правила можна тільки **додавати в кінець файлу** або після останнього доданого правила.
 
-### 6. MCP Server Card (SEP-1649)
-- `src/app/.well-known/mcp/server-card.json/route.ts` — Server Card
-- `src/app/api/mcp/route.ts` — JSON-RPC 2.0 (tools/list, tools/call, CORS)
-- `src/lib/mcp/tools.ts` — shared tools definitions
-
-### 7. Agent Skills Discovery Index (RFC v0.2.0)
-- `src/app/.well-known/agent-skills/index.json/route.ts` — index з SHA256 (booking: `a8ae83...`, services: `652285...`)
-- `public/.well-known/agent-skills/booking.md` — skill-документ
-- `public/.well-known/agent-skills/services.md` — skill-документ
-
-### 8. WebMCP (Browser AI Agents)
-- `src/types/webmcp.d.ts` — типізація `navigator.modelContext`
-- `src/components/WebMCPProvider.tsx` — реєстрація tools (`get_services`, `submit_contact_inquiry`)
-- `src/app/layout.tsx` — підключено `WebMCPProvider`
-- `src/app/api/services/route.ts` — список послуг (статичний, очікує D1)
-
-### 9. Документація та інструменти
-- `AGENT.md` — повна карта .well-known endpoint'ів
-- `scripts/verify-agent-ready.sh` — bash скрипт валідації всіх endpoint'ів
+Порушення цього правила призводить до втрати контексту та неузгодженості в роботі.
 
 ---
 
-## 📋 Карта всіх .well-known endpoint'ів
+## 1\. Контекст проекту
 
-```
-/.well-known/agents.json                ← DNS-AID Agent Index
-/.well-known/api-catalog                ← RFC 9727 (application/linkset+json)
-/.well-known/openid-configuration       ← OIDC Discovery
-/.well-known/oauth-authorization-server ← RFC 8414
-/.well-known/oauth-protected-resource   ← RFC 9728
-/.well-known/jwks.json                  ← JWKS (empty)
-/.well-known/mcp/server-card.json       ← SEP-1649 MCP Server Card
-/.well-known/agent-skills/index.json    ← Agent Skills Discovery RFC v0.2.0
-/.well-known/agent-skills/booking.md    ← Skill: booking
-/.well-known/agent-skills/services.md   ← Skill: services
-/auth.md                                ← Agent auth guide
-```
+* **Стек:** Next.js 15.5.18 (App Router), TypeScript, Tailwind CSS.
+* **Инфраструктура:** Cloudflare Workers (через OpenNext). Учитывай ограничения Edge-среды (флаг `nodejs\_compat`).
+* **Локализация:** `next-intl` (ru, uk). Любые изменения в текстах должны дублироваться в соответствующих JSON-файлах.
+* **Рендеринг:** В основном SSG, частично SSR (API, OpenGraph).
 
-## 📋 API endpoints
+## 2\. Структура директории `temp/`
 
-| Endpoint | Метод | Призначення |
-|---|---|---|
-| `/api/health` | GET | Health check |
-| `/api/openapi.json` | GET | OpenAPI 3.1 spec |
-| `/api/mcp` | POST | JSON-RPC 2.0 MCP |
-| `/api/contact` | POST | Contact form |
-| `/api/services` | GET | Services list |
-| `/_a2a/index` | GET | A2A Agent metadata |
-| `/_markdown/*` | GET | Markdown version of pages |
+Все операционные задачи, промпты и статус работы находятся в папке `temp/`.
 
-## 🛠 Технічні деталі
+* `temp/tasks-backlog.md` — детальные промпты и задачи для реализации (взятые из технических отчетов).
+* `temp/PROGRESS.md` — **КРИТИЧЕСКИ ВАЖНЫЙ ФАЙЛ**. Здесь фиксируется текущее состояние работы.
 
-- **Runtime:** `edge` (Cloudflare Workers) на всіх роутах
-- **Middleware:** next-intl + перехват `Accept: text/markdown` → rewrite на `/_markdown/`
-- **Rewrite rules:** `/_a2a/:path*` → `/a2a/:path*`, `/_markdown/:path*` → `/markdown/:path*`
-- **Matcher exclusions:** `api`, `_next`, `_vercel`, `_a2a`, `a2a`, `_markdown`, `markdown`
-- **Всі `.well-known` роути** виключені з middleware (наявність `.` в path)
-- **Пакетний менеджер:** npm (не pnpm)
+## 🧠 ПРАВИЛО №3: Пам'ять сесій (НАЙВАЖЛИВІШЕ ДЛЯ КОНТЕКСТУ)
 
----
+**Проблема:** Між сесіями (новими запусками) я не пам'ятаю, що було зроблено раніше. Користувач змушений повторювати контекст.
 
-## 🔜 Що залишилося зробити
+**Рішення — трирівнева система пам'яті:**
 
-### Пріоритет 1 (деплой)
+### Рівень 1. AGENT.md — правила та архітектура (цей файл)
+- Фіксує **незмінні правила** роботи з проектом
+- Ніколи не редагується, тільки додаються нові правила
+- Включає: контекст проекту, стек, гілки, протоколи
 
-- [ ] **Оновити `CLOUDFLARE_API_TOKEN` в GitHub Secrets** — токен прострочився, GitHub Actions падає
-- [ ] **Увімкнути DNSSEC** — Cloudflare Dashboard → DNS → Settings → DNSSEC → Enable
+### Рівень 2. TEMP/SESSION_LOG.md — хронологія сесій
+- Фіксує **кожну сесію** з датою, часом, списком змін
+- Прив'язка до git-комітів (commit hashes)
+- Перелік реалізованих функцій, виправлених багів, створених/видалених файлів
+- **Обов'язково оновлювати в кінці КОЖНОЇ сесії!**
 
-### ✅ Вже зроблено (DNS)
+### Рівень 3. TEMP/PROGRESS.md — детальний статус
+- Детальний опис поточних та завершених етапів
+- Містить карту всіх сесій із датами
 
-- ✅ **HTTPS DNS запити додані** в Cloudflare Dashboard:
-  - `HTTPS _index._agents.podvarchan.com` → `endpoint="/.well-known/agents.json"`
-  - `HTTPS _a2a._agents.podvarchan.com` → `endpoint="/_a2a/index"`
+### Протокол запуску нової сесії
 
-### Пріоритет 2 (функціонал)
+При кожному новому запуску або перезапуску я зобов'язаний:
 
-- [ ] **Підключити `/api/services` до Cloudflare D1** — замість статичного масиву
-- [ ] **Створити `/api/docs`** — HTML документація по API
-- [ ] **Додати e2e тести** для всіх `.well-known` endpoint'ів
+1. **Прочитати `TEMP/SESSION_LOG.md`** — побачити всю історію сесій
+2. **Прочитати `AGENT.md`** — нагадати собі правила
+3. **Прочитати актуальний розділ `TEMP/PROGRESS.md`** — зрозуміти поточний стан
+4. **Виконати `git status`** — побачити незакомічені зміни
+5. **Зробити звіт користувачу:** "Ми на етапі X. Останнє що робили: Y. В git є незакомічені файли Z. Продовжуємо?"
 
-### Пріоритет 3 (розширення)
+### Протокол завершення сесії
 
-- [ ] **/.well-known/ai-plugin.json** — ChatGPT Plugin manifest
-- [ ] **Нові skill-файли** (faq.md, testimonials.md)
-- [ ] **Англійська версія skill-файлів** для консистентності з index.json
+Перед завершенням сесії я зобов'язаний:
+
+1. Оновити `TEMP/SESSION_LOG.md` — додати новий запис про сесію
+2. Оновити `TEMP/PROGRESS.md` — позначити виконані задачі
+3. Запропонувати користувачу зробити git commit
 
 ---
 
-## 📊 Зміни в коді (сьогодні)
+## 🔁 Протокол роботи та відновлення (Recovery Protocol)
 
-| Файл | Тип | Зміна |
-|---|---|---|
-| `public/.well-known/agents.json` | new | DNS-AID index |
-| `public/.well-known/agent-skills/booking.md` | new | Skill document |
-| `public/.well-known/agent-skills/services.md` | new | Skill document |
-| `public/auth.md` | new | Auth guide |
-| `src/lib/html-to-markdown.ts` | new | HTML→MD converter |
-| `src/lib/mcp/tools.ts` | new | Shared MCP tools |
-| `src/types/webmcp.d.ts` | new | WebMCP types |
-| `src/components/WebMCPProvider.tsx` | new | WebMCP client provider |
-| `src/middleware.ts` | modified | Added Accept header check + exclusions |
-| `next.config.mjs` | modified | Added rewrites + headers |
-| `src/app/layout.tsx` | modified | Added WebMCPProvider |
-| `src/app/a2a/index/route.ts` | new | A2A metadata |
-| `src/app/markdown/[[...slug]]/route.ts` | new | Markdown route |
-| `src/app/.well-known/api-catalog/route.ts` | new | RFC 9727 |
-| `src/app/.well-known/openid-configuration/route.ts` | new | OIDC |
-| `src/app/.well-known/oauth-authorization-server/route.ts` | new | RFC 8414 |
-| `src/app/.well-known/oauth-protected-resource/route.ts` | new | RFC 9728 |
-| `src/app/.well-known/jwks.json/route.ts` | new | JWKS |
-| `src/app/.well-known/mcp/server-card.json/route.ts` | new | MCP Server Card |
-| `src/app/.well-known/agent-skills/index.json/route.ts` | new | Skills Index |
-| `src/app/api/health/route.ts` | new | Health check |
-| `src/app/api/openapi.json/route.ts` | new | OpenAPI spec |
-| `src/app/api/mcp/route.ts` | new | MCP JSON-RPC endpoint |
-| `src/app/api/services/route.ts` | new | Services API |
-| `src/app/auth.md/route.ts` | new | auth.md handler |
-| `AGENT.md` | new | This file |
-| `scripts/verify-agent-ready.sh` | new | Verification script |
+При втраті контексту, збої середовища або запуску нової сесії, я зобов'язаний виконати наступні кроки:
+
+1. **Перевірити статус Git:** Виконати `git status` та `git diff`, щоб зрозуміти, на чому зупинилась робота.
+2. **Прочитати `TEMP/SESSION_LOG.md`:** Побачити історію всіх сесій.
+3. **Прочитати `TEMP/PROGRESS.md`:** Дізнатись, який етап виконувався останнім.
+4. **Погодити продовження:** Коротко резюмувати для користувача: "Ми зупинились на задачі X. У git є незакомічені файли Y. Продовжуємо з цього місця?".
+
+## 4\. Строгие правила разработки (Workflow Rules)
+
+* **Атомарность:** Выполняй строго ОДНУ задачу из `temp/tasks-backlog.md` за раз. Не пытайся фиксить SEO, если текущая задача — настройка ESLint.
+* **Организация Git коммитов:** Не делай коммит всех изменений разом (`git commit -am`). Разделяй коммиты по смыслу (например, `feat: add cookie banner`, `chore: setup eslint`, `i18n: sync uk translations`).
+* **Самодокументирование:** После завершения каждой задачи или логического блока, ты **обязан** обновить файл `temp/PROGRESS.md`, отметив выполненное чекбоксом `\[x]` и записав дату/время.
+* **Безопасность среды Cloudflare:** Не используй Node.js API (например, `fs`, `child\_process`), которые не поддерживаются в Cloudflare Workers, если код выполняется в рантайме браузера или Edge.
+* **Запрос разрешений:** Перед выполнением деструктивных команд (удаление файлов, хард-ресет git, масштабный рефакторинг) — всегда запрашивай подтверждение у пользователя.
+
+## 5\. Порядок выполнения задач
+
+1. Получив команду начать работу, прочитай `temp/tasks-backlog.md`.
+2. Выбери первую невыполненную задачу (или ту, на которую указал пользователь).
+3. Проанализируй файлы, связанные с задачей.
+4. Выполни изменения.
+5. Протестируй сборку: `npm run build` (или аналогичную команду проекта), чтобы убедиться, что типизация и билд не сломаны.
+6. Обнови `temp/PROGRESS.md`.
+7. Запроси подтверждение пользователя на создание Git-коммита.
+

@@ -10,6 +10,19 @@ import { Link } from '@/i18n/routing'
 import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
 import type { NavItem } from '@/types'
 
+/* ── Translate MAIN_NAV labels via locale keys ── */
+
+function translateNav(items: NavItem[], t: (key: string) => string): NavItem[] {
+  return items.map(item => ({
+    label: t(getNavLabelKey(item.href)),
+    href: item.href,
+    children: item.children?.map(child => ({
+      label: t(getNavLabelKey(child.href)),
+      href: child.href,
+    })),
+  }))
+}
+
 /* ── Nav label key mapping ── */
 
 const NAV_LABEL_KEYS: Record<string, string> = {
@@ -118,17 +131,15 @@ function MobileNavItem({
   pathname,
   onClose,
   index,
-  t,
 }: {
   item: NavItem
   pathname: string
   onClose: () => void
   index: number
-  t: (key: string) => string
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const hasChildren = item.children && item.children.length > 0
-  const label = t(getNavLabelKey(item.href))
+  const label = item.label
 
   if (!hasChildren) {
     const active = isActive(pathname, item.href)
@@ -193,9 +204,8 @@ function MobileNavItem({
             className="overflow-hidden"
           >
             <div className="ml-8 mt-1 space-y-1 pb-1 pl-4 border-l border-gold/[0.12]">
-              {item.children!.map((child) => {
-                const childActive = isActive(pathname, child.href)
-                const childLabel = t(getNavLabelKey(child.href))
+              {item.children!.map((child) => {                  const childActive = isActive(pathname, child.href)
+                const childLabel = child.label
                 return (
                   <Link
                     key={child.href}
@@ -243,7 +253,7 @@ function DesktopDropdown({ item, pathname, t }: { item: NavItem; pathname: strin
 
   const hasChildren = item.children && item.children.length > 0
   const active = isActive(pathname, item.href)
-  const label = t(getNavLabelKey(item.href))
+  const label = item.label
 
   if (!hasChildren) {
     return (
@@ -302,9 +312,8 @@ function DesktopDropdown({ item, pathname, t }: { item: NavItem; pathname: strin
             <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" aria-hidden="true" />
 
             <nav aria-label={t('nav.submenu')} className="relative z-10">
-              {item.children!.map((child) => {
-                const childActive = isActive(pathname, child.href)
-                const childLabel = t(getNavLabelKey(child.href))
+              {item.children!.map((child) => {                    const childActive = isActive(pathname, child.href)
+                const childLabel = child.label
                 return (
                   <Link
                     key={child.href}
@@ -497,13 +506,16 @@ function Logo({ authorName, authorTitle }: { authorName: string; authorTitle: st
 
 /* ── Header Component ── */
 
-export default function Header() {
+export default function Header({ navItems }: { navItems?: NavItem[] }) {
   const pathname = usePathname()
   const t = useTranslations('common')
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [pageTop, setPageTop] = useState(true)
   const { isMobile } = useDeviceCapabilities()
+
+  // Use D1 nav items if provided, otherwise translate MAIN_NAV
+  const actualNav = navItems ?? translateNav(MAIN_NAV, t)
 
   const isHome = pathname === '/' || pathname === '/ru' || pathname === '/uk'
   const shouldBeSolid = !isHome || scrolled
@@ -570,7 +582,7 @@ export default function Header() {
             {/* ── Desktop Navigation ── */}
             <nav className="hidden lg:flex items-center" aria-label={t('nav.main')}>
               <ul className="flex items-center gap-0.5">
-                {MAIN_NAV.map((item) => (
+                {actualNav.map((item) => (
                   <DesktopDropdown key={item.href} item={item} pathname={pathname} t={t} />
                 ))}
               </ul>
@@ -677,14 +689,13 @@ export default function Header() {
 
               <nav className="px-4 pb-8" aria-label={t('nav.mobile')}>
                 <div className="space-y-1">
-                  {MAIN_NAV.map((item, idx) => (
+                  {actualNav.map((item, idx) => (
                     <MobileNavItem
                       key={item.href}
                       item={item}
                       pathname={pathname}
                       onClose={() => setMobileOpen(false)}
                       index={idx}
-                      t={t}
                     />
                   ))}
                 </div>

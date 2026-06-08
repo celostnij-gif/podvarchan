@@ -3,6 +3,7 @@ import { getTranslations, getMessages } from 'next-intl/server'
 import { SITE } from '@/constants'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { aggregateRatingSchema } from '@/lib/schema'
+import { getPublishedTestimonials } from '@/lib/content'
 import type { Testimonial } from '@/types'
 import HomeClient from './home-client'
 
@@ -64,7 +65,24 @@ export default async function HomePage({
   const webPageSchema = await getWebPageSchema(locale)
 
   /* ── AggregateRating schema from testimonials ── */
-  const testimonials = (messages?.testimonials?.items as Testimonial[]) ?? []
+  let testimonials: Testimonial[] = []
+  try {
+    const fromDb = await getPublishedTestimonials(locale)
+    if (fromDb && fromDb.length > 0) {
+      testimonials = fromDb.map(t => ({
+        id: t.id,
+        name: t.clientName,
+        text: t.translation.text,
+        result: t.translation.result ?? '',
+        rating: t.rating ?? 5,
+      }))
+    }
+  } catch {
+    // D1 not available
+  }
+  if (testimonials.length === 0) {
+    testimonials = (messages?.testimonials?.items as Testimonial[]) ?? []
+  }
   const reviews = testimonials.map((t, i) => ({
     author: t.name,
     rating: t.rating ?? 5,

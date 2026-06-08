@@ -64,6 +64,8 @@ export interface PageMeta {
   modifiedTime?: string
   author?: string
   noIndex?: boolean
+  articleTags?: string[]
+  articleSection?: string
 }
 
 /* ── Navigation ── */

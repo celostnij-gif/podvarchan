@@ -6,6 +6,8 @@ import { personSchema, medicalBusinessSchema } from '@/lib/schema'
 import { buildCanonical } from '@/lib/seo/metadata'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import type { FooterServiceItem, FooterCategoryItem } from '@/components/layout/Footer'
+import { getPublishedNavigation, getPublishedServices, getPublishedBlogCategories } from '@/lib/content'
 
 import GoogleAnalytics from '@/components/GoogleAnalytics'
 import CookieBanner from '@/components/CookieBanner'
@@ -74,6 +76,29 @@ export default async function LocaleLayout({
   const messages = await getMessages()
   const t = await getTranslations({ locale, namespace: 'common' })
 
+  /* ── D1 navigation & footer data ── */
+  const [d1Nav, d1Services, d1Categories] = await Promise.all([
+    getPublishedNavigation('HEADER', locale),
+    getPublishedServices(locale),
+    getPublishedBlogCategories(locale),
+  ])
+
+  const navItems = d1Nav.length > 0
+    ? d1Nav.map(n => ({
+        label: n.label,
+        href: n.href,
+        children: n.children.map(c => ({ label: c.label, href: c.href })),
+      }))
+    : undefined
+
+  const footerServices: FooterServiceItem[] | undefined = d1Services.length > 0
+    ? d1Services.map(s => ({ slug: s.slugBase, title: s.translation.shortTitle ?? s.translation.title }))
+    : undefined
+
+  const footerCategories: FooterCategoryItem[] | undefined = d1Categories.length > 0
+    ? d1Categories.map(c => ({ slug: c.translation.slug, name: c.translation.name }))
+    : undefined
+
   /* ── JSON-LD Schema ── */
   const jsonLdSchemas = [
     personSchema({ jobTitle: t('authorTitle') }),
@@ -118,7 +143,7 @@ export default async function LocaleLayout({
 
       <DeviceProvider>
         <ToastProvider>
-          <Header />
+          <Header navItems={navItems} />
 
           <main id="main-content" className="flex-1">
             <BreadcrumbsProvider>
@@ -128,7 +153,7 @@ export default async function LocaleLayout({
           </main>
         </ToastProvider>
 
-        <Footer locale={locale} />
+        <Footer locale={locale} services={footerServices} blogCategories={footerCategories} />
       </DeviceProvider>
 
       <GoogleAnalytics />

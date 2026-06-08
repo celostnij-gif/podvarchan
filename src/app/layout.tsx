@@ -106,6 +106,8 @@ export default async function RootLayout({
             `,
           }}
         />
+
+
         {children}
         <WebMCPProvider />
       </body>
