@@ -21,6 +21,20 @@ const skillsIndex = {
       url: 'https://podvarchan.com/.well-known/agent-skills/services.md',
       sha256: '652285e981205fb6e9296eee9bb07edba455beeefdb28f0d6c93f3b845fc4466',
     },
+    {
+      name: 'hypnotherapy-faq',
+      type: 'resource',
+      description: 'Access frequently asked questions about hypnotherapy',
+      url: 'https://podvarchan.com/.well-known/agent-skills/faq.md',
+      sha256: '943eeebffef5939828194296f4576e584724702b785f4fe91c6f95813efe25c6',
+    },
+    {
+      name: 'client-testimonials',
+      type: 'resource',
+      description: 'Access client testimonials and success stories',
+      url: 'https://podvarchan.com/.well-known/agent-skills/testimonials.md',
+      sha256: 'e7a6117458e83fba19abccd955a669c96d13ba7470c1322c9e6a2f65dbb6d555',
+    },
   ],
 }
 
