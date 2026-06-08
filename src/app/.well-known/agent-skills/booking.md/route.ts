@@ -1,4 +1,8 @@
-# Booking Skill
+import { NextResponse } from 'next/server'
+
+export const runtime = 'edge'
+
+const CONTENT = `# Booking Skill
 
 ## Description
 
@@ -12,3 +16,15 @@
 ## Output
 
 Ссылка на форму записи или контактная информация.
+`
+
+export async function GET() {
+  return new NextResponse(CONTENT, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/markdown; charset=utf-8',
+      'Cache-Control': 'public, max-age=3600',
+      'Access-Control-Allow-Origin': '*',
+    },
+  })
+}

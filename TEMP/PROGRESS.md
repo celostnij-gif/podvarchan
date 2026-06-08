@@ -565,7 +565,7 @@ Cloudflare перевіряв 8 критеріїв — всі вони вже б
 
 | Пріоритет | Задача | Статус |
 |-----------|--------|--------|
-| P0 | Оновити CLOUDFLARE_API_TOKEN в GitHub Secrets | ❌ Блокер деплою |
+| P0 | Оновити CLOUDFLARE_API_TOKEN в GitHub Secrets | ✅ Токен робочий, деплой працює |
 | P2 | Підключити `/api/services` до Cloudflare D1 | 🔜 Очікує |
 | P2 | Створити `/api/docs` — HTML документація | 🔜 Очікує |
 | P2 | E2E тести для .well-known endpoint'ів | 🔜 Очікує |

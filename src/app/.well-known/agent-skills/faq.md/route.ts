@@ -1,4 +1,8 @@
-# FAQ Skill
+import { NextResponse } from 'next/server'
+
+export const runtime = 'edge'
+
+const CONTENT = `# FAQ Skill
 
 ## Description
 
@@ -33,3 +37,15 @@
 ## Output
 
 Список вопросов и ответов, сгруппированных по категориям.
+`
+
+export async function GET() {
+  return new NextResponse(CONTENT, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/markdown; charset=utf-8',
+      'Cache-Control': 'public, max-age=3600',
+      'Access-Control-Allow-Origin': '*',
+    },
+  })
+}

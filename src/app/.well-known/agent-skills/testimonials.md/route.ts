@@ -1,4 +1,8 @@
-# Testimonials Skill
+import { NextResponse } from 'next/server'
+
+export const runtime = 'edge'
+
+const CONTENT = `# Testimonials Skill
 
 ## Description
 
@@ -48,3 +52,15 @@
 
 Массив объектов: { name, text, result } с отзывами клиентов.
 Total: 10 отзывов (ru).
+`
+
+export async function GET() {
+  return new NextResponse(CONTENT, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/markdown; charset=utf-8',
+      'Cache-Control': 'public, max-age=3600',
+      'Access-Control-Allow-Origin': '*',
+    },
+  })
+}
