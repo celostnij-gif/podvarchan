@@ -30,6 +30,8 @@ export async function generateMetadata({ params }: Props) {
     publishedTime: post.datePublished,
     modifiedTime: post.dateModified,
     author: post.author,
+    articleTags: post.keywords,
+    articleSection: post.categoryName,
     locale,
   })
 }

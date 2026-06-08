@@ -21,6 +21,15 @@ export function buildCanonical(path: string, locale: string): string {
 }
 
 /**
+ * Преобразует относительный путь к изображению в абсолютный URL.
+ */
+function absoluteUrl(path: string | undefined): string | undefined {
+  if (!path) return undefined
+  if (path.startsWith('http://') || path.startsWith('https://')) return path
+  return `${SITE.url}${path.startsWith('/') ? '' : '/'}${path}`
+}
+
+/**
  * Генерирует полный объект Metadata для Next.js App Router.
  *
  * @example
@@ -43,13 +52,15 @@ export function generateMetadata({
   publishedTime,
   modifiedTime,
   author,
+  articleTags,
+  articleSection,
   noIndex,
   path,
   locale = 'ru',
 }: GenerateMetadataParams): Metadata {
   const langPrefix = locale === 'ru' ? '/ru' : '/uk'
   const canonicalUrl = canonical ?? `${SITE.url}${langPrefix}${path}/`
-  const imageUrl = ogImage ?? `${SITE.url}${SITE.defaultOgImage}`
+  const imageUrl = absoluteUrl(ogImage) ?? `${SITE.url}${SITE.defaultOgImage}`
 
   // Build other meta tags separately to avoid fragile type casting
   const other: Record<string, string> = {}
@@ -80,6 +91,12 @@ export function generateMetadata({
       siteName: SITE.fullName,
       locale,
       type: type === 'article' ? 'article' : 'website',
+      ...(type === 'article'
+        ? {
+            ...(articleTags?.length ? { tags: articleTags } : {}),
+            ...(articleSection ? { section: articleSection } : {}),
+          }
+        : {}),
       images: [
         {
           url: imageUrl,

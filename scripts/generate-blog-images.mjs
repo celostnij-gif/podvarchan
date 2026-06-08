@@ -150,6 +150,30 @@ const IMAGES = [
     symbol: '👶',
     accent: COLORS.accentCoral,
   },
+  {
+    slug: 'net-sil-chto-delat',
+    title: 'Нет сил',
+    sub: 'Хроническая усталость и подсознание',
+    gradient: ['#2D1B1B', '#1B1B2D'],
+    symbol: '🔋',
+    accent: COLORS.accentRose,
+  },
+  {
+    slug: 'postoyannaya-ustalost-prichiny',
+    title: 'Постоянная усталость',
+    sub: 'Причины скрытые в подсознании',
+    gradient: ['#2D2D1B', '#1B1B1B'],
+    symbol: '💤',
+    accent: COLORS.gold,
+  },
+  {
+    slug: 'vliyanie-pesen-na-kachestvo-zhizni',
+    title: 'Влияние песен',
+    sub: 'Музыка и качество жизни',
+    gradient: ['#1B2D2D', '#2A2A4A'],
+    symbol: '🎵',
+    accent: COLORS.accentTeal,
+  },
 ]
 
 function svgContent({ title, sub, gradient, symbol, accent }) {
