@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server'
 
-export const runtime = 'edge'
-
 const skillsIndex = {
   $schema: 'https://agentskills.io/schemas/v0.2.0/index.json',
   version: '0.2.0',

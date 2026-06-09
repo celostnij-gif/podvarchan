@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server'
 
-export const runtime = 'edge'
-
 const pluginManifest = {
   schema_version: 'v1',
   name_for_model: 'podvarchan_hypnotherapy',

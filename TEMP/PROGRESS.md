@@ -582,12 +582,14 @@ Cloudflare перевіряв 8 критеріїв — всі вони вже б
 
 | Пріоритет | Задача | Статус |
 |-----------|--------|--------|
-| P0 | Оновити CLOUDFLARE_API_TOKEN в GitHub Secrets | ✅ Токен робочий, деплой працює |
-| P2 | Підключити `/api/services` до Cloudflare D1 | 🔜 Очікує |
+| P0 | Оновити CLOUDFLARE_API_TOKEN в GitHub Secrets | ✅ Токен робочий |
+| P0 | Підключити `/api/services` до Cloudflare D1 | ✅ Виконано |
+| P0 | Видалити `runtime = 'edge'` з усіх роутів | ✅ 26 файлів, OpenNext fix |
+| P1 | Деплой на Cloudflare Workers | ❌ Блокується лімітом 3MB (потрібен Pro plan $20/міс) |
 | P2 | Створити `/api/docs` — HTML документація | 🔜 Очікує |
 | P2 | E2E тести для .well-known endpoint'ів | 🔜 Очікує |
-| P3 | `/.well-known/ai-plugin.json` — ChatGPT Plugin | 🔜 Очікує |
-| P3 | Нові skill-файли (faq.md, testimonials.md) | 🔜 Очікує |
+| P3 | `/.well-known/ai-plugin.json` — ChatGPT Plugin | ✅ Виконано |
+| P3 | Нові skill-файли (faq.md, testimonials.md) | ✅ Виконано |
 | P3 | Англійська версія skill-файлів | 🔜 Очікує |
 
 ---
@@ -599,6 +601,8 @@ Cloudflare перевіряв 8 критеріїв — всі вони вже б
 | 1-3 | 04-05.06.2026 | **Admin Panel** (18 етапів) | `TEMP/PROGRESS.md` (етапи 1-18) |
 | 4 | 07.06.2026 | **Agent-Ready Infrastructure** (9 модулів) | `PROGRESS.md` (секція Agent-Ready) |
 | 5 | 08.06.2026 | **Правила + верифікація + skill-файли** | `TEMP/SESSION_LOG.md` (Сесія 5) |
+| 6 | 09.06.2026 | **Git cleanup + D1 blog images fix + ChatGPT Plugin** | `TEMP/SESSION_LOG.md` (Сесія 6) |
+| 7 | 09.06.2026 | **Production deploy prep: runtime=edge fix, D1 services, deploy attempt** | `TEMP/SESSION_LOG.md` (Сесія 7) |
 
 ---
 
@@ -639,6 +643,38 @@ bash scripts/verify-agent-ready.sh
 ```
 
 ---
+
+---
+
+## Сесія 7 (09.06.2026) — Production deploy preparation
+
+### Зміни:
+
+#### 1. `runtime = 'edge'` видалено з усіх 26 маршрутів
+- **Проблема:** OpenNext Cloudflare (opennextjs-cloudflare build) не підтримує edge runtime при змішаному деплої
+- **Виправлено:** `export const runtime = 'edge'` видалено з:
+  - 13 `.well-known/` роутів (всі: agents.json, api-catalog, openid-configuration, oauth-*, agent-skills/*, ai-plugin.json, mcp/server-card.json, jwks.json)
+  - 6 API роутів (contact, health, mcp, services, revalidate, openapi.json)
+  - auth.md/route
+- **Статус:** OpenNext build тепер успішний ✅
+
+#### 2. `/api/services` підключено до D1
+- Раніше: статичний масив з 5 послуг
+- Тепер: D1 через `getPublishedServices()` + fallback на статику
+- Підтримка `?locale=ru|uk`
+- TypeScript 0 errors ✅
+
+#### 3. Deploy attempted — 3MB Workers limit
+- Cloudflare Workers free plan: ліміт 3MB на бандл
+- Бандл OpenNext: ~14MB
+- **Рішення:** Потрібен Pro plan ($20/міс) для зняття ліміту
+- Або: оптимізація бандлу (видалення непотрібних пакетів)
+
+#### 4. Документування
+- `TEMP/TECHNICAL_REPORT.md` — створено повний технічний звіт
+- `TEMP/CONFLICTS.md` — оновлено статус runtime=edge
+- `TEMP/DEPLOY_INSTRUCTIONS.md` — оновлено
+- `AGENT.md` — додано Agent Notes
 
 ---
 

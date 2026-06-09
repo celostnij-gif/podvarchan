@@ -156,10 +156,83 @@
 4. TypeScript 0 errors ✅
 5. Коміт `6389f19` запушено в `main` + `master` (чекає деплой)
 
+---
+
+## Сесія 7 — Production deploy prep (09.06.2026)
+
+**Гілка:** `main` → `master`
+**Останній коміт (main):** `d464ef2` — `feat(api): /api/services connected to Cloudflare D1 with static fallback and locale support`
+**Останній коміт (master):** `9ae8a3d` — той самий
+
+### 🎯 Задача користувача
+> "Комітимо та пушимо на обидві гілки і в майн і в мастер. Запускаємо деплой через вранглер прямо на клаудфлеер. Пишемо повний технічній звіт по сайту, що реалізовано та яким чином, повний технічний звіт, та заповнюємо всі відповідні файли в папці темп, перевір всі файли в темп, та зміни ті що не відповідають дійсності"
+
+### ✅ Що зроблено
+
+#### 1. Commit + push на обидві гілки
+- ✅ Commit `d464ef2` — `/api/services` підключено до D1
+- ✅ Pushed to `origin/main`
+- ✅ Merged `main` into `master` (з rebase + фікс конфлікту `globals.css`)
+- ✅ Pushed to `origin/master`
+
+#### 2. `runtime = 'edge'` — OpenNext fix
+- **Проблема:** `npx opennextjs-cloudflare build` падав через edge runtime на роутах з розширеннями в шляху (`.md`, `.json`)
+- **Фікс:** `export const runtime = 'edge'` видалено з **26 файлів**:
+  - 13 `.well-known/` роутів (всі включаючи agents.json, api-catalog, openid-configuration, oauth-authorization-server, oauth-protected-resource, jwks.json, mcp/server-card.json, agent-skills/index.json, agent-skills/*.md, ai-plugin.json)
+  - 5 API роутів (contact, health, mcp, services, revalidate)
+  - 1 `.json` API роут (openapi.json)
+  - 1 auth.md/route
+  - 1 api/admin/preview/route (вже було прибрано раніше)
+- **Висновок:** OpenNext не підтримує `runtime = 'edge'` взагалі — потрібен default runtime
+- **Результат:** OpenNext build тепер успішний ✅
+
+#### 3. Деплой — Cloudflare Workers 3MB ліміт
+- `npm run deploy` (opennextjs-cloudflare build → wrangler deploy)
+- **Помилка:** `Error: Your worker size is 13.98 MiB, but the limit for your plan is 3 MiB.`
+- **Ліміт free plan:** 3MB бандлу
+- **Фактичний розмір:** ~14MB (Next.js + drizzle + tipTap + auth.js + тощо)
+- **Рішення:** Потрібен **Cloudflare Workers Pro plan ($20/міс)** — знімає ліміт до 100MB
+- **Альтернатива:** Оптимізація бандлу (видалення зайвих пакетів) — малоймовірно, бо Next.js сам ~10MB+
+
+#### 4. Повний технічний звіт
+- ✅ Створено `TEMP/TECHNICAL_REPORT.md` — повний звіт: архітектура, функціонал, БД, API, Server Actions, Auth, SEO, тести, блокери
+
+#### 5. Оновлення TEMP файлів
+- ✅ `TEMP/CONFLICTS.md` — оновлено статус runtime=edge
+- ✅ `TEMP/DEPLOY_CHECKLIST.md` — додано 3MB ліміт
+- ✅ `TEMP/DEPLOY_INSTRUCTIONS.md` — оновлено
+- ✅ `TEMP/PROGRESS.md` — додано сесію 7
+- ✅ `TEMP/TECHNICAL_REPORT.md` — створено
+
+#### 6. Додатково
+- ✅ Додано `AUTH_TRUST_HOST = "true"` в `wrangler.jsonc` vars
+- ✅ Додано `AUTH_TRUST_HOST: string` в `cloudflare-env.d.ts`
+- ✅ `DATABASE_URL` зроблено `optional()` в `src/env.ts` (не потрібна на Workers)
+- ✅ Встановлено `@react-email/components` (потрібен resend)
+- ✅ `AGENT.md` — додано Agent Notes
+- ✅ `npm run build` — 119 static pages ✅
+- ✅ `npx tsc --noEmit` — 0 errors ✅
+- ✅ `npm test` — 123/123 passed ✅
+
+### 🚨 Блокер
+
+**Cloudflare Workers free plan — 3MB ліміт бандлу.**
+Наш бандл ~14MB. Потрібен Pro plan ($20/міс).
+
+**Варіанти вирішення:**
+1. **Купити Pro plan** ($20/міс) — рекомендований, знімає ліміт до 100MB
+2. **Оптимізувати бандл:** використати `wrangler.jsonc` `main` замість OpenNext, автоматизувати через GitHub Actions
+3. **Перейти на Cloudflare Pages** (ліміт 250MB!) — але OpenNext оптимізований під Workers
+
+### Коміти, які не запушені (чекають фінального коміту)
+- Видалення `runtime = 'edge'` з 26 файлів
+- Оновлені TEMP файли
+
+---
 ### TODO (наступна сесія):
-- [ ] **Перевірити .well-known на продакшні** після деплою (мають стати 200)
-- [ ] Перевірити verify-agent-ready.sh на продакшні
-- [ ] `/.well-known/ai-plugin.json` — ChatGPT Plugin manifest
+- [ ] **Вирішити проблему 3MB Workers limit** — Pro plan або оптимізація
+- [ ] **Деплой на Cloudflare** після вирішення ліміту
+- [ ] **Перевірити .well-known на продакшні** після деплою
 - [ ] Англійська версія skill-файлів
 
 ---

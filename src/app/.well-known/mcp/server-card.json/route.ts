@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server'
 import { mcpTools } from '@/lib/mcp/tools'
 
-export const runtime = 'edge'
-
 const serverCard = {
   schema_version: '1.0',
   serverInfo: {

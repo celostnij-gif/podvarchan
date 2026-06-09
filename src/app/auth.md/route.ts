@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server'
 
-export const runtime = 'edge'
-
 const CONTENT = `# Authentication Guide for AI Agents — podvarchan.com
 
 ## Overview
