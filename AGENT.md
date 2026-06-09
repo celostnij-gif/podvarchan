@@ -44,6 +44,34 @@
 
 ## 🧠 ПРАВИЛО №3: Пам'ять сесій (НАЙВАЖЛИВІШЕ ДЛЯ КОНТЕКСТУ)
 
+---
+
+## Agent Notes (додаються 09.06.2026)
+
+### Технічні нюанси, виявлені при підготовці до деплою
+
+1. **Cloudflare Workers runtime:**
+   - Проект використовує `getCloudflareContext()` з `@opennextjs/cloudflare`, а не `getRequestContext()` з `@cloudflare/next-on-pages`
+   - `next-auth` v4 (`next-auth` пакет) НЕ підтримує edge runtime, тому API routes, які його використовують (`api/auth/[...nextauth]`, `api/admin/preview`), не можуть мати `export const runtime = 'edge'`
+   - `AUTH_TRUST_HOST=true` встановлюється через wrangler.jsonc vars (не у конфігурації Auth.js)
+
+2. **D1 Database доступ:**
+   - Єдиний правильний спосіб: `getCloudflareContext().env.DB` або `getActionDb()` в Server Actions
+   - `DATABASE_URL` використовується тільки `drizzle-kit` локально, не на Workers runtime
+
+3. **sharp пакет:**
+   - `sharp ^0.34.5` встановлений в `devDependencies`
+   - Використовується тільки в build-скриптах (`scripts/generate-blog-image.mjs` тощо)
+   - Жоден з цих скриптів не виконується на Cloudflare Workers — це безпечно
+
+4. **Drizzle snapshot формат:**
+   - Міграції `0001_snapshot.json` мають legacy формат (попередження при `drizzle-kit generate`)
+   - Це не блокує деплой, але потребує оновлення при наступній генерації міграцій
+
+5. **Файли конфігурації:**
+   - Проект використовує `wrangler.jsonc` (не `wrangler.toml`) — сучасний формат Wrangler v4
+   - `next.config.mjs` містить rewrites для A2A та Markdown for Agents
+
 **Проблема:** Між сесіями (новими запусками) я не пам'ятаю, що було зроблено раніше. Користувач змушений повторювати контекст.
 
 **Рішення — трирівнева система пам'яті:**

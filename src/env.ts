@@ -35,7 +35,9 @@ const envSchema = z.object({
   /* ═══════════════════════
      АДМІН-ПАНЕЛЬ — БАЗА ДАНИХ
      ═══════════════════════ */
-  DATABASE_URL: z.string().min(1, 'DATABASE_URL is required for admin panel'),
+  // DATABASE_URL — опціонально: потрібна тільки для drizzle-kit (локально),
+  // не використовується на Cloudflare Workers runtime (там D1 binding)
+  DATABASE_URL: z.string().optional(),
   CLOUDFLARE_ACCOUNT_ID: z.string().min(1, 'CLOUDFLARE_ACCOUNT_ID is required'),
   CLOUDFLARE_DATABASE_ID: z.string().min(1, 'CLOUDFLARE_DATABASE_ID is required'),
 

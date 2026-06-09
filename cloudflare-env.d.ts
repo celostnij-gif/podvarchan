@@ -47,6 +47,7 @@ interface __BaseEnv_CloudflareEnv {
 	NEXT_PUBLIC_GA_ID: string;
 	NEXT_PUBLIC_TURNSTILE_SITE_KEY: string;
 	CONTACT_EMAIL: string;
+	AUTH_TRUST_HOST: string;
 	WORKER_SELF_REFERENCE: Fetcher /* podvarchan */;
 	RATE_LIMIT_KV?: KVNamespace;
 }
