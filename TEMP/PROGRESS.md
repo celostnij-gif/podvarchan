@@ -489,6 +489,15 @@
 - [x] **blog/kategoriya/[cat]/page.tsx** — той самий підхід
 - TypeScript 0 errors ✅
 
+#### ✅ ChatGPT Plugin manifest
+- [x] **src/app/.well-known/ai-plugin.json/route.ts** — створено
+- [x] **agents.json** — додано `chatgpt_plugin` reference
+- TypeScript 0 errors ✅
+
+#### 🔍 Порівняння localhost vs podvarchan.com
+- [x] Браузерна перевірка: blog list, blog article, homepage
+- [x] Всі картинки завантажуються, 0 консольних помилок
+
 ### Пріоритет 2 (функціонал)
 
 - [ ] **Підключити `/api/services` до Cloudflare D1** — замість статичного масиву
@@ -497,8 +506,7 @@
 
 ### Пріоритет 3 (розширення)
 
-- [ ] **/.well-known/ai-plugin.json** — ChatGPT Plugin manifest
-- [ ] **Нові skill-файли** (faq.md, testimonials.md)
+- [x] **/.well-known/ai-plugin.json** — ChatGPT Plugin manifest ✅
 - [ ] **Англійська версія skill-файлів** для консистентності з index.json
 
 ---
