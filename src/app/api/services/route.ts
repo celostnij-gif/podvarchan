@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import { getPublishedServices } from '@/lib/content'
 
-export const runtime = 'edge'
-
 /* ── Service type ── */
 
 interface ServiceResponse {

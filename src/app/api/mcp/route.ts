@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { mcpTools, type McpToolDefinition } from '@/lib/mcp/tools'
 
-export const runtime = 'edge'
-
 /* ── Types ── */
 
 interface JsonRpcRequest {

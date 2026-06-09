@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server'
 
-export const runtime = 'edge'
-
 export async function GET() {
   // Auth.js uses HS256 (symmetric) with AUTH_SECRET by default,
   // which means there are no public RSA/EC keys to expose.
