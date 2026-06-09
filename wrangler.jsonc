@@ -36,7 +36,8 @@
 		"NEXT_PUBLIC_SITE_URL": "https://podvarchan.com",
 		"NEXT_PUBLIC_GA_ID": "G-42W6951F8L",
 		"NEXT_PUBLIC_TURNSTILE_SITE_KEY": "0x4AAAAAADYZ2z3RysEsBoQu",
-		"CONTACT_EMAIL": "podvarchan@gmail.com"
+		"CONTACT_EMAIL": "podvarchan@gmail.com",
+		"AUTH_TRUST_HOST": "true"
 	},
 
 	"env": {

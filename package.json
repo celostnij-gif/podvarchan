@@ -43,16 +43,17 @@
     "eslint-config-next": "16.2.6",
     "husky": "^9.1.7",
     "lint-staged": "^17.0.7",
+    "sharp": "^0.34.5",
     "tsx": "^4.22.4",
     "typescript": "^5.9.3",
     "vitest": "^4.1.8",
-    "wrangler": "^4.95.0",
-    "sharp": "^0.34.5"
+    "wrangler": "^4.95.0"
   },
   "dependencies": {
     "@auth/core": "^0.34.3",
     "@hookform/resolvers": "^5.4.0",
     "@opennextjs/cloudflare": "^1.19.11",
+    "@react-email/components": "^1.0.12",
     "@stablelib/nacl": "^2.0.1",
     "@tiptap/extension-blockquote": "^3.25.0",
     "@tiptap/extension-bullet-list": "^3.25.0",

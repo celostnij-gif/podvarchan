@@ -16,9 +16,9 @@
  * Лінива ініціалізація (lazy) — щоб уникнути падіння під час `next build`
  * (Cloudflare Worker контекст недоступний на етапі збірки).
  *
- * ⚠️  Для Cloudflare Workers обов'язково встановити змінну:
- *   AUTH_TRUST_HOST=true
- * (або при деплої: npx wrangler secret put AUTH_TRUST_HOST)
+ * ⚠️  Для Cloudflare Workers обов'язково:
+ *   - `AUTH_TRUST_HOST=true` в wrangler.jsonc vars (встановлено)
+ *   - або через `npx wrangler secret put AUTH_TRUST_HOST`
  */
 
 import NextAuth, { getServerSession } from 'next-auth'
@@ -248,6 +248,7 @@ function buildConfig(): AuthOptions {
       strategy: 'jwt',
       maxAge: 24 * 60 * 60,
     },
+
   }
 }
 
