@@ -9,6 +9,7 @@ const CONTENT = {
   agents: {
     index: '/_a2a/index',
     mcp: '/.well-known/mcp/server-card.json',
+    chatgpt_plugin: '/.well-known/ai-plugin.json',
   },
 }
 

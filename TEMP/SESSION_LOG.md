@@ -195,6 +195,25 @@
 **TypeScript:** 0 errors ✅
 **Code Review:** схвалено, зауваження виправлено (динамічні імпорти → статичні)
 
-#### 3. Документування
+#### 3. ✅ ChatGPT Plugin manifest (ai-plugin.json)
+- Створено `src/app/.well-known/ai-plugin.json/route.ts` — ChatGPT Plugin manifest
+- Містить: name_for_model, description_for_model, auth (none), api → `/api/openapi.json`, logo_url, contact_email, legal_info_url
+- Оновлено `src/app/.well-known/agents.json/route.ts` — додано `chatgpt_plugin` reference
+- TypeScript 0 errors ✅
+
+#### 4. 🔍 Порівняння localhost vs podvarchan.com
+- **Браузерна перевірка:** `/ru/blog/`, `/ru/blog/chto-takoe-gipnoterapiya/`, `/ru/`
+- **Результат:** Сайти функціонально ідентичні
+- **Картинки:** Всі завантажуються на обох версіях (фікс працює) ✅
+- **Консоль:** 0 помилок на обох версіях
+- **Єдина відмінність:** Cookie consent банер (присутній тільки на продакшні — це нормально)
+
+#### 5. 🔧 Виправлено ESLint (Toast.tsx)
+- `src/components/Toast.tsx` — unused param `message` → `_message`
+
+#### 6. Документування
 - Оновлено `TEMP/SESSION_LOG.md` (цей запис)
 - Оновлено `TEMP/PROGRESS.md` (позначено виконані задачі)
+
+### Коміти в цій сесії:
+- `91bc231` — `chore: cleanup gitignore + fix blog images missing from D1`
