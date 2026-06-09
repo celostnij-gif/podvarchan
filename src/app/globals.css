@@ -138,7 +138,7 @@
     background-position:
       15% 25%, 75% 55%, 45% 15%, 90% 75%, 30% 85%, 55% 40%, 10% 90%;
 
-    animation: glow-wander 60s ease-in-out infinite;
+    animation: glow-wander 100s ease-in-out infinite;
     will-change: background-position;
 
     /* Mask: glow only visible through the dot pattern, matching body's background dots.

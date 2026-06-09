@@ -25,7 +25,7 @@
 
 
 	"d1_databases": [
-		{ "binding": "DB", "database_name": "podvarchan", "database_id": "e0b3655c34f090e1d6e4e9f04a2424f29ce8b496f43f1e9b9089400882d4b2f1" }
+		{ "binding": "DB", "database_name": "podvarchan", "database_id": "ea2c9727-65f8-4d36-8ff1-5cfb2f4cef36" }
 	],
 
 	"kv_namespaces": [

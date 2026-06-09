@@ -44,6 +44,7 @@ next-env.d.ts
 
 # cloudflare
 .wrangler/
+.wrangler-home/
 
 # generated images
 public/images/logo/
@@ -56,7 +57,17 @@ nul
 /twilight-block-e1cd/
 *.log
 
+# terminal output dumps
+output.txt
+response.txt
+
+# playwright test reports (generated)
+/playwright-report/
+/test-results/
+
+# local dev utility
+unlock-dir.ps1
+
 # uploaded media (from admin panel)
 public/uploads/
 
-README.md

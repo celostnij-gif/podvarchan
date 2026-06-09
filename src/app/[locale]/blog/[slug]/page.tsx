@@ -1,6 +1,10 @@
 import { notFound } from 'next/navigation'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getBlogPost, getAllBlogSlugs, getAllBlogPosts, formatDate, getBlogPostBySlug } from '@/lib/content'
+import { getCloudflareContext } from '@opennextjs/cloudflare'
+import { getDb } from '@/db'
+import { eq, and } from 'drizzle-orm'
+import * as s from '@/db/schema'
 import { articleSchema } from '@/lib/schema'
 import { ClientBlogPost } from './client-page'
 
@@ -36,6 +40,31 @@ export async function generateMetadata({ params }: Props) {
   })
 }
 
+/* ── Helper: resolve category info from D1 ── */
+
+async function getCategoryInfoFromDb(categoryId: string, locale: string): Promise<{ name: string; slug: string } | null> {
+  try {
+    const ctx = getCloudflareContext()
+    const binding = (ctx.env as unknown as Record<string, unknown>).DB as D1Database | undefined
+    if (!binding) return null
+
+    const db = getDb(binding)
+    const [catTrans] = await db
+      .select()
+      .from(s.blogCategoryTranslations)
+      .where(and(
+        eq(s.blogCategoryTranslations.categoryId, categoryId),
+        eq(s.blogCategoryTranslations.locale, locale as 'ru' | 'uk'),
+      ))
+      .limit(1)
+
+    if (!catTrans) return null
+    return { name: catTrans.name, slug: catTrans.slug }
+  } catch {
+    return null
+  }
+}
+
 /* ── Try to fetch blog post from D1, fall back to static data ── */
 
 async function getPostData(slug: string, locale: string) {
@@ -48,6 +77,20 @@ async function getPostData(slug: string, locale: string) {
       const contentHtml = t.contentHtml ?? ''
       const contentJson = t.contentJson ?? '{}'
 
+      // Resolve image from static content (blog images are static files)
+      const staticPost = getBlogPost(slug)
+      const image = staticPost?.image ?? ''
+      const imageAlt = staticPost?.imageAlt ?? ''
+
+      // Resolve category name and slug from D1
+      let categoryName = ''
+      let categorySlug = ''
+      if (fromDb.categoryId) {
+        const categoryData = await getCategoryInfoFromDb(fromDb.categoryId, locale)
+        categoryName = categoryData?.name ?? ''
+        categorySlug = categoryData?.slug ?? ''
+      }
+
       return {
         title: t.title,
         body: contentHtml || contentJson,
@@ -55,11 +98,11 @@ async function getPostData(slug: string, locale: string) {
         author: '',
         datePublished: fromDb.publishedAt?.toISOString() ?? '',
         dateModified: fromDb.updatedAt?.toISOString() ?? '',
-        image: '',
-        imageAlt: '',
+        image,
+        imageAlt,
         readingTime: fromDb.readingMinutes,
-        categoryName: '',
-        categorySlug: '',
+        categoryName,
+        categorySlug,
         keywords: [] as string[],
         metaDescription: t.excerpt ?? '',
       }

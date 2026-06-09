@@ -6,7 +6,21 @@ const eslintConfig = [...nextCoreWebVitals, ...nextTypescript, {
     "@typescript-eslint/no-explicit-any": "warn",
   },
 }, {
-  ignores: ["node_modules/**", ".next/**", ".open-next/**", "twilight-block-e1cd/**", "out/**", "build/**", "next-env.d.ts"]
+  ignores: [
+    "node_modules/**",
+    ".next/**",
+    ".open-next/**",
+    ".wrangler/**",
+    ".wrangler-home/**",
+    "coverage/**",
+    "playwright-report/**",
+    "test-results/**",
+    "TEMP/**",
+    "twilight-block-e1cd/**",
+    "out/**",
+    "build/**",
+    "next-env.d.ts",
+  ]
 }];
 
 export default eslintConfig;

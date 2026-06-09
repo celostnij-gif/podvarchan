@@ -32,8 +32,8 @@ export function useToast(): ToastContextValue {
   if (!ctx) {
     // Fallback — если тост вызван вне провайдера, просто логируем
     return {
-      showToast: (_variant, message) =>
-        console.log('[Toast outside provider]', message),
+      showToast: (_variant, _message) =>
+        console.warn('[Toast] Использован вне ToastProvider. Убедитесь, что ToastProvider добавлен в layout.'),
     }
   }
   return ctx

@@ -123,7 +123,7 @@
 |--------|--------|
 | `CLOUDFLARE_API_TOKEN` в GitHub Secrets | ✅ **Токен робочий, деплой з master працює** |
 | `.env.local` для Cloudflare | ⬜ **Файл існує тільки з Turnstile keys** |
-| `.well-known` endpoints на продакшні | ⚠️ **agents.json 200, auth.md 200, решта — 404** |
+| `.well-known` endpoints на продакшні | ⚠️ **agents.json 200, auth.md 200, решта — 404 (чекає деплой)** |
 
 ### Що ще зроблено в цій сесії:
 - 🔍 **Технічний огляд** — порівняно локальний dev vs podvarchan.com онлайн
@@ -131,11 +131,70 @@
 - 📊 **Створено `TEMP/TECHNICAL_OVERVIEW.md`** — детальний технічний огляд з таблицями
 - 🤖 **robots.txt** — прибрано GPTBot, ChatGPT-User, `/*?*` блоки (коміт 0e0e647, запушено в main + master)
 - 📄 **.gitignore** — прибрано AGENT.md, додано `public/uploads/`
+- 🔬 **Діагностика .well-known 404** — знайдено кореневу причину та виправлено (коміт 6389f19)
 
-**Ключове відкриття:** Деякі Agent-Ready endpoint'и (agents.json + auth.md) працюють на продакшні після деплою. Решта 6 endpoint'ів (api-catalog, openid-configuration, oauth-*, mcp, agent-skills) повертають 404 — причина НЕ в токені (деплой працює). **Потребує діагностики:** роутинг OpenNext на Cloudflare Workers, middleware, або build output.
+**Ключове відкриття:** Деякі Agent-Ready endpoint'и (agents.json + auth.md) працюють на продакшні після деплою. Решта 6 endpoint'ів (api-catalog, openid-configuration, oauth-*, mcp, agent-skills) повертають 404 — причина НЕ в токені (деплой працює).
+
+### 🔬 Діагностика .well-known 404 (08.06.2026)
+
+**Коренева причина:** Cloudflare Workers з `assets` binding у `wrangler.jsonc` перехоплює всі запити під `/.well-known/`. Коли в `public/.well-known/` існують статичні файли (`agents.json`, skill-файли), Cloudflare копіює їх в `.open-next/assets/.well-known/`. Після цього Cloudflare починає обробляти ВСІ запити під `/.well-known/` на рівні assets — запити до нестатичних шляхів (`api-catalog`, `openid-configuration` тощо) ніколи не доходять до worker'а, отримуючи 404 напряму від asset-системи.
+
+**Докази:**
+- `agents.json` (статичний файл в `public/.well-known/`) — 200, бо Cloudflare віддає напряму з assets ✅
+- `auth.md` (роут-хендлер поза `.well-known/`, `public/auth.md` було видалено) — 200, бо немає конфлікту з assets ✅
+- Всі роут-хендлери в `src/app/.well-known/` — 404, бо Cloudflare перехоплює на рівні assets ❌
+
+**Виправлення (коміт 6389f19):**
+1. Видалено `public/.well-known/` (5 файлів: `agents.json`, `booking.md`, `services.md`, `faq.md`, `testimonials.md`)
+2. Створено 5 роут-хендлерів в `src/app/.well-known/`:
+   - `agents.json/route.ts` — повертає JSON агент-індексу
+   - `agent-skills/booking.md/route.ts` — повертає markdown
+   - `agent-skills/services.md/route.ts` — повертає markdown
+   - `agent-skills/faq.md/route.ts` — повертає markdown
+   - `agent-skills/testimonials.md/route.ts` — повертає markdown
+3. Після фіксу: немає `.well-known/` в assets → Cloudflare передає всі запити worker'у
+4. TypeScript 0 errors ✅
+5. Коміт `6389f19` запушено в `main` + `master` (чекає деплой)
 
 ### TODO (наступна сесія):
-- [ ] **Діагностика .well-known 404** — перевірити роутинг на Cloudflare Workers (OpenNext)
+- [ ] **Перевірити .well-known на продакшні** після деплою (мають стати 200)
 - [ ] Перевірити verify-agent-ready.sh на продакшні
 - [ ] `/.well-known/ai-plugin.json` — ChatGPT Plugin manifest
 - [ ] Англійська версія skill-файлів
+
+---
+
+## Сесія 6 — .gitignore очищення + фікс картинок блогу (D1)
+
+**Дата:** 09.06.2026
+**Гілка:** `main`
+
+### Що зроблено:
+
+#### 1. .gitignore — очищення сміття
+- Додано в .gitignore: `output.txt`, `response.txt`, `playwright-report/`, `test-results/`, `unlock-dir.ps1`
+- Виконано `git rm --cached` для всіх цих файлів (видалено з трекінгу)
+- Прибрано зайвий `README.md` з .gitignore (файл не існує)
+
+#### 2. 🐛 Фікс: зниклі картинки в блозі після D1
+
+**Проблема:** Після міграції на D1, при даних з бази поля `image` та `imageAlt` були порожніми рядками (`''`). Картинки — статичні файли в `public/images/blog/` — нікуди не ділися, але код їх не передавав у компоненти.
+
+**Виправлено в 3 файлах:**
+- `src/app/[locale]/blog/[slug]/page.tsx`:
+  - При даних з D1 — резолвить `image`/`imageAlt` зі статичних даних (`getBlogPost(slug)`)
+  - Додано `getCategoryInfoFromDb` — резолвить назву та slug категорії з D1
+  - Виправлено імпорти (прибрано unused, додано top-level static imports)
+
+- `src/app/[locale]/blog/page.tsx`:
+  - Додано `staticImageMap` з `BLOG_POST_METAS` — при даних з D1 підставляє `image`/`imageAlt`
+
+- `src/app/[locale]/blog/kategoriya/[cat]/page.tsx`:
+  - Той самий підхід з `staticImageMap` для сторінки категорії
+
+**TypeScript:** 0 errors ✅
+**Code Review:** схвалено, зауваження виправлено (динамічні імпорти → статичні)
+
+#### 3. Документування
+- Оновлено `TEMP/SESSION_LOG.md` (цей запис)
+- Оновлено `TEMP/PROGRESS.md` (позначено виконані задачі)

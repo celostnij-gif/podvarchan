@@ -13,6 +13,9 @@
 
 const BASE_URL = process.env.SEO_BASE_URL || 'http://localhost:3000'
 const MODE = process.env.SEO_MODE || 'static'
+const LIVE_RETRIES = Number(process.env.SEO_RETRIES ?? '3')
+const LIVE_DELAY_MS = Number(process.env.SEO_DELAY_MS ?? '1000')
+const LIVE_USER_AGENT = process.env.SEO_USER_AGENT ?? 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36'
 
 /* ── URL-и для перевірки (статичні, відомі) ── */
 
@@ -233,12 +236,27 @@ function sleep(ms) {
  */
 async function fetchPage(url) {
   const fullUrl = `${BASE_URL}${url}`
-  const resp = await fetch(fullUrl, {
-    redirect: 'manual',
-    signal: AbortSignal.timeout(10000),
-  })
-  const html = await resp.text()
-  return { html, status: resp.status }
+
+  for (let attempt = 1; attempt <= LIVE_RETRIES; attempt++) {
+    const resp = await fetch(fullUrl, {
+      redirect: 'follow',
+      signal: AbortSignal.timeout(15000),
+      headers: {
+        'User-Agent': LIVE_USER_AGENT,
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'ru-RU,ru;q=0.9,uk-UA;q=0.8,uk;q=0.7,en;q=0.6',
+      },
+    })
+    const html = await resp.text()
+
+    if (![429, 503].includes(resp.status) || attempt === LIVE_RETRIES) {
+      return { html, status: resp.status }
+    }
+
+    await sleep(750 * attempt)
+  }
+
+  throw new Error('fetch retry loop exhausted')
 }
 
 /**
@@ -278,7 +296,7 @@ async function liveCheck() {
     }
 
     // Невелика затримка, щоб не перевантажувати сервер
-    await sleep(100)
+    await sleep(LIVE_DELAY_MS)
   }
 
   return results
