@@ -41,18 +41,21 @@
 
 | Endpoint | Localhost | Production | Статус |
 |----------|-----------|------------|--------|
-| `/.well-known/agents.json` | 200 ✅ | 200 ✅ | ✅ Однаково (статичний файл) |
-| `/.well-known/api-catalog` | 200 ✅ | 404 ❌ | 🚨 Не задеплоєно |
-| `/.well-known/openid-configuration` | 200 ✅ | 404 ❌ | 🚨 Не задеплоєно |
-| `/.well-known/oauth-authorization-server` | 200 ✅ | 404 ❌ | 🚨 Не задеплоєно |
-| `/.well-known/oauth-protected-resource` | 200 ✅ | 404 ❌ | 🚨 Не задеплоєно |
-| `/.well-known/jwks.json` | 200 ✅ | 404 ❌ | 🚨 Не задеплоєно |
-| `/.well-known/mcp/server-card.json` | 200 ✅ | 404 ❌ | 🚨 Не задеплоєно |
-| `/.well-known/agent-skills/index.json` | 200 ✅ | 404 ❌ | 🚨 Не задеплоєно |
-| `/.well-known/agent-skills/faq.md` | 200 ✅ | 404 ❌ | 🚨 Не задеплоєно |
-| `/.well-known/agent-skills/testimonials.md` | 200 ✅ | 404 ❌ | 🚨 Не задеплоєно |
-| `/.well-known/agent-skills/booking.md` | 200 ✅ | 404 ❌ | 🚨 Не задеплоєно |
-| `/.well-known/agent-skills/services.md` | 200 ✅ | 404 ❌ | 🚨 Не задеплоєно |
+| `/.well-known/agents.json` | 200 ✅ | 200 ✅ | ✅ Працює (роут-хендлер) |
+| `/.well-known/api-catalog` | 200 ✅ | 404 ❌ | 🚨 Чекає деплой |
+| `/.well-known/openid-configuration` | 200 ✅ | 404 ❌ | 🚨 Чекає деплой |
+| `/.well-known/oauth-authorization-server` | 200 ✅ | 404 ❌ | 🚨 Чекає деплой |
+| `/.well-known/oauth-protected-resource` | 200 ✅ | 404 ❌ | 🚨 Чекає деплой |
+| `/.well-known/jwks.json` | 200 ✅ | — | — Не перевірено |
+| `/.well-known/mcp/server-card.json` | 200 ✅ | 404 ❌ | 🚨 Чекає деплой |
+| `/.well-known/agent-skills/index.json` | 200 ✅ | 404 ❌ | 🚨 Чекає деплой |
+| `/.well-known/agent-skills/faq.md` | 200 ✅ | 404 ❌ | 🚨 Чекає деплой |
+| `/.well-known/agent-skills/testimonials.md` | 200 ✅ | 404 ❌ | 🚨 Чекає деплой |
+| `/.well-known/agent-skills/booking.md` | 200 ✅ | 404 ❌ | 🚨 Чекає деплой |
+| `/.well-known/agent-skills/services.md` | 200 ✅ | 404 ❌ | 🚨 Чекає деплой |
+
+**Проблема:** Cloudflare Workers з assets binding перехоплював запити під `/.well-known/` через наявність `public/.well-known/`.
+**Виправлено (коміт 6389f19):** `public/.well-known/` видалено, всі файли перенесено в route handlers. Чекає деплой.
 
 ### 2.3 API endpoints
 
@@ -112,11 +115,17 @@
 **Agent-Ready код частково задеплоєно. Токен робочий.**
 
 **На продакшні:**
-- ✅ `agents.json` — 200 (статичний файл)
+- ✅ `agents.json` — 200 (роут-хендлер, після фіксу)
 - ✅ `auth.md` — 200 (роут-хендлер працює)
-- ❌ 6 інших `.well-known` endpoint'ів — 404 (потребує діагностики роутингу на Cloudflare Workers)
+- ❌ 10 інших `.well-known` endpoint'ів — 404 (чекають деплой коміту 6389f19)
 
-> ⚠️ Всі публічні сторінки (100%) працюють ідентично локальній версії. Проблема тільки з частиною `.well-known` endpoint'ів.
+**Діагностика (08.06.2026):**
+- **Коренева причина:** `public/.well-known/` існував зі статичними файлами → Cloudflare assets перехоплював всі `.well-known/` запити
+- **Виправлення:** `public/.well-known/` видалено + 5 роут-хендлерів створено в `src/app/.well-known/`
+- **Коміт:** `6389f19` запушено в `main` + `master`
+- **Статус:** Чекає деплой GitHub Actions
+
+> ⚠️ Всі публічні сторінки (100%) працюють ідентично локальній версії. Проблема з `.well-known` виправлена, чекає деплой.
 
 ---
 
@@ -137,7 +146,7 @@
 │   ├── lib/                ← Утиліти (auth, mcp, html-to-markdown, etc.)
 │   └── hooks/              ← React hooks
 ├── public/
-│   └── .well-known/        ← Статичні файли (agents.json, skill-файли)
+│   └── (статичні файли, .well-known видалено — перенесено в route handlers)
 ├── TEMP/                   ← Документація + Session Log
 └── scripts/                ← Інструменти (verify, seo, export)
 ```

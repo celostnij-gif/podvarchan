@@ -2,6 +2,22 @@
 
 /**
  * Server Actions для модуля «Медиа».
+ *
+ * ⚠️  ВАЖЛИВО: Cloudflare Workers runtime
+ * Поточне локальне зберігання файлів (fs/path) НЕ ПРАЦЮЄ на Cloudflare Workers.
+ * Для production потрібна міграція на R2:
+ *   https://developers.cloudflare.com/r2/
+ *
+ * TODO: Замінити saveFileLocally/deleteFileLocally на R2 API.
+ * Послідовність міграції:
+ *   1. Створити R2 bucket podvarchan-media
+ *   2. Додати binding в wrangler.jsonc
+ *   3. Замінити saveFileLocally на env.MEDIA_BUCKET.put()
+ *   4. Замінити deleteFileLocally на env.MEDIA_BUCKET.delete()
+ *
+ * Наразі використовується динамічний імпорт (await import('node:path'),
+ * await import('node:fs/promises')), щоб модуль не падав при статичному
+ * завантаженні в Workers runtime.
  */
 
 import { eq, desc } from 'drizzle-orm'
@@ -11,19 +27,20 @@ import { ok, okVoid, fail } from './result'
 import { withRole, withCanDelete } from './guard'
 import * as s from '@/db/schema'
 import { writeAuditLog } from '@/lib/audit/log'
-import fs from 'fs/promises'
-import path from 'path'
 
 /* ── Upload helpers ── */
 
 /**
  * Тимчасове зберігання файлу локально (public/uploads/).
- * При появі R2 binding — замінити на S3/R2 upload.
+ * Використовує динамічний імпорт fs/path для сумісності з Workers.
+ * При появі R2 binding — замінити на env.MEDIA_BUCKET.put().
  */
-
 async function saveFileLocally(
   file: File,
 ): Promise<{ storageKey: string; publicUrl: string; size: number; originalName: string; fileName: string }> {
+  const path = await import('node:path')
+  const fs = await import('node:fs/promises')
+
   const buffer = Buffer.from(await file.arrayBuffer())
   const ext = path.extname(file.name) || '.bin'
   const baseName = path.basename(file.name, ext)
@@ -54,10 +71,12 @@ async function saveFileLocally(
  */
 async function deleteFileLocally(storageKey: string): Promise<void> {
   try {
+    const path = await import('node:path')
+    const fs = await import('node:fs/promises')
     const filePath = path.join(process.cwd(), 'public', 'uploads', storageKey)
     await fs.unlink(filePath)
   } catch {
-    // Файл може вже не існувати — ігноруємо
+    // Файл може вже не існувати, або ми на Workers — ігноруємо
   }
 }
 
@@ -107,7 +126,7 @@ export const deleteMediaAsset = withCanDelete(async (session, ...args) => {
     const [existing] = await db.select().from(s.mediaAssets).where(eq(s.mediaAssets.id, id)).limit(1)
     if (!existing) return fail('Файл не знайдено')
 
-    // Видаляємо фізичний файл
+    // Видаляємо фізичний файл (локально або ігноруємо помилку на Workers)
     await deleteFileLocally(existing.storageKey)
 
     await db.delete(s.mediaAssets).where(eq(s.mediaAssets.id, id))
@@ -186,6 +205,9 @@ export const uploadMediaAsset = withRole('EDITOR', async (session, ...args) => {
 /* ── Image dimensions helper ── */
 
 async function getImageDimensions(publicUrl: string): Promise<{ width: number; height: number }> {
+  const path = await import('node:path')
+  const fs = await import('node:fs/promises')
+
   const absolutePath = path.join(process.cwd(), 'public', publicUrl)
   const buffer = await fs.readFile(absolutePath)
 

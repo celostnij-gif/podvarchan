@@ -4,6 +4,8 @@ import { sendContactNotification, sendAutoReply } from '@/lib/email'
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
 import type { SendContactEmailParams } from '@/lib/email'
 
+export const runtime = 'edge'
+
 /* ── Types ── */
 
 interface ValidationError {

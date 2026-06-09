@@ -262,10 +262,6 @@
 
 ---
 
-## Етап 16 — Командна палітра [P3]
-
----
-
 ## Етап 14 — Користувачі та журнал [P2]
 
 ### ✅ 14.1 — Users, Audit log — виконано 2026-06-05
@@ -345,7 +341,7 @@
 ### ✅ 18.1 — DEPLOY_CHECKLIST.md, ADMIN_GUIDE.md, фінальний деплой — виконано 2026-06-05
 - [x] Створено TEMP/DEPLOY_CHECKLIST.md — повний чекліст деплою (9 секцій: D1, KV, R2, scheduler, secrets, GitHub Actions, pre-deploy check, post-deploy check, моніторинг, бекапи, фінальні кроки)
 - [x] Створено ADMIN_GUIDE.md — повне керівництво для власника (17 модулів адмінки, FAQ, Appendix A-C з таблицями БД, env vars, командами)
-- [x] Додано d1_databases в wrangler.jsonc (D1 binding для production)
+- [ ] Додано d1_databases в wrangler.jsonc (D1 binding для production)
 - [x] Виправлено ESLint помилки: AdminShell (conditional useEffect), CommandPalette (set-state-in-effect), search.ts (unused import/param), useBeforeUnload (unused import), scheduler.ts (anonymous export)
 - [x] TypeScript — 0 errors; Tests — 123/123 passed; Build — 110 static pages, успішно
   ПРИМІТКА: Для production деплою потрібно виконати кроки з DEPLOY_CHECKLIST.md (створити D1, KV, secrets, GitHub Actions)
@@ -469,9 +465,9 @@
 
 ## 🔜 Що залишилося зробити
 
-### Пріоритет 1 (деплой)
+### ✅ Пріоритет 1 (деплой)
 
-- [ ] **Оновити `CLOUDFLARE_API_TOKEN` в GitHub Secrets** — токен прострочився, GitHub Actions падає
+- [x] **Оновити `CLOUDFLARE_API_TOKEN` в GitHub Secrets** — токен прострочився, GitHub Actions падає
 
 
 ### ✅ Вже зроблено (DNS)
@@ -479,6 +475,19 @@
 - ✅ **HTTPS DNS запити додані** в Cloudflare Dashboard:
   - `HTTPS _index._agents.podvarchan.com` → `endpoint="/.well-known/agents.json"`
   - `HTTPS _a2a._agents.podvarchan.com` → `endpoint="/_a2a/index"`
+
+### ✅ Виконано в сесії 6 (09.06.2026)
+
+#### 🧹 .gitignore очищення
+- [x] **output.txt, response.txt** — додано в .gitignore, видалено з трекінгу
+- [x] **playwright-report/, test-results/** — додано в .gitignore, видалено з трекінгу
+- [x] **unlock-dir.ps1** — додано в .gitignore, видалено з трекінгу
+
+#### 🐛 Фікс картинок блогу при D1
+- [x] **blog/[slug]/page.tsx** — резолв image/imageAlt зі статики, категория з D1
+- [x] **blog/page.tsx** — додано staticImageMap з BLOG_POST_METAS
+- [x] **blog/kategoriya/[cat]/page.tsx** — той самий підхід
+- TypeScript 0 errors ✅
 
 ### Пріоритет 2 (функціонал)
 

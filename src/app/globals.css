@@ -104,65 +104,6 @@
     line-height: 1.75;
   }
 
-  /* ── Glowing light patches ──
-     Warm gold radial gradients float across the screen via animated
-     background-position. Where they overlap the dot pattern below,
-     the dots appear to glow in soft, wandering patches — 1 to 5
-     chaotically reshaping spots at any moment. */
-  body::before {
-    content: '';
-    position: fixed;
-    top: -150px;
-    left: -150px;
-    right: -150px;
-    bottom: -150px;
-    z-index: 0;
-    pointer-events: none;
-    background: transparent;
-
-    background-image:
-      radial-gradient(ellipse 600px 450px at center, rgba(201, 169, 110, 0.30) 0%, transparent 48%),
-      radial-gradient(ellipse 450px 650px at center, rgba(45, 168, 130, 0.22) 0%, transparent 48%),
-      radial-gradient(circle 400px at center, rgba(139, 92, 246, 0.20) 0%, transparent 45%),
-      radial-gradient(ellipse 500px 350px at center, rgba(59, 130, 246, 0.16) 0%, transparent 45%),
-      radial-gradient(circle 280px at center, rgba(244, 114, 182, 0.14) 0%, transparent 42%),
-      radial-gradient(ellipse 520px 380px at center, rgba(251, 191, 36, 0.15) 0%, transparent 46%),
-      radial-gradient(circle 340px at center, rgba(52, 211, 153, 0.16) 0%, transparent 44%);
-
-    background-size:
-      600px 450px, 450px 650px, 400px 300px, 500px 350px, 280px 580px, 520px 380px, 340px 340px;
-
-    background-repeat:
-      no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
-
-    background-position:
-      15% 25%, 75% 55%, 45% 15%, 90% 75%, 30% 85%, 55% 40%, 10% 90%;
-
-    animation: glow-wander 60s ease-in-out infinite;
-    will-change: background-position;
-
-    /* Mask: glow only visible through the dot pattern, matching body's background dots.
-       Compensated by 150px on Y because body::before starts at top: -150px. */
-    -webkit-mask-image: radial-gradient(circle at 2px 2px, white 0px, rgba(255,255,255,0.65) 0.6px, rgba(255,255,255,0.30) 1.2px, transparent 2px);
-    -webkit-mask-size: 11px 11px;
-    -webkit-mask-repeat: repeat;
-    -webkit-mask-position: 0 150px;
-    mask-image: radial-gradient(circle at 2px 2px, white 0px, rgba(255,255,255,0.65) 0.6px, rgba(255,255,255,0.30) 1.2px, transparent 2px);
-    mask-size: 11px 11px;
-    mask-repeat: repeat;
-    mask-position: 0 150px;
-  }
-
-  /* ── Dark overlay over the glow — like the admin panel ── */
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background-color: #09090b; /* zinc-950 — як в адмін-панелі */
-  }
-
   /* ── Selection ── */
   ::selection {
     background-color: rgba(201, 169, 110, 0.25);
@@ -199,9 +140,6 @@
     body {
       background-attachment: scroll;
     }
-    body::before {
-      display: none; /* disable glow effect on mobile for performance */
-    }
   }
 
   /* ── Scroll margin for anchor links ── */
@@ -218,49 +156,6 @@
     h2[id],
     h3[id] {
       scroll-margin-top: 80px;
-    }
-  }
-
-  /* ── Wandering glow spots ──
-     5 warm radial gradients wander independently across the full
-     screen, so 1–5 glow patches chaotically appear, overlap, split
-     and reshape as they drift — never repeating the same pattern. */
-  @keyframes glow-wander {
-    0% {
-      background-position:
-        15% 25%, 75% 55%, 45% 15%, 90% 75%, 30% 85%, 55% 40%, 10% 90%;
-    }
-    12% {
-      background-position:
-        65% 15%, 18% 70%, 80% 42%, 8% 30%, 88% 62%, 72% 15%, 40% 88%;
-    }
-    25% {
-      background-position:
-        82% 58%, 42% 8%, 12% 80%, 72% 90%, 5% 25%, 35% 68%, 85% 35%;
-    }
-    37% {
-      background-position:
-        35% 85%, 62% 30%, 60% 22%, 88% 10%, 18% 60%, 50% 92%, 22% 12%;
-    }
-    50% {
-      background-position:
-        20% 32%, 55% 82%, 30% 68%, 10% 55%, 78% 12%, 92% 48%, 68% 72%;
-    }
-    62% {
-      background-position:
-        72% 42%, 15% 22%, 88% 72%, 42% 95%, 58% 35%, 28% 62%, 82% 18%;
-    }
-    75% {
-      background-position:
-        42% 68%, 78% 35%, 22% 32%, 78% 22%, 15% 78%, 62% 88%, 95% 52%;
-    }
-    87% {
-      background-position:
-        25% 55%, 65% 88%, 52% 25%, 32% 72%, 92% 42%, 18% 32%, 75% 65%;
-    }
-    100% {
-      background-position:
-        15% 25%, 75% 55%, 45% 15%, 90% 75%, 30% 85%, 55% 40%, 10% 90%;
     }
   }
 
@@ -348,12 +243,11 @@
   }
 }
 
-/* ============================================
-   COMPONENT LAYERS
-   ============================================ */
+/* ════════════════════════════════════════
+   REPEAT THE REST — ідентичний вміст обох версій
+   ════════════════════════════════════════ */
 
 @layer components {
-  /* ── Section container ── */
   .section-container {
     max-width: var(--container-max);
     margin-left: auto;
@@ -362,7 +256,6 @@
     padding-right: var(--gutter);
   }
 
-  /* ── Section padding ── */
   .section-padding {
     padding-top: var(--spacing-section-sm);
     padding-bottom: var(--spacing-section-sm);
@@ -375,7 +268,6 @@
     }
   }
 
-  /* ── Glass surface ── */
   .glass-surface {
     background: rgba(18, 18, 30, 0.75);
     backdrop-filter: blur(16px);
@@ -390,7 +282,6 @@
     border: 1px solid var(--color-border-light);
   }
 
-  /* ── Text gradient ── */
   .text-gradient-gold {
     background: linear-gradient(135deg, var(--color-gold), var(--color-gold-light));
     -webkit-background-clip: text;
@@ -398,7 +289,6 @@
     color: transparent;
   }
 
-  /* ── Premium gold heading — multi-stop gradient + metallic shimmer ── */
   .text-gold-premium {
     background: linear-gradient(
       135deg,
@@ -433,7 +323,6 @@
     color: transparent;
   }
 
-  /* ── Subtle border ── */
   .border-subtle {
     border: 1px solid var(--color-border-base);
   }
@@ -441,300 +330,7 @@
   .border-subtle-light {
     border: 1px solid var(--color-border-light);
   }
-
-  /* ════════════════════════════════════════
-     BLOG PROSE — Premium читабельна верстка
-     ════════════════════════════════════════ */
-
-  /* ── Blockquote with decorative gold quote mark ── */
-  .blog-content blockquote {
-    position: relative;
-    border: none;
-    border-left: 2px solid var(--color-gold-muted);
-    padding: 1.25rem 1.5rem 1.25rem 2.5rem;
-    margin: 1.75rem 0;
-    background: linear-gradient(135deg, rgba(201, 169, 110, 0.04) 0%, transparent 60%);
-    border-radius: 0 var(--radius-md) var(--radius-md) 0;
-    color: var(--color-text-muted);
-    font-style: italic;
-    font-size: 1.05rem;
-    line-height: 1.7;
-  }
-
-  .blog-content blockquote::before {
-    content: '"';
-    position: absolute;
-    top: 0.5rem;
-    left: 0.75rem;
-    font-size: 2.5rem;
-    line-height: 1;
-    color: var(--color-gold-muted);
-    font-family: var(--font-serif);
-    opacity: 0.5;
-    pointer-events: none;
-  }
-
-  .blog-content blockquote p:last-child {
-    margin-bottom: 0;
-  }
-
-  /* ── Lists with gold accent bullets ── */
-  .blog-content ul {
-    list-style: none;
-    padding-left: 0;
-  }
-
-  .blog-content ul li {
-    position: relative;
-    padding-left: 1.5rem;
-    margin-bottom: 0.625rem;
-  }
-
-  .blog-content ul li::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0.7em;
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--color-gold-muted);
-    opacity: 0.6;
-  }
-
-  /* Вкладені списки — менша крапка */
-  .blog-content ul ul {
-    padding-left: 0;
-    margin-bottom: 0;
-  }
-
-  .blog-content ul ul li::before {
-    width: 3px;
-    height: 3px;
-    top: 0.65em;
-    opacity: 0.4;
-  }
-
-  .blog-content ol {
-    padding-left: 1.5rem;
-    counter-reset: blog-counter;
-    list-style: none;
-  }
-
-  .blog-content ol li {
-    position: relative;
-    padding-left: 0.5rem;
-    margin-bottom: 0.625rem;
-    counter-increment: blog-counter;
-  }
-
-  .blog-content ol li::before {
-    content: counter(blog-counter) ".";
-    position: absolute;
-    left: -1.5rem;
-    color: var(--color-gold-muted);
-    font-weight: 500;
-    font-size: 0.9rem;
-    font-variant-numeric: tabular-nums;
-  }
-
-  /* Вкладені списки для ol */
-  .blog-content ol ol {
-    counter-reset: sub-counter;
-    padding-left: 1.5rem;
-    margin-bottom: 0;
-  }
-
-  .blog-content ol ol li {
-    counter-increment: sub-counter;
-  }
-
-  .blog-content ol ol li::before {
-    content: counter(sub-counter);
-    font-size: 0.8rem;
-    opacity: 0.6;
-  }
-
-  /* ── Tables ── */
-  .blog-content table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    margin: 1.5rem 0;
-    font-size: 0.9rem;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    border: 1px solid var(--color-border-base);
-  }
-
-  .blog-content thead {
-    background: var(--color-bg-surface);
-  }
-
-  .blog-content thead th {
-    padding: 0.75rem 1rem;
-    text-align: left;
-    font-weight: 600;
-    color: var(--color-text-primary);
-    font-size: 0.85rem;
-    letter-spacing: 0.03em;
-    border-bottom: 1px solid var(--color-border-base);
-  }
-
-  .blog-content tbody td {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid var(--color-border-base);
-    color: var(--color-text-secondary);
-    vertical-align: top;
-  }
-
-  .blog-content tbody tr:last-child td {
-    border-bottom: none;
-  }
-
-  .blog-content tbody tr:hover td {
-    background: rgba(201, 169, 110, 0.02);
-  }
-
-  /* ── Images within blog content ── */
-  .blog-content img {
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--color-border-base);
-    margin: 1.5rem 0;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-  }
-
-  /* ── Code blocks ── */
-  .blog-content pre {
-    background: var(--color-bg-surface);
-    border: 1px solid var(--color-border-base);
-    border-radius: var(--radius-md);
-    padding: 1.25rem 1.5rem;
-    margin: 1.5rem 0;
-    overflow-x: auto;
-    font-size: 0.875rem;
-    line-height: 1.7;
-  }
-
-  .blog-content pre code {
-    background: none;
-    padding: 0;
-    font-size: inherit;
-    color: var(--color-text-secondary);
-  }
-
-  .blog-content code {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.85em;
-    background: rgba(201, 169, 110, 0.08);
-    padding: 0.125rem 0.5rem;
-    border-radius: 3px;
-    color: var(--color-gold-light);
-  }
-
-  /* ── Horizontal rule with decorative gold dot ── */
-  .blog-content hr {
-    border: none;
-    height: 1px;
-    background: linear-gradient(to right, transparent, var(--color-border-light), transparent);
-    margin: 2.5rem 0;
-    position: relative;
-  }
-
-  .blog-content hr::after {
-    display: none;
-  }
-
-  /* ── Links with gold underline ── */
-  .blog-content a {
-    color: var(--color-green);
-    text-decoration: underline;
-    text-decoration-color: rgba(139, 115, 85, 0.3);
-    text-underline-offset: 3px;
-    text-decoration-thickness: 1px;
-    transition: color 0.3s ease, text-decoration-color 0.3s ease;
-  }
-
-  .blog-content a:hover {
-    color: var(--color-green-light);
-    text-decoration-color: rgba(227, 196, 122, 0.5);
-    text-decoration-thickness: 1.5px;
-  }
-
-  /* ── Bold/strong with slight gold tint ── */
-  .blog-content strong {
-    color: var(--color-text-primary);
-    font-weight: 600;
-  }
-
-  /* ── Headings in blog content ── */
-  .blog-content h2 {
-    font-family: var(--font-serif);
-    font-size: 1.75rem;
-    line-height: 1.25;
-    color: var(--color-text-primary);
-    margin-top: 2.75rem;
-    margin-bottom: 1rem;
-    font-weight: 500;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid rgba(201, 169, 110, 0.08);
-  }
-
-  @media (min-width: 768px) {
-    .blog-content h2 {
-      font-size: 2rem;
-      margin-top: 3rem;
-    }
-  }
-
-  .blog-content h3 {
-    font-family: var(--font-serif);
-    font-size: 1.35rem;
-    line-height: 1.3;
-    color: var(--color-gold-light);
-    margin-top: 2rem;
-    margin-bottom: 0.75rem;
-    font-weight: 500;
-  }
-
-  @media (min-width: 768px) {
-    .blog-content h3 {
-      font-size: 1.5rem;
-    }
-  }
-
-  /* ── Paragraphs ── */
-  .blog-content p {
-    color: var(--color-text-secondary);
-    line-height: 1.8;
-    margin-bottom: 1.25rem;
-    font-size: 1rem;
-  }
-
-  @media (min-width: 768px) {
-    .blog-content p {
-      font-size: 1.0625rem;
-      line-height: 1.85;
-    }
-  }
-
-  /* ── First paragraph larger (lead) ── */
-  .blog-content > p:first-of-type {
-    font-size: 1.1rem;
-    color: var(--color-text-secondary);
-    line-height: 1.8;
-  }
-
-  @media (min-width: 768px) {
-    .blog-content > p:first-of-type {
-      font-size: 1.15rem;
-    }
-  }
 }
-
-/* ============================================
-   UTILITY LAYER
-   ============================================ */
 
 @layer utilities {
   .text-balance {
@@ -745,52 +341,11 @@
     text-wrap: pretty;
   }
 
-  /* Живий точечний фон — об'ємні точки + блукаючі плями світла */
-  .bg-dot-3d {
-    background-color: var(--color-bg-base);
-    background-image:
-      radial-gradient(circle at 2px 2px, rgba(201, 169, 110, 0.30) 0px, rgba(201, 169, 110, 0.14) 0.6px, rgba(201, 169, 110, 0.06) 1.2px, transparent 2px);
-    background-size: 11px 11px;
-    background-repeat: repeat;
-    position: relative;
-  }
-
-  .bg-dot-3d::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: transparent;
-    background-image:
-      radial-gradient(ellipse 600px 450px at center, rgba(201, 169, 110, 0.30) 0%, transparent 48%),
-      radial-gradient(ellipse 450px 650px at center, rgba(45, 168, 130, 0.20) 0%, transparent 48%),
-      radial-gradient(circle 400px at center, rgba(139, 92, 246, 0.18) 0%, transparent 45%),
-      radial-gradient(ellipse 500px 350px at center, rgba(59, 130, 246, 0.14) 0%, transparent 45%),
-      radial-gradient(circle 280px at center, rgba(244, 114, 182, 0.12) 0%, transparent 42%);
-    background-size:
-      600px 450px, 450px 650px, 400px 400px, 500px 350px, 280px 280px;
-    background-repeat:
-      no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
-    background-position:
-      15% 25%, 75% 55%, 45% 15%, 90% 75%, 30% 85%;
-    animation: glow-wander 50s ease-in-out infinite;
-    will-change: background-position;
-
-    /* Mask: glow only within dots, matching the parent's dot pattern */
-    -webkit-mask-image: radial-gradient(circle at 2px 2px, white 0px, rgba(255,255,255,0.65) 0.6px, rgba(255,255,255,0.30) 1.2px, transparent 2px);
-    -webkit-mask-size: 11px 11px;
-    -webkit-mask-repeat: repeat;
-    mask-image: radial-gradient(circle at 2px 2px, white 0px, rgba(255,255,255,0.65) 0.6px, rgba(255,255,255,0.30) 1.2px, transparent 2px);
-    mask-size: 11px 11px;
-    mask-repeat: repeat;
-  }
-
   .bg-dot-pattern {
     background-image: radial-gradient(var(--color-border-base) 1px, transparent 1px);
     background-size: 24px 24px;
   }
 
-  /* ── Hero animations (keyframes defined in @layer base) ── */
   .animate-hero-orb {
     animation: hero-orb 6s ease-in-out infinite;
   }
@@ -802,5 +357,5 @@
   .animate-scroll-indicator {
     animation: scroll-indicator 2.5s ease-in-out infinite;
   }
-
 }
+

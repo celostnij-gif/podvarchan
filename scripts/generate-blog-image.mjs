@@ -2,10 +2,6 @@ import sharp from 'sharp';
 
 const W = 1200;
 const H = 630;
-<<<<<<< Updated upstream
-const GOLD = '#C9A96E';
-=======
->>>>>>> Stashed changes
 const TEAL = 'rgba(45, 168, 130, 0.25)';
 const PURPLE = 'rgba(139, 92, 246, 0.18)';
 const BLUE = 'rgba(59, 130, 246, 0.14)';

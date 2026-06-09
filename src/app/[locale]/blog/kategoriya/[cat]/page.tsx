@@ -3,6 +3,7 @@ import { getTranslations, getMessages } from 'next-intl/server'
 import { BLOG_CATEGORIES } from '@/constants'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getPublishedBlogPosts } from '@/lib/content'
+import { BLOG_POST_METAS } from '@/content/blog'
 import { ClientBlogCategory } from './client-page'
 import type { BlogPost } from '@/types'
 
@@ -43,23 +44,29 @@ async function getCategoryPosts(categorySlug: string, locale: string): Promise<B
   try {
     const fromDb = await getPublishedBlogPosts(locale)
     if (fromDb && fromDb.length > 0) {
+      // Build image lookup from static data (blog images are static files)
+      const staticImageMap = new Map(BLOG_POST_METAS.map(m => [m.slug, { image: m.image, imageAlt: m.imageAlt }]))
+
       return fromDb
         .filter(p => p.categoryName !== null)
-        .map(p => ({
-          slug: p.translation.slug,
-          title: p.translation.title,
-          description: p.translation.excerpt ?? '',
-          metaDescription: '',
-          keywords: [] as string[],
-          categoryName: p.categoryName ?? '',
-          categorySlug: categorySlug,
-          datePublished: p.publishedAt?.toISOString() ?? '',
-          dateModified: p.updatedAt?.toISOString() ?? '',
-          author: '',
-          readingTime: p.readingMinutes,
-          image: undefined,
-          imageAlt: undefined,
-        }))
+        .map(p => {
+          const staticImages = staticImageMap.get(p.translation.slug)
+          return {
+            slug: p.translation.slug,
+            title: p.translation.title,
+            description: p.translation.excerpt ?? '',
+            metaDescription: '',
+            keywords: [] as string[],
+            categoryName: p.categoryName ?? '',
+            categorySlug: categorySlug,
+            datePublished: p.publishedAt?.toISOString() ?? '',
+            dateModified: p.updatedAt?.toISOString() ?? '',
+            author: '',
+            readingTime: p.readingMinutes,
+            image: staticImages?.image ?? undefined,
+            imageAlt: staticImages?.imageAlt ?? undefined,
+          }
+        })
     }
   } catch {
     // D1 not available, fall through

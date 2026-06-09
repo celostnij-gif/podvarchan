@@ -10,7 +10,7 @@
     "crons": ["*/5 * * * *"]
   },
   "d1_databases": [
-    { "binding": "DB", "database_name": "podvarchan", "database_id": "" }
+    { "binding": "DB", "database_name": "podvarchan", "database_id": "ea2c9727-65f8-4d36-8ff1-5cfb2f4cef36" }
   ],
   "vars": {
     "REVALIDATE_URL": "https://podvarchan.com/api/revalidate",
