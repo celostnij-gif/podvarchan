@@ -3,6 +3,7 @@ import { Cormorant_Garamond, Inter } from 'next/font/google'
 import { getLocale } from 'next-intl/server'
 import { SITE } from '@/constants'
 import Script from 'next/script'
+import WebMCP from '@/components/WebMCP'
 import './globals.css'
 
 /* ── Fonts ── */
@@ -105,6 +106,7 @@ export default async function RootLayout({
             `,
           }}
         />
+        <WebMCP />
         {children}
       </body>
     </html>
