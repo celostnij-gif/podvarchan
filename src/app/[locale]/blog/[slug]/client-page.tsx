@@ -82,7 +82,8 @@ export function ClientBlogPost({ title, body, date, category, categorySlug, auth
 
       {/* ────── Article Hero ────── */}
       <section className="relative pt-16 pb-10 md:pt-20 md:pb-14 overflow-hidden">
-        <div className="relative z-10 w-full max-w-3xl px-gutter text-left">
+        <div className="relative z-10 w-full max-w-container mx-auto px-gutter text-left">
+          <div className="max-w-3xl">
           {/* Breadcrumbs */}
           <HeroBreadcrumbs />
           <motion.div
@@ -127,19 +128,8 @@ export function ClientBlogPost({ title, body, date, category, categorySlug, auth
               </span>
             </motion.div>
 
-            {/* Featured image */}
-            {image && (
-              <motion.div variants={heroFadeUp} className="mt-8 rounded-xl overflow-hidden border border-border-base shadow-lg shadow-black/20">
-                {/* eslint-disable-next-line @next/next/no-img-element -- dynamic external image */}
-                <img
-                  src={image}
-                  alt={imageAlt ?? title}
-                  className="w-full h-auto object-cover aspect-video"
-                  loading="eager"
-                />
-              </motion.div>
-            )}
           </motion.div>
+          </div>
         </div>
       </section>
 
@@ -151,6 +141,18 @@ export function ClientBlogPost({ title, body, date, category, categorySlug, auth
         </div>
 
         <div className="relative z-10 max-w-3xl mx-auto">
+          {/* Featured image */}
+          {image && (
+            <div className="mb-8 rounded-xl overflow-hidden border border-border-base shadow-lg shadow-black/20">
+              {/* eslint-disable-next-line @next/next/no-img-element -- dynamic external image */}
+              <img
+                src={image}
+                alt={imageAlt ?? title}
+                className="w-full h-auto object-cover aspect-video"
+                loading="eager"
+              />
+            </div>
+          )}
           {/* Article body */}
           <article
             className="blog-content"

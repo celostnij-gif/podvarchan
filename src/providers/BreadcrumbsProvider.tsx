@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, type ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import type { BreadcrumbItem } from '@/components/ui/Breadcrumbs'
 
 /* ── Context type ── */
@@ -53,13 +53,14 @@ export function useRegisteredSchemas(): Record<string, unknown>[] {
 export function useSetBreadcrumbs(items: BreadcrumbItem[]): void {
   const { items: currentItems, setItems } = useContext(BreadcrumbsContext)
 
-  // Deduplicate — avoids infinite setState loop
-  const currentStr = JSON.stringify(currentItems)
-  const nextStr = JSON.stringify(items)
+  useEffect(() => {
+    const currentStr = JSON.stringify(currentItems)
+    const nextStr = JSON.stringify(items)
 
-  if (nextStr !== currentStr) {
-    setItems(items)
-  }
+    if (nextStr !== currentStr) {
+      setItems(items)
+    }
+  })
 }
 
 /* ── Hook for registering page-specific JSON-LD schemas ── */
