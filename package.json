@@ -1,0 +1,37 @@
+{
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "deploy": "npx opennextjs-cloudflare build && npx wrangler deploy",
+    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv ./cloudflare-env.d.ts"
+  },
+  "devDependencies": {
+    "@tailwindcss/typography": "^0.5.19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.6",
+    "typescript": "^5.9.3",
+    "wrangler": "^4.95.0"
+  },
+  "dependencies": {
+    "@opennextjs/cloudflare": "^1.19.11",
+    "@stablelib/nacl": "^2.0.1",
+    "@types/node": "^25.9.1",
+    "@types/react": "^19.2.15",
+    "@types/react-dom": "^19.2.3",
+    "autoprefixer": "^10.5.0",
+    "framer-motion": "^12.40.0",
+    "next": "^15.5.18",
+    "next-intl": "^4.12.0",
+    "next-mdx-remote": "^6.0.0",
+    "postcss": "^8.5.15",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "resend": "^6.12.4",
+    "sharp": "^0.34.5",
+    "tailwindcss": "^3.4.19"
+  }
+}

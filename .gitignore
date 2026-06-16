@@ -1,0 +1,60 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# turbopack
+.turbopack
+
+# exported/build output
+/SITEPOD/
+
+# open-next (Cloudflare Workers build)
+/.open-next/
+
+# cloudflare
+.wrangler/
+
+# generated images
+public/images/logo/
+
+# windows reserved filename
+nul
+
+# temp / backup files
+/TEMP/
+/twilight-block-e1cd/
+*.log
+
+# local utility scripts
+/unlock-dir.ps1
