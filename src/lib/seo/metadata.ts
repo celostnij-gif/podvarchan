@@ -15,8 +15,8 @@ export function buildCanonical(path: string, locale: string): string {
   const base = SITE.url
   const localePrefix = locale === 'ru' ? '/ru' : '/uk'
   const cleanPath = path.startsWith('/') ? path : `/${path}`
-  // Убираем trailing slash если путь не просто '/'
-  const normalizedPath = cleanPath === '/' ? '' : cleanPath.replace(/\/$/, '')
+  // Keep trailing slash — consistent with trailingSlash:true in next.config
+  const normalizedPath = cleanPath
   return `${base}${localePrefix}${normalizedPath}`
 }
 

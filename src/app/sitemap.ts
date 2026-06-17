@@ -14,9 +14,8 @@ function makeLocalized(
   changefreq: MetadataRoute.Sitemap[number]['changeFrequency'],
   lastModified?: Date
 ): [MetadataRoute.Sitemap[number], MetadataRoute.Sitemap[number]] {
-  
-  // Убираем лишние слэши для корня сайта
-  const cleanPath = path === '/' ? '' : path
+  // Paths always include trailing slash — consistent with trailingSlash:true in next.config
+  const cleanPath = path
   
   const ruUrl = `${BASE}/ru${cleanPath}`
   const ukUrl = `${BASE}/uk${cleanPath}`
