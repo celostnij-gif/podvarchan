@@ -45,9 +45,6 @@ next-env.d.ts
 # cloudflare
 .wrangler/
 
-# generated images
-public/images/logo/
-
 # windows reserved filename
 nul
 
