@@ -8,17 +8,26 @@ export async function GET() {
     issuer: ISSUER,
     authorization_endpoint: `${ISSUER}/api/auth/signin`,
     token_endpoint: `${ISSUER}/api/auth/callback/credentials`,
+    revocation_endpoint: `${ISSUER}/api/auth/revoke`,
     token_endpoint_auth_methods_supported: ['client_secret_basic', 'none'],
     response_types_supported: ['code'],
-    grant_types_supported: ['authorization_code', 'refresh_token'],
+    grant_types_supported: [
+      'authorization_code',
+      'refresh_token',
+      'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      'urn:workos:agent-auth:grant-type:claim',
+    ],
     scopes_supported: ['openid', 'profile', 'email'],
     code_challenge_methods_supported: ['S256'],
 
     // Agent auth block for AI agent registration/discovery
     agent_auth: {
-      skill: 'auth.md',
+      skill: `${ISSUER}/auth.md`,
       register_uri: `${ISSUER}/api/auth/register`,
-      identity_types_supported: ['identity_assertion', 'anonymous'],
+      identity_endpoint: `${ISSUER}/api/auth/identity`,
+      claim_endpoint: `${ISSUER}/api/auth/claim`,
+      events_endpoint: `${ISSUER}/api/auth/event/notify`,
+      identity_types_supported: ['identity_assertion', 'anonymous', 'service_auth'],
       identity_assertion: {
         assertion_types_supported: [
           'urn:ietf:params:oauth:token-type:id-jag',
@@ -27,7 +36,9 @@ export async function GET() {
         credential_types_supported: ['client_secret_basic'],
         claim_uri: `${ISSUER}/api/auth/claim`,
         revocation_uri: `${ISSUER}/api/auth/revoke`,
-        events_supported: ['revocation'],
+        events_supported: [
+          'https://schemas.workos.com/events/agent/auth/identity/assertion/revoked',
+        ],
       },
       anonymous: {
         credential_types_supported: ['none'],
