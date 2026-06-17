@@ -90,3 +90,50 @@ export function transliterate(text: string): string {
     .replace(/-+/g, '-')
     .toLowerCase()
 }
+
+/* ── Sitemap / D1 helpers (fallback to constants) ── */
+
+interface TranslationItem {
+  id: number
+  translation: { slug: string; title: string }
+  priority: number
+  updatedAt?: Date
+  createdAt?: Date
+  publishedAt?: Date
+}
+
+interface BlogPostItem {
+  id: number
+  translation: { slug: string; title: string; excerpt: string }
+  publishedAt?: Date
+  updatedAt?: Date
+  categorySlug: string
+}
+
+/**
+ * Запрашивает опубликованные услуги из D1 (или кидает ошибку для fallback).
+ */
+export async function getPublishedServices(
+  _locale: string,
+): Promise<TranslationItem[] | null> {
+  // D1 binding not available in all envs — throw to trigger fallback
+  throw new Error('D1 not available')
+}
+
+/**
+ * Запрашивает опубликованные категории блога из D1 (или кидает ошибку для fallback).
+ */
+export async function getPublishedBlogCategories(
+  _locale: string,
+): Promise<{ translation: { slug: string } }[] | null> {
+  throw new Error('D1 not available')
+}
+
+/**
+ * Запрашивает опубликованные статьи блога из D1 (или кидает ошибку для fallback).
+ */
+export async function getPublishedBlogPosts(
+  _locale: string,
+): Promise<BlogPostItem[] | null> {
+  throw new Error('D1 not available')
+}
