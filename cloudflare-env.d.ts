@@ -1,7 +1,7 @@
 /* ── Minimal KVNamespace type (avoiding @cloudflare/workers-types dep) ── */
 interface KVNamespace {
   get(key: string, options?: { type: 'text' }): Promise<string | null>
-  get<Expected extends unknown = unknown>(
+  get<Expected = unknown>(
     key: string,
     options: KVNamespaceGetOptions<Expected>
   ): Promise<Expected | null>
