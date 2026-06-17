@@ -139,7 +139,7 @@ export function ClientAboutPage() {
       <SectionContainer size="sm" background="surface">
         <div className="grid grid-cols-3 gap-6 max-w-2xl mx-auto text-center">
           {[
-            { value: '500+', label: t('statsClients') },
+            { value: '2000+', label: t('statsClients') },
             { value: '15+', label: t('statsYears') },
             { value: '6+', label: t('statsCertificates') },
           ].map((stat, i) => (
