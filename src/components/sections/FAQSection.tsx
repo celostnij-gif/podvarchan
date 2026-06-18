@@ -34,7 +34,7 @@ export default function FAQSection() {
 
   return (
     <AnimatedSection as="section" variant="fadeUp" aria-labelledby="faq-heading">
-      <SectionContainer size="md" background="default">
+      <SectionContainer size="md" background="transparent">
         {/* Heading */}
         <motion.div
           variants={headingVariants}

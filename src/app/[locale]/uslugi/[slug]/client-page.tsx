@@ -393,7 +393,7 @@ function FAQSection({ service }: { service: ServiceData }) {
 
   return (
     <AnimatedSection as="section" variant="fadeUp" aria-label="Часто задаваемые вопросы">
-      <SectionContainer size="md" background="default">
+      <SectionContainer size="md" background="transparent">
         <AnimatedText direction="up" as="h2" className="text-3xl md:text-4xl lg:text-5xl font-display text-text-primary text-center">
           Часто задаваемые вопросы
         </AnimatedText>

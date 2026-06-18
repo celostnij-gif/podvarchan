@@ -29,7 +29,7 @@ export function ClientFaqPage({ items, schemas }: Props) {
       />
 
       {/* ────── FAQ Content ────── */}
-      <SectionContainer size="sm">
+      <SectionContainer size="sm" background="transparent">
         <div className="mt-10 space-y-3">
           {items.map((item, index) => (
             <AnimatedText key={index} direction="up" delay={index * 50}>

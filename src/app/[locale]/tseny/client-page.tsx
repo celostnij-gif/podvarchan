@@ -203,7 +203,7 @@ export function TsenyClient({ schemas }: TsenyClientProps) {
 
       {/* ── FAQ ── */}
       <AnimatedSection as="div" variant="fadeUp">
-        <SectionContainer size="md" background="surface">
+        <SectionContainer size="md" background="transparent">
           <div className="max-w-2xl mx-auto">
             <AnimatedText as="h2" direction="up" className="text-2xl md:text-3xl font-display text-text-primary text-center mb-8">
               {t('faqTitle')}
