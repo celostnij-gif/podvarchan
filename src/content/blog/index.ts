@@ -1652,3 +1652,4 @@ export const BLOG_POSTS: BlogPost[] = [
 export const BLOG_POST_METAS: Omit<BlogPost, 'body'>[] =
   BLOG_POSTS.map(({ body: _, ...meta}
 ) => meta)
+export { BLOG_POSTS_UK, BLOG_POST_METAS_UK } from './index-uk'

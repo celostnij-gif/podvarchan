@@ -17,7 +17,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props) {
   const { slug, locale } = await params
-  const post = getBlogPost(slug)
+  const post = getBlogPost(slug, locale)
   if (!post) return {}
 
   return seoMetadata({
@@ -36,11 +36,11 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug, locale } = await params
-  const post = getBlogPost(slug)
+  const post = getBlogPost(slug, locale)
   if (!post) notFound()
 
   /* ── Related posts from same category (excluding current) ── */
-  const allPosts = getAllBlogPosts()
+  const allPosts = getAllBlogPosts(locale)
   const relatedPosts = allPosts
     .filter(p => p.categorySlug === post.categorySlug && p.slug !== slug)
     .slice(0, 2)

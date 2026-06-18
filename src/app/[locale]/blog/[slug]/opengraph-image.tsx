@@ -13,7 +13,7 @@ interface Props {
 
 export default async function BlogOGImage({ params }: Props) {
   const { locale, slug } = await params
-  const post = getBlogPost(slug)
+  const post = getBlogPost(slug, locale)
   const { regular, semiBold, bold, all: fonts } = await loadInterFonts()
   const ff = regular ? 'Inter' : 'sans-serif'
   const ffSemi = semiBold ? 'Inter' : 'sans-serif'

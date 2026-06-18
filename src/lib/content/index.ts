@@ -1,47 +1,61 @@
 import type { BlogPost } from '@/types'
-import { BLOG_POSTS, BLOG_POST_METAS } from '@/content/blog'
+import { BLOG_POSTS, BLOG_POST_METAS, BLOG_POSTS_UK, BLOG_POST_METAS_UK } from '@/content/blog'
 
 /**
- * Загружает контентную статью блога по slug.
+ * Возвращает массив статей для указанной локали.
  */
-export function getBlogPost(slug: string): BlogPost | undefined {
-  return BLOG_POSTS.find((post) => post.slug === slug)
+function getPosts(locale?: string): BlogPost[] {
+  return locale === 'uk' ? BLOG_POSTS_UK : BLOG_POSTS
+}
+
+/**
+ * Возвращает массив метаданных (без body) для указанной локали.
+ */
+function getMetas(locale?: string): Omit<BlogPost, 'body'>[] {
+  return locale === 'uk' ? BLOG_POST_METAS_UK : BLOG_POST_METAS
+}
+
+/**
+ * Загружает контентную статью блога по slug и локали.
+ */
+export function getBlogPost(slug: string, locale?: string): BlogPost | undefined {
+  return getPosts(locale).find((post) => post.slug === slug)
 }
 
 /**
  * Возвращает список всех slug'ов статей блога.
+ * Slug'и одинаковы для всех локалей.
  */
 export function getAllBlogSlugs(): string[] {
   return BLOG_POSTS.map((post) => post.slug)
 }
 
 /**
- * Возвращает все статьи блога.
+ * Возвращает все статьи блога для указанной локали.
  */
-export function getAllBlogPosts(): BlogPost[] {
-  return BLOG_POSTS
+export function getAllBlogPosts(locale?: string): BlogPost[] {
+  return getPosts(locale)
 }
 
 /**
  * Возвращает все статьи блога только с метаданными (без body).
- * Для использования в клиентских компонентах — минимизирует размер бандла.
  */
-export function getAllBlogPostMetas(): Omit<BlogPost, 'body'>[] {
-  return BLOG_POST_METAS
+export function getAllBlogPostMetas(locale?: string): Omit<BlogPost, 'body'>[] {
+  return getMetas(locale)
 }
 
 /**
- * Возвращает статьи по категории.
+ * Возвращает статьи по категории для указанной локали.
  */
-export function getBlogPostsByCategory(categorySlug: string): BlogPost[] {
-  return BLOG_POSTS.filter((post) => post.categorySlug === categorySlug)
+export function getBlogPostsByCategory(categorySlug: string, locale?: string): BlogPost[] {
+  return getPosts(locale).filter((post) => post.categorySlug === categorySlug)
 }
 
 /**
- * Возвращает последние N статей.
+ * Возвращает последние N статей для указанной локали.
  */
-export function getRecentBlogPosts(limit: number = 6): BlogPost[] {
-  return BLOG_POSTS.slice(0, limit)
+export function getRecentBlogPosts(limit: number = 6, locale?: string): BlogPost[] {
+  return getPosts(locale).slice(0, limit)
 }
 
 /**
@@ -49,19 +63,18 @@ export function getRecentBlogPosts(limit: number = 6): BlogPost[] {
  */
 export function formatDate(dateString: string): string {
   const date = new Date(dateString)
-  return date.toLocaleDateString('ru-RU', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
+  const months = [
+    'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+    'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря',
+  ]
+  return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`
 }
 
 /**
  * Форматирует дату в ISO для schema.org.
  */
 export function formatDateISO(dateString: string): string {
-  const date = new Date(dateString)
-  return date.toISOString().split('T')[0]
+  return new Date(dateString).toISOString()
 }
 
 /**
@@ -69,45 +82,36 @@ export function formatDateISO(dateString: string): string {
  */
 export function transliterate(text: string): string {
   const map: Record<string, string> = {
-    а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'e', ё: 'yo',
-    ж: 'zh', з: 'z', и: 'i', й: 'i', к: 'k', л: 'l', м: 'm',
+    а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'e', ё: 'e',
+    ж: 'zh', з: 'z', и: 'i', й: 'y', к: 'k', л: 'l', м: 'm',
     н: 'n', о: 'o', п: 'p', р: 'r', с: 's', т: 't', у: 'u',
     ф: 'f', х: 'kh', ц: 'ts', ч: 'ch', ш: 'sh', щ: 'shch',
     ъ: '', ы: 'y', ь: '', э: 'e', ю: 'yu', я: 'ya',
-    А: 'A', Б: 'B', В: 'V', Г: 'G', Д: 'D', Е: 'E', Ё: 'Yo',
-    Ж: 'Zh', З: 'Z', И: 'I', Й: 'I', К: 'K', Л: 'L', М: 'M',
-    Н: 'N', О: 'O', П: 'P', Р: 'R', С: 'S', Т: 'T', У: 'U',
-    Ф: 'F', Х: 'Kh', Ц: 'Ts', Ч: 'Ch', Ш: 'Sh', Щ: 'Shch',
-    Ъ: '', Ы: 'Y', Ь: '', Э: 'E', Ю: 'Yu', Я: 'Ya',
   }
-
   return text
-    .split('')
-    .map((char) => map[char] ?? char)
-    .join('')
-    .replace(/[^a-zA-Z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
     .toLowerCase()
+    .split('')
+    .map((ch) => map[ch] || ch)
+    .join('')
+    .replace(/[^a-z0-9-]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
 }
 
 /* ── Sitemap / D1 helpers (fallback to constants) ── */
 
 interface TranslationItem {
-  id: number
-  translation: { slug: string; title: string }
-  priority: number
-  updatedAt?: Date
-  createdAt?: Date
-  publishedAt?: Date
+  slug: string
+  translation: {
+    title: string
+    metaDescription: string
+  }
 }
 
 interface BlogPostItem {
-  id: number
-  translation: { slug: string; title: string; excerpt: string }
-  publishedAt?: Date
-  updatedAt?: Date
-  categorySlug: string
+  slug: string
+  datePublished: string
+  dateModified: string
 }
 
 /**
@@ -116,7 +120,6 @@ interface BlogPostItem {
 export async function getPublishedServices(
   _locale: string,
 ): Promise<TranslationItem[] | null> {
-  // D1 binding not available in all envs — throw to trigger fallback
   throw new Error('D1 not available')
 }
 
