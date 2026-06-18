@@ -51,7 +51,14 @@ export const SERVICES: Service[] = [
   { slug: 'neyverennost-i-strakh-provala', category: 'neyverennost', priority: 3, icon: '🌟', ctaLink: '/kontakty/' },
   { slug: 'psikhosomatika', category: 'psikhosomatika', priority: 3, icon: '🌿', ctaLink: '/kontakty/' },
   { slug: 'lichnostnyy-krizis', category: 'krizis', priority: 3, icon: '🌅', ctaLink: '/kontakty/' },
-  { slug: 'tsifrovoy-detoks-i-gadzhet-zavisimost', category: 'tsifrovoy-detoks', priority: 3, icon: '📱', ctaLink: '/kontakty/' },
+  { slug: 'kak-izbavitsya-ot-trevogi', category: 'trevoga', priority: 3, icon: '🦋', ctaLink: '/kontakty/' },
+  { slug: 'postoyannaya-trevoga-bez-prichiny', category: 'trevoga', priority: 3, icon: '🌫️', ctaLink: '/kontakty/' },
+  { slug: 'utrennyaya-trevoga', category: 'trevoga', priority: 3, icon: '🌅', ctaLink: '/kontakty/' },
+  { slug: 'trevoga-pered-snom', category: 'trevoga', priority: 3, icon: '🌙', ctaLink: '/kontakty/' },
+  { slug: 'trevoga-posle-stressa', category: 'trevoga', priority: 3, icon: '🌊', ctaLink: '/kontakty/' },
+  { slug: 'vnutrenneye-napryazheniye', category: 'trevoga', priority: 3, icon: '⚡', ctaLink: '/kontakty/' },
+  { slug: 'navyazchivye-mysli', category: 'trevoga', priority: 3, icon: '🌀', ctaLink: '/kontakty/' },
+  { slug: 'strakh-budushchego', category: 'trevoga', priority: 3, icon: '🌄', ctaLink: '/kontakty/' },
 ]
 
 /* ── Blog Categories ── */
@@ -95,6 +102,14 @@ export const SERVICE_ICONS: Record<string, string> = {
   'psikhosomatika': '🌿',
   'lichnostnyy-krizis': '🌅',
   'tsifrovoy-detoks-i-gadzhet-zavisimost': '📱',
+  'kak-izbavitsya-ot-trevogi': '🦋',
+  'postoyannaya-trevoga-bez-prichiny': '🌫️',
+  'utrennyaya-trevoga': '🌅',
+  'trevoga-pered-snom': '🌙',
+  'trevoga-posle-stressa': '🌊',
+  'vnutrenneye-napryazheniye': '⚡',
+  'navyazchivye-mysli': '🌀',
+  'strakh-budushchego': '🌄',
 }
 
 export const AUTHOR = {
