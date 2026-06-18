@@ -55,3 +55,7 @@ nul
 
 # local utility scripts
 /unlock-dir.ps1
+
+# harness / session metadata
+/_jobs.json
+/_run_id.txt
