@@ -43,3 +43,65 @@
 6. Обнови `temp/PROGRESS.md`.
 7. Запроси подтверждение пользователя на создание Git-коммита.
 
+
+## 6. КРИТИЧЕСКИ ВАЖНО: Конфигурация деплоя (GitHub Actions + Cloudflare Workers)
+
+### 6.1. Провайдер деплоя
+
+**GitHub Actions** — основной пайплайн. Тригер: push в `master`.
+Workflow: `.github/workflows/deploy.yml` — `npm ci` → `eslint` → `cloudflare/wrangler-action@v3` (з `preCommands: npx opennextjs-cloudflare build`).
+
+Cloudflare Workers Builds (GitHub App) — дублирующий білд, але тільки GitHub Actions деплоїть робочий воркер.
+
+### 6.2. Версії (зафіксовано 2026-06-18)
+
+| Компонент | Версія |
+|---|---|
+| Next.js | 15.5.19 |
+| @opennextjs/cloudflare | 1.19.11 |
+| @opennextjs/aws | 4.0.2 |
+| Wrangler | 4.102.0 |
+| workerd compatibility_date | 2026-06-03 |
+| Node.js (CI) | 22.16.0 |
+| npm (CI) | 10.9.2 |
+
+### 6.3. РЕШЕНИЕ: помилка `@swc/helpers` при `npm ci`
+
+**Симптом:** GitHub Actions падає на `npm ci` з `Missing: @swc/helpers@0.5.23 from lock file`.
+**Причина:** npm 11 (локально) резолвить `@swc/helpers@0.5.15` в `package-lock.json`, але npm 10.9.2 (CI) потребує `0.5.23` через те, що `next` та інші пакети очікують новішу версію.
+**Фікс TRY 1 (не спрацював):** Ручне редагування `package-lock.json` (bump 0.5.15→0.5.23) — npm install знову писав 0.5.15.
+**Фікс TRY 2 (спрацював):**
+1. `npm install @swc/helpers@0.5.23` — додати як явну залежність в `package.json` з `^0.5.23`.
+2. Видалити `node_modules` та `package-lock.json`.
+3. `npm install` — повна перегенерація lock-файлу.
+4. Коміт: `7dd96e0` ("fix: regenerate package-lock.json, add @swc/helpers@0.5.23 explicit dep").
+
+**ЗОЛОТЕ ПРАВИЛО:** Якщо `npm ci` падає з помилкою "Missing: ... from lock file" — НЕ редагуй lock-файл вручну. Додай проблемний пакет як явну залежність в `package.json` і регенеруй `package-lock.json` через `npm install`.
+
+### 6.4. Secrets в GitHub (обов'язкові)
+
+| Secret | Призначення |
+|---|---|
+| CLOUDFLARE_API_TOKEN | Токен для wrangler deploy |
+| CLOUDFLARE_ACCOUNT_ID | Cloudflare Account ID |
+| NEXT_PUBLIC_SITE_URL | https://podvarchan.com |
+| NEXT_PUBLIC_GA_ID | G-42W6951F8L |
+| NEXT_PUBLIC_TURNSTILE_SITE_KEY | 0x4AAAAAADYZ2z3RysEsBoQu |
+| CONTACT_EMAIL | podvarchan@gmail.com |
+
+### 6.5. Wrangler config
+
+- `wrangler.jsonc` — основний конфіг.
+- `compatibility_date: "2026-06-03"`.
+- `compatibility_flags: ["nodejs_compat", "global_fetch_strictly_public"]`.
+- Біндінги: `RATE_LIMIT_KV` (KV), `DB` (D1), `WORKER_SELF_REFERENCE`, `ASSETS`.
+- Environment variables: `NEXTJS_ENV`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_GA_ID`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `CONTACT_EMAIL`, `AUTH_TRUST_HOST`, `REVALIDATE_URL`.
+
+### 6.6. Успішний деплой 2026-06-18
+
+Run #63 (коміт `7dd96e0`) — всі кроки пройдено.
+URL: https://podvarchan.maguchen.workers.dev
+Version ID: bed23700-a844-467d-b3c5-ee383591f194
+**
+НЕ ЗМІНЮЙ цю конфігурацію без явної команди користувача.**
+Якщо сумніваєшся — прочитай цей розділ і повернись до перевірки версій.
