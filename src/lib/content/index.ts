@@ -101,8 +101,11 @@ export function transliterate(text: string): string {
 /* ── Sitemap / D1 helpers (fallback to constants) ── */
 
 interface TranslationItem {
-  slug: string
+  id: string
+  priority: number
+  updatedAt?: Date
   translation: {
+    slug: string
     title: string
     metaDescription: string
   }
@@ -110,8 +113,13 @@ interface TranslationItem {
 
 interface BlogPostItem {
   slug: string
-  datePublished: string
-  dateModified: string
+  updatedAt?: Date
+  publishedAt?: Date
+  translation: {
+    slug: string
+  }
+ datePublished?: string
+ dateModified?: string
 }
 
 /**
