@@ -63,7 +63,6 @@ export interface PageMeta {
   publishedTime?: string
   modifiedTime?: string
   author?: string
-  noIndex?: boolean
 }
 
 /* ── Navigation ── */

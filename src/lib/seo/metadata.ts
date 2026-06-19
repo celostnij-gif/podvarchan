@@ -43,7 +43,6 @@ export function generateMetadata({
   publishedTime,
   modifiedTime,
   author,
-  noIndex,
   path,
   locale = 'ru',
 }: GenerateMetadataParams): Metadata {
@@ -96,11 +95,11 @@ export function generateMetadata({
       images: [imageUrl],
     },
     robots: {
-      index: !noIndex,
-      follow: !noIndex,
+      index: true,
+      follow: true,
       googleBot: {
-        index: !noIndex,
-        follow: !noIndex,
+        index: true,
+        follow: true,
         'max-video-preview': -1,
         'max-image-preview': 'large',
         'max-snippet': -1,

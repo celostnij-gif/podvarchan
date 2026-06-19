@@ -38,7 +38,7 @@ const heroFadeUp = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.1, 0, 1] as const } },
 }
 
-export function ClientBlogCategory({ category, posts }: Props) {
+export function ClientBlogCategory({ category, posts, locale }: Props) {
   const t = useTranslations('blog')
   const commonT = useTranslations('common')
 
@@ -73,7 +73,7 @@ export function ClientBlogCategory({ category, posts }: Props) {
             {/* Post count */}
             <motion.div variants={heroFadeUp} className="mt-6 flex items-center gap-2 text-sm text-text-muted">
               <span className="w-1.5 h-1.5 rounded-full bg-gold" />
-              {posts.length} {posts.length === 1 ? 'статья' : 'статей'}
+              {t('totalArticles', { count: posts.length })}
             </motion.div>
           </motion.div>
         </div>
@@ -102,6 +102,8 @@ export function ClientBlogCategory({ category, posts }: Props) {
                       image={post.image}
                       imageAlt={post.imageAlt}
                       minutesLabel={t('minutes')}
+                      locale={locale}
+                      readMoreLabel={t('readMore')}
                     />
                   </motion.div>
                 ))}

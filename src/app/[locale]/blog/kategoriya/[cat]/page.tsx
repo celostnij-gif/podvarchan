@@ -47,7 +47,7 @@ export default async function BlogCategoryPage({ params }: Props) {
   const category = blogCategories.find((c) => c.slug === cat)
   if (!category) notFound()
 
-  const posts = getBlogPostsByCategory(cat)
+  const posts = getBlogPostsByCategory(cat, locale)
 
   return <ClientBlogCategory category={category} posts={posts} locale={locale} />
 }

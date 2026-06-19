@@ -61,8 +61,15 @@ export function getRecentBlogPosts(limit: number = 6, locale?: string): BlogPost
 /**
  * Форматирует дату в русскоязычный формат.
  */
-export function formatDate(dateString: string): string {
+export function formatDate(dateString: string, locale: string = 'ru'): string {
   const date = new Date(dateString)
+  if (locale.startsWith('uk')) {
+    const months = [
+      'січня', 'лютого', 'березня', 'квітня', 'травня', 'червня',
+      'липня', 'серпня', 'вересня', 'жовтня', 'листопада', 'грудня',
+    ]
+    return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`
+  }
   const months = [
     'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
     'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря',

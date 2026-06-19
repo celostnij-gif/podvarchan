@@ -549,32 +549,34 @@ function DiplomaModal({
 interface DiplomaShowcaseProps {
   title?: string
   subtitle?: string
+  diplomas?: Diploma[]
 }
 
 const MARQUEE_DURATION = 35 // seconds for a full cycle
-
 export default function DiplomaShowcase({
   title,
   subtitle,
+  diplomas,
 }: DiplomaShowcaseProps) {
   const t = useTranslations('diplomaShowcase')
   const resolvedTitle = title ?? t('defaultTitle')
   const resolvedSubtitle = subtitle ?? t('defaultSubtitle')
+  const items = diplomas ?? DIPLOMAS
 
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const [isPaused, setIsPaused] = useState(false)
 
   const handleSelect = useCallback((diploma: Diploma) => {
-    setSelectedIndex(DIPLOMAS.indexOf(diploma))
-  }, [])
+    setSelectedIndex(items.indexOf(diploma))
+  }, [items])
 
   const handleNavigate = useCallback((direction: 'prev' | 'next') => {
     setSelectedIndex((prev) => {
       if (prev === null) return prev
       if (direction === 'prev') return Math.max(0, prev - 1)
-      return Math.min(DIPLOMAS.length - 1, prev + 1)
+      return Math.min(items.length - 1, prev + 1)
     })
-  }, [])
+  }, [items])
 
   const handleClose = useCallback(() => {
     setSelectedIndex(null)
@@ -638,7 +640,7 @@ export default function DiplomaShowcase({
             }}
           >
             {/* Two copies for seamless infinite loop */}
-            {[...DIPLOMAS, ...DIPLOMAS].map((diploma, i) => (
+            {[...items, ...items].map((diploma, i) => (
               <div
                 key={`${diploma.id}-${i}`}
                 className="w-[260px] md:w-[300px] shrink-0"
@@ -670,7 +672,7 @@ export default function DiplomaShowcase({
         {selectedIndex !== null && (
           <DiplomaModal
             key={selectedIndex}
-            allDiplomas={DIPLOMAS}
+            allDiplomas={items}
             currentIndex={selectedIndex}
             onNavigate={handleNavigate}
             onClose={handleClose}

@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { useTranslations, useMessages } from 'next-intl'
+import { useTranslations, useMessages, useLocale } from 'next-intl'
 import { AnimatedText, SectionContainer, AnimatedSection, childVariants, Button } from '@/components/ui'
 import { useSetBreadcrumbs } from '@/providers/BreadcrumbsProvider'
 import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
@@ -22,6 +22,7 @@ interface MessagesBlogCategory {
 export default function BlogPage() {
   const t = useTranslations('blog')
   const commonT = useTranslations('common')
+  const locale = useLocale()
   const messages = useMessages()
   const blogCategories = (messages?.blogCategories as MessagesBlogCategory[]) ?? []
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
@@ -31,7 +32,7 @@ export default function BlogPage() {
     { label: commonT('nav.blog') },
   ])
 
-  const allPosts = getAllBlogPostMetas()
+  const allPosts = getAllBlogPostMetas(locale)
 
   const filteredPosts = useMemo(() => {
     if (!activeCategory) return allPosts
@@ -96,10 +97,9 @@ export default function BlogPage() {
                 <span className="w-1.5 h-1.5 rounded-full bg-gold" />
                 {allPosts.length > 0 && t('totalArticles', { count: allPosts.length })}
               </span>
-              <span className="w-px h-4 bg-border-base" aria-hidden="true" />
               <span className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-green" />
-                {blogCategories.length} {blogCategories.length === 1 ? 'категория' : 'категорий'}
+                {t('totalCategories', { count: blogCategories.length })}
               </span>
             </motion.div>
           </div>
@@ -153,6 +153,8 @@ export default function BlogPage() {
                   {...featuredPost}
                   featured
                   minutesLabel={t('minutes')}
+                  locale={locale}
+                  readMoreLabel={t('readMore')}
                 />
               </motion.div>
             )}
@@ -165,6 +167,8 @@ export default function BlogPage() {
                     <BlogCard
                       {...post}
                       minutesLabel={t('minutes')}
+                      locale={locale}
+                      readMoreLabel={t('readMore')}
                     />
                   </motion.div>
                 ))}

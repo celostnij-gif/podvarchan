@@ -20,6 +20,10 @@ export interface BlogCardProps {
   minutesLabel?: string
   /** Show category badge? (default: true) */
   showCategory?: boolean
+  /** Locale for date formatting */
+  locale?: string
+  /** Read more label */
+  readMoreLabel?: string
 }
 
 /* ── Blog Card ── */
@@ -37,6 +41,8 @@ export default function BlogCard({
   featured = false,
   minutesLabel = 'мин',
   showCategory = true,
+  locale,
+  readMoreLabel = 'Читать',
 }: BlogCardProps) {
   return (
     <TiltCard tiltDegree={3} scale={1.015} className={`rounded-xl h-full ${featured ? 'md:col-span-2' : ''}`}>
@@ -95,10 +101,10 @@ export default function BlogCard({
               <svg className="w-3.5 h-3.5 inline mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
                 <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              {formatDate(datePublished)}
+              {formatDate(datePublished, locale)}
             </span>
             <span className="inline-flex items-center gap-1 text-xs text-gold opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-[-4px] group-hover:translate-x-0">
-              {minutesLabel === 'мин' || minutesLabel === 'хв' ? 'Читать' : 'Read'}
+              {readMoreLabel}
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
                    stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 12h14" /><path d="M12 5l7 7-7 7" />

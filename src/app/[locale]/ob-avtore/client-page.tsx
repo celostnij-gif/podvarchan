@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, useScroll, useTransform } from 'framer-motion'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useMessages } from 'next-intl'
 import Image from 'next/image'
 import { AnimatedText, AnimatedSection, SectionContainer, TiltCard, childVariants, DiplomaShowcase } from '@/components/ui'
 import { useSetBreadcrumbs } from '@/providers/BreadcrumbsProvider'
@@ -52,9 +52,28 @@ export function ClientAboutPage() {
     { label: commonT('nav.about') },
   ])
 
+  const credNames = t.raw('credNames') as string[]
+  const credOrgs = t.raw('credOrgs') as string[]
+  const educationCreds = AUTHOR.credentials.filter((c) => c.category === 'degree').map((cred, i) => ({
+    ...cred,
+    name: credNames[i] ?? cred.name,
+    organization: credOrgs[i] ?? cred.organization,
+  }))
+  const certCreds = AUTHOR.credentials.filter((c) => c.category === 'certification').map((cred, i) => ({
+    ...cred,
+    name: credNames[i + 3] ?? cred.name,
+    organization: credOrgs[i + 3] ?? cred.organization,
+  }))
   const specializationItems = t.raw('specializationItems') as string[]
-  const educationCreds = AUTHOR.credentials.filter((c) => c.category === 'degree')
-  const certCreds = AUTHOR.credentials.filter((c) => c.category === 'certification')
+  const messages = useMessages()
+  const diplomaItems = (messages as any)?.diplomaData?.items as Array<{
+    id: number
+    title: string
+    organization: string
+    year: string
+    description: string
+    image: string
+  }> | undefined
 
   return (
     <>
@@ -299,7 +318,7 @@ export function ClientAboutPage() {
       {/* ════════════════════════════════════════
            DIPLOMAS — Визуальная демонстрация дипломов
            ════════════════════════════════════════ */}
-      <DiplomaShowcase />
+      <DiplomaShowcase diplomas={diplomaItems} />
 
       {/* ════════════════════════════════════════
            METHOD — Описание метода

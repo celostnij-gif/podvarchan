@@ -63,7 +63,7 @@ export default async function BlogPostPage({ params }: Props) {
     <ClientBlogPost
       title={post.title}
       body={post.body ?? ''}
-      date={formatDate(post.datePublished)}
+      date={formatDate(post.datePublished, locale)}
       category={post.categoryName}
       categorySlug={post.categorySlug}
       author={post.author}

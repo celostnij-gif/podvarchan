@@ -1,6 +1,6 @@
 'use client'
 
-import { useMessages } from 'next-intl'
+import { useMessages, useTranslations } from 'next-intl'
 import { motion } from 'framer-motion'
 import { Link } from '@/i18n/routing'
 import { SERVICE_ICONS } from '@/constants'
@@ -73,9 +73,11 @@ const faqItem = (i: number) => ({
 /* ── Hero Section ── */
 
 function HeroSection({ service }: { service: ServiceData }) {
+  const commonT = useTranslations('common')
+  const t = useTranslations('serviceSection')
   useSetBreadcrumbs([
-    { label: 'Главная', href: '/' },
-    { label: 'Услуги', href: '/uslugi/' },
+    { label: commonT('nav.home'), href: '/' },
+    { label: commonT('nav.services'), href: '/uslugi/' },
     { label: service.shortTitle },
   ])
 
@@ -151,7 +153,7 @@ function HeroSection({ service }: { service: ServiceData }) {
             </Link>
 
             <span className="text-xs text-text-muted">
-              {'Первая консультация — бесплатно'}
+              {t('heroFreeLabel')}
             </span>
           </motion.div>
 
@@ -175,42 +177,43 @@ function HeroSection({ service }: { service: ServiceData }) {
 /* ── Method Section ── */
 
 function MethodSection({ service }: { service: ServiceData }) {
+  const t = useTranslations('serviceSection')
   const label = service.shortTitle?.toLowerCase() || service.slug
 
   const steps = [
     {
       num: '01',
-      title: 'Диагностика и ваш запрос',
-      desc: `Начинаем с бесплатной 15-минутной консультации. Вы рассказываете о своей ситуации, я задаю вопросы, чтобы понять корень проблемы. Вместе определяем, подходит ли вам гипнотерапия.`,
+      title: t('methodStep1Title'),
+      desc: t('methodStep1Desc'),
     },
     {
       num: '02',
-      title: 'Сессия гипнотерапии',
-      desc: `В комфортной онлайн-обстановке через голос и дыхание я мягко ввожу вас в трансовое состояние. Работаем с первопричиной на уровне подсознания. Вы сохраняете полный контроль.`,
+      title: t('methodStep2Title'),
+      desc: t('methodStep2Desc'),
     },
     {
       num: '03',
-      title: 'Курс и интеграция',
-      desc: `Для устойчивого результата рекомендую курс 5–10 сессий. Между встречами вы получаете индивидуальные аудио-программы для закрепления изменений.`,
+      title: t('methodStep3Title'),
+      desc: t('methodStep3Desc'),
     },
     {
       num: '04',
-      title: 'Устойчивый результат',
-      desc: `Новые нейронные связи, изменение реакций, выход из старых сценариев. Не временное облегчение — а реальные изменения в жизни.`,
+      title: t('methodStep4Title'),
+      desc: t('methodStep4Desc'),
     },
   ]
 
   return (
-    <AnimatedSection as="section" variant="fadeUp" aria-label="Как я работаю">
+    <AnimatedSection as="section" variant="fadeUp" aria-label={t('methodAriaLabel')}>
       <SectionContainer size="md" background="surface">
         <AnimatedText direction="up" as="h2" className="text-3xl md:text-4xl lg:text-5xl font-display text-text-primary leading-tight text-center">
-          Как я работаю с{' '}
+          {t('methodTitle')}{' '}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold to-gold-light">
-            {label}
+            {t('methodTitleAccent', { service: label })}
           </span>
         </AnimatedText>
         <AnimatedText direction="up" delay={150} as="p" className="mt-4 text-base text-text-secondary max-w-2xl mx-auto text-center">
-          Процесс одинаково эффективен для всех направлений — меняются только акценты
+          {t('methodSubtitle')}
         </AnimatedText>
 
         <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -242,7 +245,7 @@ function MethodSection({ service }: { service: ServiceData }) {
         {/* Online badge */}
         <AnimatedText direction="up" delay={250} as="div" className="mt-10 p-5 rounded-xl bg-bg-elevated/50 border border-border-base text-center">
           <p className="text-sm text-text-muted">
-            Онлайн — так же эффективно, как и очные сессии
+            {t('methodBadge')}
           </p>
         </AnimatedText>
       </SectionContainer>
@@ -254,26 +257,27 @@ function MethodSection({ service }: { service: ServiceData }) {
 
 function SymptomsSection({ service }: { service: ServiceData }) {
   const messages = useMessages()
+  const t = useTranslations('serviceSection')
   const symptoms = getSymptoms(messages, service.slug)
 
   return (
-    <AnimatedSection as="section" variant="fadeUp" aria-label="Признаки и симптомы">
+    <AnimatedSection as="section" variant="fadeUp" aria-label={t('symptomsTitle')}>
       <SectionContainer size="md" background="default">
         <AnimatedText direction="up" as="div" className="text-center">
           <div className="inline-flex items-center gap-3 mb-4">
             <span className="w-8 h-px bg-gold/40" aria-hidden="true" />
-            <span className="text-[10px] font-semibold tracking-[0.25em] uppercase text-gold">Вам знакомо?</span>
+            <span className="text-[10px] font-semibold tracking-[0.25em] uppercase text-gold">{t('symptomsLabel')}</span>
             <span className="w-8 h-px bg-gold/40" aria-hidden="true" />
           </div>
         </AnimatedText>
         <AnimatedText direction="up" delay={150} as="h2" className="mt-4 text-3xl md:text-4xl lg:text-5xl font-display text-text-primary leading-tight text-center">
-          Признаки, с которыми{' '}
+          {t('symptomsTitle')}{' '}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold to-gold-light">
-            я работаю
+            {t('symptomsTitleAccent')}
           </span>
         </AnimatedText>
         <AnimatedText direction="up" delay={250} as="p" className="mt-4 text-base text-text-secondary max-w-xl mx-auto text-center">
-          Если вы узнаёте себя в этих состояниях — вы пришли по адресу
+          {t('symptomsSubtitle')}
         </AnimatedText>
 
         <div className="mt-10 md:mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -308,16 +312,17 @@ function SymptomsSection({ service }: { service: ServiceData }) {
 
 function FAQSection({ service }: { service: ServiceData }) {
   const messages = useMessages()
+  const t = useTranslations('serviceSection')
   const serviceFaqs = (messages?.serviceFaqs as Record<string, Array<{ question: string; answer: string }>>) ?? {}
   const defaultFaqs = (messages?.serviceFaqs?._default as Array<{ question: string; answer: string }>) ?? []
   const faqs = serviceFaqs[service.slug] || defaultFaqs
   if (faqs.length === 0) return null
 
   return (
-    <AnimatedSection as="section" variant="fadeUp" aria-label="Часто задаваемые вопросы">
+    <AnimatedSection as="section" variant="fadeUp" aria-label={t('faqTitle')}>
       <SectionContainer size="md" background="transparent">
         <AnimatedText direction="up" as="h2" className="text-3xl md:text-4xl lg:text-5xl font-display text-text-primary text-center">
-          Часто задаваемые вопросы
+          {t('faqTitle')}
         </AnimatedText>
 
         <div className="mt-10 max-w-2xl mx-auto space-y-3" role="list">
@@ -341,6 +346,7 @@ function FAQSection({ service }: { service: ServiceData }) {
 /* ── CTA Section ── */
 
 function CTASection({ service }: { service: ServiceData }) {
+  const t = useTranslations('serviceSection')
   return (
     <AnimatedSection as="div" variant="fadeUp">
       <SectionContainer size="md" background="deep">
@@ -348,15 +354,14 @@ function CTASection({ service }: { service: ServiceData }) {
           <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-96 h-96 bg-gold/5 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
 
           <AnimatedText as="h2" direction="up" className="relative text-3xl md:text-4xl font-display text-text-primary leading-tight">
-            Запишитесь на{' '}
+            {t('ctaTitle')}{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold to-gold-light">
-              бесплатную консультацию
+              {t('ctaAccent')}
             </span>
           </AnimatedText>
 
           <AnimatedText as="p" direction="up" delay={150} className="relative mt-6 text-base text-text-secondary leading-relaxed max-w-xl mx-auto">
-            На первой встрече мы познакомимся, обсудим ваш запрос, и вы поймёте, подходит ли вам этот метод.
-            Никаких обязательств.
+            {t('ctaDescription')}
           </AnimatedText>
 
           <AnimatedText direction="up" delay={250} className="relative mt-8">
@@ -392,18 +397,18 @@ function CTASection({ service }: { service: ServiceData }) {
 }
 
 /* ── Related Services Section ── */
-
 function RelatedServicesSection({ service, allServices }: { service: ServiceData; allServices: ServiceData[] }) {
+  const t = useTranslations('serviceSection')
   const relatedSlugs = RELATED_SERVICES[service.slug] || []
   const related = allServices.filter(s => relatedSlugs.includes(s.slug)).slice(0, 3)
 
   if (related.length === 0) return null
 
   return (
-    <AnimatedSection as="section" variant="fadeUp" aria-label="Похожие услуги">
+    <AnimatedSection as="section" variant="fadeUp" aria-label={t('relatedTitle')}>
       <SectionContainer size="md" background="default">
         <AnimatedText direction="up" as="h2" className="text-3xl md:text-4xl lg:text-5xl font-display text-text-primary text-center">
-          Похожие направления
+          {t('relatedTitle')}
         </AnimatedText>
 
         <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
