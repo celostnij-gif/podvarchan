@@ -77,6 +77,8 @@ export default async function RootLayout({
       className={`${cormorant.variable} ${inter.variable}`}
       suppressHydrationWarning
     >
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       <body
         className="bg-bg-base text-text-primary font-body antialiased flex flex-col min-h-screen"
         suppressHydrationWarning
