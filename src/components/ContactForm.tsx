@@ -17,28 +17,58 @@ interface FormErrors {
 
 type SubmitStatus = 'idle' | 'loading' | 'success' | 'error'
 
+type FieldId = keyof Omit<FormErrors, 'agreed'>
+
+interface FieldConfig {
+  id: FieldId
+  label: string
+  required: boolean
+  type: 'text' | 'email' | 'tel' | 'textarea'
+  placeholderKey: string
+  maxLength?: number
+  autoComplete: string
+}
+
 const MAX_MESSAGE_LENGTH = 2000
+
+const FIELDS: FieldConfig[] = [
+  { id: 'name', label: 'nameLabel', required: true, type: 'text', placeholderKey: 'namePlaceholder', maxLength: 100, autoComplete: 'name' },
+  { id: 'email', label: 'emailLabel', required: true, type: 'email', placeholderKey: 'emailPlaceholder', autoComplete: 'email' },
+  { id: 'phone', label: 'phoneLabel', required: false, type: 'tel', placeholderKey: 'phonePlaceholder', maxLength: 30, autoComplete: 'tel' },
+  { id: 'message', label: 'messageLabel', required: true, type: 'textarea', placeholderKey: 'messagePlaceholder', maxLength: MAX_MESSAGE_LENGTH, autoComplete: 'off' },
+]
 
 /* ── Component ── */
 
 export default function ContactForm() {
   const t = useTranslations('contactForm')
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [phone, setPhone] = useState('')
-  const [message, setMessage] = useState('')
+  const [values, setValues] = useState<Record<string, string>>({ name: '', email: '', phone: '', message: '' })
   const [agreed, setAgreed] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
   const [status, setStatus] = useState<SubmitStatus>('idle')
   const [serverError, setServerError] = useState('')
   const [turnstileReady, setTurnstileReady] = useState(false)
 
+  const nameRef = useRef<HTMLInputElement>(null)
+  const emailRef = useRef<HTMLInputElement>(null)
+  const phoneRef = useRef<HTMLInputElement>(null)
+  const messageRef = useRef<HTMLTextAreaElement>(null)
+  const agreedRef = useRef<HTMLInputElement>(null)
+
   const widgetContainerRef = useRef<HTMLDivElement>(null)
   const widgetIdRef = useRef<string | undefined>(undefined)
 
-  /* ── Turnstile widget ── */
+  const inputClass = [
+    'w-full bg-bg-elevated border border-border-light rounded-lg px-4 py-3 text-text-primary',
+    'placeholder:text-text-muted/60 font-body text-sm transition-all duration-300',
+    'focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold-muted hover:border-border-light/80',
+  ].join(' ')
 
-  /* ── Detect localhost (dev mode) ── */
+  const inputErrClass = 'border-error/40 focus:ring-error/30 focus:border-error'
+  const labelClass = 'block text-sm font-medium text-text-secondary mb-1.5'
+  const errorTextClass = 'mt-1 text-xs text-error'
+
+  /* ── Turnstile ── */
 
   const isLocalhost =
     typeof window !== 'undefined' &&
@@ -46,133 +76,104 @@ export default function ContactForm() {
 
   useEffect(() => {
     const container = widgetContainerRef.current
-
     if (!TURNSTILE_SITE_KEY || isLocalhost) {
-      // dev mode or localhost — no captcha needed
       queueMicrotask(() => setTurnstileReady(true))
       return
     }
-
-    // Отложенная загрузка — даём React отрисовать container div
     const timer = setTimeout(() => {
-      const script = document.querySelector<HTMLScriptElement>(
-        'script[src*="challenges.cloudflare.com/turnstile/v0/api.js"]',
-      )
+      const script = document.querySelector<HTMLScriptElement>('script[src*="challenges.cloudflare.com/turnstile/v0/api.js"]')
 
       function renderWidget() {
         if (!widgetContainerRef.current || !window.turnstile) return
-
-        widgetIdRef.current = window.turnstile!.render(
-          widgetContainerRef.current,
-          {
-            sitekey: TURNSTILE_SITE_KEY!,
-            callback: () => setTurnstileReady(true),
-            'expired-callback': () => setTurnstileReady(false),
-            'error-callback': () => setTurnstileReady(false),
-            theme: 'dark',
-          },
-        )
+        widgetIdRef.current = window.turnstile!.render(widgetContainerRef.current, {
+          sitekey: TURNSTILE_SITE_KEY!,
+          callback: () => setTurnstileReady(true),
+          'expired-callback': () => setTurnstileReady(false),
+          'error-callback': () => setTurnstileReady(false),
+          theme: 'dark',
+        })
       }
 
       if (script && window.turnstile) {
         renderWidget()
       } else {
-        const newScript = document.createElement('script')
-        newScript.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
-        newScript.async = true
-        newScript.defer = true
-        newScript.onload = renderWidget
-        document.head.appendChild(newScript)
+        const s = document.createElement('script')
+        s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
+        s.async = true; s.defer = true; s.onload = renderWidget
+        document.head.appendChild(s)
       }
     }, 100)
-
     return () => {
       clearTimeout(timer)
-      if (container && window.turnstile?.remove) {
-        window.turnstile.remove(container)
-      }
+      if (container && window.turnstile?.remove) window.turnstile.remove(container)
     }
   }, [isLocalhost])
 
   /* ── Validation ── */
 
-  function validate(): FormErrors {
+  function getValue(field: FieldId) { return (values[field] ?? '').trim() }
+
+  function validate() {
     const errs: FormErrors = {}
-    if (name.trim().length < 2) errs.name = t('nameError')
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = t('emailError')
-    if (phone.trim() && !/^[\d\s+\-()]+$/.test(phone.trim())) errs.phone = t('phoneError')
-    if (message.trim().length < 10) errs.message = t('messageError')
+    if (getValue('name').length < 2) errs.name = t('nameError')
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(getValue('email'))) errs.email = t('emailError')
+    const p = getValue('phone')
+    if (p && !/^[\d\s+\-()]+$/.test(p)) errs.phone = t('phoneError')
+    if (getValue('message').length < 10) errs.message = t('messageError')
     if (!agreed) errs.agreed = t('agreeError')
     return errs
   }
 
-  /* ── Field-specific validation ── */
-
-  function validateField(field: keyof FormErrors): string | undefined {
+  function validateField(field: FieldId): string | undefined {
+    const val = getValue(field)
     switch (field) {
-      case 'name':
-        return name.trim().length < 2 ? t('nameError') : undefined
-      case 'email':
-        return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? t('emailError') : undefined
-      case 'phone':
-        return phone.trim() && !/^[\d\s+\-()]+$/.test(phone.trim()) ? t('phoneError') : undefined
-      case 'message':
-        return message.trim().length < 10 ? t('messageError') : undefined
+      case 'name': return val.length < 2 ? t('nameError') : undefined
+      case 'email': return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) ? t('emailError') : undefined
+      case 'phone': return val && !/^[\d\s+\-()]+$/.test(val) ? t('phoneError') : undefined
+      case 'message': return val.length < 10 ? t('messageError') : undefined
     }
   }
 
   /* ── Handlers ── */
 
-  function handleBlur(field: keyof FormErrors) {
-    const error = validateField(field)
-    setErrors((prev) => ({ ...prev, [field]: error }))
-  }
-
-  function handleChange(
-    setter: (v: string) => void,
-    field: keyof FormErrors,
-    maxLength?: number,
-  ) {
+  function onChange(field: string, maxLength?: number) {
     return (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      const value = maxLength ? e.target.value.slice(0, maxLength) : e.target.value
-      setter(value)
-      if (errors[field]) {
-        setErrors((prev) => ({ ...prev, [field]: undefined }))
-      }
+      const v = maxLength ? e.target.value.slice(0, maxLength) : e.target.value
+      setValues((prev) => ({ ...prev, [field]: v }))
+      if (errors[field as keyof FormErrors]) setErrors((prev) => ({ ...prev, [field]: undefined }))
     }
   }
 
-  async function handleSubmit(e: FormEvent) {
+  function onBlur(field: FieldId) {
+    setErrors((prev) => ({ ...prev, [field]: validateField(field) }))
+  }
+
+  async function onSubmit(e: FormEvent) {
     e.preventDefault()
     setServerError('')
-
-    const validationErrors = validate()
-    setErrors(validationErrors)
-    if (Object.keys(validationErrors).length > 0) {
-      focusFirstError(validationErrors)
+    const errs = validate()
+    setErrors(errs)
+    if (Object.keys(errs).length > 0) {
+      const order: (keyof FormErrors)[] = ['name', 'email', 'phone', 'message', 'agreed']
+      for (const f of order) {
+        if (errs[f]) {
+          const ref = f === 'name' ? nameRef : f === 'email' ? emailRef : f === 'phone' ? phoneRef : f === 'message' ? messageRef : agreedRef
+          ref?.current?.focus()
+          ref?.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          break
+        }
+      }
       return
     }
-
     setStatus('loading')
-
-    // Получить Turnstile токен
-    const turnstileToken = getTurnstileToken()
-
     try {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, phone, message, turnstileToken }),
+        body: JSON.stringify({ ...values, turnstileToken: getTurnstileToken() }),
       })
-
       const data: { error?: string } = await res.json()
-
-      if (!res.ok) {
-        setStatus('error')
-        setServerError(data.error || t('errorDefault'))
-        return
-      }
-
+      if (!res.ok) { setStatus('error'); setServerError(data.error || t('errorDefault')); return }
       setStatus('success')
       resetTurnstile()
     } catch {
@@ -181,245 +182,90 @@ export default function ContactForm() {
     }
   }
 
-  function focusFirstError(errs: FormErrors) {
-    const order = ['name', 'email', 'phone', 'message', 'agreed'] as const
-    const refs: Record<string, React.RefObject<HTMLElement | null>> = {
-      name: nameRef,
-      email: emailRef,
-      phone: phoneRef,
-      message: messageRef,
-      agreed: agreedRef,
-    }
-    for (const field of order) {
-      if (errs[field]) {
-        refs[field]?.current?.focus()
-        refs[field]?.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        break
-      }
-    }
+  function reset() {
+    setValues({ name: '', email: '', phone: '', message: '' })
+    setAgreed(false); setErrors({}); setStatus('idle'); setServerError(''); setTurnstileReady(false)
   }
 
-  // Refs for focus management
-  const nameRef = useRef<HTMLInputElement>(null)
-  const emailRef = useRef<HTMLInputElement>(null)
-  const phoneRef = useRef<HTMLInputElement>(null)
-  const messageRef = useRef<HTMLTextAreaElement>(null)
-  const agreedRef = useRef<HTMLInputElement>(null)
-
-  function handleReset() {
-    setName('')
-    setEmail('')
-    setPhone('')
-    setMessage('')
-    setAgreed(false)
-    setErrors({})
-    setStatus('idle')
-    setServerError('')
-    setTurnstileReady(false)
-  }
-
-  /* ── Styles ── */
-
-  const inputBase =
-    'w-full bg-bg-elevated border border-border-light rounded-lg px-4 py-3 text-text-primary ' +
-    'placeholder:text-text-muted/60 font-body text-sm transition-all duration-300 ' +
-    'focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold-muted ' +
-    'hover:border-border-light/80'
-
-  const inputError =
-    'border-error/40 focus:ring-error/30 focus:border-error'
-
-  const labelClass = 'block text-sm font-medium text-text-secondary mb-1.5'
-
-  const errorTextClass = 'mt-1 text-xs text-error'
-
-  /* ── Render: Success ── */
+  /* ── Success view ── */
 
   if (status === 'success') {
     return (
       <div className="flex flex-col items-center text-center py-8 px-4">
-        {/* Green checkmark */}
         <div className="w-16 h-16 rounded-full bg-success/10 border border-success/30 flex items-center justify-center mb-5">
           <svg className="w-8 h-8 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         </div>
-
-        <h3 className="text-xl font-display text-text-primary mb-2">
-          {t('successTitle')}
-        </h3>
-        <p className="text-sm text-text-muted max-w-sm">
-          {t('successDescription')}
-        </p>
-
-        <Button
-          type="button"
-          variant="secondary"
-          size="md"
-          className="mt-6"
-          onClick={handleReset}
-        >
-          {t('sendAnother')}
-        </Button>
+        <h3 className="text-xl font-display text-text-primary mb-2">{t('successTitle')}</h3>
+        <p className="text-sm text-text-muted max-w-sm">{t('successDescription')}</p>
+        <Button type="button" variant="secondary" size="md" className="mt-6" onClick={reset}>{t('sendAnother')}</Button>
       </div>
     )
   }
 
-  /* ── Render: Form ── */
+  /* ── Form ── */
+
+  function renderInput(field: FieldConfig) {
+    const error = errors[field.id]
+    const inputId = `cf-${field.id}`
+    const errorId = `${inputId}-error`
+    const base = `${inputClass} ${error ? inputErrClass : ''}`
+
+    if (field.type === 'textarea') {
+      return (
+        <div key={field.id}>
+          <div className="flex items-center justify-between mb-1.5">
+            <label htmlFor={inputId} className={labelClass}>{t(field.label)} {field.required && <span className="text-gold">*</span>}</label>
+            {values[field.id].length > 0 && <span className="text-[11px] text-text-muted/60 tabular-nums">{values[field.id].length} / {MAX_MESSAGE_LENGTH}</span>}
+          </div>
+          <textarea ref={messageRef} id={inputId} rows={4} value={values[field.id]}
+            onChange={onChange(field.id, field.maxLength)} onBlur={() => onBlur(field.id)}
+            placeholder={t(field.placeholderKey)} className={`${base} resize-y min-h-[7rem]`}
+            aria-invalid={!!error} aria-describedby={error ? errorId : undefined} required={field.required} />
+          {error && <p id={errorId} className={errorTextClass} role="alert">{error}</p>}
+        </div>
+      )
+    }
+
+    const inputRef = field.id === 'name' ? nameRef : field.id === 'email' ? emailRef : phoneRef
+    return (
+      <div key={field.id}>
+        <label htmlFor={inputId} className={labelClass}>{t(field.label)} {field.required && <span className="text-gold">*</span>}</label>
+        <input ref={inputRef} id={inputId} type={field.type} value={values[field.id]}
+          onChange={onChange(field.id, field.maxLength)} onBlur={() => onBlur(field.id)}
+          placeholder={t(field.placeholderKey)} className={base}
+          aria-invalid={!!error} aria-describedby={error ? errorId : undefined}
+          autoComplete={field.autoComplete} required={field.required} />
+        {error && <p id={errorId} className={errorTextClass} role="alert">{error}</p>}
+      </div>
+    )
+  }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-5">
-      {/* ── Name ── */}
-      <div>
-        <label htmlFor="cf-name" className={labelClass}>
-          {t('nameLabel')} <span className="text-gold">*</span>
-        </label>
-        <input
-          ref={nameRef}
-          id="cf-name"
-          type="text"
-          value={name}
-          onChange={handleChange(setName, 'name', 100)}
-          onBlur={() => handleBlur('name')}
-          placeholder={t('namePlaceholder')}
-          className={`${inputBase} ${errors.name ? inputError : ''}`}
-          aria-invalid={!!errors.name}
-          aria-describedby={errors.name ? 'cf-name-error' : undefined}
-          autoComplete="name"
-          required
-        />
-        {errors.name && (
-          <p id="cf-name-error" className={errorTextClass} role="alert">
-            {errors.name}
-          </p>
-        )}
-      </div>
+    <form onSubmit={onSubmit} noValidate className="space-y-5">
+      {FIELDS.map(renderInput)}
 
-      {/* ── Email ── */}
-      <div>
-        <label htmlFor="cf-email" className={labelClass}>
-          {t('emailLabel')} <span className="text-gold">*</span>
-        </label>
-        <input
-          ref={emailRef}
-          id="cf-email"
-          type="email"
-          value={email}
-          onChange={handleChange(setEmail, 'email')}
-          onBlur={() => handleBlur('email')}
-          placeholder={t('emailPlaceholder')}
-          className={`${inputBase} ${errors.email ? inputError : ''}`}
-          aria-invalid={!!errors.email}
-          aria-describedby={errors.email ? 'cf-email-error' : undefined}
-          autoComplete="email"
-          required
-        />
-        {errors.email && (
-          <p id="cf-email-error" className={errorTextClass} role="alert">
-            {errors.email}
-          </p>
-        )}
-      </div>
-
-      {/* ── Phone ── */}
-      <div>
-        <label htmlFor="cf-phone" className={labelClass}>
-          {t('phoneLabel')}
-        </label>
-        <input
-          ref={phoneRef}
-          id="cf-phone"
-          type="tel"
-          value={phone}
-          onChange={handleChange(setPhone, 'phone', 30)}
-          onBlur={() => handleBlur('phone')}
-          placeholder={t('phonePlaceholder')}
-          className={`${inputBase} ${errors.phone ? inputError : ''}`}
-          aria-invalid={!!errors.phone}
-          aria-describedby={errors.phone ? 'cf-phone-error' : undefined}
-          autoComplete="tel"
-        />
-        {errors.phone && (
-          <p id="cf-phone-error" className={errorTextClass} role="alert">
-            {errors.phone}
-          </p>
-        )}
-      </div>
-
-      {/* ── Message ── */}
-      <div>
-        <div className="flex items-center justify-between mb-1.5">
-          <label htmlFor="cf-message" className={labelClass}>
-            {t('messageLabel')} <span className="text-gold">*</span>
-          </label>
-          {message.length > 0 && (
-            <span className="text-[11px] text-text-muted/60 tabular-nums">
-              {message.length} / {MAX_MESSAGE_LENGTH}
-            </span>
-          )}
-        </div>
-        <textarea
-          ref={messageRef}
-          id="cf-message"
-          rows={4}
-          value={message}
-          onChange={handleChange(setMessage, 'message', MAX_MESSAGE_LENGTH)}
-          onBlur={() => handleBlur('message')}
-          placeholder={t('messagePlaceholder')}
-          className={`${inputBase} resize-y min-h-[7rem] ${errors.message ? inputError : ''}`}
-          aria-invalid={!!errors.message}
-          aria-describedby={errors.message ? 'cf-message-error' : undefined}
-          required
-        />
-        {errors.message && (
-          <p id="cf-message-error" className={errorTextClass} role="alert">
-            {errors.message}
-          </p>
-        )}
-      </div>
-
-      {/* ── Server error ── */}
       {status === 'error' && serverError && (
-        <div className="p-3 rounded-lg bg-error-bg border border-error/30 text-sm text-error" role="alert">
-          {serverError}
-        </div>
+        <div className="p-3 rounded-lg bg-error-bg border border-error/30 text-sm text-error" role="alert">{serverError}</div>
       )}
 
-      {/* ── Turnstile widget ── */}
       {TURNSTILE_SITE_KEY && (
-        <div className="flex justify-center">
-          <div ref={widgetContainerRef} />
-        </div>
+        <div className="flex justify-center"><div ref={widgetContainerRef} /></div>
       )}
 
-      {/* ── Error banner ── */}
       {Object.keys(errors).length > 0 && (
-        <div
-          role="alert"
-          aria-live="polite"
-          className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-400 flex items-center gap-2"
-        >
-          <span aria-hidden="true">⚠</span>
-          {t('fieldErrorBanner')}
+        <div role="alert" aria-live="polite" className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-red-400 flex items-center gap-2">
+          <span aria-hidden="true">⚠</span> {t('fieldErrorBanner')}
         </div>
       )}
 
-      {/* ── Consent checkbox ── */}
       <div className="mt-2">
         <label className="flex items-start gap-3 cursor-pointer group">
           <div className="relative mt-0.5 flex-shrink-0">
-            <input
-              ref={agreedRef}
-              type="checkbox"
-              checked={agreed}
-              onChange={(e) => {
-                setAgreed(e.target.checked)
-                if (e.target.checked) setErrors((prev) => ({ ...prev, agreed: undefined }))
-              }}
-              className="sr-only peer"
-              aria-required="true"
-              aria-describedby={errors.agreed ? 'cf-agreed-error' : undefined}
-            />
+            <input ref={agreedRef} type="checkbox" checked={agreed}
+              onChange={(e) => { setAgreed(e.target.checked); if (e.target.checked) setErrors((prev) => ({ ...prev, agreed: undefined })) }}
+              className="sr-only peer" aria-required="true" aria-describedby={errors.agreed ? 'cf-agreed-error' : undefined} />
             <div className="w-5 h-5 rounded border border-border-light bg-bg-elevated peer-checked:bg-gold/20 peer-checked:border-gold/60 peer-focus-visible:ring-2 peer-focus-visible:ring-gold/30 transition-all duration-200 flex items-center justify-center">
               {agreed && (
                 <svg width="10" height="8" viewBox="0 0 10 8" fill="none" aria-hidden="true">
@@ -428,9 +274,7 @@ export default function ContactForm() {
               )}
             </div>
           </div>
-          <span className="text-sm text-text-secondary leading-relaxed">
-            {t('agreeText')}
-          </span>
+          <span className="text-sm text-text-secondary leading-relaxed">{t('agreeText')}</span>
         </label>
         {errors.agreed && (
           <p id="cf-agreed-error" className="mt-1 text-xs text-error flex items-center gap-1.5" role="alert">
@@ -439,15 +283,7 @@ export default function ContactForm() {
         )}
       </div>
 
-      {/* ── Submit ── */}
-      <Button
-        type="submit"
-        variant="primary"
-        size="lg"
-        fullWidth
-        loading={status === 'loading'}
-        disabled={status === 'loading' || !turnstileReady}
-      >
+      <Button type="submit" variant="primary" size="lg" fullWidth loading={status === 'loading'} disabled={status === 'loading' || !turnstileReady}>
         {status === 'loading' ? t('sending') : t('submit')}
       </Button>
     </form>
