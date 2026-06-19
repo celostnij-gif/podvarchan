@@ -1194,6 +1194,12 @@
     },
     "tsifrovoy-detoks-i-gadzhet-zavisimost": {
       "shortTitle": "Цифровой детокс"
+    },
+    "onlajn-konsultaciya-psyhologa": {
+      "shortTitle": "Психолог онлайн"
+    },
+    "psyholog-bioenergetyk": {
+      "shortTitle": "Биоэнергетик"
     }
   },
   "serviceSection": {
@@ -1217,7 +1223,9 @@
     "ctaAccent": "бесплатную консультацию",
     "ctaDescription": "На первой встрече мы познакомимся, обсудим ваш запрос, и вы поймёте, подходит ли вам этот метод. Никаких обязательств.",
     "relatedTitle": "Похожие направления",
-    "heroFreeLabel": "Первая консультация — бесплатно"
+    "heroFreeLabel": "Первая консультация — бесплатно",
+    "symptomsSubtitle": "Эти состояния знакомы многим, но с каждым из них можно работать",
+    "methodSubtitle": "От первой встречи до устойчивого результата"
   },
   "about": {
     "metaTitle": "Вячеслав Подварчан — гипнотерапевт онлайн",
