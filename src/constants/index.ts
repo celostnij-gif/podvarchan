@@ -44,6 +44,8 @@ export const MAIN_NAV: NavItem[] = [
 
 export const SERVICES: Service[] = [
   { slug: 'gipnoterapiya-onlayn', category: 'gipnoterapiya', priority: 1, icon: '✨', ctaLink: '/kontakty/' },
+  { slug: 'onlajn-konsultaciya-psyhologa', category: 'zagalni-zapit', priority: 1, icon: '👤', ctaLink: '/kontakty/' },
+  { slug: 'psyholog-bioenergetyk', category: 'zagalni-zapit', priority: 1, icon: '🔮', ctaLink: '/kontakty/' },
   { slug: 'trevoga-i-panicheskiye-ataki', category: 'trevoga', priority: 1, icon: '🫂', ctaLink: '/kontakty/' },
   { slug: 'rabota-s-podsoznaniem', category: 'podsoznanie', priority: 2, icon: '🌌', ctaLink: '/kontakty/' },
   { slug: 'samosabotazh-i-bloki', category: 'samosabotazh', priority: 2, icon: '🔓', ctaLink: '/kontakty/' },
