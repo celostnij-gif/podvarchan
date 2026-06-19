@@ -13,6 +13,7 @@ interface PersonSchemaParams {
   description?: string
   image?: string
   jobTitle?: string
+  locale?: string
 }
 
 /**
@@ -34,7 +35,34 @@ export function personSchema(params: PersonSchemaParams = {}): Record<string, un
     description = AUTHOR.description,
     image = AUTHOR.image,
     jobTitle = AUTHOR.jobTitle,
+    locale = 'ru',
   } = params
+
+  const knowsAbout: string[] = locale === 'uk'
+    ? [
+        'Еріксонівський гіпноз',
+        'Регресивна гіпнотерапія',
+        'Тривожні розлади',
+        'Панічні атаки',
+        'Самосаботаж та прокрастинація',
+        'Робота з підсвідомістю',
+        'Психосоматика',
+        'Обмежувальні переконання',
+        'Емоційне вигорання',
+        'Особистісна криза',
+      ]
+    : [
+        'Эриксоновский гипноз',
+        'Регрессивная гипнотерапия',
+        'Тревожные расстройства',
+        'Панические атаки',
+        'Самосаботаж и прокрастинация',
+        'Работа с подсознанием',
+        'Психосоматика',
+        'Ограничивающие убеждения',
+        'Эмоциональное выгорание',
+        'Личностный кризис',
+      ]
 
   const schema: Record<string, unknown> = {
     '@context': 'https://schema.org',
@@ -47,27 +75,16 @@ export function personSchema(params: PersonSchemaParams = {}): Record<string, un
     description,
     url: `${SITE.url}${AUTHOR.url}`,
     image: `${SITE.url}${image}`,
-    knowsAbout: [
-      'Эриксоновский гипноз',
-      'Регрессивная гипнотерапия',
-      'Тревожные расстройства',
-      'Панические атаки',
-      'Самосаботаж и прокрастинация',
-      'Работа с подсознанием',
-      'Психосоматика',
-      'Ограничивающие убеждения',
-      'Эмоциональное выгорание',
-      'Личностный кризис',
-    ],
+    knowsAbout,
     worksFor: {
       '@type': 'Organization',
       name: SITE.fullName,
     },
     contactPoint: {
       '@type': 'ContactPoint',
-      contactType: 'Запись на консультацию',
+      contactType: locale === 'uk' ? 'Запис на консультацію' : 'Запись на консультацию',
       url: `${SITE.url}/kontakty/`,
-      availableLanguage: ['Russian'],
+      availableLanguage: locale === 'uk' ? ['Ukrainian'] : ['Russian'],
     },
   }
 

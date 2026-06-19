@@ -1,9 +1,10 @@
 /**
- * Генерирует WEBP-изображения для 12 статей блога.
+ * Генерирует WEBP-изображения для 12 статей блога (RU + UK локали).
  * Запуск: node scripts/generate-blog-images.mjs
  *
  * Каждое изображение: 1200×630px (OpenGraph-формат), тёмный градиентный фон,
  * тематическая иконка и текст в стиле дизайн-системы сайта.
+ * Для української локалі генеруються файли <slug>-uk.webp.
  */
 
 import sharp from 'sharp'
@@ -14,7 +15,6 @@ import { fileURLToPath } from 'url'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const OUT_DIR = join(__dirname, '..', 'public', 'images', 'blog')
 
-// Дизайн-токены из tailwind.config
 const COLORS = {
   gold: '#C8A96E',
   goldLight: '#E8D5A3',
@@ -37,6 +37,7 @@ const IMAGES = [
     gradient: ['#1A1A2E', '#2D1B4E'],
     symbol: '🧠',
     accent: COLORS.accentPurple,
+    uk: { title: 'Гіпнотерапія', sub: 'Що це і як працює' },
   },
   {
     slug: 'kak-rabotaet-gipnoz',
@@ -45,6 +46,7 @@ const IMAGES = [
     gradient: ['#0F1B2D', '#1B3A4B'],
     symbol: '🌊',
     accent: COLORS.accentBlue,
+    uk: { title: 'Як працює гіпноз', sub: 'Наукове пояснення' },
   },
   {
     slug: 'trevoga-prichiny-i-simptomy',
@@ -53,6 +55,7 @@ const IMAGES = [
     gradient: ['#2D1B1B', '#4A2525'],
     symbol: '💫',
     accent: COLORS.accentRose,
+    uk: { title: 'Тривога', sub: 'Причини та симптоми' },
   },
   {
     slug: 'kak-spravitsya-s-trevogoy',
@@ -61,6 +64,7 @@ const IMAGES = [
     gradient: ['#1B2D1B', '#2A4A2A'],
     symbol: '🪷',
     accent: COLORS.accentGreen,
+    uk: { title: 'Як впоратися', sub: 'із тривогою' },
   },
   {
     slug: 'panicheskiye-ataki-chto-delat',
@@ -69,6 +73,7 @@ const IMAGES = [
     gradient: ['#2D1B1B', '#4A2A2A'],
     symbol: '💜',
     accent: COLORS.accentRose,
+    uk: { title: 'Панічні атаки', sub: 'Перша допомога та лікування' },
   },
   {
     slug: 'chto-takoe-samosabotazh',
@@ -77,6 +82,7 @@ const IMAGES = [
     gradient: ['#1B1B2D', '#2A2A4A'],
     symbol: '🧱',
     accent: COLORS.accentPurple,
+    uk: { title: 'Самосаботаж', sub: 'Що це і як проявляється' },
   },
   {
     slug: 'samosabotazh-prichiny',
@@ -85,6 +91,7 @@ const IMAGES = [
     gradient: ['#1B1B2D', '#3A2A4A'],
     symbol: '🌳',
     accent: COLORS.accentPurple,
+    uk: { title: 'Причини самосаботажу', sub: 'Психологія підсвідомості' },
   },
   {
     slug: 'emotsionalnoye-vygoraniye-simptomy',
@@ -93,6 +100,7 @@ const IMAGES = [
     gradient: ['#2D1B10', '#4A2A1A'],
     symbol: '🔥',
     accent: COLORS.accentCoral,
+    uk: { title: 'Емоційне', sub: 'вигорання' },
   },
   {
     slug: 'vnutrenniy-kritik',
@@ -101,6 +109,7 @@ const IMAGES = [
     gradient: ['#1B2D2D', '#2A4A4A'],
     symbol: '🗣️',
     accent: COLORS.accentTeal,
+    uk: { title: 'Внутрішній критик', sub: 'Як приборкати' },
   },
   {
     slug: 'podavlennyye-emotsii',
@@ -109,6 +118,7 @@ const IMAGES = [
     gradient: ['#1B1B2D', '#2A2A4A'],
     symbol: '🌊',
     accent: COLORS.accentBlue,
+    uk: { title: 'Пригнічені емоції', sub: 'Наслідки та звільнення' },
   },
   {
     slug: 'eksistentsialnyy-krizis',
@@ -117,6 +127,7 @@ const IMAGES = [
     gradient: ['#1B1B1B', '#2D2D1B'],
     symbol: '♾️',
     accent: COLORS.gold,
+    uk: { title: 'Екзистенційна', sub: 'криза' },
   },
   {
     slug: 'gipnoterapiya-onlayn-kak-prokhodit',
@@ -125,6 +136,7 @@ const IMAGES = [
     gradient: ['#0F1B2D', '#1B3A4B'],
     symbol: '💻',
     accent: COLORS.accentBlue,
+    uk: { title: 'Онлайн-гіпноз', sub: 'Як проходять сесії' },
   },
   {
     slug: 'priznaki-gadzhet-zavisimosti',
@@ -133,6 +145,7 @@ const IMAGES = [
     gradient: ['#1B1B2D', '#3A2A4A'],
     symbol: '📱',
     accent: COLORS.accentPurple,
+    uk: { title: 'Ознаки', sub: 'гаджетозалежності' },
   },
   {
     slug: 'tsifrovoy-detoks-poshagovoe-rukovodstvo',
@@ -141,6 +154,7 @@ const IMAGES = [
     gradient: ['#1B2D2D', '#2A4A4A'],
     symbol: '🔋',
     accent: COLORS.accentTeal,
+    uk: { title: 'Цифровий детокс', sub: 'Покрокове керівництво' },
   },
   {
     slug: 'detskaya-gadzhet-zavisimost',
@@ -149,11 +163,11 @@ const IMAGES = [
     gradient: ['#2D1B10', '#4A2A1A'],
     symbol: '👶',
     accent: COLORS.accentCoral,
+    uk: { title: 'Дитяча', sub: 'гаджетозалежність' },
   },
 ]
 
 function svgContent({ title, sub, gradient, symbol, accent }) {
-  // Радиальный градиент
   const gradId = 'bg'
   const accentHex = accent.replace('#', '')
 
@@ -167,96 +181,77 @@ function svgContent({ title, sub, gradient, symbol, accent }) {
       <stop offset="0%" stop-color="${accent}" stop-opacity="0.15" />
       <stop offset="100%" stop-color="${accent}" stop-opacity="0" />
     </linearGradient>
-    <linearGradient id="line" x1="0%" y1="0%" x2="100%" y2="0%">
+    <linearGradient id="shine" x1="0%" y1="100%" x2="100%" y2="0%">
       <stop offset="0%" stop-color="${accent}" stop-opacity="0" />
-      <stop offset="50%" stop-color="${accent}" stop-opacity="0.6" />
-      <stop offset="100%" stop-color="${accent}" stop-opacity="0" />
+      <stop offset="100%" stop-color="${accent}" stop-opacity="0.06" />
     </linearGradient>
   </defs>
 
   <!-- Background -->
   <rect width="1200" height="630" fill="url(#${gradId})" />
+  <rect width="1200" height="630" fill="url(#glow)" />
+  <rect width="1200" height="630" fill="url(#shine)" />
 
-  <!-- Subtle glow accent -->
-  <rect x="300" y="100" width="600" height="430" rx="215" fill="url(#glow)" />
+  <!-- Decorative border -->
+  <rect x="16" y="16" width="1168" height="598" rx="20" fill="none" stroke="${COLORS.gold}" stroke-opacity="0.12" stroke-width="0.5" />
 
-  <!-- Decorative circles -->
-  <circle cx="1050" cy="100" r="150" fill="${accent}" opacity="0.03" />
-  <circle cx="100" cy="500" r="100" fill="${accent}" opacity="0.04" />
+  <!-- Accent line -->
+  <rect x="96" y="200" width="160" height="2" rx="1" fill="${accent}" opacity="0.5" />
 
-  <!-- Grid dots pattern -->
-  <g opacity="0.04">
-    ${Array.from({ length: 40 }, (_, i) => {
-      const x = 30 + (i % 10) * 120
-      const y = 30 + Math.floor(i / 10) * 150
-      return `<circle cx="${x}" cy="${y}" r="2" fill="#ffffff" />`
-    }).join('\n      ')}
-  </g>
-
-  <!-- Top accent line -->
-  <rect x="450" y="0" width="300" height="2" fill="url(#line)" />
-
-  <!-- Symbol (large emoji) -->
-  <text x="600" y="220" text-anchor="middle" font-size="80" dominant-baseline="central">
-    ${symbol}
-  </text>
+  <!-- Symbol -->
+  <text x="96" y="280" font-size="56" font-family="sans-serif">${symbol}</text>
 
   <!-- Title -->
-  <text x="600" y="340" text-anchor="middle"
-        font-family="Georgia, 'Times New Roman', serif"
-        font-size="48" font-weight="700" fill="#F0EEE6"
-        letter-spacing="1">
-    ${title}
+  <text x="96" y="370" font-size="48" font-weight="700" font-family="system-ui, sans-serif" fill="${COLORS.goldLight}">
+    <tspan x="96" dy="0">${title.replace(/</g, '&lt;')}</tspan>
   </text>
 
   <!-- Subtitle -->
-  <text x="600" y="390" text-anchor="middle"
-        font-family="Arial, Helvetica, sans-serif"
-        font-size="22" fill="#8888A0"
-        letter-spacing="2">
-    ${sub}
+  <text x="96" y="430" font-size="28" font-weight="400" font-family="system-ui, sans-serif" fill="${COLORS.textMuted}">
+    <tspan x="96" dy="0">${sub.replace(/</g, '&lt;')}</tspan>
   </text>
 
-  <!-- Decorative underline -->
-  <rect x="500" y="420" width="200" height="1" fill="${accent}" opacity="0.4" />
-
-  <!-- Bottom label -->
-  <text x="600" y="560" text-anchor="middle"
-        font-family="Arial, Helvetica, sans-serif"
-        font-size="13" fill="#555568"
-        letter-spacing="3">
-    PODVARCHAN.COM
-  </text>
-
-  <!-- Bottom accent line -->
-  <rect x="450" y="628" width="300" height="2" fill="url(#line)" />
+  <!-- Domain watermark -->
+  <text x="1096" y="590" font-size="14" font-weight="400" font-family="system-ui, sans-serif" fill="${COLORS.textMuted}" opacity="0.4" text-anchor="end">podvarchan.com</text>
 </svg>`
 }
 
+async function generateImage(img, outPath, locale) {
+  const svg = svgContent({
+    title: locale === 'uk' && img.uk ? img.uk.title : img.title,
+    sub: locale === 'uk' && img.uk ? img.uk.sub : img.sub,
+    gradient: img.gradient,
+    symbol: img.symbol,
+    accent: img.accent,
+  })
+
+  try {
+    await sharp(Buffer.from(svg))
+      .resize(1200, 630)
+      .webp({ quality: 85 })
+      .toFile(outPath)
+    console.log(`  ✅ ${outPath.split(/[/\\]/).pop()} — ${locale === 'uk' ? img.uk?.title : img.title}`)
+  } catch (err) {
+    console.error(`  ❌ ${outPath.split(/[/\\]/).pop()} — ОШИБКА: ${err.message}`)
+  }
+}
+
 async function main() {
-  console.log('🎨 Генерация изображений для блога...\n')
+  console.log('🎨 Генерація зображень для блогу...\n')
 
   if (!existsSync(OUT_DIR)) {
     mkdirSync(OUT_DIR, { recursive: true })
-    console.log(`📁 Создана директория: ${OUT_DIR}`)
+    console.log(`📁 Створена директорія: ${OUT_DIR}`)
   }
 
   for (const img of IMAGES) {
-    const svg = svgContent(img)
-    const outPath = join(OUT_DIR, `${img.slug}.webp`)
-
-    try {
-      await sharp(Buffer.from(svg))
-        .resize(1200, 630)
-        .webp({ quality: 85 })
-        .toFile(outPath)
-      console.log(`  ✅ ${img.slug}.webp — ${img.title}`)
-    } catch (err) {
-      console.error(`  ❌ ${img.slug}.webp — ОШИБКА: ${err.message}`)
-    }
+    // RU: <slug>.webp
+    await generateImage(img, join(OUT_DIR, `${img.slug}.webp`), 'ru')
+    // UK: <slug>-uk.webp
+    await generateImage(img, join(OUT_DIR, `${img.slug}-uk.webp`), 'uk')
   }
 
-  console.log(`\n✨ Готово! Все изображения сохранены в:\n   ${OUT_DIR}`)
+  console.log(`\n✨ Готово! Всі зображення збережено в:\n   ${OUT_DIR}`)
 }
 
 main()

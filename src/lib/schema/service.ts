@@ -46,14 +46,17 @@ export function serviceSchema(params: ServiceSchemaParams): Record<string, unkno
     },
     audience: {
       '@type': 'Audience',
-      audienceType: 'Взрослые, ищущие психологическую помощь онлайн',
+      audienceType: locale === 'uk'
+        ? 'Дорослі, які шукають психологічну допомогу онлайн'
+        : 'Взрослые, ищущие психологическую помощь онлайн',
     },
     offers: {
       '@type': 'Offer',
-      name: `Консультация: ${name}`,
+      name: locale === 'uk' ? `Консультація: ${name}` : `Консультация: ${name}`,
       availability: 'https://schema.org/OnlineOnly',
       url: cleanUrl(SITE.url, localePrefix, url),
     },
+
   }
 }
 
@@ -61,13 +64,15 @@ export function serviceSchema(params: ServiceSchemaParams): Record<string, unkno
  * Генерирует JSON-LD объект MedicalBusiness schema.org (глобальный, для всего сайта).
  * Используется на главной и всех страницах как базовый E-E-A-T сигнал.
  */
-export function medicalBusinessSchema(): Record<string, unknown> {
+export function medicalBusinessSchema(locale: string = 'ru'): Record<string, unknown> {
   return {
     '@context': 'https://schema.org',
     '@type': 'MedicalBusiness',
     '@id': `${SITE.url}#medicalbusiness`,
     name: SITE.fullName,
-    description: 'Онлайн-гипнотерапия: работа с тревогой, паническими атаками, самосаботажем и подсознанием.',
+    description: locale === 'uk'
+      ? 'Онлайн-гіпнотерапія: робота з тривогою, панічними атаками, самосаботажем та підсвідомістю.'
+      : 'Онлайн-гипнотерапия: работа с тревогой, паническими атаками, самосаботажем и подсознанием.',
     url: SITE.url,
     medicalSpecialty: 'Psychotherapy',
     founder: {
@@ -76,7 +81,7 @@ export function medicalBusinessSchema(): Record<string, unknown> {
     },
     address: {
       '@type': 'PostalAddress',
-      addressCountry: 'RU',
+      addressCountry: locale === 'uk' ? 'UA' : 'RU',
     },
     contactPoint: {
       '@type': 'ContactPoint',

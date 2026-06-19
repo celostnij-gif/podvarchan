@@ -76,8 +76,8 @@ export default async function LocaleLayout({
 
   /* ── JSON-LD Schema ── */
   const jsonLdSchemas = [
-    personSchema({ jobTitle: t('authorTitle') }),
-    medicalBusinessSchema(),
+    personSchema({ jobTitle: t('authorTitle'), locale }),
+    medicalBusinessSchema(locale),
     {
       '@context': 'https://schema.org',
       '@type': 'WebSite',
