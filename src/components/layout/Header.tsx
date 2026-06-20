@@ -585,11 +585,13 @@ export default function Header() {
     <>
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 animate-fade-in-down
-          ${shouldBeTransparent
-            ? 'bg-transparent'
-            : shouldBeSolid
-              ? `bg-bg-base/85 ${isMobile ? 'backdrop-blur-md' : 'backdrop-blur-2xl'} border-b border-border-base/80 shadow-[0_4px_30px_rgba(0,0,0,0.3)]`
-              : 'bg-gradient-to-b from-bg-base/40 to-transparent backdrop-blur-sm'
+          ${isMobile
+            ? 'bg-bg-base/85 backdrop-blur-md border-b border-border-base/80'
+            : shouldBeTransparent
+              ? 'bg-transparent'
+              : shouldBeSolid
+                ? 'bg-bg-base/85 backdrop-blur-2xl border-b border-border-base/80 shadow-[0_4px_30px_rgba(0,0,0,0.3)]'
+                : 'bg-gradient-to-b from-bg-base/40 to-transparent backdrop-blur-sm'
           }`}
         style={{ animationDelay: '0s' }}
       >

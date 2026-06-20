@@ -86,20 +86,28 @@ export default function TiltCard({
   }, [perspective])
 
   const canTilt = isDesktop && !disabled
-
+  const tiltStyle = canTilt
+    ? {
+        transform: isHovered ? transform : `perspective(${perspective}px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`,
+        boxShadow: isHovered ? glow : 'none',
+        transition: 'transform 0.25s ease-out, box-shadow 0.35s ease-out',
+        willChange: 'transform' as const,
+      }
+    : {
+        transform: 'none',
+        boxShadow: 'none',
+        transition: 'none',
+        willChange: 'auto' as const,
+      }
+  
   return (
     <div
       ref={cardRef}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onMouseMove={canTilt ? handleMouseMove : undefined}
+      onMouseEnter={canTilt ? handleMouseEnter : undefined}
+      onMouseLeave={canTilt ? handleMouseLeave : undefined}
       className={className}
-      style={{
-        transform: isHovered && canTilt ? transform : `perspective(${perspective}px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`,
-        boxShadow: isHovered && canTilt ? glow : 'none',
-        transition: 'transform 0.25s ease-out, box-shadow 0.35s ease-out',
-        willChange: canTilt ? 'transform' : 'auto',
-      }}
+      style={tiltStyle}
     >
       {children}
     </div>
