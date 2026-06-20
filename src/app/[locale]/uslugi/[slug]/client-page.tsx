@@ -4,6 +4,7 @@ import { useMessages, useTranslations } from 'next-intl'
 import { motion } from 'framer-motion'
 import { Link } from '@/i18n/routing'
 import { SERVICE_ICONS } from '@/constants'
+import { ServiceIcon } from '@/components/ui/Icons'
 import { AnimatedSection, AnimatedText, SectionContainer, MedicalDisclaimer, TiltCard, FaqAccordion } from '@/components/ui'
 import { useSetBreadcrumbs, useRegisterSchemas } from '@/providers/BreadcrumbsProvider'
 import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
@@ -427,7 +428,7 @@ function RelatedServicesSection({ service, allServices }: { service: ServiceData
                              hover:bg-bg-elevated hover:border-gold/30 hover:-translate-y-0.5
                              hover:shadow-glow-gold transition-all duration-400 rounded-xl"
                 >
-                  <span className="text-2xl" role="img" aria-hidden="true">{SERVICE_ICONS[item.slug] || '✨'}</span>
+                  <ServiceIcon name={SERVICE_ICONS[item.slug] || 'sparkles'} size={24} className="text-gold" />
                   <h3 className="mt-2 text-lg font-display text-gold group-hover:text-gold-light transition-colors">
                     {item.title}
                   </h3>

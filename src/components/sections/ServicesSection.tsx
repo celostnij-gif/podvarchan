@@ -1,26 +1,14 @@
-'use client'
-
-import { motion } from 'framer-motion'
-import { useTranslations, useMessages } from 'next-intl'
-import { Link } from '@/i18n/routing'
-import TiltCard from '@/components/ui/TiltCard'
-import { AnimatedSection, SectionContainer } from '@/components/ui'
-
-/* ── Emoji icons by slug (универсальные, не зависят от языка) ── */
-
-const ICONS: Record<string, string> = {
-  'gipnoterapiya-onlayn': '✨',
-  'trevoga-i-panicheskiye-ataki': '🫂',
-  'rabota-s-podsoznaniem': '🌌',
-  'samosabotazh-i-bloki': '🔓',
-  'emotsionalnoye-vygoraniye': '🕯️',
-  'neyverennost-i-strakh-provala': '🌟',
-  'psikhosomatika': '🌿',
-  'lichnostnyy-krizis': '🌅',
-  'tsifrovoy-detoks-i-gadzhet-zavisimost': '📱',
-}
-
-/* ── Тип для servicesData из переводов ── */
+ 'use client'
+ 
+ import { motion } from 'framer-motion'
+ import { useTranslations, useMessages } from 'next-intl'
+ import { Link } from '@/i18n/routing'
+ import TiltCard from '@/components/ui/TiltCard'
+ import { AnimatedSection, SectionContainer } from '@/components/ui'
+ import { ServiceIcon } from '@/components/ui/Icons'
+ import { SERVICE_ICONS } from '@/constants'
+ 
+ /* ── Тип для servicesData из переводов ── */
 
 interface ServiceItem {
   slug: string
@@ -99,7 +87,7 @@ export default function ServicesSection() {
                              hover:border-gold-muted hover:shadow-lg hover:shadow-gold/5
                              transition-all duration-400 h-full rounded-xl"
                 >
-                  <span className="text-2xl" role="img" aria-hidden="true">{ICONS[service.slug] || '✨'}</span>
+                  <ServiceIcon name={SERVICE_ICONS[service.slug] || 'sparkles'} size={24} className="text-gold group-hover:scale-110 transition-transform duration-400" />
                   <h3 className="mt-3 text-lg font-display text-gold group-hover:text-gold-light transition-colors">
                     {service.title}
                   </h3>

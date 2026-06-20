@@ -8,6 +8,7 @@ import { LogoImage } from '@/components/ui/LogoImage'
 import { MAIN_NAV } from '@/constants'
 import { Link } from '@/i18n/routing'
 import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
+import { Icon, TelegramIcon, WhatsAppIcon } from '@/components/ui/Icons'
 import type { NavItem } from '@/types'
 
 /* ── Nav label key mapping ── */
@@ -31,10 +32,36 @@ const NAV_LABEL_KEYS: Record<string, string> = {
   '/uslugi/lichnostnyy-krizis/': 'nav.krizis',
   '/uslugi/tsifrovoy-detoks-i-gadzhet-zavisimost/': 'nav.tsifrovoy-detoks',
 }
+ 
+ /* ── Nav icon mapping ── */
+ 
+ const NAV_ICONS: Record<string, string> = {
+  '/': 'house',
+  '/uslugi/': 'book-open',
+  '/blog/': 'file-text',
+  '/ob-avtore/': 'user',
+  '/metod/': 'book-open',
+  '/faq/': 'help-circle',
+  '/tseny/': 'dollar-sign',
+  '/kontakty/': 'phone',
+  '/uslugi/gipnoterapiya-onlayn/': 'brain',
+  '/uslugi/trevoga-i-panicheskiye-ataki/': 'heart',
+  '/uslugi/rabota-s-podsoznaniem/': 'moon',
+  '/uslugi/samosabotazh-i-bloki/': 'lock',
+  '/uslugi/emotsionalnoye-vygoraniye/': 'flame',
+  '/uslugi/neyverennost-i-strakh-provala/': 'shield-off',
+  '/uslugi/psikhosomatika/': 'leaf',
+  '/uslugi/lichnostnyy-krizis/': 'compass',
+  '/uslugi/tsifrovoy-detoks-i-gadzhet-zavisimost/': 'smartphone',
+}
 
 function getNavLabelKey(href: string): string {
   return NAV_LABEL_KEYS[href] ?? 'nav.home'
 }
+ 
+ function getNavIcon(href: string): string {
+   return NAV_ICONS[href] ?? 'sparkles'
+ }
 
 // Mobile menu overlay & panel variants (still need framer-motion for exit animations)
 const mobileOverlay = {
@@ -143,10 +170,14 @@ function MobileNavItem({
               : 'text-text-secondary hover:text-text-primary hover:bg-white/[0.04] border border-transparent'
             }`}
         >
-          <span className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-            active ? 'bg-gold shadow-glow-gold' : 'bg-text-muted/30 group-hover:bg-gold-muted'
-          }`} />
-          <span>{label}</span>
+          <span className={`w-8 h-8 flex items-center justify-center rounded-xl transition-all duration-300 ${
+            active
+              ? 'bg-gold/[0.12] text-gold'
+              : 'bg-white/[0.04] text-text-muted/60 group-hover:bg-white/[0.06] group-hover:text-text-secondary'
+          }`}>
+            <Icon name={getNavIcon(item.href)} size={16} />
+          </span>
+          <span className="font-medium">{label}</span>
         </Link>
       </motion.div>
     )
@@ -166,10 +197,14 @@ function MobileNavItem({
         aria-expanded={isOpen}
       >
         <div className="flex items-center gap-3">
-          <span className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-            active ? 'bg-gold shadow-glow-gold' : 'bg-text-muted/30'
-          }`} />
-          <span>{label}</span>
+          <span className={`w-8 h-8 flex items-center justify-center rounded-xl transition-all duration-300 ${
+            active || isOpen
+              ? 'bg-gold/[0.12] text-gold'
+              : 'bg-white/[0.04] text-text-muted/60'
+          }`}>
+            <Icon name={getNavIcon(item.href)} size={16} />
+          </span>
+          <span className="font-medium">{label}</span>
         </div>
         <motion.svg
           animate={{ rotate: isOpen ? 180 : 0 }}
@@ -201,13 +236,14 @@ function MobileNavItem({
                     key={child.href}
                     href={child.href}
                     onClick={onClose}
-                    className={`block px-4 py-2.5 rounded-xl text-sm transition-all duration-200
+                    className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-all duration-200
                       ${childActive
                         ? 'text-gold bg-gold/[0.06]'
                         : 'text-text-muted hover:text-text-secondary hover:bg-white/[0.03]'
                       }`}
                   >
-                    {childLabel}
+                    <Icon name={getNavIcon(child.href)} size={14} className="shrink-0" />
+                    <span>{childLabel}</span>
                   </Link>
                 )
               })}
@@ -722,19 +758,29 @@ export default function Header() {
                   </Link>
                 </div>
 
-                <div className="mt-6 px-4">
+                <div className="mt-6 px-4 space-y-3">
+                  <a href="https://t.me/SLAVKA_VIP" target="_blank" rel="noopener noreferrer"
+                     className="flex items-center gap-2.5 text-sm text-text-muted hover:text-[#0088cc] transition-colors duration-200">
+                    <TelegramIcon size={16} />
+                    @SLAVKA_VIP
+                  </a>
+                  <a href="https://wa.me/380663122069" target="_blank" rel="noopener noreferrer"
+                     className="flex items-center gap-2.5 text-sm text-text-muted hover:text-[#25D366] transition-colors duration-200">
+                    <WhatsAppIcon size={16} />
+                    +380 66 312 2069
+                  </a>
                   <a href="mailto:podvarchan@gmail.com"
                      className="flex items-center gap-2.5 text-sm text-text-muted hover:text-gold transition-colors duration-200">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
-                         strokeLinejoin="round">
+                         strokeLinejoin="round" aria-hidden="true">
                       <rect x="2" y="4" width="20" height="16" rx="2" />
                       <path d="M22 4l-10 8L2 4" />
                     </svg>
                     podvarchan@gmail.com
                   </a>
                   <Link href="/politika-konfidentsialnosti/"
-                        className="inline-block mt-3 text-xs text-text-muted/50 hover:text-gold-muted transition-colors duration-200">
+                        className="inline-block mt-2 text-xs text-text-muted/50 hover:text-gold-muted transition-colors duration-200">
                     {t('privacy')}
                   </Link>
                 </div>

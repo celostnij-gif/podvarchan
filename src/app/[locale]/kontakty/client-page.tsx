@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl'
 import { AnimatedText, SectionContainer, PageHero } from '@/components/ui'
 import ContactForm from '@/components/ContactForm'
+import { TelegramIcon, WhatsAppIcon, EmailIcon } from '@/components/ui/Icons'
 
 export default function KontaktyClient() {
   const t = useTranslations('contacts')
@@ -59,8 +60,8 @@ export default function KontaktyClient() {
 
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <span className="shrink-0 w-9 h-9 flex items-center justify-center rounded-full bg-gold/10 text-gold text-sm" aria-hidden="true">
-                    ✈
+                  <span className="shrink-0 w-9 h-9 flex items-center justify-center rounded-full bg-[#0088cc]/10 text-[#0088cc]">
+                    <TelegramIcon size={18} />
                   </span>
                   <div>
                     <p className="text-xs text-text-muted">Telegram</p>
@@ -75,8 +76,8 @@ export default function KontaktyClient() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="shrink-0 w-9 h-9 flex items-center justify-center rounded-full bg-gold/10 text-gold text-sm" aria-hidden="true">
-                    📱
+                  <span className="shrink-0 w-9 h-9 flex items-center justify-center rounded-full bg-[#25D366]/10 text-[#25D366]">
+                    <WhatsAppIcon size={18} />
                   </span>
                   <div>
                     <p className="text-xs text-text-muted">WhatsApp</p>
@@ -91,8 +92,8 @@ export default function KontaktyClient() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="shrink-0 w-9 h-9 flex items-center justify-center rounded-full bg-gold/10 text-gold text-sm" aria-hidden="true">
-                    ✉
+                  <span className="shrink-0 w-9 h-9 flex items-center justify-center rounded-full bg-gold/10 text-gold">
+                    <EmailIcon size={18} />
                   </span>
                   <div>
                     <p className="text-xs text-text-muted">Email</p>

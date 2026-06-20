@@ -25,6 +25,7 @@
     "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10.5.0",
     "framer-motion": "^12.40.0",
+    "lucide-react": "^1.21.0",
     "next": "^15.5.18",
     "next-intl": "^4.12.0",
     "next-mdx-remote": "^6.0.0",

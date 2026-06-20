@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { useTranslations, useMessages } from 'next-intl'
 import { Link } from '@/i18n/routing'
 import { SERVICE_ICONS } from '@/constants'
+import { ServiceIcon } from '@/components/ui/Icons'
 import TiltCard from '@/components/ui/TiltCard'
 import { AnimatedSection, AnimatedText, SectionContainer } from '@/components/ui'
 import { useSetBreadcrumbs } from '@/providers/BreadcrumbsProvider'
@@ -81,12 +82,12 @@ function ServiceCard({ service, index }: { service: ServiceItem; index: number }
         </div>
 
         {/* Icon */}
-        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl
+        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center
                          bg-gold/[0.06] border border-gold/10
                          group-hover:scale-110 group-hover:bg-gold/[0.1]
                          transition-all duration-400`}
-             role="img" aria-hidden="true">
-          {SERVICE_ICONS[service.slug] || '✨'}
+             aria-hidden="true">
+          <ServiceIcon name={SERVICE_ICONS[service.slug] || 'sparkles'} size={24} className="text-gold" />
         </div>
 
         {/* Title */}
