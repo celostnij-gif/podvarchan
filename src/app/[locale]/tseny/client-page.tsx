@@ -182,7 +182,7 @@ export function TsenyClient({ schemas }: TsenyClientProps) {
 
       {/* ── Pricing Cards ── */}
       <AnimatedSection as="div" variant="fadeUp">
-        <SectionContainer size="md" className="bg-bg-base">
+        <SectionContainer size="md">
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4 items-stretch">
             {pricingPlans.map((plan, i) => (
               <PricingCard key={i} {...plan} index={i} />
@@ -222,7 +222,7 @@ export function TsenyClient({ schemas }: TsenyClientProps) {
 
       {/* ── CTA ── */}
       <AnimatedSection as="div" variant="fadeUp">
-        <SectionContainer size="md" background="deep">
+        <SectionContainer size="md">
           <div className="relative max-w-3xl mx-auto text-center">
             <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-96 h-96 bg-gold/5 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
 

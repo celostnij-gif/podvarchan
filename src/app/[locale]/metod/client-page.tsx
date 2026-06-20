@@ -228,7 +228,7 @@ export default function MetodClient() {
            THREE COMPONENTS
            ════════════════════════════════════════ */}
       <AnimatedSection as="div" variant="fadeUp">
-      <SectionContainer size="md" background="default">
+      <SectionContainer size="md">
         <AnimatedText as="h2" direction="up" className="text-3xl md:text-4xl font-display text-text-primary text-center">
           {t('componentsTitle')}
         </AnimatedText>
@@ -293,7 +293,7 @@ export default function MetodClient() {
               <TiltCard key={i} tiltDegree={4} scale={1.015} className="rounded-xl h-full">
               <motion.div
                 variants={childVariants}
-                className="relative p-6 bg-bg-base border border-border-base hover:border-gold/20 transition-all duration-400 group rounded-xl h-full flex flex-col"
+                className="relative p-6 border border-border-base hover:border-gold/20 transition-all duration-400 group rounded-xl h-full flex flex-col"
               >
                 <span className="absolute -top-2.5 -left-2.5 w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center text-xs font-display text-gold">
                   {i + 1}
@@ -323,7 +323,7 @@ export default function MetodClient() {
            SAFETY
            ════════════════════════════════════════ */}
       <AnimatedSection as="div" variant="fadeUp">
-      <SectionContainer size="md" background="default">
+      <SectionContainer size="md">
         <AnimatedText as="h2" direction="up" className="text-3xl md:text-4xl font-display text-text-primary text-center">
           {t('safetyTitle')}
         </AnimatedText>
@@ -333,7 +333,7 @@ export default function MetodClient() {
             <TiltCard key={i} tiltDegree={3} scale={1.015} className="rounded-xl h-full">
             <motion.div
               variants={childVariants}
-              className="p-6 bg-bg-surface border border-border-base text-center
+              className="p-6 border border-border-base text-center
                          hover:border-gold/20 transition-all duration-400 group rounded-xl h-full flex flex-col"
             >
               <h3 className="text-base font-display text-gold group-hover:text-gold-light transition-colors duration-300">
@@ -363,7 +363,7 @@ export default function MetodClient() {
               <TiltCard key={i} tiltDegree={2} scale={1.01} glowOpacity={0.04} className="rounded-lg">
               <motion.li
                 variants={childVariants}
-                className="flex items-start gap-3 p-4 bg-bg-base border border-border-base
+                className="flex items-start gap-3 p-4 border border-border-base
                            hover:border-gold/15 transition-all duration-300 group rounded-lg"
               >
                 <span
@@ -390,7 +390,7 @@ export default function MetodClient() {
            CTA
            ════════════════════════════════════════ */}
       <AnimatedSection as="div" variant="fadeUp">
-      <SectionContainer size="md" background="deep">
+      <SectionContainer size="md">
         <div className="relative max-w-3xl mx-auto text-center">
           {/* Decorative gradient */}
           <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-96 h-96 bg-gold/5 rounded-full blur-3xl pointer-events-none" />

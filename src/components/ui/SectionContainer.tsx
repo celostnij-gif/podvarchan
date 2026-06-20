@@ -26,15 +26,13 @@ const sizeStyles: Record<SectionSize, string> = {
   full: 'py-0',                              // No padding, children control spacing
 }
 
-/* ── Background variants ── */
-
-const bgStyles: Record<string, string> = {
-  default: 'bg-bg-base/85',
-  deep: 'bg-bg-deep/85',
-  subtle: 'bg-gradient-subtle',
-  surface: 'bg-bg-surface/85',
-  transparent: 'bg-transparent',
-}
+ const bgStyles: Record<string, string> = {
+   default: 'bg-transparent',
+   deep: 'bg-bg-deep/85',
+   subtle: 'bg-gradient-subtle',
+   surface: 'bg-bg-surface/85',
+   transparent: 'bg-transparent',
+ }
 
 /* ── Component ── */
 
@@ -48,24 +46,21 @@ export default function SectionContainer({
   id,
   ...rest
 }: SectionContainerProps) {
-  return (
-    <Tag
-      id={id}
-      className={[
-        // Background
-        bgStyles[background],
-        // Padding
-        sizeStyles[size],
-        // Container constraints
-        !fullWidth ? 'section-container' : 'px-6 md:px-8',
-        // Custom
-        className,
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      {...rest}
-    >
-      {children}
-    </Tag>
+   return (
+     <Tag
+       id={id}
+       className={[
+         bgStyles[background],
+         sizeStyles[size],
+         !fullWidth ? 'section-container' : 'px-6 md:px-8',
+         'transition-all duration-700 ease-out',
+         className,
+       ]
+         .filter(Boolean)
+         .join(' ')}
+       {...rest}
+     >
+       {children}
+     </Tag>
   )
 }

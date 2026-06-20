@@ -134,7 +134,7 @@ export function ClientBlogPost({ title, body, date, category, categorySlug, auth
       </section>
 
       {/* ────── Article Content ────── */}
-      <SectionContainer className="relative">
+      <SectionContainer background="surface" className="relative">
         {/* Subtle background decoration */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-gradient-radial from-gold/[0.01] via-transparent to-transparent blur-[100px]" />
@@ -257,7 +257,7 @@ export function ClientBlogPost({ title, body, date, category, categorySlug, auth
 
       {/* ── CTA ── */}
       <AnimatedSection as="div" variant="fadeUp">
-        <SectionContainer size="md" background="deep">
+        <SectionContainer size="md">
           <div className="relative max-w-3xl mx-auto text-center">
             <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-96 h-96 bg-gold/5 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
 

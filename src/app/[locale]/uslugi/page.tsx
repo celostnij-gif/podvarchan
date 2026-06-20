@@ -63,7 +63,7 @@ function ServiceCard({ service, index }: { service: ServiceItem; index: number }
       <Link
         href={`/uslugi/${service.slug}/`}
         className={`group relative block p-6 md:p-7 h-full
-                    bg-bg-surface border border-border-base
+                    border border-border-base
                     hover:bg-bg-elevated ${color.border} ${color.glow}
                     hover:-translate-y-1
                     transition-all duration-500 overflow-hidden rounded-2xl`}
@@ -188,7 +188,7 @@ export default function UslugiPage() {
 
       {/* ── Services Grid ── */}
       <AnimatedSection as="div" variant="fadeUp" staggerDelay={0.04}>
-        <SectionContainer size="md" background="surface">
+        <SectionContainer size="md">
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-2">
             {servicesData.map((service, index) => (
               <ServiceCard key={service.slug} service={service} index={index} />
@@ -199,7 +199,7 @@ export default function UslugiPage() {
 
       {/* ── CTA ── */}
       <AnimatedSection as="div" variant="fadeUp">
-        <SectionContainer size="md" background="deep">
+        <SectionContainer size="md">
           <div className="relative max-w-3xl mx-auto text-center">
             <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-96 h-96 bg-gold/5 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
 

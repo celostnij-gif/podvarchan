@@ -196,7 +196,7 @@ export default function BlogPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, ease: [0.25, 0.1, 0, 1] }}
-            className="mt-8 text-center py-20 px-6 rounded-2xl bg-bg-surface border border-border-base"
+            className="mt-8 text-center py-20 px-6 rounded-2xl border border-border-base"
           >
             <div className="w-16 h-16 mx-auto rounded-full bg-gold/10 flex items-center justify-center mb-6">
               <svg className="w-8 h-8 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -215,7 +215,7 @@ export default function BlogPage() {
 
       {/* ────── CTA Section ────── */}
       <AnimatedSection as="div" variant="fadeUp">
-        <SectionContainer size="md" background="deep">
+        <SectionContainer size="md">
           <div className="relative max-w-3xl mx-auto text-center">
             <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-96 h-96 bg-gold/5 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
 

@@ -83,7 +83,7 @@ export default function ServicesSection() {
               <TiltCard tiltDegree={4} scale={1.015} className="rounded-xl h-full">
                 <Link
                   href={`/uslugi/${service.slug}/`}
-                  className="group block p-6 bg-bg-surface border border-border-base
+                  className="group block p-6 border border-border-base
                              hover:border-gold-muted hover:shadow-lg hover:shadow-gold/5
                              transition-all duration-400 h-full rounded-xl"
                 >

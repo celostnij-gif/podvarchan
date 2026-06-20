@@ -17,7 +17,7 @@ export default function AuthorPreviewSection() {
 
   return (
     <AnimatedSection as="section" variant="fadeUp" aria-label={t('ariaLabel')}>
-      <SectionContainer size="md" background="surface" className="bg-bg-surface">
+      <SectionContainer size="md" background="transparent">
         <div className="grid gap-10 md:grid-cols-2 items-center">
           {/* Photo */}
           <motion.div

@@ -58,7 +58,7 @@ export default function HomeClient({ locale: _locale, schemas }: { locale: strin
 
       {/* ── CTA ── */}
       <AnimatedSection as="div" variant="fadeUp">
-        <SectionContainer size="md" background="deep">
+        <SectionContainer size="md">
           <div className="relative max-w-3xl mx-auto text-center">
             <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-96 h-96 bg-gold/5 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
 

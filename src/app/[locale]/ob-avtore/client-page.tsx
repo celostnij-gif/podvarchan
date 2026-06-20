@@ -155,7 +155,7 @@ export function ClientAboutPage() {
       {/* ════════════════════════════════════════
            STATS — Цифры доверия
            ════════════════════════════════════════ */}
-      <SectionContainer size="sm" background="surface">
+      <SectionContainer size="sm">
         <div className="grid grid-cols-3 gap-6 max-w-2xl mx-auto text-center">
           {[
             { value: '2000+', label: t('statsClients') },
@@ -178,9 +178,9 @@ export function ClientAboutPage() {
            PERSONAL STORY — Путь и философия
            ════════════════════════════════════════ */}
       <AnimatedSection as="div" variant="fadeUp">
-        <SectionContainer size="md" background="default">
+        <SectionContainer size="md">
           <div className="max-w-3xl mx-auto">
-            <div className="relative p-8 md:p-12 bg-bg-surface border border-border-base rounded-2xl">
+            <div className="relative p-8 md:p-12 border border-border-base rounded-2xl">
               {/* Decorative quote mark */}
               <span
                 className="absolute -top-3 left-6 text-7xl text-gold/10 font-display leading-none pointer-events-none select-none"
@@ -229,7 +229,7 @@ export function ClientAboutPage() {
                   variants={cardSlide(i)}
                   initial="initial"
                   whileInView="whileInView"
-                  className="flex items-start gap-5 p-6 bg-bg-base border border-border-base
+                  className="flex items-start gap-5 p-6 border border-border-base
                              hover:border-gold/20 transition-all duration-400 group rounded-xl"
                 >
                   {/* Icon */}
@@ -262,7 +262,7 @@ export function ClientAboutPage() {
            CERTIFICATIONS — Сертификаты
            ════════════════════════════════════════ */}
       <AnimatedSection as="div" variant="fadeUp">
-        <SectionContainer size="md" background="default">
+        <SectionContainer size="md">
           <AnimatedText
             as="h2"
             direction="up"
@@ -286,7 +286,7 @@ export function ClientAboutPage() {
                   variants={cardSlide(i)}
                   initial="initial"
                   whileInView="whileInView"
-                  className="flex items-start gap-5 p-6 bg-bg-surface border border-border-base
+                  className="flex items-start gap-5 p-6 border border-border-base
                              hover:border-gold/20 transition-all duration-400 group rounded-xl"
                 >
                   {/* Icon */}
@@ -392,7 +392,7 @@ export function ClientAboutPage() {
            CTA — Призыв к действию
            ════════════════════════════════════════ */}
       <AnimatedSection as="div" variant="fadeUp">
-        <SectionContainer size="md" background="deep">
+        <SectionContainer size="md">
           <div className="relative max-w-3xl mx-auto text-center">
             {/* Decorative glow */}
             <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-96 h-96 bg-gold/5 rounded-full blur-3xl pointer-events-none" />

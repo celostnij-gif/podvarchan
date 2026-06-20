@@ -48,7 +48,7 @@ export default function BlogCard({
     <TiltCard tiltDegree={3} scale={1.015} className={`rounded-xl h-full ${featured ? 'md:col-span-2' : ''}`}>
       <Link
         href={`/blog/${slug}/`}
-        className="group block bg-bg-surface border border-border-base
+        className="group block border border-border-base
                    hover:border-gold-muted hover:shadow-lg hover:shadow-gold/5
                    hover:-translate-y-0.5
                    transition-all duration-400 h-full flex flex-col overflow-hidden rounded-xl"

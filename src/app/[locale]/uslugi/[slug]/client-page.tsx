@@ -263,7 +263,7 @@ function SymptomsSection({ service }: { service: ServiceData }) {
 
   return (
     <AnimatedSection as="section" variant="fadeUp" aria-label={t('symptomsTitle')}>
-      <SectionContainer size="md" background="default">
+      <SectionContainer size="md">
         <AnimatedText direction="up" as="div" className="text-center">
           <div className="inline-flex items-center gap-3 mb-4">
             <span className="w-8 h-px bg-gold/40" aria-hidden="true" />
@@ -350,7 +350,7 @@ function CTASection({ service }: { service: ServiceData }) {
   const t = useTranslations('serviceSection')
   return (
     <AnimatedSection as="div" variant="fadeUp">
-      <SectionContainer size="md" background="deep">
+      <SectionContainer size="md">
         <div className="relative max-w-3xl mx-auto text-center">
           <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-96 h-96 bg-gold/5 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
 
@@ -407,7 +407,7 @@ function RelatedServicesSection({ service, allServices }: { service: ServiceData
 
   return (
     <AnimatedSection as="section" variant="fadeUp" aria-label={t('relatedTitle')}>
-      <SectionContainer size="md" background="default">
+      <SectionContainer size="md">
         <AnimatedText direction="up" as="h2" className="text-3xl md:text-4xl lg:text-5xl font-display text-text-primary text-center">
           {t('relatedTitle')}
         </AnimatedText>
@@ -424,7 +424,7 @@ function RelatedServicesSection({ service, allServices }: { service: ServiceData
               <TiltCard tiltDegree={4} scale={1.015} className="rounded-xl h-full">
                 <Link
                   href={`/uslugi/${item.slug}/`}
-                  className="group block p-6 bg-bg-surface border border-border-base h-full
+                  className="group block p-6 border border-border-base h-full
                              hover:bg-bg-elevated hover:border-gold/30 hover:-translate-y-0.5
                              hover:shadow-glow-gold transition-all duration-400 rounded-xl"
                 >
