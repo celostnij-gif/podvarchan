@@ -26,15 +26,17 @@ jobs:
       - name: ESLint check
         run: npm run lint
 
-      - name: Build & Deploy
+      - name: Build
+        run: npx opennextjs-cloudflare build
+        env:
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          NEXT_PUBLIC_GA_ID: ${{ secrets.NEXT_PUBLIC_GA_ID }}
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY: 0x4AAAAAADYZ2z3RysEsBoQu
+          NEXTJS_ENV: production
+          CONTACT_EMAIL: ${{ secrets.CONTACT_EMAIL }}
+
+      - name: Deploy to Cloudflare
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          preCommands: npx opennextjs-cloudflare build
-        env:
-          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
-          NEXT_PUBLIC_GA_ID: ${{ secrets.NEXT_PUBLIC_GA_ID }}
-          NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
-          NEXTJS_ENV: production
-          CONTACT_EMAIL: ${{ secrets.CONTACT_EMAIL }}
