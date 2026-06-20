@@ -1014,7 +1014,23 @@
       "methodLink": "Подробнее об авторском методе →",
       "ctaTitle": "Готовы начать?",
       "ctaDescription": "Запишитесь на бесплатную 15-минутную консультацию онлайн, чтобы обсудить ваш запрос и выбрать подходящий формат работы.",
-      "cta": "Записаться на консультацию"
+      "cta": "Записаться на консультацию",
+      "credNames": [
+        "Диплом специалиста с отличием — Практический психолог",
+        "Магистр музыкального образования — Музыкальная терапия",
+        "Кхенпо (Доктор буддийской философии)",
+        "INLPTA Certified Practitioner (НЛП Практик)",
+        "ABH Certified Hypnotherapist (сертифицированный гипнотерапевт)",
+        "Transference-Focused Psychotherapy (TFP) — курс последипломного образования"
+      ],
+      "credOrgs": [
+        "Черкасский национальный университет им. Б. Хмельницкого",
+        "The University of Kansas, School of Music",
+        "Shechen Institute of Higher Buddhist Studies (Lekshay Nyidai Ling)",
+        "Международная ассоциация тренеров НЛП (INLPTA)",
+        "American Board of Hypnotherapy (ABH)",
+        "Институт психоаналитической психотерапии / TFP Institute (Otto Kernberg, Frank Yeomans)"
+      ]
     },
     "metod": {
       "heading": "Авторский метод",
@@ -1244,23 +1260,7 @@
     "spec3": "Работа с тревогой и паническими атаками",
     "spec4": "Проработка ограничивающих убеждений",
     "spec5": "Самосаботаж и прокрастинация",
-    "spec6": "Психосоматика и телесные симптомы",
-    "credNames": [
-      "Диплом специалиста с отличием — Практический психолог",
-      "Магистр музыкального образования — Музыкальная терапия",
-      "Кхенпо (Доктор буддийской философии)",
-      "INLPTA Certified Practitioner (НЛП Практик)",
-      "ABH Certified Hypnotherapist (сертифицированный гипнотерапевт)",
-      "Transference-Focused Psychotherapy (TFP) — курс последипломного образования"
-    ],
-    "credOrgs": [
-      "Черкасский национальный университет им. Б. Хмельницкого",
-      "The University of Kansas, School of Music",
-      "Shechen Institute of Higher Buddhist Studies (Lekshay Nyidai Ling)",
-      "Международная ассоциация тренеров НЛП (INLPTA)",
-      "American Board of Hypnotherapy (ABH)",
-      "Институт психоаналитической психотерапии / TFP Institute (Otto Kernberg, Frank Yeomans)"
-    ]
+    "spec6": "Психосоматика и телесные симптомы"
   },
   "contacts": {
     "pageTitle": "Контакты",
