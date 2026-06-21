@@ -180,7 +180,7 @@ export function ClientAboutPage() {
       <AnimatedSection as="div" variant="fadeUp">
         <SectionContainer size="md">
           <div className="max-w-3xl mx-auto">
-            <div className="relative p-8 md:p-12 border border-border-base rounded-2xl">
+            <div className="relative p-8 md:p-12 bg-bg-surface/85 border border-border-base rounded-2xl">
               {/* Decorative quote mark */}
               <span
                 className="absolute -top-3 left-6 text-7xl text-gold/10 font-display leading-none pointer-events-none select-none"
@@ -196,12 +196,53 @@ export function ClientAboutPage() {
                 >
                   {t('personalStoryTitle')}
                 </AnimatedText>
+
+                {/* Narrative */}
                 <AnimatedText
                   direction="up"
-                  delay={100}
-                  className="mt-6 text-base text-text-secondary leading-relaxed whitespace-pre-line"
+                  delay={80}
+                  className="mt-6 text-base text-text-secondary leading-relaxed"
                 >
                   {t('personalStory')}
+                </AnimatedText>
+
+                {/* Divider */}
+                <div className="my-8 h-px bg-gradient-to-r from-transparent via-gold/20 to-transparent" aria-hidden="true" />
+
+                {/* Related directions */}
+                <AnimatedText
+                  direction="up"
+                  delay={120}
+                  className="text-base font-display text-gold-light"
+                >
+                  {t('personalStoryDirections')}
+                </AnimatedText>
+
+                <AnimatedText direction="up" delay={160}>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    {[
+                      { slug: 'gipnoterapiya-onlayn', icon: '✨' },
+                      { slug: 'rabota-s-podsoznaniem', icon: '🌌' },
+                      { slug: 'samosabotazh-i-bloki', icon: '🔓' },
+                      { slug: 'trevoga-i-panicheskiye-ataki', icon: '🫂' },
+                    ].map((svc) => {
+                      const svcData = (messages?.servicesData as Array<{ slug: string; title: string }>)?.find((s) => s.slug === svc.slug)
+                      if (!svcData) return null
+                      return (
+                        <Link
+                          key={svc.slug}
+                          href={`/uslugi/${svc.slug}/`}
+                          className="flex items-center gap-3 p-3 rounded-lg bg-bg-elevated/50 border border-border-base
+                                     hover:border-gold/30 hover:bg-bg-elevated transition-all duration-300 group"
+                        >
+                          <span className="text-lg" aria-hidden="true">{svc.icon}</span>
+                          <span className="text-sm text-text-secondary group-hover:text-gold transition-colors duration-300">
+                            {svcData.title}
+                          </span>
+                        </Link>
+                      )
+                    })}
+                  </div>
                 </AnimatedText>
               </div>
             </div>
