@@ -114,8 +114,8 @@ function ProblemCard({
       <motion.div
         variants={cardVariants}
         custom={index}
-        className={`group relative p-6 md:p-7 bg-white/[0.02] border border-white/[0.05]
-                    hover:bg-white/[0.04] ${color.border}
+        className={`group relative p-6 md:p-7 bg-bg-surface/85 border border-white/[0.05]
+                    hover:bg-bg-surface ${color.border}
                     hover:shadow-[0_0_30px_rgba(201,169,110,0.04)]
                     transition-all duration-500 h-full flex flex-col`}
       >
