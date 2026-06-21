@@ -152,8 +152,7 @@ function HeroSection({ service }: { service: ServiceData }) {
                 </svg>
               </span>
             </Link>
-
-            <span className="text-xs text-text-muted">
+            <span className="badge-free">
               {t('heroFreeLabel')}
             </span>
           </motion.div>
@@ -356,7 +355,7 @@ function CTASection({ service }: { service: ServiceData }) {
 
           <AnimatedText as="h2" direction="up" className="relative text-3xl md:text-4xl font-display text-text-primary leading-tight">
             {t('ctaTitle')}{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold to-gold-light">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-green to-green-light">
               {t('ctaAccent')}
             </span>
           </AnimatedText>

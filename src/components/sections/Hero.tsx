@@ -247,6 +247,13 @@ export default function Hero() {
             ))}
           </ul>
 
+          {/* Free consultation badge */}
+          <div className="flex justify-center mt-6 animate-fade-in-up" style={{ animationDelay: '620ms' }}>
+            <span className="badge-free">
+              {t('freeBadge')}
+            </span>
+          </div>
+
           {/* CTA Buttons */}
           <div
             className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up"

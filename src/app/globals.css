@@ -406,6 +406,33 @@
     color: transparent;
   }
 
+  /* ── Free consultation badge — green pill for "бесплатно" ── */
+  .badge-free {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    background: rgba(64, 145, 108, 0.12);
+    border: 1px solid rgba(64, 145, 108, 0.25);
+    color: var(--color-green-light);
+    white-space: nowrap;
+    backdrop-filter: blur(4px);
+  }
+
+  .badge-free::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--color-green-light);
+    flex-shrink: 0;
+  }
+
   /* ── Premium gold heading — multi-stop gradient + metallic shimmer ── */
   .text-gold-premium {
     background: linear-gradient(
