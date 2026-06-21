@@ -132,9 +132,10 @@ export const AUTHOR = {
     'https://www.facebook.com/SLAVKA10VIP',
     'https://x.com/PodvarchanVip',
     'https://mentalzon.com/ru/therapist/19292/вячеслав-подварчан-иванович',
+    'https://www.b17.ru/podvarchan_vyacheslav/',
     /* ═══════════════════════════════════════════════════════════
        ⚡  E-E-A-T сигналы — добавить по мере регистрации:
-       LinkedIn, YouTube, Google Business Profile, B17.ru
+       LinkedIn, YouTube, Google Business Profile
        ═══════════════════════════════════════════════════════════ */
   ],
   credentials: [
