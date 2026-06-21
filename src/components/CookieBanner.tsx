@@ -92,7 +92,7 @@ export default function CookieBanner() {
                 className={[
                   'px-4 py-2 text-xs font-medium rounded-lg',
                   'text-text-muted hover:text-text-primary',
-                  'bg-bg-surface hover:bg-bg-elevated',
+                  'bg-bg-surface/85 hover:bg-bg-elevated',
                   'border border-border-base hover:border-border-light',
                   'transition-all duration-200',
                 ].join(' ')}

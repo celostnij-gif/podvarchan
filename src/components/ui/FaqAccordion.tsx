@@ -21,7 +21,7 @@ export default function FaqAccordion({ question, answer, compact = false }: FaqA
 
   return (
     <div
-      className={`rounded-xl border bg-bg-surface overflow-hidden transition-colors duration-300 ${
+      className={`rounded-xl border bg-bg-surface/85 overflow-hidden transition-colors duration-300 ${
         isOpen
           ? 'border-gold-muted/30 shadow-[0_0_24px_rgba(201,169,110,0.04)]'
           : 'border-border-base'

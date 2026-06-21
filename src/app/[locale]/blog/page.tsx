@@ -115,7 +115,7 @@ export default function BlogPage() {
               className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300
                 ${!activeCategory
                   ? 'bg-gold text-bg-base shadow-glow-gold'
-                  : 'bg-bg-surface text-text-muted hover:text-text-primary border border-border-base hover:border-gold-muted/40'
+                  : 'bg-bg-surface/85 text-text-muted hover:text-text-primary border border-border-base hover:border-gold-muted/40'
                 }`}
             >
               {t('allArticles')}
@@ -127,7 +127,7 @@ export default function BlogPage() {
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300
                   ${activeCategory === cat.slug
                     ? 'bg-gold text-bg-base shadow-glow-gold'
-                    : 'bg-bg-surface text-text-muted hover:text-text-primary border border-border-base hover:border-gold-muted/40'
+                    : 'bg-bg-surface/85 text-text-muted hover:text-text-primary border border-border-base hover:border-gold-muted/40'
                   }`}
               >
                 {cat.name}
@@ -196,7 +196,7 @@ export default function BlogPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, ease: [0.25, 0.1, 0, 1] }}
-            className="mt-8 text-center py-20 px-6 rounded-2xl border border-border-base"
+            className="mt-8 text-center py-20 px-6 rounded-2xl border border-border-base bg-bg-surface/85"
           >
             <div className="w-16 h-16 mx-auto rounded-full bg-gold/10 flex items-center justify-center mb-6">
               <svg className="w-8 h-8 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>

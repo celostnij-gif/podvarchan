@@ -18,11 +18,10 @@ export interface CardProps extends HTMLAttributes<HTMLElement> {
 
 const variantStyles: Record<CardVariant, string> = {
   default:
-    'bg-bg-surface border border-border-base shadow-sm ' +
+    'bg-bg-surface/85 border border-border-base shadow-sm ' +
     'shadow-inner-glow',
-
   glow:
-    'bg-bg-surface border border-gold-muted/20 shadow-glow-gold ' +
+    'bg-bg-surface/85 border border-gold-muted/20 shadow-glow-gold ' +
     'shadow-inner-glow',
 
   bordered:

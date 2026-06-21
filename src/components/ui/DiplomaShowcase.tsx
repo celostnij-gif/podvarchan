@@ -125,7 +125,7 @@ function MarqueeCard({
       type="button"
       onClick={() => onSelect(diploma)}
       className="group relative w-full text-left overflow-hidden rounded-xl
-                 bg-bg-surface border border-border-base flex flex-col h-full
+                 bg-bg-surface/85 border border-border-base flex flex-col h-full
                  hover:border-gold/30 hover:-translate-y-0.5
                  hover:shadow-[0_0_30px_rgba(201,169,110,0.06)]
                  transition-all duration-500"

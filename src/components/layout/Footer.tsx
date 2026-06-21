@@ -61,7 +61,7 @@ export default async function Footer({ locale }: { locale: string }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 flex items-center justify-center rounded-full
-                           bg-bg-surface border border-border-base text-text-muted
+                           bg-bg-surface/85 border border-border-base text-text-muted
                            hover:text-gold hover:border-gold-muted hover:bg-bg-elevated
                            transition-all duration-200"
                 aria-label="Telegram"
@@ -75,7 +75,7 @@ export default async function Footer({ locale }: { locale: string }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 flex items-center justify-center rounded-full
-                           bg-bg-surface border border-border-base text-text-muted
+                           bg-bg-surface/85 border border-border-base text-text-muted
                            hover:text-gold hover:border-gold-muted hover:bg-bg-elevated
                            transition-all duration-200"
                 aria-label="WhatsApp"
@@ -87,7 +87,7 @@ export default async function Footer({ locale }: { locale: string }) {
               <a
                 href="mailto:podvarchan@gmail.com"
                 className="w-9 h-9 flex items-center justify-center rounded-full
-                           bg-bg-surface border border-border-base text-text-muted
+                           bg-bg-surface/85 border border-border-base text-text-muted
                            hover:text-gold hover:border-gold-muted hover:bg-bg-elevated
                            transition-all duration-200"
                 aria-label="Email"

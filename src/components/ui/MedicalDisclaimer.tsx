@@ -9,7 +9,7 @@ export function MedicalDisclaimer({ className = '' }: MedicalDisclaimerProps) {
 
   return (
     <div
-      className={`mt-8 p-4 rounded-xl border border-border-base bg-bg-surface/50 flex gap-3 items-start ${className}`}
+      className={`mt-8 p-4 rounded-xl border border-border-base bg-bg-surface/85 flex gap-3 items-start ${className}`}
     >
       <span className="text-text-muted text-lg flex-shrink-0 mt-0.5" aria-hidden="true">
         ℹ️

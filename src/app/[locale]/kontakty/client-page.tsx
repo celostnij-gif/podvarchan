@@ -27,7 +27,7 @@ export default function KontaktyClient() {
           {/* ── Left column: steps + contacts + confidentiality ── */}
           <div className="lg:col-span-2 space-y-8">
             {/* Steps */}
-            <AnimatedText direction="up" className="p-6 rounded-xl bg-bg-surface border border-border-base">
+            <AnimatedText direction="up" className="p-6 rounded-xl bg-bg-surface/85 border border-border-base">
               <h2 className="text-lg font-display text-gold mb-4">{t('stepsTitle')}</h2>
               <ol className="space-y-4">
                 <li className="flex gap-3 items-start">
@@ -52,7 +52,7 @@ export default function KontaktyClient() {
             </AnimatedText>
 
             {/* Contact info */}
-            <AnimatedText direction="up" className="p-6 rounded-xl bg-bg-surface border border-border-base">
+            <AnimatedText direction="up" className="p-6 rounded-xl bg-bg-surface/85 border border-border-base">
               <h2 className="text-lg font-display text-gold mb-4">{t('bookingTitle')}</h2>
               <p className="mt-0 mb-5 text-sm text-text-muted">
                 {t('bookingDescription')}
@@ -109,7 +109,7 @@ export default function KontaktyClient() {
             </AnimatedText>
 
             {/* Confidentiality */}
-            <AnimatedText direction="up" className="p-6 rounded-xl bg-bg-surface/50 border border-border-base">
+            <AnimatedText direction="up" className="p-6 rounded-xl bg-bg-surface/85 border border-border-base">
               <div className="flex gap-3 items-start">
                 <span className="shrink-0 w-9 h-9 flex items-center justify-center rounded-full bg-gold/5 text-gold/60 text-sm" aria-hidden="true">
                   🔒
@@ -125,7 +125,7 @@ export default function KontaktyClient() {
           </div>
 
           {/* ── Right column: form ── */}
-          <AnimatedText direction="up" delay={100} className="lg:col-span-3 p-6 md:p-8 rounded-xl bg-bg-surface border border-border-base">
+          <AnimatedText direction="up" delay={100} className="lg:col-span-3 p-6 md:p-8 rounded-xl bg-bg-surface/85 border border-border-base">
             <h2 className="text-lg font-display text-gold mb-2">{t('formTitle')}</h2>
             <p className="text-sm text-text-muted mb-6">
               {t('formDescription')}

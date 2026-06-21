@@ -372,7 +372,7 @@ export function ClientAboutPage() {
               <TiltCard key={i} tiltDegree={2} scale={1.01} glowOpacity={0.04} className="rounded-lg h-full">
                 <motion.div
                   variants={childVariants}
-                  className="flex items-start gap-3 p-4 bg-bg-surface border border-border-base
+                  className="flex items-start gap-3 p-4 bg-bg-surface/85 border border-border-base
                              hover:border-gold/15 transition-all duration-300 group rounded-lg h-full"
                 >
                   <span className="text-gold mt-0.5 shrink-0 text-lg group-hover:scale-110 transition-transform duration-300" aria-hidden="true">

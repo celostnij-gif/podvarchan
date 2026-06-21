@@ -112,7 +112,7 @@ export default function MethodSection() {
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, margin: '-40px' }}
-                className="relative p-6 bg-bg-surface border border-border-base
+                className="relative p-6 bg-bg-surface/85 border border-border-base
                            hover:border-gold/20 transition-all duration-400 group rounded-xl
                            h-full flex flex-col"
               >
@@ -135,7 +135,7 @@ export default function MethodSection() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="mt-10 p-6 rounded-xl bg-bg-elevated/50 border border-border-base text-center"
+          className="mt-10 p-6 rounded-xl bg-bg-elevated/85 border border-border-base text-center"
         >
           <p className="text-sm text-text-muted">{t('onlineBadge')}</p>
         </motion.div>

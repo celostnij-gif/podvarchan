@@ -81,7 +81,7 @@ export default function TestimonialsSection() {
               initial="enter"
               animate="center"
               exit="exit"
-              className="p-8 md:p-10 rounded-2xl bg-bg-surface border border-border-base text-center"
+              className="p-8 md:p-10 rounded-2xl bg-bg-surface/85 border border-border-base text-center"
             >
               {/* Avatar */}
               <div className="w-14 h-14 mx-auto rounded-full bg-gradient-to-br from-gold to-gold-dark

@@ -189,7 +189,7 @@ export function ClientBlogPost({ title, body, date, category, categorySlug, auth
                   <AnimatedText key={post.slug} direction="up" delay={i * 100}>
                     <Link
                       href={`/blog/${post.slug}/`}
-                      className="group block p-5 rounded-xl bg-bg-surface border border-border-base
+                      className="group block p-5 rounded-xl bg-bg-surface/85 border border-border-base
                                  hover:border-gold/30 hover:-translate-y-0.5
                                  transition-all duration-300"
                     >
@@ -219,7 +219,7 @@ export function ClientBlogPost({ title, body, date, category, categorySlug, auth
           </div>
 
           {/* ── Author bio ── */}
-          <div className="mt-12 p-6 rounded-xl bg-bg-surface border border-border-base">
+          <div className="mt-12 p-6 rounded-xl bg-bg-surface/85 border border-border-base">
             <div className="flex items-start gap-4">
               <div className="w-14 h-14 rounded-full bg-gradient-to-br from-gold to-gold-dark flex items-center justify-center text-xl font-display text-bg-base shrink-0">
                 ВП

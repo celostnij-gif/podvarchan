@@ -57,7 +57,7 @@ function PricingCard({
       className={`relative rounded-2xl p-6 md:p-8 flex flex-col ${
         highlighted
           ? 'bg-gradient-to-b from-gold/[0.08] to-gold/[0.02] border-2 border-gold/30 shadow-[0_0_40px_rgba(201,169,110,0.1)]'
-          : 'bg-bg-surface border border-border-base hover:border-gold-muted/30'
+          : 'bg-bg-surface/85 border border-border-base hover:border-gold-muted/30'
       } transition-all duration-500`}
     >
       {badge && (

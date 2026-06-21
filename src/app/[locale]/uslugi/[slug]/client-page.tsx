@@ -224,7 +224,7 @@ function MethodSection({ service }: { service: ServiceData }) {
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
-                className="group relative p-6 bg-bg-surface border border-border-base
+                className="group relative p-6 bg-bg-surface/85 border border-border-base
                            hover:border-gold/20 transition-all duration-400 rounded-xl h-full flex flex-col"
               >
                 <span className="text-4xl font-display text-gold/20 group-hover:text-gold/40 transition-colors duration-300"
@@ -243,7 +243,7 @@ function MethodSection({ service }: { service: ServiceData }) {
         </div>
 
         {/* Online badge */}
-        <AnimatedText direction="up" delay={250} as="div" className="mt-10 p-5 rounded-xl bg-bg-elevated/50 border border-border-base text-center">
+        <AnimatedText direction="up" delay={250} as="div" className="mt-10 p-5 rounded-xl bg-bg-elevated/85 border border-border-base text-center">
           <p className="text-sm text-text-muted">
             {t('methodBadge')}
           </p>
