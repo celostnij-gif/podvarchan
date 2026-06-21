@@ -200,7 +200,7 @@
       background-attachment: scroll;
     }
     body::before {
-      display: none; /* disable glow effect on mobile for performance */
+      /* glow enabled — user request */
     }
   }
 
