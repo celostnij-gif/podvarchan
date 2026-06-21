@@ -7,7 +7,7 @@ interface ServiceSchemaParams {
   url: string
   image?: string
   providerName?: string
-  areaServed?: string
+  areaServed?: string[]
   locale?: string
 }
 
@@ -22,7 +22,7 @@ export function serviceSchema(params: ServiceSchemaParams): Record<string, unkno
     url,
     image,
     providerName = SITE.authorName,
-    areaServed = 'RU',
+    areaServed = ['RU', 'UA'],
     locale,
   } = params
 
@@ -40,10 +40,10 @@ export function serviceSchema(params: ServiceSchemaParams): Record<string, unkno
       '@id': `${SITE.url}/ob-avtore/#person`,
       name: providerName,
     },
-    areaServed: {
+    areaServed: areaServed.map((country) => ({
       '@type': 'Country',
-      name: areaServed,
-    },
+      name: country,
+    })),
     audience: {
       '@type': 'Audience',
       audienceType: locale === 'uk'
@@ -81,8 +81,12 @@ export function medicalBusinessSchema(locale: string = 'ru'): Record<string, unk
     },
     address: {
       '@type': 'PostalAddress',
-      addressCountry: locale === 'uk' ? 'UA' : 'RU',
+      addressCountry: 'UA',
     },
+    areaServed: [
+      { '@type': 'Country', name: 'RU' },
+      { '@type': 'Country', name: 'UA' },
+    ],
     contactPoint: {
       '@type': 'ContactPoint',
       contactType: 'customer service',

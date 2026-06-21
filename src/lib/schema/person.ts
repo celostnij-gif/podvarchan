@@ -5,6 +5,7 @@ export interface PersonCredential {
   category: 'certification' | 'license' | 'degree'
   organization: string
   year: string
+  url?: string
 }
 
 interface PersonSchemaParams {
@@ -99,6 +100,24 @@ export function personSchema(params: PersonSchemaParams = {}): Record<string, un
       },
       dateCreated: cred.year,
     }))
+  }
+
+  /* ── alumniOf: вузы по degree credentials ── */
+  const degreeCredentials: PersonCredential[] = credentials.filter((c) => c.category === 'degree')
+  if (degreeCredentials.length > 0) {
+    schema.alumniOf = degreeCredentials.map((cred) => ({
+      '@type': 'CollegeOrUniversity',
+      name: cred.organization,
+      ...(cred.url ? { url: cred.url } : {}),
+    }))
+  }
+
+  /* ── award: диплом с отличием и т.п. ── */
+  const awards = credentials
+    .filter((c) => /отличием|honors/i.test(c.name))
+    .map((c) => c.name)
+  if (awards.length > 0) {
+    schema.award = awards.length === 1 ? awards[0] : awards
   }
 
   if (sameAs.length > 0) {
