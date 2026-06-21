@@ -1,13 +1,28 @@
 'use client'
 
-import Image from 'next/image'
-import { motion } from 'framer-motion'
+import { motion, useInView } from 'framer-motion'
 import { useTranslations } from 'next-intl'
+import { useRef, useState, useCallback } from 'react'
 import { Link } from '@/i18n/routing'
 import { AnimatedSection, SectionContainer } from '@/components/ui'
 
 export default function AuthorPreviewSection() {
   const t = useTranslations('authorPreview')
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const isInView = useInView(containerRef, { once: false, margin: '-100px' })
+  const [isPlaying, setIsPlaying] = useState(true)
+
+  const togglePlay = useCallback(() => {
+    if (!videoRef.current) return
+    if (videoRef.current.paused) {
+      videoRef.current.play()
+      setIsPlaying(true)
+    } else {
+      videoRef.current.pause()
+      setIsPlaying(false)
+    }
+  }, [])
 
   const credentials = [
     { icon: '🎓', text: t('cert1') },
@@ -19,25 +34,55 @@ export default function AuthorPreviewSection() {
     <AnimatedSection as="section" variant="fadeUp" aria-label={t('ariaLabel')}>
       <SectionContainer size="md" background="transparent">
         <div className="grid gap-10 md:grid-cols-2 items-center">
-          {/* Photo */}
+          {/* Video */}
           <motion.div
+            ref={containerRef}
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, ease: [0.25, 0.1, 0, 1] as const }}
-            className="flex justify-center"
+            className="flex justify-center relative group"
           >
             <div className="relative w-64 h-64 md:w-80 md:h-80 rounded-2xl overflow-hidden
                             bg-gradient-to-br from-gold/10 to-gold/5 border border-gold/10
                             shadow-[0_0_30px_rgba(201,169,110,0.08)]">
-              <Image
-                src="/images/about.webp"
-                alt={t('photoAlt')}
-                fill
-                sizes="(max-width: 768px) 256px, 320px"
-                className="object-cover"
-                priority
+              <video
+                ref={videoRef}
+                src="/videos/author-preview.mp4"
+                poster="/images/about.webp"
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="auto"
+                className="w-full h-full object-cover"
+                aria-label={t('videoAlt')}
+                onClick={togglePlay}
               />
+              {/* Play/pause overlay on hover */}
+              <button
+                type="button"
+                onClick={togglePlay}
+                className="absolute inset-0 flex items-center justify-center
+                           bg-black/0 hover:bg-black/20 transition-all duration-300
+                           opacity-0 group-hover:opacity-100 cursor-pointer"
+                aria-label={isPlaying ? t('pauseVideo') : t('playVideo')}
+              >
+                <div className="w-12 h-12 rounded-full bg-gold/90 flex items-center justify-center
+                                shadow-lg backdrop-blur-sm transition-transform duration-300
+                                group-hover:scale-110">
+                  {isPlaying ? (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="text-bg-deep">
+                      <rect x="6" y="4" width="4" height="16" rx="1" />
+                      <rect x="14" y="4" width="4" height="16" rx="1" />
+                    </svg>
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="text-bg-deep ml-0.5">
+                      <polygon points="6,4 20,12 6,20" />
+                    </svg>
+                  )}
+                </div>
+              </button>
             </div>
           </motion.div>
 
