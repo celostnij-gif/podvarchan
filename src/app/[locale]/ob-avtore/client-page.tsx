@@ -210,6 +210,62 @@ export function ClientAboutPage() {
       </AnimatedSection>
 
       {/* ════════════════════════════════════════
+           FAMILY — Фото с женой (доверие)
+           ════════════════════════════════════════ */}
+      <AnimatedSection as="div" variant="fadeUp">
+        <SectionContainer size="md">
+          <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+            {/* Photo */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7, ease: [0.25, 0.1, 0, 1] }}
+              className="relative"
+            >
+              <div className="relative rounded-2xl overflow-hidden border-2 border-gold/20 shadow-glow-gold">
+                <Image
+                  src="/images/author-family.webp"
+                  alt={t('familyPhotoAlt')}
+                  width={800}
+                  height={533}
+                  className="w-full h-auto object-cover"
+                  sizes="(max-width: 768px) 100vw, 400px"
+                  priority={false}
+                />
+              </div>
+              {/* Decorative corner accents */}
+              <div className="absolute -top-2 -left-2 w-6 h-6 border-t-2 border-l-2 border-gold/30 rounded-tl" aria-hidden="true" />
+              <div className="absolute -bottom-2 -right-2 w-6 h-6 border-b-2 border-r-2 border-gold/30 rounded-br" aria-hidden="true" />
+            </motion.div>
+
+            {/* Text */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7, delay: 0.15, ease: [0.25, 0.1, 0, 1] }}
+            >
+              <AnimatedText
+                as="h2"
+                direction="up"
+                className="text-2xl md:text-3xl font-display text-gold"
+              >
+                {t('familyTitle')}
+              </AnimatedText>
+              <AnimatedText
+                direction="up"
+                delay={100}
+                className="mt-4 text-base text-text-secondary leading-relaxed"
+              >
+                {t('familyDescription')}
+              </AnimatedText>
+            </motion.div>
+          </div>
+        </SectionContainer>
+      </AnimatedSection>
+
+      {/* ════════════════════════════════════════
            EDUCATION — Дипломы и образование
            ════════════════════════════════════════ */}
       <AnimatedSection as="div" variant="fadeUp">
