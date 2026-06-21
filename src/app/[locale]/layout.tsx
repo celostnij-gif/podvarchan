@@ -120,7 +120,7 @@ export default async function LocaleLayout({
         <ToastProvider>
           <Header />
 
-          <main id="main-content" className="flex-1">
+          <main id="main-content" className="flex-1 min-h-[calc(100vh-4rem)]">
             <BreadcrumbsProvider>
               <PageSchemaRenderer />
               {children}
