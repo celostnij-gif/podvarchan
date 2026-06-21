@@ -88,7 +88,7 @@ export default function ServicesSection() {
                              transition-all duration-400 h-full rounded-xl"
                 >
                   <ServiceIcon name={SERVICE_ICONS[service.slug] || 'sparkles'} size={24} className="text-gold-muted group-hover:scale-110 transition-transform duration-400" />
-                  <h3 className="mt-3 text-lg font-display text-gold group-hover:text-gold-light transition-colors">
+                  <h3 className="mt-3 text-lg font-display text-text-primary group-hover:text-green-light transition-colors duration-300">
                     {service.title}
                   </h3>
                   <p className="mt-2 text-sm text-text-muted leading-relaxed" aria-hidden="true">

@@ -231,7 +231,7 @@ function MethodSection({ service }: { service: ServiceData }) {
                       aria-hidden="true">
                   {step.num}
                 </span>
-                <h3 className="mt-3 text-lg font-display text-text-primary group-hover:text-gold transition-colors duration-300">
+                <h3 className="mt-3 text-lg font-display text-green group-hover:text-green-light transition-colors duration-300">
                   {step.title}
                 </h3>
                 <p className="mt-2 text-sm text-text-muted leading-relaxed flex-1">
@@ -298,7 +298,9 @@ function SymptomsSection({ service }: { service: ServiceData }) {
                                  group-hover:scale-110 transition-transform duration-400`}>
                   <span className="leading-none" role="img" aria-hidden="true">{symptom.icon}</span>
                 </div>
-                <h3 className="mt-3 text-base font-display text-text-primary">{symptom.title}</h3>
+                <h3 className="mt-3 text-base font-display text-green">
+                  {symptom.title}
+                </h3>
                 <p className="mt-1.5 text-sm text-text-muted leading-relaxed flex-1">{symptom.desc}</p>
               </motion.div>
             </TiltCard>
@@ -428,7 +430,7 @@ function RelatedServicesSection({ service, allServices }: { service: ServiceData
                              hover:shadow-glow-gold transition-all duration-400 rounded-xl"
                 >
                   <ServiceIcon name={SERVICE_ICONS[item.slug] || 'sparkles'} size={24} className="text-gold" />
-                  <h3 className="mt-2 text-lg font-display text-gold group-hover:text-gold-light transition-colors">
+                  <h3 className="mt-2 text-lg font-display text-green group-hover:text-green-light transition-colors">
                     {item.title}
                   </h3>
                   <p className="mt-2 text-sm text-text-muted leading-relaxed">{item.shortTitle}</p>
