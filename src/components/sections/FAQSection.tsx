@@ -73,7 +73,7 @@ export default function FAQSection() {
         >
           <Link
             href="/faq/"
-            className="text-sm text-gold hover:text-gold-light underline-offset-4 hover:underline transition-all"
+            className="text-sm text-green-light hover:text-green underline-offset-4 hover:underline transition-all"
           >
             {faqT('allLink')} →
           </Link>

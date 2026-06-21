@@ -398,6 +398,14 @@
     color: transparent;
   }
 
+  /* ── Text gradient green — forward, go, growth ── */
+  .text-gradient-green {
+    background: linear-gradient(135deg, var(--color-green), var(--color-green-light));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
   /* ── Premium gold heading — multi-stop gradient + metallic shimmer ── */
   .text-gold-premium {
     background: linear-gradient(

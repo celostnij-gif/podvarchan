@@ -73,8 +73,8 @@ export default function AuthorPreviewSection() {
             <div className="mt-8">
               <Link
                 href="/ob-avtore/"
-                className="group inline-flex items-center gap-2 text-sm font-medium text-gold
-                           hover:text-gold-light transition-colors duration-200"
+                className="group inline-flex items-center gap-2 text-sm font-medium text-green-light
+                           hover:text-green transition-colors duration-200"
               >
                 {t('readMore')}
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"

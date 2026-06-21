@@ -198,8 +198,8 @@ export default function ProblemsSection() {
           variants={cardVariants}
           custom={6}
           className="mt-12 p-8 md:p-10 rounded-2xl text-center
-                     bg-gradient-to-br from-gold/[0.06] to-gold/[0.02]
-                     border border-gold/[0.12]"
+                     bg-gradient-to-br from-green/[0.06] to-green/[0.02]
+                     border border-green/[0.12]"
         >
           <p className="text-xl font-display text-text-primary">{t('calloutTitle')}</p>
           <p className="mt-2 text-sm text-text-muted">{t('calloutText')}</p>
@@ -209,9 +209,9 @@ export default function ProblemsSection() {
               data-analytics-booking="problems-cta"
               className="group relative inline-flex items-center justify-center px-7 py-3 rounded-full
                          text-sm font-semibold tracking-wide overflow-hidden
-                         bg-gradient-to-r from-gold to-gold-light text-bg-deep
-                         shadow-[0_0_20px_rgba(201,169,110,0.15)]
-                         hover:shadow-[0_0_30px_rgba(201,169,110,0.25)]
+                         bg-gradient-to-r from-green to-green-light text-bg-deep
+                         shadow-[0_0_20px_rgba(45,106,79,0.15)]
+                         hover:shadow-[0_0_30px_rgba(45,106,79,0.25)]
                          hover:-translate-y-0.5 active:translate-y-0
                          transition-all duration-400"
             >

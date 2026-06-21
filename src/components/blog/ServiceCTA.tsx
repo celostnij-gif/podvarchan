@@ -45,8 +45,8 @@ export default function ServiceCTA({
       <div className="mt-5">
         <Link
           href={`/uslugi/${serviceSlug}/`}
-          className="group inline-flex items-center gap-2 text-sm font-medium text-gold
-                     hover:text-gold-light transition-colors duration-200"
+          className="group inline-flex items-center gap-2 text-sm font-medium text-green-light
+                     hover:text-green transition-colors duration-200"
         >
           <span>Докладніше про {serviceName.toLowerCase()}</span>
           <svg

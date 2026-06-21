@@ -23,7 +23,7 @@ function FooterColumn({ title, children }: { title: string; children: ReactNode 
 function FooterLink({ href, children }: { href: string; children: ReactNode }) {
   return (
     <li>
-      <Link href={href} className="text-sm text-text-muted hover:text-gold transition-colors duration-200">
+      <Link href={href} className="text-sm text-text-muted hover:text-green-light transition-colors duration-200">
         {children}
       </Link>
     </li>
@@ -125,7 +125,7 @@ export default async function Footer({ locale }: { locale: string }) {
             <FooterLink href="/kontakty/">{t('cta.booking')}</FooterLink>
             <li>
               <a href="mailto:podvarchan@gmail.com"
-                 className="text-sm text-text-muted hover:text-gold transition-colors duration-200">
+                 className="text-sm text-text-muted hover:text-green-light transition-colors duration-200">
                 podvarchan@gmail.com
               </a>
             </li>

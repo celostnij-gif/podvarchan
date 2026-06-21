@@ -49,7 +49,7 @@ export default function BlogCard({
       <Link
         href={`/blog/${slug}/`}
         className="group block border border-border-base
-                   hover:border-gold-muted hover:shadow-lg hover:shadow-gold/5
+                   hover:border-green hover:shadow-lg hover:shadow-green/5
                    hover:-translate-y-0.5
                    transition-all duration-400 h-full flex flex-col overflow-hidden rounded-xl"
       >
@@ -84,13 +84,11 @@ export default function BlogCard({
           </div>
 
           {/* Title */}
-          <h2 className={`font-display text-text-primary group-hover:text-gold transition-colors duration-300 ${
+          <h2 className={`font-display text-text-primary group-hover:text-green-light transition-colors duration-300 ${
             featured ? 'text-2xl md:text-3xl' : 'text-lg'
           } line-clamp-3`}>
             {title}
           </h2>
-
-          {/* Description */}
           <p className="mt-2.5 text-sm text-text-muted leading-relaxed line-clamp-3 flex-1">
             {description}
           </p>
@@ -103,7 +101,7 @@ export default function BlogCard({
               </svg>
               {formatDate(datePublished, locale)}
             </span>
-            <span className="inline-flex items-center gap-1 text-xs text-gold opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-[-4px] group-hover:translate-x-0">
+            <span className="inline-flex items-center gap-1 text-xs text-green-light opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-[-4px] group-hover:translate-x-0">
               {readMoreLabel}
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
                    stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

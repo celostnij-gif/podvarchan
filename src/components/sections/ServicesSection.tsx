@@ -87,8 +87,8 @@ export default function ServicesSection() {
                              hover:border-gold-muted hover:shadow-lg hover:shadow-gold/5
                              transition-all duration-400 h-full rounded-xl"
                 >
-                  <ServiceIcon name={SERVICE_ICONS[service.slug] || 'sparkles'} size={24} className="text-gold group-hover:scale-110 transition-transform duration-400" />
-                  <h3 className="mt-3 text-lg font-display text-gold group-hover:text-gold-light transition-colors">
+                  <ServiceIcon name={SERVICE_ICONS[service.slug] || 'sparkles'} size={24} className="text-green-light group-hover:scale-110 transition-transform duration-400" />
+                  <h3 className="mt-3 text-lg font-display text-green-light group-hover:text-green transition-colors">
                     {service.title}
                   </h3>
                   <p className="mt-2 text-sm text-text-muted leading-relaxed" aria-hidden="true">
@@ -110,7 +110,7 @@ export default function ServicesSection() {
         >
           <Link
             href="/uslugi/"
-            className="text-sm text-gold hover:text-gold-light underline-offset-4 hover:underline transition-all"
+            className="text-sm text-green-light hover:text-green underline-offset-4 hover:underline transition-all"
           >
             {t('allLink')}
           </Link>
