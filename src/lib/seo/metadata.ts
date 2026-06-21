@@ -48,6 +48,7 @@ export function generateMetadata({
 }: GenerateMetadataParams): Metadata {
   const langPrefix = locale === 'ru' ? '/ru' : '/uk'
   const canonicalUrl = canonical ?? `${SITE.url}${langPrefix}${path}/`
+  const ogLocale = locale === 'uk' ? 'uk_UA' : 'ru_RU'
   const imageUrl = ogImage ?? `${SITE.url}${SITE.defaultOgImage}`
 
   // Build other meta tags separately to avoid fragile type casting
@@ -77,7 +78,7 @@ export function generateMetadata({
       description,
       url: canonicalUrl,
       siteName: SITE.fullName,
-      locale,
+      locale: ogLocale,
       type: type === 'article' ? 'article' : 'website',
       images: [
         {
