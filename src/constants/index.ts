@@ -126,13 +126,15 @@ export const AUTHOR = {
   url: '/ob-avtore/',
   sameAs: [
     'https://t.me/SLAVKA_VIP',
+    'https://t.me/podvarchan',
     'https://wa.me/380663122069',
     'https://www.instagram.com/vip_podvarchan/',
+    'https://www.facebook.com/SLAVKA10VIP',
+    'https://x.com/PodvarchanVip',
     'https://mentalzon.com/ru/therapist/19292/вячеслав-подварчан-иванович',
     /* ═══════════════════════════════════════════════════════════
        ⚡  E-E-A-T сигналы — добавить по мере регистрации:
-       LinkedIn, Facebook, YouTube, Google Business Profile,
-       B17.ru, каталоги психологов
+       LinkedIn, YouTube, Google Business Profile, B17.ru
        ═══════════════════════════════════════════════════════════ */
   ],
   credentials: [
