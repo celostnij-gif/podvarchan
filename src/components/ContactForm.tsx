@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, type FormEvent, type ChangeEvent } from 'react'
 import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui'
+import { Link } from '@/i18n/routing'
 import { getTurnstileToken, resetTurnstile, TURNSTILE_SITE_KEY } from '@/lib/turnstile'
 
 /* ── Types ── */
@@ -274,7 +275,7 @@ export default function ContactForm() {
               )}
             </div>
           </div>
-          <span className="text-sm text-text-secondary leading-relaxed">{t('agreeText')}</span>
+          <span className="text-sm text-text-secondary leading-relaxed">{t('agreeText')} <Link href="/politika-konfidentsialnosti/" className="text-gold hover:text-gold-light underline underline-offset-2 transition-colors">{t('privacyLink')}</Link></span>
         </label>
         {errors.agreed && (
           <p id="cf-agreed-error" className="mt-1 text-xs text-error flex items-center gap-1.5" role="alert">

@@ -61,6 +61,7 @@ export const SERVICES: Service[] = [
   { slug: 'vnutrenneye-napryazheniye', category: 'trevoga', priority: 3, icon: '⚡', ctaLink: '/kontakty/' },
   { slug: 'navyazchivye-mysli', category: 'trevoga', priority: 3, icon: '🌀', ctaLink: '/kontakty/' },
   { slug: 'strakh-budushchego', category: 'trevoga', priority: 3, icon: '🌅', ctaLink: '/kontakty/' },
+  { slug: 'tsifrovoy-detoks-i-gadzhet-zavisimost', category: 'tsifrovoy-detoks', priority: 2, icon: '📱', ctaLink: '/kontakty/' },
 ]
 
 /* ── Blog Categories ── */

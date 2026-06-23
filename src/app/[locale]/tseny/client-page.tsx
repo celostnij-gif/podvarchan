@@ -47,6 +47,7 @@ function PricingCard({
   highlighted?: boolean
   index: number
 }) {
+  const t = useTranslations('tseny')
   return (
     <motion.div
       variants={cardVariants}
@@ -72,18 +73,18 @@ function PricingCard({
       </div>
 
       <div className="mb-6">
-        <div className="flex items-baseline gap-2">
-          {originalPrice && (
-            <span className="text-lg text-text-muted line-through">{originalPrice}</span>
+        <div className="flex items-baseline gap-2 flex-wrap">
+          {(originalPrice || oldPrice) && (
+            <span className="text-lg text-text-muted line-through">{originalPrice || oldPrice}</span>
+          )}
+          {(originalPrice || oldPrice) && (
+            <span className="text-text-muted/40 text-sm" aria-hidden="true">/</span>
           )}
           <span className={`text-3xl md:text-4xl font-display font-bold ${
             highlighted ? 'text-gold' : 'text-text-primary'
           }`}>
             {price}
           </span>
-          {oldPrice && (
-            <span className="text-sm text-text-muted line-through">{oldPrice}</span>
-          )}
         </div>
         <p className="text-xs text-text-muted mt-1">{description}</p>
       </div>
@@ -109,7 +110,7 @@ function PricingCard({
         } active:translate-y-0`}
       >
         <span className={highlighted ? 'drop-shadow-[0_1px_2px_rgba(5,5,8,0.5)]' : ''}>
-          {index === 0 ? 'Записаться' : 'Выбрать курс'}
+          {t(index === 0 ? 'cardCtaFree' : 'cardCtaOther')}
         </span>
       </Link>
     </motion.div>
