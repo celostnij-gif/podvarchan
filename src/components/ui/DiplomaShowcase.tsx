@@ -114,14 +114,18 @@ const textFadeUp = {
 function MarqueeCard({
   diploma,
   onSelect,
+  isDuplicate = false,
 }: {
   diploma: Diploma
   onSelect: (diploma: Diploma) => void
+  isDuplicate?: boolean
 }) {
   const t = useTranslations('diplomaShowcase')
 
   return (
     <button
+      tabIndex={isDuplicate ? -1 : undefined}
+      aria-hidden={isDuplicate || undefined}
       type="button"
       onClick={() => onSelect(diploma)}
       className="group relative w-full text-left overflow-hidden rounded-xl
@@ -522,6 +526,7 @@ function DiplomaModal({
               variants={textFadeUp}
               href={diploma.image}
               download
+              aria-label={`${t('downloadImage')}: ${diploma.title}`}
               className="inline-flex items-center gap-2 text-xs text-gold/70 hover:text-gold
                          transition-colors duration-200"
             >
@@ -639,15 +644,29 @@ export default function DiplomaShowcase({
               willChange: 'transform',
             }}
           >
-            {/* Two copies for seamless infinite loop */}
-            {[...items, ...items].map((diploma, i) => (
+            {/* First copy — visible to all */}
+            {items.map((diploma) => (
               <div
-                key={`${diploma.id}-${i}`}
+                key={diploma.id}
                 className="w-[260px] md:w-[300px] shrink-0"
               >
                 <MarqueeCard
                   diploma={diploma}
                   onSelect={handleSelect}
+                />
+              </div>
+            ))}
+            {/* Second copy — seamless loop visual only, hidden from screen readers */}
+            {items.map((diploma) => (
+              <div
+                key={`dup-${diploma.id}`}
+                className="w-[260px] md:w-[300px] shrink-0"
+                aria-hidden="true"
+              >
+                <MarqueeCard
+                  diploma={diploma}
+                  onSelect={handleSelect}
+                  isDuplicate
                 />
               </div>
             ))}
