@@ -8,7 +8,7 @@ export type SchemaType =
   | 'Person'
   | 'Article'
   | 'Service'
-  | 'MedicalBusiness'
+  | 'ProfessionalService'
   | 'FAQPage'
   | 'BreadcrumbList'
   | 'WebSite'
@@ -18,7 +18,7 @@ const REQUIRED_FIELDS: Record<SchemaType, string[]> = {
   Person: ['@context', '@type', 'name', 'url'],
   Article: ['@context', '@type', 'headline', 'author', 'datePublished'],
   Service: ['@context', '@type', 'name', 'description', 'provider'],
-  MedicalBusiness: ['@context', '@type', 'name', 'url'],
+  ProfessionalService: ['@context', '@type', 'name', 'url'],
   FAQPage: ['@context', '@type', 'mainEntity'],
   BreadcrumbList: ['@context', '@type', 'itemListElement'],
   WebSite: ['@context', '@type', 'url', 'name'],

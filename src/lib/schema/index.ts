@@ -1,7 +1,7 @@
 export { personSchema } from './person'
 export type { PersonCredential } from './person'
 
-export { serviceSchema, medicalBusinessSchema } from './service'
+export { serviceSchema, practiceSchema } from './service'
 
 export { articleSchema } from './article'
 

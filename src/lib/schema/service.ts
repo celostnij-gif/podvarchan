@@ -1,6 +1,5 @@
 import { SITE } from '@/constants'
 import { cleanUrl } from './utils'
-
 interface ServiceSchemaParams {
   name: string
   description: string
@@ -12,7 +11,7 @@ interface ServiceSchemaParams {
 }
 
 /**
- * Генерирует JSON-LD объект MedicalBusiness schema.org для страниц услуг.
+ * Генерирует JSON-LD объект Service schema.org для страниц услуг.
  * Используется на /uslugi/[slug]/ страницах.
  */
 export function serviceSchema(params: ServiceSchemaParams): Record<string, unknown> {
@@ -61,20 +60,21 @@ export function serviceSchema(params: ServiceSchemaParams): Record<string, unkno
 }
 
 /**
- * Генерирует JSON-LD объект MedicalBusiness schema.org (глобальный, для всего сайта).
+ * Генерирует JSON-LD объект ProfessionalService schema.org (глобальный, для всего сайта).
+ * ProfessionalService — более корректный тип для онлайн-практики без мед.лицензии,
+ * чем MedicalBusiness. Снижает жёсткость YMYL-фильтров Google для ниши психотерапии.
  * Используется на главной и всех страницах как базовый E-E-A-T сигнал.
  */
-export function medicalBusinessSchema(locale: string = 'ru'): Record<string, unknown> {
+export function practiceSchema(locale: string = 'ru'): Record<string, unknown> {
   return {
     '@context': 'https://schema.org',
-    '@type': 'MedicalBusiness',
-    '@id': `${SITE.url}#medicalbusiness`,
+    '@type': 'ProfessionalService',
+    '@id': `${SITE.url}#practice`,
     name: SITE.fullName,
     description: locale === 'uk'
       ? 'Онлайн-гіпнотерапія: робота з тривогою, панічними атаками, самосаботажем та підсвідомістю.'
       : 'Онлайн-гипнотерапия: работа с тревогой, паническими атаками, самосаботажем и подсознанием.',
     url: SITE.url,
-    medicalSpecialty: 'Psychotherapy',
     founder: {
       '@type': 'Person',
       '@id': `${SITE.url}/ob-avtore/#person`,

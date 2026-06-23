@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, getTranslations } from 'next-intl/server'
 import { SITE } from '@/constants'
-import { personSchema, medicalBusinessSchema } from '@/lib/schema'
+import { personSchema, practiceSchema } from '@/lib/schema'
 import { buildCanonical } from '@/lib/seo/metadata'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
@@ -77,7 +77,7 @@ export default async function LocaleLayout({
   /* ── JSON-LD Schema ── */
   const jsonLdSchemas = [
     personSchema({ jobTitle: t('authorTitle'), locale }),
-    medicalBusinessSchema(locale),
+    practiceSchema(locale),
     {
       '@context': 'https://schema.org',
       '@type': 'WebSite',
