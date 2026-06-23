@@ -37,6 +37,16 @@ const directionAnimations: Record<AnimatedDirection, string> = {
 
 /* ── Component ── */
 
+/**
+ * AnimatedText — появляется с анимацией при скролле.
+ *
+ * Прогрессивное улучшение:
+ * - По умолчанию контент ВИДЕН (не opacity:0).
+ * - Когда элемент попадает во вьюпорт, добавляется класс анимации.
+ * - Если JS не загрузился / Observer не сработал — контент просто виден без анимации.
+ * - 'transition-none' удалён, чтобы не блокировать CSS-переходы.
+ * - pre-reduced-motion уважается через motion-safe в CSS-ключевых кадрах.
+ */
 export default function AnimatedText({
   children,
   as: Tag = 'div',
@@ -75,14 +85,13 @@ export default function AnimatedText({
     return () => observer.disconnect()
   }, [once, threshold])
 
-  const animationClass = isVisible ? directionAnimations[direction] : 'opacity-0'
+  const animationClass = isVisible ? directionAnimations[direction] : ''
 
   return (
     <Tag
       ref={ref}
       className={[
-        'transition-none',
-        isVisible ? animationClass : 'opacity-0',
+        isVisible ? animationClass : '',
         className,
       ]
         .filter(Boolean)

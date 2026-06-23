@@ -18,7 +18,7 @@ const config: Config = {
         'gold': '#C9A96E',
         'gold-light': '#E3C47A',
         'gold-dark': '#A8874A',
-        'gold-muted': '#8B7355',
+        'gold-muted': '#9C7F4A',
 
         // Forest green — secondary, calm, nature
         'green': '#2D6A4F',
@@ -26,7 +26,7 @@ const config: Config = {
         'green-deep': '#1B4332',
         'green-muted': '#1D3F32',
 
-        // Text hierarchy
+      '--color-gold-muted': '#9C7F4A',
         'text-primary': '#ECEBF2',
         'text-secondary': '#B0AEBF',
         'text-muted': '#7C7A8F',
