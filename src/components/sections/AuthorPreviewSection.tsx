@@ -2,7 +2,7 @@
 
 import { motion, useInView } from 'framer-motion'
 import { useTranslations } from 'next-intl'
-import { useRef, useState, useCallback } from 'react'
+import { useRef, useState, useEffect, useCallback } from 'react'
 import { Link } from '@/i18n/routing'
 import { AnimatedSection, SectionContainer } from '@/components/ui'
 
@@ -10,8 +10,19 @@ export default function AuthorPreviewSection() {
   const t = useTranslations('authorPreview')
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const isInView = useInView(containerRef, { once: false, margin: '-100px' })
-  const [isPlaying, setIsPlaying] = useState(true)
+  const isInView = useInView(containerRef, { once: true, margin: '-100px' })
+  const [hasLoaded, setHasLoaded] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
+
+  /* ── Lazy-load video when section enters viewport ── */
+  useEffect(() => {
+    if (isInView && videoRef.current && !hasLoaded) {
+      videoRef.current.preload = 'auto'
+      videoRef.current.load()
+      setHasLoaded(true)
+      videoRef.current.play().then(() => setIsPlaying(true)).catch(() => {})
+    }
+  }, [isInView, hasLoaded])
 
   const togglePlay = useCallback(() => {
     if (!videoRef.current) return
@@ -50,11 +61,10 @@ export default function AuthorPreviewSection() {
                 ref={videoRef}
                 src="/videos/author-preview.mp4"
                 poster="/images/about.webp"
-                autoPlay
                 muted
                 loop
                 playsInline
-                preload="auto"
+                preload="none"
                 className="w-full h-full object-cover"
                 aria-label={t('videoAlt')}
                 onClick={togglePlay}

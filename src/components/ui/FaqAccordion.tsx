@@ -15,6 +15,7 @@ const easePremium = [0.25, 0.1, 0, 1] as const
 /**
  * Animated FAQ accordion with smooth open/close transitions.
  * Uses framer-motion for height + opacity animation on both enter and exit.
+ * The question is wrapped in <h3> for proper heading outline structure.
  */
 export default function FaqAccordion({ question, answer, compact = false }: FaqAccordionProps) {
   const [isOpen, setIsOpen] = useState(false)
@@ -27,33 +28,35 @@ export default function FaqAccordion({ question, answer, compact = false }: FaqA
           : 'border-border-base'
       }`}
     >
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        aria-expanded={isOpen}
-        className={`flex items-center justify-between w-full text-left cursor-pointer
-                   text-text-primary font-medium
-                   hover:bg-bg-elevated transition-colors duration-200 ${
-                     compact ? 'px-5 py-4' : 'px-5 py-5'
-                   } ${
-                     isOpen ? 'border-b border-border-light/50' : ''
-                   }`}
-      >
-        <span className={compact ? 'text-sm pr-4' : 'text-base font-body pr-4'}>{question}</span>
-        <motion.svg
-          animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ duration: 0.35, ease: easePremium }}
-          className="w-4 h-4 text-gold shrink-0"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
+      <h3 className="m-0">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          aria-expanded={isOpen}
+          className={`flex items-center justify-between w-full text-left cursor-pointer
+                     text-text-primary font-medium
+                     hover:bg-bg-elevated transition-colors duration-200 ${
+                       compact ? 'px-5 py-4' : 'px-5 py-5'
+                     } ${
+                       isOpen ? 'border-b border-border-light/50' : ''
+                     }`}
         >
-          <path d="M6 9l6 6 6-6" />
-        </motion.svg>
-      </button>
+          <span className={compact ? 'text-sm pr-4' : 'text-base font-body pr-4'}>{question}</span>
+          <motion.svg
+            animate={{ rotate: isOpen ? 180 : 0 }}
+            transition={{ duration: 0.35, ease: easePremium }}
+            className="w-4 h-4 text-gold shrink-0"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M6 9l6 6 6-6" />
+          </motion.svg>
+        </button>
+      </h3>
 
       <motion.div
         initial={false}

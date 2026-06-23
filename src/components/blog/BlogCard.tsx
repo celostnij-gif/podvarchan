@@ -48,10 +48,11 @@ export default function BlogCard({
     <TiltCard tiltDegree={3} scale={1.015} className={`rounded-xl h-full ${featured ? 'md:col-span-2' : ''}`}>
       <Link
         href={`/blog/${slug}/`}
+        aria-label={`${title} — ${readMoreLabel}`}
         className="group block border border-border-base
                    hover:border-green hover:shadow-lg hover:shadow-green/5
                    hover:-translate-y-0.5
-                   transition-all duration-400 h-full flex flex-col overflow-hidden rounded-xl"
+                   transition-all duration-400 h-full flex flex-col overflow-hidden rounded-xl focus-visible:outline-2 focus-visible:outline-gold focus-visible:outline-offset-2"
       >
         {/* Image with shimmer overlay */}
         {image && (

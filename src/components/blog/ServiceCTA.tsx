@@ -1,21 +1,22 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/routing'
 
 interface ServiceCTAProps {
-  /** Назва послуги (наприклад, "Гіпнотерапія онлайн") */
+  /** Название услуги (например, "Гипнотерапия онлайн") */
   serviceName: string
-  /** Slug послуги (наприклад, "gipnoterapiya-onlayn") */
+  /** Slug услуги (например, "gipnoterapiya-onlayn") */
   serviceSlug: string
-  /** Заголовок CTA-блоку */
+  /** Заголовок CTA-блока */
   headline: string
-  /** Короткий опис (1-2 речення) */
+  /** Краткое описание (1-2 предложения) */
   description: string
 }
 
 /**
- * Компактний CTA-блок для вбудовування в статті блогу.
- * Відображається як акцентна картка з посиланням на сторінку послуги.
+ * Компактный CTA-блок для вставки в статьи блога.
+ * Отображается как акцентная карточка со ссылкой на страницу услуги.
  */
 export default function ServiceCTA({
   serviceName,
@@ -23,6 +24,8 @@ export default function ServiceCTA({
   headline,
   description,
 }: ServiceCTAProps) {
+  const t = useTranslations('pages.blog')
+
   return (
     <div className="relative mt-12 p-6 md:p-8 rounded-2xl border-l-4 border-gold
                     bg-gradient-to-br from-gold/[0.06] to-gold/[0.02]
@@ -30,7 +33,7 @@ export default function ServiceCTA({
       <div className="absolute -top-3 left-6 px-3 py-0.5 rounded-full
                       bg-gold text-bg-deep text-[10px] font-semibold
                       tracking-[0.15em] uppercase">
-        Рекомендуємо
+        {t('recommendedLabel')}
       </div>
 
       <div className="mt-3">
@@ -48,7 +51,7 @@ export default function ServiceCTA({
           className="group inline-flex items-center gap-2 text-sm font-medium text-green-light
                      hover:text-green transition-colors duration-200"
         >
-          <span>Докладніше про {serviceName.toLowerCase()}</span>
+          <span>{t('readMoreService', { service: serviceName.toLowerCase() })}</span>
           <svg
             width="14" height="14" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" strokeWidth="2" strokeLinecap="round"

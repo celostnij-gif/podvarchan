@@ -111,7 +111,7 @@ export default async function LocaleLayout({
                    focus:bg-gold focus:text-bg-deep focus:outline-none
                    focus:text-sm focus:font-medium"
       >
-        Перейти до змісту / Перейти к содержанию
+        {t('skipToContent')}
       </a>
 
       <ScrollProgress />

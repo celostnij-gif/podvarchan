@@ -5,6 +5,7 @@ import { AnimatedText, SectionContainer, PageHero } from '@/components/ui'
 import ContactForm from '@/components/ContactForm'
 import { TelegramIcon, WhatsAppIcon, EmailIcon } from '@/components/ui/Icons'
 
+import MedicalDisclaimer from '@/components/MedicalDisclaimer'
 export default function KontaktyClient() {
   const t = useTranslations('contacts')
   const commonT = useTranslations('common')
@@ -122,6 +123,9 @@ export default function KontaktyClient() {
                 </div>
               </div>
             </AnimatedText>
+
+            {/* Emergency disclaimer */}
+            <MedicalDisclaimer type="crisis" />
           </div>
 
           {/* ── Right column: form ── */}
