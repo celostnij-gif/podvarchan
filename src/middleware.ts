@@ -8,6 +8,14 @@ export default function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Skip API routes, static assets, well-known paths — they handle themselves
+  // HTTP → HTTPS redirect (defense in depth — Cloudflare edge normally handles this)
+  const proto = request.headers.get('x-forwarded-proto')
+  if (proto === 'http') {
+    const url = new URL(request.url)
+    url.protocol = 'https:'
+    return NextResponse.redirect(url.toString(), 301)
+  }
+
   if (
     pathname.startsWith('/api/') ||
     pathname.startsWith('/_next/') ||
