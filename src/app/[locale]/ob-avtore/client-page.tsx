@@ -92,11 +92,7 @@ export function ClientAboutPage() {
             <HeroBreadcrumbs />
             <div className="grid md:grid-cols-5 gap-8 md:gap-12 items-center">
               {/* Photo */}
-              <motion.div
-                {...fadeUp}
-                transition={{ ...fadeUp.transition, delay: 0.05 }}
-                className="md:col-span-2 flex justify-center md:justify-start"
-              >
+              <div className="md:col-span-2 flex justify-center md:justify-start animate-fade-in-down">
                 <div className="relative w-56 h-56 md:w-72 md:h-72 rounded-2xl overflow-hidden border-2 border-gold/20 shadow-glow-gold">
                   <Image
                     src="/images/about.webp"
@@ -107,7 +103,7 @@ export function ClientAboutPage() {
                     sizes="(max-width: 768px) 224px, 288px"
                   />
                 </div>
-              </motion.div>
+              </div>
 
               {/* Text */}
               <div className="md:col-span-3 text-center md:text-left">

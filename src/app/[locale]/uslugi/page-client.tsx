@@ -27,13 +27,6 @@ const fadeUp = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.1, 0, 1] as const } },
 }
 
-const sectionContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.12, delayChildren: 0.2 },
-  },
-}
 
 const cardUp = (i: number) => ({
   hidden: { opacity: 0, y: 30, scale: 0.97 },
@@ -145,35 +138,30 @@ export function UslugiClient() {
     <>
       {/* ── Hero Section ── */}
       <section className="relative overflow-hidden pt-16 pb-10 md:pt-20 md:pb-14">
-        <motion.div
-          variants={sectionContainer}
-          initial="hidden"
-          animate="visible"
-          className="relative z-10 w-full max-w-container mx-auto px-gutter text-left"
-        >
+        <div className="relative z-10 w-full max-w-container mx-auto px-gutter text-left">
           <div className="max-w-3xl">
             {/* Breadcrumbs */}
             <HeroBreadcrumbs />
             {/* Section label */}
-            <motion.div variants={fadeUp} className="inline-flex items-center gap-3">
+            <div className="inline-flex items-center gap-3 animate-fade-in-down">
               <span className="w-8 h-px bg-gold/40" aria-hidden="true" />
               <span className="text-[10px] font-semibold tracking-[0.25em] uppercase text-gold">
                 {commonT('nav.services')}
               </span>
-            </motion.div>
+            </div>
 
             {/* Heading */}
-            <motion.h1 variants={fadeUp} className="mt-4 text-4xl md:text-5xl lg:text-6xl font-display text-gold-premium leading-tight">
+            <h1 className="mt-4 text-4xl md:text-5xl lg:text-6xl font-display text-gold-premium leading-tight animate-fade-in-down" style={{ animationDelay: '0.05s' }}>
               {t('pageTitle')}
-            </motion.h1>
+            </h1>
 
             {/* Description */}
-            <motion.p variants={fadeUp} className="mt-4 text-lg text-text-secondary leading-relaxed max-w-2xl">
+            <p className="mt-4 text-lg text-text-secondary leading-relaxed max-w-2xl animate-fade-in-down" style={{ animationDelay: '0.1s' }}>
               {t('pageDescription')}
-            </motion.p>
+            </p>
 
             {/* Stats */}
-            <motion.div variants={fadeUp} className="mt-8 flex items-center gap-6 text-sm text-text-muted">
+            <div className="mt-8 flex items-center gap-6 text-sm text-text-muted animate-fade-in-down" style={{ animationDelay: '0.15s' }}>
               <span className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-gold" />
                 {servicesData.length} {t('directions') || 'направлений'}
@@ -183,9 +171,9 @@ export function UslugiClient() {
                 <span className="w-1.5 h-1.5 rounded-full bg-green" />
                 {t('consultation') || 'Бесплатная консультация'}
               </span>
-            </motion.div>
+            </div>
           </div>
-        </motion.div>
+        </div>
       </section>
 
       {/* ── Services Grid ── */}

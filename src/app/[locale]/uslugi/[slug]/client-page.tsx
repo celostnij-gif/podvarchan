@@ -89,45 +89,25 @@ function HeroSection({ service }: { service: ServiceData }) {
           {/* Breadcrumbs */}
           <HeroBreadcrumbs />
           {/* Section label */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.25, 0.1, 0, 1] }}
-            className="inline-flex items-center gap-3"
-          >
+          <div className="inline-flex items-center gap-3 animate-fade-in-down">
             <span className="w-8 h-px bg-gold/40" aria-hidden="true" />
             <span className="text-[10px] font-semibold tracking-[0.25em] uppercase text-gold">
               {service.shortTitle}
             </span>
-          </motion.div>
+          </div>
 
           {/* Title */}
-          <motion.h1
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.7, ease: [0.25, 0.1, 0, 1] }}
-            className="mt-6 text-4xl md:text-5xl lg:text-6xl font-display text-gold-premium leading-tight tracking-tight"
-          >
+          <h1 className="mt-6 text-4xl md:text-5xl lg:text-6xl font-display text-gold-premium leading-tight tracking-tight animate-fade-in-down" style={{ animationDelay: '0.05s' }}>
             {service.title}
-          </motion.h1>
+          </h1>
 
           {/* Description */}
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.5, ease: [0.25, 0.1, 0, 1] }}
-            className="mt-4 text-lg text-text-secondary leading-relaxed max-w-2xl"
-          >
+          <p className="mt-4 text-lg text-text-secondary leading-relaxed max-w-2xl animate-fade-in-down" style={{ animationDelay: '0.1s' }}>
             {service.description}
-          </motion.p>
+          </p>
 
           {/* CTA */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.5, ease: [0.25, 0.1, 0, 1] }}
-            className="mt-8 flex flex-col sm:flex-row items-start gap-4"
-          >
+          <div className="mt-8 flex flex-col sm:flex-row items-start gap-4 animate-fade-in-down" style={{ animationDelay: '0.15s' }}>
             <Link
               href="/kontakty/"
               data-analytics-booking={`service-${service.slug}-hero`}
@@ -155,16 +135,12 @@ function HeroSection({ service }: { service: ServiceData }) {
             <span className="badge-free">
               {t('heroFreeLabel')}
             </span>
-          </motion.div>
+          </div>
 
           {/* Medical Disclaimer */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-          >
+          <div style={{ animationDelay: '0.2s' }} className="animate-fade-in-down">
             <MedicalDisclaimer className="mt-6" />
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>
