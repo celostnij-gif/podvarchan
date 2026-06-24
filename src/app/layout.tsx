@@ -33,6 +33,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
+  description: SITE.fullName,
   verification: {
     google: process.env.GOOGLE_SITE_VERIFICATION ?? '',
   },
