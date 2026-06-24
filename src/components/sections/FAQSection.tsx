@@ -49,7 +49,7 @@ export default function FAQSection() {
         </motion.div>
 
         {/* FAQ Items */}
-        <div className="mt-10 max-w-2xl mx-auto space-y-3" role="list">
+        <div className="mt-10 max-w-2xl mx-auto space-y-3">
           {faqItems.slice(0, 6).map((item, index) => (
             <motion.div
               key={index}

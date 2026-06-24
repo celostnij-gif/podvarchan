@@ -5,7 +5,8 @@ import { motion } from 'framer-motion'
 import { Link } from '@/i18n/routing'
 import { SERVICE_ICONS } from '@/constants'
 import { ServiceIcon } from '@/components/ui/Icons'
-import { AnimatedSection, AnimatedText, SectionContainer, MedicalDisclaimer, TiltCard, FaqAccordion } from '@/components/ui'
+import { AnimatedSection, AnimatedText, SectionContainer, TiltCard, FaqAccordion } from '@/components/ui'
+import MedicalDisclaimer from '@/components/MedicalDisclaimer'
 import { useSetBreadcrumbs, useRegisterSchemas } from '@/providers/BreadcrumbsProvider'
 import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 
@@ -138,9 +139,7 @@ function HeroSection({ service }: { service: ServiceData }) {
           </div>
 
           {/* Medical Disclaimer */}
-          <div style={{ animationDelay: '0.2s' }} className="animate-fade-in-down">
-            <MedicalDisclaimer className="mt-6" />
-          </div>
+            <MedicalDisclaimer type="crisis" className="mt-6" />
         </div>
       </div>
     </section>
@@ -303,7 +302,7 @@ function FAQSection({ service }: { service: ServiceData }) {
           {t('faqTitle')}
         </AnimatedText>
 
-        <div className="mt-10 max-w-2xl mx-auto space-y-3" role="list">
+        <div className="mt-10 max-w-2xl mx-auto space-y-3">
           {faqs.slice(0, 5).map((item, index) => (
             <motion.div
               key={index}

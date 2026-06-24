@@ -3,7 +3,8 @@
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
-import { AnimatedText, AnimatedSection, SectionContainer, Button, MedicalDisclaimer, TiltCard, childVariants } from '@/components/ui'
+import { AnimatedText, AnimatedSection, SectionContainer, Button, TiltCard, childVariants } from '@/components/ui'
+import MedicalDisclaimer from '@/components/MedicalDisclaimer'
 import { useSetBreadcrumbs } from '@/providers/BreadcrumbsProvider'
 import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 import { Link } from '@/i18n/routing'
@@ -384,8 +385,7 @@ export default function MetodClient() {
       {/* ════════════════════════════════════════
            MEDICAL DISCLAIMER
            ════════════════════════════════════════ */}
-      <MedicalDisclaimer />
-
+      <MedicalDisclaimer type="crisis" />
       {/* ════════════════════════════════════════
            CTA
            ════════════════════════════════════════ */}
