@@ -1,7 +1,9 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+import { useLocale } from 'next-intl'
 import type { BreadcrumbItem } from '@/components/ui/Breadcrumbs'
+import { breadcrumbSchema } from '@/lib/schema'
 
 /* ── Context type ── */
 
@@ -51,7 +53,8 @@ export function useRegisteredSchemas(): Record<string, unknown>[] {
 /* ── Hook for setting breadcrumbs from a page component ── */
 
 export function useSetBreadcrumbs(items: BreadcrumbItem[]): void {
-  const { items: currentItems, setItems } = useContext(BreadcrumbsContext)
+  const { items: currentItems, schemas: currentSchemas, setItems, setSchemas } = useContext(BreadcrumbsContext)
+  const locale = useLocale()
 
   useEffect(() => {
     const currentStr = JSON.stringify(currentItems)
@@ -59,11 +62,14 @@ export function useSetBreadcrumbs(items: BreadcrumbItem[]): void {
 
     if (nextStr !== currentStr) {
       setItems(items)
+      // Auto-register BreadcrumbList schema with updated breadcrumbs
+      const schemaItems = items.map(i => ({ name: i.label, url: i.href ?? '/' }))
+      const bcSchema = breadcrumbSchema({ items: schemaItems, locale })
+      const nonBreadcrumb = currentSchemas.filter(s => s['@type'] !== 'BreadcrumbList')
+      setSchemas([...nonBreadcrumb, bcSchema])
     }
   })
 }
-
-/* ── Hook for registering page-specific JSON-LD schemas ── */
 
 export function useRegisterSchemas(newSchemas: Record<string, unknown>[]): void {
   const { schemas: currentSchemas, setSchemas } = useContext(BreadcrumbsContext)
