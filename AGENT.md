@@ -105,3 +105,53 @@ Version ID: bed23700-a844-467d-b3c5-ee383591f194
 **
 НЕ ЗМІНЮЙ цю конфігурацію без явної команди користувача.**
 Якщо сумніваєшся — прочитай цей розділ і повернись до перевірки версій.
+
+## 7. Cloudflare Workers AI — Selection Rules
+
+### 7.1. Доступные бесплатные модели
+
+| Модель | ID | Контекст | Особенность |
+|---|---|---|---|
+| **Qwen3 30B A3B FP8** | `@cf/qwen/qwen3-30b-a3b-fp8` | 32K токенов | Самая мощная, reasoning. Для сложной редактуры, YMYL-рецензирования, кода, архитектурных решений. |
+| **GLM 4.7 Flash** | `@cf/zai-org/glm-4.7-flash` | 131K токенов | Быстрая, большой контекст. Для пакетной обработки, локализации, аудита переводов, ревью множества файлов за раз. |
+| **Llama 3.2 3B** | `@cf/meta/llama-3.2-3b-instruct` | 80K токенов | Лёгкие задачи: проверка орфографии, быстрые ответы, простые рерайты. |
+| **Llama 3.2 11B Vision** | `@cf/meta/llama-3.2-11b-vision-instruct` | 128K токенов | Мультимодальная. Для генерации alt-текстов, анализа скриншотов/UI. |
+| **Mistral 7B** | `@cf/mistral/mistral-7b-instruct-v0.2-lora` | 15K токенов | Базовая. Для однофайловых ревью, простых рефакторингов. |
+| **Granite 4.0 H/Micro** | `@cf/ibm-granite/granite-4.0-h-micro` | 131K токенов | Большой контекст. Для анализа больших файлов, кодовых баз. |
+| **Llama 3.2 1B** | `@cf/meta/llama-3.2-1b-instruct` | 60K токенов | Для быстрых классификаций и простых проверок. |
+| **Gemma 2B/7B** | `@cf/google/gemma-2b-it-lora` / `@cf/google/gemma-7b-it-lora` | 8K/3.5K | Компактные. Для простых переформулировок. |
+
+### 7.2. Назначение ролей в плане
+
+Каждый план (в TEMP/) ДОЛЖЕН включать таблицу назначений:
+
+```md
+| Роль | Модель | Обоснование |
+|---|---|---|
+| **Executor** | `cloudflare/@cf/qwen/qwen3-30b-a3b-fp8` | Сложная задача (код/YMYL/reasoning) |
+| **Reviewer** | `cloudflare/@cf/zai-org/glm-4.7-flash` | Быстрое ревью всех файлов за раз |
+```
+
+### 7.3. Процесс Executor → Reviewer
+
+1. **Executor** (я или task-агент) выполняет задачу.
+2. **Reviewer** (Cloudflare-модель через curl/node_repl) проверяет дифф:
+   - GET Diff изменений.
+   - Отправить в Cloudflare AI с промптом на проверку качества/безопасности/YMYL.
+   - Получить вердикт: `PASS` / `NEEDS FIX` / `FAIL`.
+3. Если `PASS` → commit + push.
+4. Если `NEEDS FIX` → исправить замечания → повторное ревью.
+
+### 7.4. Модель по умолчанию
+
+Если задача не указана в плане — использовать `cloudflare/@cf/qwen/qwen3-30b-a3b-fp8` как executor и `cloudflare/@cf/zai-org/glm-4.7-flash` как reviewer.
+
+### 7.5. API эндпоинт
+
+```
+POST https://api.cloudflare.com/client/v4/accounts/d2d025682352e4f90336d295deef3fce/ai/v1/chat/completions
+Authorization: Bearer CLOUDFLARE_API_TOKEN (из .env)
+Body: { model: "@cf/...", messages: [...], max_tokens: N }
+```
+
+Модели указывать явно (full ID). Эндпоинт `/v1/models` не поддерживается (405).

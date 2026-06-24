@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import { getTranslations, getMessages } from 'next-intl/server'
 import { BLOG_CATEGORIES } from '@/constants'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
-import { getBlogPostsByCategory } from '@/lib/content'
+import { getBlogPostMetasByCategory } from '@/lib/content-metas'
 import { ClientBlogCategory } from './client-page'
 
 /* ── Local type for blog category data from messages ── */
@@ -47,7 +47,7 @@ export default async function BlogCategoryPage({ params }: Props) {
   const category = blogCategories.find((c) => c.slug === cat)
   if (!category) notFound()
 
-  const posts = getBlogPostsByCategory(cat, locale)
+  const posts = getBlogPostMetasByCategory(cat, locale)
 
   return <ClientBlogCategory category={category} posts={posts} locale={locale} />
 }

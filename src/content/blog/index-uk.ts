@@ -2042,5 +2042,5 @@ export const BLOG_POSTS_UK: BlogPost[] = [
   },
 ]
 
-export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] =
-  BLOG_POSTS_UK.map(({ body: _, ...meta }) => meta)
+import { BLOG_POST_METAS_UK } from './metas-uk'
+export { BLOG_POST_METAS_UK }

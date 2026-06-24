@@ -8,7 +8,7 @@ import { useSetBreadcrumbs } from '@/providers/BreadcrumbsProvider'
 import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 import { Link } from '@/i18n/routing'
 import BlogCard from '@/components/blog/BlogCard'
-import { getAllBlogPostMetas } from '@/lib/content'
+import { getAllBlogPostMetas } from '@/lib/content-metas'
 /* ── BlogCategory from messages has all localized fields ── */
 interface MessagesBlogCategory {
   slug: string

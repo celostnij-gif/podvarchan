@@ -1,4 +1,7 @@
+// ── Blog Post Client Page ──
 'use client'
+
+import Image from 'next/image'
 
 import { useTranslations } from 'next-intl'
 import { useMessages } from 'next-intl'
@@ -144,12 +147,13 @@ export function ClientBlogPost({ title, body, date, category, categorySlug, auth
           {/* Featured image */}
           {image && (
             <div className="mb-8 rounded-xl overflow-hidden border border-border-base shadow-lg shadow-black/20">
-              {/* eslint-disable-next-line @next/next/no-img-element -- dynamic external image */}
-              <img
+              <Image
                 src={image}
                 alt={imageAlt ?? title}
+                width={1200}
+                height={675}
                 className="w-full h-auto object-cover aspect-video"
-                loading="eager"
+                priority
               />
             </div>
           )}

@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 import { Link } from '@/i18n/routing'
 import { TiltCard } from '@/components/ui'
 import { formatDate } from '@/lib/content'
@@ -57,12 +59,12 @@ export default function BlogCard({
         {/* Image with shimmer overlay */}
         {image && (
           <div className={`relative overflow-hidden ${featured ? 'aspect-[2/1]' : 'aspect-video'}`}>
-            {/* eslint-disable-next-line @next/next/no-img-element -- dynamic external image */}
-            <img
+            <Image
               src={image}
               alt={imageAlt ?? title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-              loading="lazy"
+              fill
+              sizes={featured ? '(max-width: 768px) 100vw, 50vw' : '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw'}
+              className="object-cover group-hover:scale-105 transition-transform duration-700"
             />
             {/* Shimmer overlay on hover — same as CTA buttons */}
             <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full

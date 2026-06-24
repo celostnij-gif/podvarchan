@@ -2707,11 +2707,6 @@ export const BLOG_POSTS: BlogPost[] = [
   },
 ]
 
-/**
- * Массив только с метаданными (без body).
- * Без body файл в ~10 раз легче — для клиентских компонентов.
- */
-export const BLOG_POST_METAS: Omit<BlogPost, 'body'>[] =
-  BLOG_POSTS.map(({ body: _, ...meta}
-) => meta)
+import { BLOG_POST_METAS } from './metas'
+export { BLOG_POST_METAS }
 export { BLOG_POSTS_UK, BLOG_POST_METAS_UK } from './index-uk'

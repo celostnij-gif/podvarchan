@@ -19,7 +19,7 @@ interface BlogCategoryMsg {
 
 interface Props {
   category: BlogCategoryMsg
-  posts: BlogPost[]
+  posts: Omit<BlogPost, 'body'>[]
   locale: string
 }
 
