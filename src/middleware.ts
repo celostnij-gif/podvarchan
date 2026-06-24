@@ -32,7 +32,19 @@ export default function middleware(request: NextRequest) {
     return NextResponse.rewrite(mdUrl)
   }
 
-  return intlMiddleware(request)
+  const response = intlMiddleware(request)
+
+  // Edge cache for public HTML pages — Worker hits are dramatically reduced
+  // s-maxage=86400: CDN caches 24h, serves cached even if Worker is cold
+  // stale-while-revalidate=3600: serves stale while revalidating in background
+  if (response.status < 300) {
+    response.headers.set(
+      'Cache-Control',
+      'public, s-maxage=86400, stale-while-revalidate=3600'
+    )
+  }
+
+  return response
 }
 
 export const config = {
