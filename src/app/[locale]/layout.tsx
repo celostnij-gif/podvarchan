@@ -6,6 +6,7 @@ import { personSchema, practiceSchema } from '@/lib/schema'
 import { buildCanonical } from '@/lib/seo/metadata'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import MobileStickyCTA from '@/components/layout/MobileStickyCTA'
 
 import GoogleAnalytics from '@/components/GoogleAnalytics'
 import CookieBanner from '@/components/CookieBanner'
@@ -93,6 +94,7 @@ export default async function LocaleLayout({
   ]
 
   return (
+
     <NextIntlClientProvider locale={locale} messages={messages}>
       {/* JSON-LD Schema */}
       {jsonLdSchemas.map((schema, index) => (
@@ -133,6 +135,8 @@ export default async function LocaleLayout({
 
       <GoogleAnalytics />
       <CookieBanner />
+      <MobileStickyCTA />
+
     </NextIntlClientProvider>
   )
 }

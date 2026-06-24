@@ -1,13 +1,14 @@
 'use client'
 
 import { useMessages, useTranslations } from 'next-intl'
-import { motion } from 'framer-motion'
 import { Link } from '@/i18n/routing'
+import { useSetBreadcrumbs, useRegisterSchemas } from '@/providers/BreadcrumbsProvider'
+import SuitableForSection from '@/components/sections/SuitableForSection'
+import MedicalDisclaimer from '@/components/MedicalDisclaimer'
+import { motion } from 'framer-motion'
 import { SERVICE_ICONS } from '@/constants'
 import { ServiceIcon } from '@/components/ui/Icons'
 import { AnimatedSection, AnimatedText, SectionContainer, TiltCard, FaqAccordion } from '@/components/ui'
-import MedicalDisclaimer from '@/components/MedicalDisclaimer'
-import { useSetBreadcrumbs, useRegisterSchemas } from '@/providers/BreadcrumbsProvider'
 import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 
 interface ServiceData {
@@ -433,6 +434,8 @@ export function ClientServicePage({ service, schemas }: Props) {
       <SymptomsSection service={service} />
       <MethodSection service={service} />
       <FAQSection service={service} />
+      <SuitableForSection />
+
       <CTASection service={service} />
       <RelatedServicesSection service={service} allServices={allServices} />
     </>
