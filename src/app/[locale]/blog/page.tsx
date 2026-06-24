@@ -1,15 +1,16 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { motion } from 'framer-motion'
 import { useTranslations, useMessages, useLocale } from 'next-intl'
-import { AnimatedText, SectionContainer, AnimatedSection, childVariants, Button } from '@/components/ui'
+import { AnimatedText, SectionContainer, AnimatedSection, Button } from '@/components/ui'
 import { useSetBreadcrumbs } from '@/providers/BreadcrumbsProvider'
 import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 import { Link } from '@/i18n/routing'
 import BlogCard from '@/components/blog/BlogCard'
 import { getAllBlogPostMetas } from '@/lib/content-metas'
-/* ── BlogCategory from messages has all localized fields ── */
+
+const PAGE_SIZE = 9
+
 interface MessagesBlogCategory {
   slug: string
   name: string
@@ -26,6 +27,7 @@ export default function BlogPage() {
   const messages = useMessages()
   const blogCategories = (messages?.blogCategories as MessagesBlogCategory[]) ?? []
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
   useSetBreadcrumbs([
     { label: commonT('nav.home'), href: '/' },
@@ -39,11 +41,21 @@ export default function BlogPage() {
     return allPosts.filter((post) => post.categorySlug === activeCategory)
   }, [activeCategory, allPosts])
 
+  const handleCategoryClick = (slug: string | null) => {
+    setActiveCategory(slug)
+    setVisibleCount(PAGE_SIZE)
+  }
+
   // Featured = first post when no filter is active
   const featuredPost = !activeCategory && allPosts.length > 0 ? allPosts[0] : null
   const gridPosts = !activeCategory ? allPosts.slice(1) : filteredPosts
+  const visiblePosts = featuredPost
+    ? gridPosts.slice(0, visibleCount - 1)
+    : gridPosts.slice(0, visibleCount)
 
   const isEmptyFiltered = activeCategory && filteredPosts.length === 0
+  const hasMore = gridPosts.length > visiblePosts.length
+  const totalToShow = visiblePosts.length + (featuredPost ? 1 : 0)
 
   return (
     <>
@@ -51,48 +63,23 @@ export default function BlogPage() {
       <section className="relative overflow-hidden pt-16 pb-10 md:pt-20 md:pb-14">
         <div className="relative z-10 w-full max-w-container mx-auto px-gutter text-left">
           <div className="max-w-3xl">
-            {/* Breadcrumbs */}
             <HeroBreadcrumbs />
-            {/* Section label */}
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: [0.25, 0.1, 0, 1] }}
-              className="inline-flex items-center gap-3"
-            >
+            <div className="inline-flex items-center gap-3 mt-4 animate-fade-in-down">
               <span className="w-8 h-px bg-gold/40" aria-hidden="true" />
               <span className="text-[10px] font-semibold tracking-[0.25em] uppercase text-gold">
                 {commonT('nav.blog')}
               </span>
-            </motion.div>
+            </div>
 
-            {/* Heading with gold gradient accent */}
-            <motion.h1
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1, duration: 0.7, ease: [0.25, 0.1, 0, 1] }}
-              className="mt-4 text-4xl md:text-5xl lg:text-6xl font-display text-gold-premium leading-tight tracking-tight"
-            >
+            <h1 className="mt-4 text-4xl md:text-5xl lg:text-6xl font-display text-gold-premium leading-tight tracking-tight animate-fade-in-down" style={{ animationDelay: '0.05s' }}>
               {t('pageTitle')}
-            </motion.h1>
+            </h1>
 
-            {/* Description */}
-            <motion.p
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.5, ease: [0.25, 0.1, 0, 1] }}
-              className="mt-4 text-lg md:text-xl text-text-secondary max-w-2xl leading-relaxed"
-            >
+            <p className="mt-4 text-lg md:text-xl text-text-secondary max-w-2xl leading-relaxed animate-fade-in-down" style={{ animationDelay: '0.1s' }}>
               {t('pageDescription')}
-            </motion.p>
+            </p>
 
-            {/* Stats */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.5, ease: [0.25, 0.1, 0, 1] }}
-              className="mt-6 flex items-center gap-4 text-sm text-text-muted"
-            >
+            <div className="mt-6 flex items-center gap-4 text-sm text-text-muted animate-fade-in-down" style={{ animationDelay: '0.15s' }}>
               <span className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-gold" />
                 {allPosts.length > 0 && t('totalArticles', { count: allPosts.length })}
@@ -101,7 +88,7 @@ export default function BlogPage() {
                 <span className="w-1.5 h-1.5 rounded-full bg-green" />
                 {t('totalCategories', { count: blogCategories.length })}
               </span>
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
@@ -111,7 +98,7 @@ export default function BlogPage() {
         <SectionContainer>
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={() => setActiveCategory(null)}
+              onClick={() => handleCategoryClick(null)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300
                 ${!activeCategory
                   ? 'bg-gold text-bg-base shadow-glow-gold'
@@ -123,7 +110,7 @@ export default function BlogPage() {
             {blogCategories.map((cat) => (
               <button
                 key={cat.slug}
-                onClick={() => setActiveCategory(cat.slug)}
+                onClick={() => handleCategoryClick(cat.slug)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300
                   ${activeCategory === cat.slug
                     ? 'bg-gold text-bg-base shadow-glow-gold'
@@ -140,15 +127,10 @@ export default function BlogPage() {
       {/* ────── Posts Grid ────── */}
       {allPosts.length > 0 && !isEmptyFiltered && (
         <SectionContainer className="mt-6">
-          <AnimatedSection
-            variant="fadeUp"
-            staggerDelay={0.06}
-            delay={0.1}
-            className="space-y-8"
-          >
+          <div className="space-y-8">
             {/* Featured post */}
             {featuredPost && !activeCategory && (
-              <motion.div variants={childVariants} className="w-full">
+              <div className="w-full">
                 <BlogCard
                   {...featuredPost}
                   featured
@@ -156,48 +138,53 @@ export default function BlogPage() {
                   locale={locale}
                   readMoreLabel={t('readMore')}
                 />
-              </motion.div>
+              </div>
             )}
 
             {/* Grid posts */}
-            {gridPosts.length > 0 && (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {gridPosts.map((post) => (
-                  <motion.div key={post.slug} variants={childVariants}>
-                    <BlogCard
-                      {...post}
-                      minutesLabel={t('minutes')}
-                      locale={locale}
-                      readMoreLabel={t('readMore')}
-                    />
-                  </motion.div>
-                ))}
-              </div>
-            )}
-          </AnimatedSection>
+            {visiblePosts.length > 0 && (
+              <>
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {visiblePosts.map((post) => (
+                    <div key={post.slug}>
+                      <BlogCard
+                        {...post}
+                        minutesLabel={t('minutes')}
+                        locale={locale}
+                        readMoreLabel={t('readMore')}
+                      />
+                    </div>
+                  ))}
+                </div>
 
-          {/* Total count */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="mt-12 text-sm text-text-muted text-center"
-          >
-            {t('totalArticles', { count: allPosts.length })}
-          </motion.p>
+                {/* Pagination: Show more */}
+                {hasMore && (
+                  <div className="flex justify-center mt-10">
+                    <button
+                      onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
+                      className="group relative inline-flex items-center justify-center px-8 py-3 rounded-full text-sm font-semibold tracking-wide overflow-hidden
+                        bg-bg-surface/85 text-text-secondary hover:text-text-primary border border-border-base hover:border-gold-muted/40
+                        transition-all duration-300"
+                    >
+                      <span className="relative z-10 flex items-center gap-2">
+                        {t('showMore', { count: Math.min(PAGE_SIZE, gridPosts.length - visiblePosts.length) })}
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-300 group-hover:translate-y-0.5">
+                          <path d="M6 9l6 6 6-6" />
+                        </svg>
+                      </span>
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </SectionContainer>
       )}
 
-      {/* ────── Empty state (no posts at all / filter with no results) ────── */}
+      {/* ────── Empty state ────── */}
       {(allPosts.length === 0 || isEmptyFiltered) && (
         <SectionContainer>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, ease: [0.25, 0.1, 0, 1] }}
-            className="mt-8 text-center py-20 px-6 rounded-2xl border border-border-base bg-bg-surface/85"
-          >
+          <div className="mt-8 text-center py-20 px-6 rounded-2xl border border-border-base bg-bg-surface/85">
             <div className="w-16 h-16 mx-auto rounded-full bg-gold/10 flex items-center justify-center mb-6">
               <svg className="w-8 h-8 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
@@ -209,7 +196,7 @@ export default function BlogPage() {
             <p className="mt-2 text-text-muted text-sm max-w-md mx-auto">
               {t('noArticlesDesc')}
             </p>
-          </motion.div>
+          </div>
         </SectionContainer>
       )}
 

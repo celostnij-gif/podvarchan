@@ -1,15 +1,16 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { AnimatedText, SectionContainer, AnimatedSection, childVariants, Button } from '@/components/ui'
+import { AnimatedText, SectionContainer, AnimatedSection, Button } from '@/components/ui'
 import { useSetBreadcrumbs } from '@/providers/BreadcrumbsProvider'
 import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 import BlogCard from '@/components/blog/BlogCard'
 import { Link } from '@/i18n/routing'
 import type { BlogPost } from '@/types'
 
-/* ── Local type for blog category data from messages ── */
+const PAGE_SIZE = 9
+
 interface BlogCategoryMsg {
   slug: string
   name: string
@@ -23,24 +24,10 @@ interface Props {
   locale: string
 }
 
-/* ── Animation Variants ── */
-
-const heroContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1, delayChildren: 0.15 },
-  },
-}
-
-const heroFadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.1, 0, 1] as const } },
-}
-
 export function ClientBlogCategory({ category, posts, locale }: Props) {
   const t = useTranslations('blog')
   const commonT = useTranslations('common')
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
   useSetBreadcrumbs([
     { label: commonT('nav.home'), href: '/' },
@@ -48,34 +35,28 @@ export function ClientBlogCategory({ category, posts, locale }: Props) {
     { label: category.name },
   ])
 
+  const visiblePosts = posts.slice(0, visibleCount)
+  const hasMore = posts.length > visiblePosts.length
+
   return (
     <>
       {/* ────── Category Hero ────── */}
       <section className="relative pt-16 pb-10 md:pt-20 md:pb-14 overflow-hidden">
         <div className="relative z-10 w-full max-w-3xl px-gutter text-left">
-          {/* Breadcrumbs */}
           <HeroBreadcrumbs />
-          <motion.div
-            variants={heroContainer}
-            initial="hidden"
-            animate="visible"
-          >
-            {/* Heading */}
-            <motion.h1 variants={heroFadeUp} className="text-4xl md:text-5xl font-display text-gold-premium leading-tight tracking-tight">
-              {category.name}
-            </motion.h1>
 
-            {/* Description */}
-            <motion.p variants={heroFadeUp} className="mt-4 text-lg text-text-secondary max-w-2xl leading-relaxed">
-              {category.description}
-            </motion.p>
+          <h1 className="mt-5 text-4xl md:text-5xl font-display text-gold-premium leading-tight tracking-tight animate-fade-in-down">
+            {category.name}
+          </h1>
 
-            {/* Post count */}
-            <motion.div variants={heroFadeUp} className="mt-6 flex items-center gap-2 text-sm text-text-muted">
-              <span className="w-1.5 h-1.5 rounded-full bg-gold" />
-              {t('totalArticles', { count: posts.length })}
-            </motion.div>
-          </motion.div>
+          <p className="mt-4 text-lg text-text-secondary max-w-2xl leading-relaxed animate-fade-in-down" style={{ animationDelay: '0.1s' }}>
+            {category.description}
+          </p>
+
+          <div className="mt-6 flex items-center gap-2 text-sm text-text-muted animate-fade-in-down" style={{ animationDelay: '0.15s' }}>
+            <span className="w-1.5 h-1.5 rounded-full bg-gold" />
+            {t('totalArticles', { count: posts.length })}
+          </div>
         </div>
       </section>
 
@@ -83,14 +64,10 @@ export function ClientBlogCategory({ category, posts, locale }: Props) {
       {posts.length > 0 ? (
         <SectionContainer>
           <div>
-            <AnimatedSection
-              variant="fadeUp"
-              staggerDelay={0.07}
-              delay={0.15}
-            >
+            <div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {posts.map((post) => (
-                  <motion.div key={post.slug} variants={childVariants}>
+                {visiblePosts.map((post) => (
+                  <div key={post.slug}>
                     <BlogCard
                       slug={post.slug}
                       title={post.title}
@@ -105,10 +82,29 @@ export function ClientBlogCategory({ category, posts, locale }: Props) {
                       locale={locale}
                       readMoreLabel={t('readMore')}
                     />
-                  </motion.div>
+                  </div>
                 ))}
               </div>
-            </AnimatedSection>
+
+              {/* Pagination: Show more */}
+              {hasMore && (
+                <div className="flex justify-center mt-10">
+                  <button
+                    onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
+                    className="group relative inline-flex items-center justify-center px-8 py-3 rounded-full text-sm font-semibold tracking-wide overflow-hidden
+                      bg-bg-surface/85 text-text-secondary hover:text-text-primary border border-border-base hover:border-gold-muted/40
+                      transition-all duration-300"
+                  >
+                    <span className="relative z-10 flex items-center gap-2">
+                      {t('showMore', { count: Math.min(PAGE_SIZE, posts.length - visiblePosts.length) })}
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="transition-transform duration-300 group-hover:translate-y-0.5">
+                        <path d="M6 9l6 6 6-6" />
+                      </svg>
+                    </span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </SectionContainer>
       ) : (
