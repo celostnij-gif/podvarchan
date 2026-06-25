@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import { getMessages } from 'next-intl/server'
 import { SERVICES } from '@/constants'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
-import { serviceSchema } from '@/lib/schema'
+import { serviceSchema, faqSchema } from '@/lib/schema'
 import { getCategorySlugsByService } from '@/lib/serviceMapping'
 import { getAllBlogPostMetas } from '@/lib/content-metas'
 import { ClientServicePage } from './client-page'
@@ -40,11 +40,8 @@ export default async function ServicePage({ params }: Props) {
 
   /* ── Related blog posts ── */
   const categorySlugs = getCategorySlugsByService(slug)
-  const allPosts = getAllBlogPostMetas(locale)
-  const relatedPosts = allPosts
-    .filter(p => categorySlugs.includes(p.categorySlug))
-    .slice(0, 3)
-    .map(p => ({ slug: p.slug, title: p.title }))
+  /* ── FAQ Schema — берём вопросы из переводов ── */
+  const serviceFaqs = ((messages as any)?.serviceFaqs as Record<string, Array<{ question: string; answer: string }>> | undefined)?.[slug] ?? []
 
   const schema = serviceSchema({
     name: service.title,
@@ -53,5 +50,10 @@ export default async function ServicePage({ params }: Props) {
     locale,
   })
 
-  return <ClientServicePage service={service} locale={locale} schemas={[schema]} relatedPosts={relatedPosts} />
+  const schemas: Record<string, unknown>[] = [schema]
+  if (serviceFaqs.length > 0) {
+    schemas.push(faqSchema(serviceFaqs))
+  }
+
+  return <ClientServicePage service={service} locale={locale} schemas={schemas} relatedPosts={relatedPosts} />
 }

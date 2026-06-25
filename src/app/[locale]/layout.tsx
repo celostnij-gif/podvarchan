@@ -91,6 +91,17 @@ export default async function LocaleLayout({
         '@id': `${SITE.url}/ob-avtore/#person`,
       },
     },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      '@id': `${SITE.url}/#breadcrumb`,
+      itemListElement: [{
+        '@type': 'ListItem',
+        position: 1,
+        name: t('siteName'),
+        url: `${SITE.url}/${locale}/`,
+      }],
+    },
   ]
 
   return (
