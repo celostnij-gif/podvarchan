@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import dynamic from 'next/dynamic'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, getTranslations } from 'next-intl/server'
 import { SITE } from '@/constants'
@@ -6,10 +7,13 @@ import { personSchema, practiceSchema } from '@/lib/schema'
 import { buildCanonical } from '@/lib/seo/metadata'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
-import MobileStickyCTA from '@/components/layout/MobileStickyCTA'
+import { SITE } from '@/constants'
+import { personSchema, practiceSchema } from '@/lib/schema'
+import { buildCanonical } from '@/lib/seo/metadata'
 
-import GoogleAnalytics from '@/components/GoogleAnalytics'
-import CookieBanner from '@/components/CookieBanner'
+const GoogleAnalytics = dynamic(() => import('@/components/GoogleAnalytics'), { ssr: false })
+const CookieBanner = dynamic(() => import('@/components/CookieBanner'), { ssr: false })
+const MobileStickyCTA = dynamic(() => import('@/components/layout/MobileStickyCTA'), { ssr: false })
 import { ToastProvider } from '@/components/Toast'
 import ScrollProgress from '@/components/ui/ScrollProgress'
 
