@@ -7,9 +7,6 @@ import { personSchema, practiceSchema } from '@/lib/schema'
 import { buildCanonical } from '@/lib/seo/metadata'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
-import { SITE } from '@/constants'
-import { personSchema, practiceSchema } from '@/lib/schema'
-import { buildCanonical } from '@/lib/seo/metadata'
 
 const GoogleAnalytics = dynamic(() => import('@/components/GoogleAnalytics'), { ssr: false })
 const CookieBanner = dynamic(() => import('@/components/CookieBanner'), { ssr: false })

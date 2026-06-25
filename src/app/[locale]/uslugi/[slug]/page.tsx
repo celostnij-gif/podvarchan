@@ -38,11 +38,16 @@ export default async function ServicePage({ params }: Props) {
   const service = servicesData.find((s) => s.slug === slug)
   if (!service) notFound()
 
-  /* ── Related blog posts ── */
-  const categorySlugs = getCategorySlugsByService(slug)
+  /* ── Related blog posts (for future cross-linking) ── */
+  // const categorySlugs = getCategorySlugsByService(slug)
+  // const allPosts = getAllBlogPostMetas(locale)
+  // const relatedPosts = allPosts
+  //   .filter(p => categorySlugs.includes(p.categorySlug))
+  //   .slice(0, 3)
+  //   .map(p => ({ slug: p.slug, title: p.title }))
+
   /* ── FAQ Schema — берём вопросы из переводов ── */
   const serviceFaqs = ((messages as any)?.serviceFaqs as Record<string, Array<{ question: string; answer: string }>> | undefined)?.[slug] ?? []
-
   const schema = serviceSchema({
     name: service.title,
     description: service.description,
@@ -55,5 +60,6 @@ export default async function ServicePage({ params }: Props) {
     schemas.push(faqSchema(serviceFaqs))
   }
 
-  return <ClientServicePage service={service} locale={locale} schemas={schemas} relatedPosts={relatedPosts} />
+  return <ClientServicePage service={service} locale={locale} schemas={schemas} />
+
 }
