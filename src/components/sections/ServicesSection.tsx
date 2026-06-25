@@ -46,12 +46,14 @@ const cardVariants = {
 
 /* ── Компонент ── */
 
-export default function ServicesSection() {
+export default function ServicesSection({ maxCards }: { maxCards?: number } = {}) {
   const t = useTranslations('servicesSection')
   const messages = useMessages()
   const services = (messages?.servicesData as ServiceItem[]) ?? []
 
   if (services.length === 0) return null
+
+  const displayedServices = maxCards ? services.slice(0, maxCards) : services
 
   return (
     <AnimatedSection as="section" variant="fadeUp" className="relative overflow-hidden" aria-label={t('ariaLabel')}>
@@ -70,7 +72,7 @@ export default function ServicesSection() {
 
         {/* Cards grid */}
         <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {services.map((service, i) => (
+          {displayedServices.map((service, i) => (
             <motion.div
               key={service.slug}
               variants={cardVariants}

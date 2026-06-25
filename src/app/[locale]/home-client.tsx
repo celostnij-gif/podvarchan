@@ -45,7 +45,7 @@ export default function HomeClient({ locale: _locale, schemas }: { locale: strin
       <MethodSection />
 
       {/* ── Услуги ── */}
-      <ServicesSection />
+      <ServicesSection maxCards={9} />
 
       {/* ── Об авторе ── */}
       <AuthorPreviewSection />
