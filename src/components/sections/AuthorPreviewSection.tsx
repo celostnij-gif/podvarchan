@@ -51,8 +51,9 @@ export default function AuthorPreviewSection() {
             transition={{ duration: 0.6, ease: [0.25, 0.1, 0, 1] as const }}
           >
             <h2 className="text-2xl md:text-3xl font-serif font-semibold mb-4 text-foreground">
-              {t('heading')}{' '}
-              <span className="text-gold">{t('headingAccent')}</span>
+              {t('headingPrefix')}
+              <span className="text-gold">{t('headingHighlight')}</span>
+              {t('headingSuffix')}
             </h2>
             <p className="text-foreground/70 mb-6 leading-relaxed">
               {t('description')}

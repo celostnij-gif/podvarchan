@@ -57,6 +57,14 @@ export async function generateMetadata({
       siteName: SITE.fullName,
       locale: locale === 'uk' ? 'uk_UA' : 'ru_RU',
       type: 'website',
+      images: [
+        {
+          url: `${SITE.url}${SITE.defaultOgImage}`,
+          width: 1200,
+          height: 630,
+          alt: t('siteTitle'),
+        },
+      ],
     },
   }
 }
