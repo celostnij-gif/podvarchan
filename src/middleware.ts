@@ -7,6 +7,11 @@ const intlMiddleware = createMiddleware(routing)
 export default function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
+  // P0-A: locale redirect — корень / редиректит на RU (дефолтный язык)
+  if (pathname === '/') {
+    return NextResponse.redirect(new URL('/ru/', request.url), 302)
+  }
+
   // Skip API routes, static assets, well-known paths — they handle themselves
   // HTTP → HTTPS redirect (defense in depth — Cloudflare edge normally handles this)
   const proto = request.headers.get('x-forwarded-proto')
