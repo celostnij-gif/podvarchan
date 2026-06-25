@@ -8,9 +8,9 @@ import { buildCanonical } from '@/lib/seo/metadata'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 
-const GoogleAnalytics = dynamic(() => import('@/components/GoogleAnalytics'), { ssr: false })
-const CookieBanner = dynamic(() => import('@/components/CookieBanner'), { ssr: false })
-const MobileStickyCTA = dynamic(() => import('@/components/layout/MobileStickyCTA'), { ssr: false })
+const GoogleAnalytics = dynamic(() => import('@/components/GoogleAnalytics'))
+const CookieBanner = dynamic(() => import('@/components/CookieBanner'))
+const MobileStickyCTA = dynamic(() => import('@/components/layout/MobileStickyCTA'))
 import { ToastProvider } from '@/components/Toast'
 import ScrollProgress from '@/components/ui/ScrollProgress'
 
