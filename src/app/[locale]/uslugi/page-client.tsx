@@ -212,7 +212,7 @@ export function UslugiClient() {
                 <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full
                                  transition-transform duration-700 bg-gradient-to-r
                                  from-transparent via-white/20 to-transparent" aria-hidden="true" />
-                <span className="relative z-10 flex items-center gap-2 drop-shadow-[0_1px_2px_rgba(5,5,8,0.5)]">
+                <span className="relative z-10 flex items-center gap-2">
                   {commonT('cta.booking')}
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                        stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"

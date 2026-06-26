@@ -369,11 +369,11 @@ function DesktopDropdown({ item, pathname, t }: { item: NavItem; pathname: strin
                 href="/kontakty/"
                 data-analytics-booking="header-dropdown"
                 className="group flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl text-sm font-medium tracking-wide
-                           bg-gradient-to-r from-gold/[0.12] to-gold/[0.06] text-gold
+                           bg-gradient-to-r from-gold/[0.12] to-gold/[0.06] text-primary hover:text-gold
                            hover:from-gold/[0.18] hover:to-gold/[0.1] active:from-gold/[0.08]
                            transition-all duration-300"
               >
-                <span className="drop-shadow-[0_1px_2px_rgba(5,5,8,0.5)]">{t('cta.booking')}</span>
+                <span>{t('cta.booking')}</span>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" strokeWidth="2" strokeLinecap="round"
                      strokeLinejoin="round"
@@ -633,7 +633,7 @@ export default function Header() {
                 <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full
                                  transition-transform duration-700 bg-gradient-to-r
                                  from-transparent via-white/20 to-transparent" aria-hidden="true" />
-                <span className="relative z-10 flex items-center gap-2 drop-shadow-[0_1px_2px_rgba(5,5,8,0.5)]">
+                <span className="relative z-10 flex items-center gap-2">
                   {t('cta.booking')}
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                        stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
@@ -782,7 +782,7 @@ export default function Header() {
                     <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full
                                      transition-transform duration-700 bg-gradient-to-r
                                      from-transparent via-white/20 to-transparent" aria-hidden="true" />
-                    <span className="relative z-10 flex items-center gap-2 drop-shadow-[0_1px_2px_rgba(5,5,8,0.5)]">
+                    <span className="relative z-10 flex items-center gap-2">
                       {t('cta.booking')}
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                            stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"

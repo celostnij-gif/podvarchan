@@ -127,7 +127,7 @@ export function ClientAboutPage() {
                                hover:brightness-110 hover:shadow-lg hover:-translate-y-0.5
                                transition-all duration-400 text-sm md:text-base"
                   >
-                    <span className="drop-shadow-[0_1px_2px_rgba(5,5,8,0.5)]">{commonT('bookingCta')}</span>
+                    <span>{commonT('bookingCta')}</span>
                   </Link>
                 </AnimatedText>
               </div>
@@ -502,7 +502,7 @@ export function ClientAboutPage() {
                            hover:brightness-110 hover:shadow-lg hover:-translate-y-0.5
                            transition-all duration-400 text-base"
               >
-                <span className="drop-shadow-[0_1px_2px_rgba(5,5,8,0.5)]">{t('cta')}</span>
+                <span>{t('cta')}</span>
               </Link>
             </AnimatedText>
           </div>

@@ -109,7 +109,7 @@ function PricingCard({
             : 'bg-bg-elevated border border-border-light text-text-primary hover:bg-gold/10 hover:border-gold/30 hover:text-gold'
         } active:translate-y-0`}
       >
-        <span className={highlighted ? 'drop-shadow-[0_1px_2px_rgba(5,5,8,0.5)]' : ''}>
+        <span>
           {t(index === 0 ? 'cardCtaFree' : 'cardCtaOther')}
         </span>
       </Link>
@@ -248,7 +248,7 @@ export function TsenyClient({ schemas }: TsenyClientProps) {
                 <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full
                                  transition-transform duration-700 bg-gradient-to-r
                                  from-transparent via-white/20 to-transparent" />
-                <span className="relative z-10 flex items-center gap-2.5 drop-shadow-[0_1px_2px_rgba(5,5,8,0.5)]">
+                <span className="relative z-10 flex items-center gap-2.5">
                   {t('ctaButton')}
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                        stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"

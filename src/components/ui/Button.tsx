@@ -197,7 +197,7 @@ export default function Button({
 
       {/* Label (hidden while loading — only show spinner) */}
       {!loading && children && (
-        <span className={variant === 'primary' ? 'drop-shadow-[0_1px_2px_rgba(5,5,8,0.5)]' : ''}>
+        <span>
           {children}
         </span>
       )}
