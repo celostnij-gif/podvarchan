@@ -43,7 +43,7 @@ function highlightMatch(text: string, query: string): React.ReactNode {
   )
 }
 
-export function ClientSearchPage({ locale, blogPosts, services, translations }: Props) {
+export function ClientSearchPage({ locale: _locale, blogPosts, services, translations }: Props) {
   const t = useTranslations('search')
   const commonT = useTranslations('common')
   const [query, setQuery] = useState('')

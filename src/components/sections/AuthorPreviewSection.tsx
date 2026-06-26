@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/routing'
 import { AnimatedSection, SectionContainer } from '@/components/ui'
@@ -29,10 +30,8 @@ export default function AuthorPreviewSection() {
             <div className="relative w-64 h-64 md:w-80 md:h-80 rounded-2xl overflow-hidden
                             bg-gradient-to-br from-gold/10 to-gold/5 border border-gold/10
                             shadow-[0_0_30px_rgba(201,169,110,0.08)]">
-              <img
+              <Image
                 src="/images/author/preview-320.webp"
-                srcSet="/images/author/preview-320.webp 320w, /images/author/preview-640.webp 640w"
-                sizes="(max-width: 768px) 256px, 320px"
                 alt={t('photoAlt')}
                 className="w-full h-full object-cover"
                 loading="lazy"

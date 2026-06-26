@@ -12,15 +12,6 @@ import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 import { Link } from '@/i18n/routing'
 import ServiceCTA from '@/components/blog/ServiceCTA'
 import { getServiceSlugByCategory } from '@/lib/serviceMapping'
-/* ── BlogCategory from messages has all localized fields ── */
-interface MessagesBlogCategory {
-  slug: string
-  name: string
-  description: string
-  metaDescription: string
-  keywords: string[]
-  serviceSlug: string
-}
 
 interface RelatedPost {
   slug: string
@@ -73,7 +64,6 @@ export function ClientBlogPost({ title, body, date, category, categorySlug, auth
 
   /* ── Service CTA data from category mapping ── */
   const servicesData = (messages?.servicesData as Array<{ slug: string; title: string; description: string }>) ?? []
-  const blogCategories = (messages?.blogCategories as MessagesBlogCategory[]) ?? []
   const serviceSlug = getServiceSlugByCategory(categorySlug)
   const serviceData = serviceSlug ? servicesData.find(s => s.slug === serviceSlug) : null
 
