@@ -2,10 +2,7 @@
 
 import { useTranslations } from 'next-intl'
 import dynamic from 'next/dynamic'
-
-const Hero = dynamic(() => import('@/components/sections/Hero'), {
-  loading: () => <div className="min-h-[90vh] md:min-h-screen" aria-hidden="true" />,
-})
+import Hero from '@/components/sections/Hero'
 const ProblemsSection = dynamic(() => import('@/components/sections/ProblemsSection'), {
   loading: () => <div className="h-48 md:h-64" aria-hidden="true" />,
 })
