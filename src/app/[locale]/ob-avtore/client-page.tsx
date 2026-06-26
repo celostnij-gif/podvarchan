@@ -60,14 +60,8 @@ export function ClientAboutPage() {
   }))
   const specializationItems = t.raw('specializationItems') as string[]
   const messages = useMessages()
-  const diplomaItems = (messages as any)?.diplomaData?.items as Array<{
-    id: number
-    title: string
-    organization: string
-    year: string
-    description: string
-    image: string
-  }> | undefined
+  const messagesWithDiploma = messages as unknown as { diplomaData?: { items: Array<{ id: number; title: string; organization: string; year: string; description: string; image: string }> } }
+  const diplomaItems = messagesWithDiploma.diplomaData?.items
 
   return (
     <>

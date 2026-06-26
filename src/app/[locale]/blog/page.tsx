@@ -55,7 +55,6 @@ export default function BlogPage() {
 
   const isEmptyFiltered = activeCategory && filteredPosts.length === 0
   const hasMore = gridPosts.length > visiblePosts.length
-  const totalToShow = visiblePosts.length + (featuredPost ? 1 : 0)
 
   return (
     <>

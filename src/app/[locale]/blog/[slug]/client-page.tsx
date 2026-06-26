@@ -76,7 +76,6 @@ export function ClientBlogPost({ title, body, date, category, categorySlug, auth
   const blogCategories = (messages?.blogCategories as MessagesBlogCategory[]) ?? []
   const serviceSlug = getServiceSlugByCategory(categorySlug)
   const serviceData = serviceSlug ? servicesData.find(s => s.slug === serviceSlug) : null
-  const categoryData = blogCategories.find(c => c.slug === categorySlug)
 
   return (
     <>

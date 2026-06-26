@@ -30,7 +30,7 @@ interface Props {
 /* ── Symptoms from messages (localized) ── */
 
 function getSymptoms(messages: Record<string, unknown>, slug: string): Array<{ icon: string; title: string; desc: string }> {
-  const allSymptoms = (messages as any)?.serviceSymptoms as Record<string, Array<{ icon: string; title: string; desc: string }>> | undefined
+  const allSymptoms = (messages as unknown as Record<string, Record<string, Array<{ icon: string; title: string; desc: string }>>>)?.['serviceSymptoms'] as Record<string, Array<{ icon: string; title: string; desc: string }>> | undefined
   return allSymptoms?.[slug] ?? allSymptoms?.['gipnoterapiya-onlayn'] ?? []
 }
 /* ── Related services mapping ── */
