@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { SITE, SERVICES, BLOG_CATEGORIES, STATIC_PAGES } from '@/constants'
 import { getAllBlogPosts, getPublishedServices, getPublishedBlogPosts, getPublishedBlogCategories } from '@/lib/content'
+import { SERVICE_SLUG_UK, BLOG_SLUG_UK, CATEGORY_SLUG_UK } from '@/lib/slugMapping'
 
 const BASE = SITE.url
 
@@ -86,8 +87,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const servicePriorityMap: Record<number, number> = { 1: 0.8, 2: 0.7, 3: 0.6 }
     for (const service of SERVICES) {
       const priority = servicePriorityMap[service.priority] ?? 0.6
-      const [ru, uk] = makeLocalized(`/uslugi/${service.slug}/`, priority, 'monthly')
-      entries.push(ru, uk)
+      const ruUrl = `${BASE}/ru/uslugi/${service.slug}/`
+      const ukSlug = SERVICE_SLUG_UK[service.slug] ?? service.slug
+      const ukUrl = `${BASE}/uk/uslugi/${ukSlug}/`
+      const date = new Date()
+      const alternates = { ru: ruUrl, uk: ukUrl }
+      entries.push({ url: ruUrl, alternates: { languages: alternates }, priority, changeFrequency: 'monthly', lastModified: date })
+      entries.push({ url: ukUrl, alternates: { languages: alternates }, priority, changeFrequency: 'monthly', lastModified: date })
     }
   }
 
@@ -101,8 +107,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   } catch {
     for (const category of BLOG_CATEGORIES) {
-      const [ru, uk] = makeLocalized(`/blog/kategoriya/${category.slug}/`, 0.6, 'weekly')
-      entries.push(ru, uk)
+      const ruUrl = `${BASE}/ru/blog/kategoriya/${category.slug}/`
+      const ukCat = CATEGORY_SLUG_UK[category.slug] ?? category.slug
+      const ukUrl = `${BASE}/uk/blog/kategoriya/${ukCat}/`
+      const date = new Date()
+      const alternates = { ru: ruUrl, uk: ukUrl }
+      entries.push({ url: ruUrl, alternates: { languages: alternates }, priority: 0.6, changeFrequency: 'weekly', lastModified: date })
+      entries.push({ url: ukUrl, alternates: { languages: alternates }, priority: 0.6, changeFrequency: 'weekly', lastModified: date })
     }
   }
 
@@ -119,8 +130,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const blogPosts = getAllBlogPosts()
     for (const post of blogPosts) {
       const modDate = new Date(post.dateModified ?? post.datePublished)
-      const [ru, uk] = makeLocalized(`/blog/${post.slug}/`, 0.8, 'weekly', modDate)
-      entries.push(ru, uk)
+      const ruUrl = `${BASE}/ru/blog/${post.slug}/`
+      const ukSlug = BLOG_SLUG_UK[post.slug] ?? post.slug
+      const ukUrl = `${BASE}/uk/blog/${ukSlug}/`
+      const alternates = { ru: ruUrl, uk: ukUrl }
+      entries.push({ url: ruUrl, alternates: { languages: alternates }, priority: 0.8, changeFrequency: 'weekly', lastModified: modDate })
+      entries.push({ url: ukUrl, alternates: { languages: alternates }, priority: 0.8, changeFrequency: 'weekly', lastModified: modDate })
     }
   }
 

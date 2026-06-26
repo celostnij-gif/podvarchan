@@ -1,5 +1,6 @@
 import type { BlogPost } from '@/types'
 import { BLOG_POSTS, BLOG_POST_METAS, BLOG_POSTS_UK, BLOG_POST_METAS_UK } from '@/content/blog'
+import { resolveBlogSlug } from '@/lib/slugMapping'
 
 /**
  * Возвращает массив статей для указанной локали.
@@ -19,7 +20,8 @@ function getMetas(locale?: string): Omit<BlogPost, 'body'>[] {
  * Загружает контентную статью блога по slug и локали.
  */
 export function getBlogPost(slug: string, locale?: string): BlogPost | undefined {
-  return getPosts(locale).find((post) => post.slug === slug)
+  const resolved = resolveBlogSlug(slug)
+  return getPosts(locale).find((post) => post.slug === resolved)
 }
 
 /**

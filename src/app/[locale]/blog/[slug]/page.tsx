@@ -3,6 +3,7 @@ import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getBlogPost, getAllBlogSlugs, getAllBlogPosts, formatDate } from '@/lib/content'
 import { articleSchema } from '@/lib/schema'
 import { ClientBlogPost } from './client-page'
+import { BLOG_SLUG_UK, resolveBlogSlug } from '@/lib/slugMapping'
 
 export const dynamicParams = false
 
@@ -11,12 +12,14 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  const slugs = getAllBlogSlugs()
-  return slugs.map((slug) => ({ slug }))
+  const ruSlugs = getAllBlogSlugs()
+  const ukSlugs = ruSlugs.map((s) => BLOG_SLUG_UK[s]).filter(Boolean)
+  return [...ruSlugs, ...ukSlugs].map((slug) => ({ slug }))
 }
 
 export async function generateMetadata({ params }: Props) {
-  const { slug, locale } = await params
+  const { slug: rawSlug, locale } = await params
+  const slug = resolveBlogSlug(rawSlug)
   const post = getBlogPost(slug, locale)
   if (!post) return {}
 
@@ -35,7 +38,8 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export default async function BlogPostPage({ params }: Props) {
-  const { slug, locale } = await params
+  const { slug: rawSlug, locale } = await params
+  const slug = resolveBlogSlug(rawSlug)
   const post = getBlogPost(slug, locale)
   if (!post) notFound()
 

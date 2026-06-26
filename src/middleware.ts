@@ -1,3 +1,12 @@
+import {
+  SERVICE_SLUG_UK,
+  SERVICE_SLUG_FROM_UK,
+  BLOG_SLUG_UK,
+  BLOG_SLUG_FROM_UK,
+  CATEGORY_SLUG_UK,
+  CATEGORY_SLUG_FROM_UK,
+} from '@/lib/slugMapping'
+
 import createMiddleware from 'next-intl/middleware'
 import { NextRequest, NextResponse } from 'next/server'
 import { routing } from './i18n/routing'
@@ -19,6 +28,66 @@ export default function middleware(request: NextRequest) {
     const url = new URL(request.url)
     url.protocol = 'https:'
     return NextResponse.redirect(url.toString(), 301)
+  }
+
+  // ── UK slug redirects ──
+  const segments = pathname.split('/').filter(Boolean)
+  if (segments.length >= 3) {
+    const [locale, section, ...rest] = segments
+
+    if (locale === 'uk' && section === 'uslugi') {
+      const slug = rest.join('/')
+      const ukSlug = SERVICE_SLUG_UK[slug]
+      if (ukSlug && ukSlug !== slug) {
+        request.nextUrl.pathname = `/uk/uslugi/${ukSlug}/`
+        return NextResponse.redirect(request.nextUrl, 301)
+      }
+    }
+
+    if (locale === 'uk' && section === 'blog') {
+      if (rest[0] === 'kategoriya' && rest[1]) {
+        const cat = rest[1]
+        const ukCat = CATEGORY_SLUG_UK[cat]
+        if (ukCat && ukCat !== cat) {
+          request.nextUrl.pathname = `/uk/blog/kategoriya/${ukCat}/`
+          return NextResponse.redirect(request.nextUrl, 301)
+        }
+      } else if (rest.length === 1) {
+        const slug = rest[0]
+        const ukSlug = BLOG_SLUG_UK[slug]
+        if (ukSlug && ukSlug !== slug) {
+          request.nextUrl.pathname = `/uk/blog/${ukSlug}/`
+          return NextResponse.redirect(request.nextUrl, 301)
+        }
+      }
+    }
+
+    if (locale === 'ru' && section === 'uslugi') {
+      const slug = rest.join('/')
+      const ruSlug = SERVICE_SLUG_FROM_UK[slug]
+      if (ruSlug) {
+        request.nextUrl.pathname = `/ru/uslugi/${ruSlug}/`
+        return NextResponse.redirect(request.nextUrl, 301)
+      }
+    }
+
+    if (locale === 'ru' && section === 'blog') {
+      if (rest[0] === 'kategoriya' && rest[1]) {
+        const cat = rest[1]
+        const ruCat = CATEGORY_SLUG_FROM_UK[cat]
+        if (ruCat) {
+          request.nextUrl.pathname = `/ru/blog/kategoriya/${ruCat}/`
+          return NextResponse.redirect(request.nextUrl, 301)
+        }
+      } else if (rest.length === 1) {
+        const slug = rest[0]
+        const ruSlug = BLOG_SLUG_FROM_UK[slug]
+        if (ruSlug) {
+          request.nextUrl.pathname = `/ru/blog/${ruSlug}/`
+          return NextResponse.redirect(request.nextUrl, 301)
+        }
+      }
+    }
   }
 
   if (

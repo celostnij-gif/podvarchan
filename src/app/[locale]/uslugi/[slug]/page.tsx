@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { getMessages } from 'next-intl/server'
 import { SERVICES } from '@/constants'
+import { SERVICE_SLUG_UK, resolveServiceSlug } from '@/lib/slugMapping'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { serviceSchema, faqSchema } from '@/lib/schema'
 import { ClientServicePage } from './client-page'
@@ -32,11 +33,16 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  return SERVICES.map((service) => ({ slug: service.slug }))
+  const ruSlugs = SERVICES.map((service) => ({ slug: service.slug }))
+  const ukSlugs = SERVICES.map((service) => ({ slug: SERVICE_SLUG_UK[service.slug] })).filter(
+    (s) => s.slug !== undefined
+  )
+  return [...ruSlugs, ...ukSlugs]
 }
 
 export async function generateMetadata({ params }: Props) {
-  const { slug, locale } = await params
+  const { slug: rawSlug, locale } = await params
+  const slug = resolveServiceSlug(rawSlug)
   const messages = await getMessages({ locale })
   const servicesData = (messages.servicesData as ServicesMessage[])
   const service = servicesData.find((s) => s.slug === slug)
@@ -52,7 +58,8 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export default async function ServicePage({ params }: Props) {
-  const { slug, locale } = await params
+  const { slug: rawSlug, locale } = await params
+  const slug = resolveServiceSlug(rawSlug)
   const messages = await getMessages({ locale })
   const servicesData = (messages.servicesData as ServicesMessage[])
   const service = servicesData.find((s) => s.slug === slug)
