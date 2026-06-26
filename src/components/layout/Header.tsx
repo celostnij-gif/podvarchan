@@ -610,7 +610,7 @@ export default function Header() {
             {/* ── Desktop Navigation ── */}
             <nav className="hidden lg:flex items-center" aria-label={t('nav.main')}>
               <ul className="flex items-center gap-0.5">
-                {MAIN_NAV.map((item) => (
+                {MAIN_NAV.filter(item => item.href !== '/search/').map((item) => (
                   <DesktopDropdown key={item.href} item={item} pathname={pathname} t={t} />
                 ))}
               </ul>
@@ -622,7 +622,7 @@ export default function Header() {
               <Link
                 href="/kontakty/"
                 data-analytics-booking="header-desktop"
-                className="group relative inline-flex items-center justify-center px-5 py-2.5 rounded-full
+                className="group relative inline-flex items-center justify-center px-4 py-2 rounded-full
                            text-sm font-semibold tracking-wide overflow-hidden
                            bg-gradient-to-r from-gold to-gold-light text-bg-deep
                            shadow-[0_0_20px_rgba(201,169,110,0.15)]
@@ -643,11 +643,43 @@ export default function Header() {
                   </svg>
                 </span>
               </Link>
+              <Link
+                href="/search/"
+                className="relative group flex items-center justify-center w-9 h-9 rounded-xl
+                           text-text-muted hover:text-text-primary hover:bg-white/[0.06]
+                           active:bg-white/[0.04] transition-all duration-200"
+                aria-label={t('nav.search')}
+              >
+                <Icon name="search" size={18} />
+                <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap
+                                 text-[11px] font-medium px-2 py-1 rounded-md
+                                 bg-bg-elevated text-text-primary border border-border-base
+                                 opacity-0 group-hover:opacity-100 transition-opacity duration-200
+                                 pointer-events-none z-50 shadow-lg">
+                  {t('nav.search')}
+                </span>
+              </Link>
             </div>
 
             {/* ── Mobile Right Side — LangSwitcher + Burger ── */}
             <div className="flex lg:hidden items-center gap-1.5">
               <LangSwitcher />
+              <Link
+                href="/search/"
+                className="relative group flex items-center justify-center w-9 h-9 rounded-xl
+                           text-text-muted hover:text-text-primary hover:bg-white/[0.06]
+                           active:bg-white/[0.04] transition-all duration-200"
+                aria-label={t('nav.search')}
+              >
+                <Icon name="search" size={18} />
+                <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap
+                                 text-[11px] font-medium px-2 py-1 rounded-md
+                                 bg-bg-elevated text-text-primary border border-border-base
+                                 opacity-0 group-hover:opacity-100 transition-opacity duration-200
+                                 pointer-events-none z-50 shadow-lg">
+                  {t('nav.search')}
+                </span>
+              </Link>
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
                 className="relative w-10 h-10 flex items-center justify-center
@@ -717,7 +749,7 @@ export default function Header() {
 
               <nav className="px-4 pb-8" aria-label={t('nav.mobile')}>
                 <div className="space-y-1">
-                  {MAIN_NAV.map((item, idx) => (
+                  {MAIN_NAV.filter(item => item.href !== '/search/').map((item, idx) => (
                     <MobileNavItem
                       key={item.href}
                       item={item}
