@@ -2144,5 +2144,18 @@
     "moreOnTopic": "Читайте также по теме",
     "showMore": "Показать ещё ({count})",
     "readMoreLink": "Записаться на консультацию по этому направлению"
-  }
+  },
+  "search": {
+    "metaTitle": "Поиск",
+    "metaDescription": "Поиск по сайту — статьи и услуги гипнотерапии онлайн",
+    "heading": "Поиск",
+    "placeholder": "Введите запрос...",
+    "noResults": "Ничего не найдено. Попробуйте изменить запрос.",
+    "blogHeading": "Статьи",
+    "servicesHeading": "Услуги",
+    "readingTime": "Чтение:",
+    "minutes": "мин",
+    "breadcrumb": "Поиск",
+    "moreResults": "ещё результатов"
+}
 }
