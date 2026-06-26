@@ -155,3 +155,43 @@ Body: { model: "@cf/...", messages: [...], max_tokens: N }
 ```
 
 Модели указывать явно (full ID). Эндпоинт `/v1/models` не поддерживается (405).
+
+## 8. Sitemap и robots.txt (2026-06-26)
+
+### 8.1. Генерация robots.txt
+
+`robots.txt` генерируется **динамически** через Next.js Metadata Route API: `src/app/robots.ts`.
+Статический файл `public/robots.txt` **не нужен** — он перекроет динамическую генерацию.
+
+Строка 31 в `robots.ts`:
+```ts
+sitemap: `${SITE.url}/sitemap.xml`,
+```
+Автоматически добавляет `Sitemap: https://podvarchan.com/sitemap.xml` в `/robots.txt`.
+
+`middleware.ts` (строка 30) исключает `/robots.txt` из обработки — путь проходит к Next.js-роуту.
+
+### 8.2. Карта сайта (sitemap.xml)
+
+Sitemap генерируется Next.js (страницы из App Router). На 2026-06-26 содержит **132 URL** (66 уникальных страниц x 2 языка).
+
+**Группы страниц:**
+| Раздел | URL на язык |
+|---|---|
+| `/` — главная | 1 |
+| `/uslugi/` — услуги (категория) | 1 |
+| `/uslugi/*` — детальные услуги | 18 |
+| `/blog/` — блог (список) | 1 |
+| `/blog/kategoriya/*` — категории блога | 7 |
+| `/blog/*` — статьи | 20 |
+| `/ob-avtore/` — об авторе | 1 |
+| `/metod/` — метод | 1 |
+| `/tseny/` — цены | 1 |
+| `/faq/` — FAQ | 1 |
+| `/kontakty/` — контакты | 1 |
+| `/politika-konfidentsialnosti/` — политика | 1 |
+| `/disclaimer/` — дисклеймер | 1 |
+
+### 8.3. Свежий слепок ссылок
+
+Последний снепшот всех URL с live-версии сохранён в `%TEMP%\live-urls-podvarchan.txt` (132 URL, отсортированы, без дублей).
