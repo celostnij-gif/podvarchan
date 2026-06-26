@@ -54,6 +54,13 @@ export function serviceSchema(params: ServiceSchemaParams): Record<string, unkno
       name: locale === 'uk' ? `Консультація: ${name}` : `Консультация: ${name}`,
       availability: 'https://schema.org/OnlineOnly',
       url: cleanUrl(SITE.url, localePrefix, url),
+      priceSpecification: {
+        '@type': 'PriceSpecification',
+        priceCurrency: 'USD',
+        description: locale === 'uk'
+          ? 'Ціни на консультації — на сторінці цін'
+          : 'Цены на консультации — на странице цен',
+      },
     },
 
   }
