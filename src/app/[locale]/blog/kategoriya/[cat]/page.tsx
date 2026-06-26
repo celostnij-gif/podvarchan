@@ -5,6 +5,8 @@ import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getBlogPostMetasByCategory } from '@/lib/content-metas'
 import { ClientBlogCategory } from './client-page'
 
+
+export const dynamicParams = false
 /* ── Local type for blog category data from messages ── */
 interface BlogCategoryMsg {
   slug: string

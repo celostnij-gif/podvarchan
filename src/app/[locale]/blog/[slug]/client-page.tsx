@@ -176,8 +176,9 @@ export function ClientBlogPost({ title, body, date, category, categorySlug, auth
               <ServiceCTA
                 serviceName={serviceData.title}
                 serviceSlug={serviceSlug!}
-                headline={t('ctaService', { service: categoryData?.name || serviceData.title })}
-                description={t('ctaServiceDescription', { serviceName: (categoryData?.name || serviceData.title).toLowerCase() })}
+                headline={t('ctaService', { service: serviceData.title })}
+
+                description={t('ctaServiceDescription', { serviceName: serviceData.title.toLowerCase() })}
               />
             </AnimatedText>
           )}
