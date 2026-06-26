@@ -5,7 +5,7 @@ import {
   Brain, Heart, Moon, Lock, Flame, Shield, ShieldOff, Leaf, Compass,
   Smartphone, Feather, CloudSun, CloudFog, Sunrise, Waves, Zap,
   RefreshCw, Sunset, UserCheck, Sparkles, House, FileText, User,
-  BookOpen, HelpCircle, DollarSign, Phone, type LucideIcon,
+  BookOpen, HelpCircle, DollarSign, Phone, Search, type LucideIcon,
 } from 'lucide-react'
 
 /* ── Icon name → Lucide component map ── */
@@ -39,6 +39,7 @@ const iconMap: Record<string, LucideIcon> = {
   'help-circle': HelpCircle,
   'dollar-sign': DollarSign,
   phone: Phone,
+  search: Search,
 }
 
 /* ── Props ── */

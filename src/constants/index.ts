@@ -38,6 +38,7 @@ export const MAIN_NAV: NavItem[] = [
   { label: 'Метод', href: '/metod/' },
   { label: 'FAQ', href: '/faq/' },
   { label: 'Цены', href: '/tseny/' },
+  { label: 'Поиск', href: '/search/' },
 ]
 
 /* ── Services ── */
