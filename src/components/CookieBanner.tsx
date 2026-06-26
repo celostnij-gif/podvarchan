@@ -105,7 +105,7 @@ export default function CookieBanner() {
                 onClick={handleAccept}
                 className={[
                   'px-5 py-2 text-xs font-semibold rounded-lg',
-                  'text-bg-deep bg-gold hover:bg-gold-light',
+                  'text-bg-deep hover:text-gold-dark bg-gold hover:bg-gold-light',
                   'shadow-lg shadow-gold/20',
                   'transition-all duration-200',
                   'active:scale-95',

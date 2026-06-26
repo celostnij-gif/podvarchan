@@ -23,7 +23,7 @@ const variantStyles: Record<ButtonVariant, string> = {
   primary:
     'bg-gold text-bg-deep font-semibold tracking-wide ' +
     'shadow-glow-gold ' +
-    'hover:brightness-110 hover:shadow-lg hover:-translate-y-0.5 ' +
+    'hover:brightness-110 hover:text-gold-dark hover:shadow-lg hover:-translate-y-0.5 ' +
     'active:brightness-95 active:translate-y-0 ' +
     'focus-visible:ring-2 focus-visible:ring-gold-light focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base ' +
     'disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:brightness-100 disabled:hover:shadow-glow-gold disabled:hover:translate-y-0',

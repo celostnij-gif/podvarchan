@@ -209,7 +209,7 @@ export default function ProblemsSection() {
               data-analytics-booking="problems-cta"
               className="group relative inline-flex items-center justify-center px-7 py-3 rounded-full
                          text-sm font-semibold tracking-wide overflow-hidden
-                         bg-gradient-to-r from-green to-green-light text-bg-deep
+                         bg-gradient-to-r from-green to-green-light text-bg-deep hover:text-gold-dark
                          shadow-[0_0_20px_rgba(45,106,79,0.15)]
                          hover:shadow-[0_0_30px_rgba(45,106,79,0.25)]
                          hover:-translate-y-0.5 active:translate-y-0

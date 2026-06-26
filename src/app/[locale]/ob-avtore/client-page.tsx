@@ -123,7 +123,7 @@ export function ClientAboutPage() {
                   <Link
                     href="/kontakty/"
                     className="inline-flex items-center justify-center px-7 py-3 md:px-9 md:py-3.5 rounded-full
-                               bg-gold text-bg-deep font-semibold tracking-wide shadow-glow-gold
+                               bg-gold text-bg-deep hover:text-gold-dark font-semibold tracking-wide shadow-glow-gold
                                hover:brightness-110 hover:shadow-lg hover:-translate-y-0.5
                                transition-all duration-400 text-sm md:text-base"
                   >
@@ -498,7 +498,7 @@ export function ClientAboutPage() {
               <Link
                 href="/kontakty/"
                 className="inline-flex items-center justify-center px-9 py-3.5 rounded-full
-                           bg-gold text-bg-deep font-semibold tracking-wide shadow-glow-gold
+                           bg-gold text-bg-deep hover:text-gold-dark font-semibold tracking-wide shadow-glow-gold
                            hover:brightness-110 hover:shadow-lg hover:-translate-y-0.5
                            transition-all duration-400 text-base"
               >

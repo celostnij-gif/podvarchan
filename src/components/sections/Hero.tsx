@@ -264,7 +264,7 @@ export default function Hero() {
               data-analytics-booking="hero-primary"
               className="group relative inline-flex items-center justify-center px-8 py-3.5 md:px-10 md:py-4
                          rounded-full text-sm md:text-base font-semibold tracking-wide overflow-hidden
-                         bg-gradient-to-r from-gold to-gold-light text-bg-deep
+                         bg-gradient-to-r from-gold to-gold-light text-bg-deep hover:text-gold-dark
                          shadow-[0_0_25px_rgba(201,169,110,0.15)]
                          hover:shadow-[0_0_40px_rgba(201,169,110,0.25)]
                          hover:-translate-y-0.5 active:translate-y-0

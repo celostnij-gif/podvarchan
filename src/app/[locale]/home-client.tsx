@@ -72,7 +72,7 @@ export default function HomeClient({ locale: _locale, schemas }: { locale: strin
                 href="/kontakty/"
                 data-analytics-booking="home-cta"
                 className="group relative inline-flex items-center justify-center px-7 py-3 md:px-9 md:py-3.5 rounded-full
-                           bg-gradient-to-r from-gold to-gold-light text-bg-deep font-semibold shadow-glow-gold
+                           bg-gradient-to-r from-gold to-gold-light text-bg-deep hover:text-gold-dark font-semibold shadow-glow-gold
                            hover:shadow-[0_0_40px_rgba(201,169,110,0.25)] hover:-translate-y-0.5
                            active:brightness-95 active:translate-y-0
                            transition-all duration-400 text-sm md:text-base gap-2.5 overflow-hidden"

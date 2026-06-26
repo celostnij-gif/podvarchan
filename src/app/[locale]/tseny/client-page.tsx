@@ -105,7 +105,7 @@ function PricingCard({
         data-analytics-booking="tseny-card"
         className={`mt-8 inline-flex items-center justify-center w-full px-6 py-3 rounded-full text-sm font-semibold tracking-wide transition-all duration-400 ${
           highlighted
-            ? 'bg-gradient-to-r from-gold to-gold-light text-bg-deep shadow-glow-gold hover:shadow-[0_0_30px_rgba(201,169,110,0.25)] hover:-translate-y-0.5'
+            ? 'bg-gradient-to-r from-gold to-gold-light text-bg-deep hover:text-gold-dark shadow-glow-gold hover:shadow-[0_0_30px_rgba(201,169,110,0.25)] hover:-translate-y-0.5'
             : 'bg-bg-elevated border border-border-light text-text-primary hover:bg-gold/10 hover:border-gold/30 hover:text-gold'
         } active:translate-y-0`}
       >
@@ -240,7 +240,7 @@ export function TsenyClient({ schemas }: TsenyClientProps) {
                 href="/kontakty/"
                 data-analytics-booking="tseny-cta"
                 className="group relative inline-flex items-center justify-center px-7 py-3 md:px-9 md:py-3.5 rounded-full
-                           bg-gradient-to-r from-gold to-gold-light text-bg-deep font-semibold tracking-wide shadow-glow-gold
+                           bg-gradient-to-r from-gold to-gold-light text-bg-deep hover:text-gold-dark font-semibold tracking-wide shadow-glow-gold
                            hover:shadow-[0_0_40px_rgba(201,169,110,0.25)] hover:-translate-y-0.5
                            active:brightness-95 active:translate-y-0
                            transition-all duration-400 text-sm md:text-base gap-2.5 overflow-hidden"
