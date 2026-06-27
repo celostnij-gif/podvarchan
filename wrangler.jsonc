@@ -29,7 +29,8 @@
 	},
 
 	"migrations": [
-		{ "tag": "v1", "deleted_classes": ["CounterAgent"] }
+		{ "tag": "v1", "new_classes": ["CounterAgent"] },
+		{ "tag": "v2", "deleted_classes": ["CounterAgent"] }
 	],
 	"workers_dev": true,
 
