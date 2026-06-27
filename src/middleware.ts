@@ -65,24 +65,25 @@ export default function middleware(request: NextRequest) {
     if (locale === 'ru' && section === 'uslugi') {
       const slug = rest.join('/')
       const ruSlug = SERVICE_SLUG_FROM_UK[slug]
-      if (ruSlug) {
+      if (ruSlug && ruSlug !== slug) {
         request.nextUrl.pathname = `/ru/uslugi/${ruSlug}/`
         return NextResponse.redirect(request.nextUrl, 301)
       }
     }
 
+
     if (locale === 'ru' && section === 'blog') {
       if (rest[0] === 'kategoriya' && rest[1]) {
         const cat = rest[1]
         const ruCat = CATEGORY_SLUG_FROM_UK[cat]
-        if (ruCat) {
+        if (ruCat && ruCat !== cat) {
           request.nextUrl.pathname = `/ru/blog/kategoriya/${ruCat}/`
           return NextResponse.redirect(request.nextUrl, 301)
         }
       } else if (rest.length === 1) {
         const slug = rest[0]
         const ruSlug = BLOG_SLUG_FROM_UK[slug]
-        if (ruSlug) {
+        if (ruSlug && ruSlug !== slug) {
           request.nextUrl.pathname = `/ru/blog/${ruSlug}/`
           return NextResponse.redirect(request.nextUrl, 301)
         }

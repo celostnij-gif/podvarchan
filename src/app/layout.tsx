@@ -80,6 +80,8 @@ export default async function RootLayout({
     >
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preload" as="image" href="/images/hero-bg.webp" />
+        <link rel="preload" as="image" href="/images/hero-bg-mobile.webp" media="(max-width: 768px)" />
       <body
         className="bg-bg-base text-text-primary font-body antialiased flex flex-col min-h-screen"
         suppressHydrationWarning

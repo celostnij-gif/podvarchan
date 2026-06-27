@@ -18,6 +18,24 @@ interface KVNamespace {
   }): Promise<{ keys: { name: string; expiration?: number; metadata?: unknown }[]; list_complete: boolean; cursor?: string }>
 }
 
+/* ── Minimal DurableObjectNamespace type (avoids @cloudflare/workers-types dep) ── */
+interface DurableObjectNamespace<T extends object = object> {
+  idFromName(name: string): DurableObjectId;
+  idFromString(id: string): DurableObjectId;
+  get(id: DurableObjectId): T;
+  newUniqueId(options?: { jurisdiction?: string }): DurableObjectId;
+}
+interface DurableObjectId {
+  name?: string;
+  toString(): string;
+  equals(other: DurableObjectId): boolean;
+}
+interface DurableObjectState {
+  waitUntil(promise: Promise<unknown>): void;
+  id: DurableObjectId;
+  storage: { get<T = unknown>(key: string): Promise<T | undefined>; put<T>(key: string, value: T): Promise<void>; delete(key: string): Promise<boolean>; list<T = unknown>(options?: { limit?: number; prefix?: string }): Promise<Map<string, T>> };
+}
+
 interface KVNamespaceGetOptions<Expected> {
   type: 'text' | 'json' | 'arrayBuffer' | 'stream'
   cacheTtl?: number
@@ -32,6 +50,7 @@ interface __BaseEnv_CloudflareEnv {
 	CONTACT_EMAIL: string;
 	WORKER_SELF_REFERENCE: Fetcher /* podvarchan */;
 	RATE_LIMIT_KV?: KVNamespace;
+	CounterAgent: DurableObjectNamespace<import("./agents/counter").CounterAgent>;
 }
 
 // Secrets set via `wrangler secret put` (not in wrangler.jsonc vars)

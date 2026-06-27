@@ -1,8 +1,7 @@
 {
-	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "podvarchan",
-	"main": ".open-next/worker.js",
-	"compatibility_date": "2026-06-03",
+	"main": "wrangler/worker.ts",
+	"compatibility_date": "2026-06-27",
 	"compatibility_flags": [
 		"nodejs_compat",
 		"global_fetch_strictly_public"
@@ -31,6 +30,23 @@
 	"kv_namespaces": [
 		{ "binding": "RATE_LIMIT_KV", "id": "2f39c831b94841b3b30d7b6246c2a221" }
 	],
+
+	"durable_objects": {
+		"bindings": [
+			{
+				"name": "CounterAgent",
+				"class_name": "CounterAgent",
+			},
+		],
+	},
+
+	"migrations": [
+		{
+			"tag": "v1",
+			"new_sqlite_classes": ["CounterAgent"],
+		},
+	],
+
 
 	"vars": {
 		"NEXTJS_ENV": "production",
