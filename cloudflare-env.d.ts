@@ -50,7 +50,6 @@ interface __BaseEnv_CloudflareEnv {
 	CONTACT_EMAIL: string;
 	WORKER_SELF_REFERENCE: Fetcher /* podvarchan */;
 	RATE_LIMIT_KV?: KVNamespace;
-	CounterAgent: DurableObjectNamespace<import("./agents/counter").CounterAgent>;
 }
 
 // Secrets set via `wrangler secret put` (not in wrangler.jsonc vars)
