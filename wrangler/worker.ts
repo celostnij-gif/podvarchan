@@ -6,5 +6,8 @@
  * fetch handler and its own DOs (queue, cache, etc.). Agent classes
  * are added alongside.
  */
+// Agent classes
+export { CounterAgent } from "../src/agents/counter";
+
 // OpenNext worker — imports resolved by wrangler bundler at deploy time
 export { DOQueueHandler, DOShardedTagCache, BucketCachePurge, default } from "../.open-next/worker.js";
