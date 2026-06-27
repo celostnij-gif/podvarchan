@@ -120,10 +120,11 @@ export default function middleware(request: NextRequest) {
   // Edge cache for public HTML pages — Worker hits are dramatically reduced
   // s-maxage=86400: CDN caches 24h, serves cached even if Worker is cold
   // stale-while-revalidate=3600: serves stale while revalidating in background
+  // stale-if-error=604800: serve stale for 7d if Worker fails (mitigates free plan CPU limit)
   if (response.status < 300) {
     response.headers.set(
       'Cache-Control',
-      'public, s-maxage=86400, stale-while-revalidate=3600'
+      'public, s-maxage=86400, stale-while-revalidate=3600, stale-if-error=604800'
     )
   }
 
