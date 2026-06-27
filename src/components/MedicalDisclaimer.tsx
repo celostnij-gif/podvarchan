@@ -31,7 +31,7 @@ export default function MedicalDisclaimer({ type = 'general', className = '' }: 
   return (
     <div role="alert" className={`p-4 md:p-5 rounded-xl border border-amber-500/20 bg-amber-500/5 ${className}`}>
       <div className="flex items-start gap-3">
-        <span className="text-lg mt-0.5 flex-shrink-0" role="img" aria-hidden="true">
+        <span className="text-lg mt-0.5 shrink-0" role="img" aria-hidden="true">
           {config.icon}
         </span>
         <div>

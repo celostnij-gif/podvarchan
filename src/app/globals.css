@@ -1,88 +1,273 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* ══════════════════════════════════════════════════
+   Tailwind CSS v4 — import replaces @tailwind base/components/utilities
+   ══════════════════════════════════════════════════ */
+@import "tailwindcss";
 
-/* ============================================
-   DARK PREMIUM WELLNESS — Design System Tokens
-   ============================================ */
+/* ══════════════════════════════════════════════════
+   CUSTOM DESIGN TOKENS (replaces tailwind.config.ts)
+   ══════════════════════════════════════════════════ */
+@theme {
+  /* ── Backgrounds ── */
+  --color-bg-deep: #050508;
+  --color-bg-base: #0A0A12;
+  --color-bg-surface: #12121E;
+  --color-bg-elevated: #1A1A2E;
+  --color-bg-highlight: #24243A;
 
+  /* ── Gold accent — warmth, premium, candlelight ── */
+  --color-gold: #C9A96E;
+  --color-gold-light: #E3C47A;
+  --color-gold-dark: #A8874A;
+  --color-gold-muted: #9C7F4A;
+
+  /* ── Forest green — secondary, calm, nature ── */
+  --color-green: #2D6A4F;
+  --color-green-light: #40916C;
+  --color-green-deep: #1B4332;
+  --color-green-muted: #1D3F32;
+
+  /* ── Text ── */
+  --color-text-primary: #ECEBF2;
+  --color-text-secondary: #B0AEBF;
+  --color-text-muted: #7C7A8F;
+
+  /* ── Borders ── */
+  --color-border-base: #1E1E30;
+  --color-border-light: #2A2A42;
+
+  /* ── Status ── */
+  --color-error: #D4455A;
+  --color-error-bg: #2D1520;
+  --color-success: #40916C;
+  --color-success-bg: #152D20;
+  --color-warning: #C9A96E;
+  --color-warning-bg: #2D2515;
+
+  /* ── Typography ── */
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  /* ── Font sizes ── */
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.75rem;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.75rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 1.4;
+  --text-3xl: 2rem;
+  --text-3xl--line-height: 1.3;
+  --text-4xl: 2.5rem;
+  --text-4xl--line-height: 1.2;
+  --text-5xl: 3.5rem;
+  --text-5xl--line-height: 1.1;
+  --text-6xl: 4.5rem;
+  --text-6xl--line-height: 1.05;
+  --text-7xl: 5.5rem;
+  --text-7xl--line-height: 1.02;
+
+  /* ── Border radius ── */
+  --radius-sm: 0.25rem;
+  --radius: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-3xl: 3rem;
+  --radius-full: 9999px;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 12px 48px rgba(0, 0, 0, 0.45);
+  --shadow-glow-gold: 0 0 20px rgba(201, 169, 110, 0.15), 0 0 40px rgba(201, 169, 110, 0.05);
+  --shadow-glow-green: 0 0 20px rgba(45, 106, 79, 0.2);
+  --shadow-inner-glow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --shadow-inner-glow-strong: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+  /* ── Custom spacing ── */
+  --spacing-section: 7.5rem;
+  --spacing-section-sm: 4rem;
+  --spacing-gutter: 1.5rem;
+
+  /* ── Container max-widths ── */
+  --container-max: 75rem;
+  --container-sm: 56rem;
+  --container-xs: 40rem;
+
+  /* ── Animations ── */
+  --animate-fade-in: fade-in 0.6s ease-out forwards;
+  --animate-fade-in-up: fade-in-up 0.7s ease-out forwards;
+  --animate-fade-in-down: fade-in-down 0.5s ease-out forwards;
+  --animate-slide-in-left: slide-in-left 0.6s ease-out forwards;
+  --animate-slide-in-right: slide-in-right 0.6s ease-out forwards;
+  --animate-glow-pulse: glow-pulse 3s ease-in-out infinite;
+  --animate-scale-in: scale-in 0.4s ease-out forwards;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-shimmer: shimmer 3s linear infinite;
+  --animate-gradient-shift: gradient-shift 4s ease-in-out infinite;
+  --animate-glow-wander: glow-wander 60s ease-in-out infinite;
+  --animate-hero-orb: hero-orb 6s ease-in-out infinite;
+  --animate-rotate-slow: rotate-slow 120s linear infinite;
+  --animate-scroll-indicator: scroll-indicator 2.5s ease-in-out infinite;
+  --animate-gold-shimmer: gold-shimmer 10s ease-in-out infinite;
+
+  /* ── Background images ── */
+  --background-image-gradient-radial: radial-gradient(var(--tw-gradient-stops));
+  --background-image-gradient-subtle: linear-gradient(135deg, #12121E 0%, #0A0A12 100%);
+  --background-image-gradient-gold: linear-gradient(135deg, #C9A96E 0%, #A8874A 100%);
+  --background-image-gradient-glass: linear-gradient(135deg, rgba(18, 18, 30, 0.8) 0%, rgba(18, 18, 30, 0.2) 100%);
+  --background-image-gradient-hero: radial-gradient(ellipse at 50% 0%, rgba(201, 169, 110, 0.08) 0%, transparent 60%);
+
+  /* ── Transition durations ── */
+  --duration-5000: 5000ms;
+  --duration-10000: 10000ms;
+  --duration-20000: 20000ms;
+  --duration-30000: 30000ms;
+  --duration-40000: 40000ms;
+  --duration-60000: 60000ms;
+
+  /* ── Backdrop blur ── */
+  --blur-xs: 2px;
+}
+
+/* ══════════════════════════════════════════════════
+   KEYFRAMES (referenced by @theme --animate-*)
+   ══════════════════════════════════════════════════ */
+
+@keyframes fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes fade-in-up {
+  0% { opacity: 0; transform: translateY(24px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in-down {
+  0% { opacity: 0; transform: translateY(-16px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-left {
+  0% { opacity: 0; transform: translateX(-30px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slide-in-right {
+  0% { opacity: 0; transform: translateX(30px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(201, 169, 110, 0.12); }
+  50% { box-shadow: 0 0 35px rgba(201, 169, 110, 0.3); }
+}
+
+@keyframes scale-in {
+  0% { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* ── Wandering glow spots ──
+   7 multi-colored radial gradients wander independently across the full
+   screen. Colors shift between gold, teal, purple, blue, rose, amber, and
+   emerald — each spot drifts independently so the palette never repeats. */
+@keyframes glow-wander {
+  0% {
+    background-position:
+      15% 25%, 75% 55%, 45% 15%, 90% 75%, 30% 85%, 55% 40%, 10% 90%;
+  }
+  12% {
+    background-position:
+      65% 15%, 18% 70%, 80% 42%, 8% 30%, 88% 62%, 72% 15%, 40% 88%;
+  }
+  25% {
+    background-position:
+      82% 58%, 42% 8%, 12% 80%, 72% 90%, 5% 25%, 35% 68%, 85% 35%;
+  }
+  37% {
+    background-position:
+      35% 85%, 62% 30%, 60% 22%, 88% 10%, 18% 60%, 50% 92%, 22% 12%;
+  }
+  50% {
+    background-position:
+      20% 32%, 55% 82%, 30% 68%, 10% 55%, 78% 12%, 92% 48%, 68% 72%;
+  }
+  62% {
+    background-position:
+      72% 42%, 15% 22%, 88% 72%, 42% 95%, 58% 35%, 28% 62%, 82% 18%;
+  }
+  75% {
+    background-position:
+      42% 68%, 78% 35%, 22% 32%, 78% 22%, 15% 78%, 62% 88%, 95% 52%;
+  }
+  87% {
+    background-position:
+      25% 55%, 65% 88%, 52% 25%, 32% 72%, 92% 42%, 18% 32%, 75% 65%;
+  }
+  100% {
+    background-position:
+      15% 25%, 75% 55%, 45% 15%, 90% 75%, 30% 85%, 55% 40%, 10% 90%;
+  }
+}
+
+@keyframes hero-orb {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes rotate-slow {
+  0% { transform: rotate(0deg) scale(0.8); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes scroll-indicator {
+  0%, 100% { opacity: 0.3; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(6px); }
+}
+
+@keyframes gold-shimmer {
+  0%   { background-position: 0% 50%; }
+  25%  { background-position: 60% 40%; }
+  50%  { background-position: 100% 50%; }
+  75%  { background-position: 60% 60%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ══════════════════════════════════════════════════
+   BASE LAYER — Element HTML styles
+   ══════════════════════════════════════════════════ */
 @layer base {
-  /* ── Base font settings ── */
   html {
     font-size: 16px;
     text-rendering: optimizeLegibility;
     -webkit-text-size-adjust: 100%;
-  }
-
-  :root {
-    /* ── Backgrounds ── */
-    --color-bg-deep: #050508;
-    --color-bg-base: #0A0A12;
-    --color-bg-surface: #12121E;
-    --color-bg-elevated: #1A1A2E;
-    --color-bg-highlight: #24243A;
-
-    /* ── Gold accent ── */
-    --color-gold: #C9A96E;
-    --color-gold-light: #E3C47A;
-    --color-gold-dark: #A8874A;
-    --color-gold-muted: #9C7F4A;
-
-    /* ── Forest green ── */
-    --color-green: #2D6A4F;
-    --color-green-light: #40916C;
-    --color-green-deep: #1B4332;
-    --color-green-muted: #1D3F32;
-
-    /* ── Text ── */
-    --color-text-primary: #ECEBF2;
-    --color-text-secondary: #B0AEBF;
-    --color-text-muted: #7C7A8F;
-
-    /* ── Borders ── */
-    --color-border-base: #1E1E30;
-    --color-border-light: #2A2A42;
-
-    /* ── Status ── */
-    --color-error: #D4455A;
-    --color-error-bg: #2D1520;
-    --color-success: #40916C;
-    --color-success-bg: #152D20;
-    --color-warning: #C9A96E;
-    --color-warning-bg: #2D2515;
-
-    /* ── Typography ── */
-    --font-serif: 'Cormorant Garamond', Georgia, serif;
-    --font-sans: 'Inter', system-ui, sans-serif;
-
-    /* ── Border Radius ── */
-    --radius-sm: 0.25rem;
-    --radius: 0.5rem;
-    --radius-md: 0.75rem;
-    --radius-lg: 1rem;
-    --radius-xl: 1.5rem;
-    --radius-2xl: 2rem;
-    --radius-3xl: 3rem;
-    --radius-full: 9999px;
-
-    /* ── Shadows ── */
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
-    --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
-    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
-    --shadow-xl: 0 12px 48px rgba(0, 0, 0, 0.45);
-    --shadow-glow-gold: 0 0 20px rgba(201, 169, 110, 0.15);
-    --shadow-glow-green: 0 0 20px rgba(45, 106, 79, 0.2);
-
-    /* ── Spacing ── */
-    --spacing-section: 7.5rem;
-    --spacing-section-sm: 4rem;
-    --container-max: 75rem;
-    --gutter: 1.5rem;
-  }
-
-  /* ── Base HTML ── */
-  html {
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -160,7 +345,7 @@
     inset: 0;
     z-index: -1;
     pointer-events: none;
-    background-color: #09090b; /* zinc-950 — як в адмін-панелі */
+    background-color: #09090b;
   }
 
   /* ── Selection ── */
@@ -199,9 +384,6 @@
     body {
       background-attachment: scroll;
     }
-    body::before {
-      /* glow enabled — user request */
-    }
   }
 
   /* ── Scroll margin for anchor links ── */
@@ -219,65 +401,6 @@
     h3[id] {
       scroll-margin-top: 80px;
     }
-  }
-
-  /* ── Wandering glow spots ──
-     7 multi-colored radial gradients wander independently across the full
-     screen, so glow patches chaotically appear, overlap, split and reshape
-     as they drift — never repeating the same pattern. */
-  @keyframes glow-wander {
-    0% {
-      background-position:
-        15% 25%, 75% 55%, 45% 15%, 90% 75%, 30% 85%, 55% 40%, 10% 90%;
-    }
-    12% {
-      background-position:
-        65% 15%, 18% 70%, 80% 42%, 8% 30%, 88% 62%, 72% 15%, 40% 88%;
-    }
-    25% {
-      background-position:
-        82% 58%, 42% 8%, 12% 80%, 72% 90%, 5% 25%, 35% 68%, 85% 35%;
-    }
-    37% {
-      background-position:
-        35% 85%, 62% 30%, 60% 22%, 88% 10%, 18% 60%, 50% 92%, 22% 12%;
-    }
-    50% {
-      background-position:
-        20% 32%, 55% 82%, 30% 68%, 10% 55%, 78% 12%, 92% 48%, 68% 72%;
-    }
-    62% {
-      background-position:
-        72% 42%, 15% 22%, 88% 72%, 42% 95%, 58% 35%, 28% 62%, 82% 18%;
-    }
-    75% {
-      background-position:
-        42% 68%, 78% 35%, 22% 32%, 78% 22%, 15% 78%, 62% 88%, 95% 52%;
-    }
-    87% {
-      background-position:
-        25% 55%, 65% 88%, 52% 25%, 32% 72%, 92% 42%, 18% 32%, 75% 65%;
-    }
-    100% {
-      background-position:
-        15% 25%, 75% 55%, 45% 15%, 90% 75%, 30% 85%, 55% 40%, 10% 90%;
-    }
-  }
-
-  /* ── Hero-specific animations ── */
-  @keyframes hero-orb {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-12px); }
-  }
-
-  @keyframes rotate-slow {
-    0% { transform: rotate(0deg) scale(0.8); }
-    100% { transform: rotate(360deg) scale(1); }
-  }
-
-  @keyframes scroll-indicator {
-    0%, 100% { opacity: 0.3; transform: translateY(0); }
-    50% { opacity: 1; transform: translateY(6px); }
   }
 
   /* ── Focus ring ── */
@@ -348,18 +471,19 @@
   }
 }
 
-/* ============================================
-   COMPONENT LAYERS
-   ============================================ */
-
+/* ══════════════════════════════════════════════════
+   COMPONENT LAYER
+   ══════════════════════════════════════════════════ */
 @layer components {
-  /* ── Section container ── */
+  /* ── Section container (with Container Query support) ── */
   .section-container {
     max-width: var(--container-max);
     margin-left: auto;
     margin-right: auto;
-    padding-left: var(--gutter);
-    padding-right: var(--gutter);
+    padding-left: var(--spacing-gutter);
+    padding-right: var(--spacing-gutter);
+    container-type: inline-size;
+    container-name: section;
   }
 
   /* ── Section padding ── */
@@ -398,7 +522,7 @@
     color: transparent;
   }
 
-  /* ── Text gradient green — forward, go, growth ── */
+  /* ── Text gradient green ── */
   .text-gradient-green {
     background: linear-gradient(135deg, var(--color-green), var(--color-green-light));
     -webkit-background-clip: text;
@@ -453,14 +577,6 @@
     animation: gold-shimmer 10s ease-in-out infinite;
   }
 
-  @keyframes gold-shimmer {
-    0%   { background-position: 0% 50%; }
-    25%  { background-position: 60% 40%; }
-    50%  { background-position: 100% 50%; }
-    75%  { background-position: 60% 60%; }
-    100% { background-position: 0% 50%; }
-  }
-
   .text-gradient-hero {
     background: linear-gradient(135deg, var(--color-text-primary) 0%, var(--color-gold) 100%);
     -webkit-background-clip: text;
@@ -477,11 +593,10 @@
     border: 1px solid var(--color-border-light);
   }
 
-  /* ════════════════════════════════════════
+  /* ════════════════════════════════════════════
      BLOG PROSE — Premium читабельна верстка
-     ════════════════════════════════════════ */
+     ════════════════════════════════════════════ */
 
-  /* ── Blockquote with decorative gold quote mark ── */
   .blog-content blockquote {
     position: relative;
     border: none;
@@ -513,7 +628,6 @@
     margin-bottom: 0;
   }
 
-  /* ── Lists with gold accent bullets ── */
   .blog-content ul {
     list-style: none;
     padding-left: 0;
@@ -537,7 +651,6 @@
     opacity: 0.6;
   }
 
-  /* Вкладені списки — менша крапка */
   .blog-content ul ul {
     padding-left: 0;
     margin-bottom: 0;
@@ -573,7 +686,6 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Вкладені списки для ol */
   .blog-content ol ol {
     counter-reset: sub-counter;
     padding-left: 1.5rem;
@@ -590,7 +702,6 @@
     opacity: 0.6;
   }
 
-  /* ── Tables ── */
   .blog-content table {
     width: 100%;
     border-collapse: separate;
@@ -631,7 +742,6 @@
     background: rgba(201, 169, 110, 0.02);
   }
 
-  /* ── Images within blog content ── */
   .blog-content img {
     border-radius: var(--radius-lg);
     border: 1px solid var(--color-border-base);
@@ -639,7 +749,6 @@
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
   }
 
-  /* ── Code blocks ── */
   .blog-content pre {
     background: var(--color-bg-surface);
     border: 1px solid var(--color-border-base);
@@ -667,7 +776,6 @@
     color: var(--color-gold-light);
   }
 
-  /* ── Horizontal rule with decorative gold dot ── */
   .blog-content hr {
     border: none;
     height: 1px;
@@ -680,7 +788,6 @@
     display: none;
   }
 
-  /* ── Links with gold underline ── */
   .blog-content a {
     color: var(--color-green);
     text-decoration: underline;
@@ -696,13 +803,11 @@
     text-decoration-thickness: 1.5px;
   }
 
-  /* ── Bold/strong with slight gold tint ── */
   .blog-content strong {
     color: var(--color-text-primary);
     font-weight: 600;
   }
 
-  /* ── Headings in blog content ── */
   .blog-content h2 {
     font-family: var(--font-serif);
     font-size: 1.75rem;
@@ -738,7 +843,6 @@
     }
   }
 
-  /* ── Paragraphs ── */
   .blog-content p {
     color: var(--color-text-secondary);
     line-height: 1.8;
@@ -753,7 +857,6 @@
     }
   }
 
-  /* ── First paragraph larger (lead) ── */
   .blog-content > p:first-of-type {
     font-size: 1.1rem;
     color: var(--color-text-secondary);
@@ -767,10 +870,9 @@
   }
 }
 
-/* ============================================
+/* ══════════════════════════════════════════════════
    UTILITY LAYER
-   ============================================ */
-
+   ══════════════════════════════════════════════════ */
 @layer utilities {
   .text-balance {
     text-wrap: balance;
@@ -825,7 +927,7 @@
     background-size: 24px 24px;
   }
 
-  /* ── Hero animations (keyframes defined in @layer base) ── */
+  /* ── Hero animations ── */
   .animate-hero-orb {
     animation: hero-orb 6s ease-in-out infinite;
   }
@@ -837,5 +939,46 @@
   .animate-scroll-indicator {
     animation: scroll-indicator 2.5s ease-in-out infinite;
   }
-
 }
+
+/* ══════════════════════════════════════════════════
+   MODERN CSS FEATURES (Tailwind v4 enhancements)
+   ══════════════════════════════════════════════════ */
+
+/* ── Container Queries ──
+   .section-container now has container-type: inline-size defined above.
+   Example usage for adaptive hero layout:
+@container hero (min-width: 600px) {
+  .hero-title {
+    font-size: var(--text-5xl);
+  }
+}
+*/
+
+/* ── OKLCH color variants (optional — for modern browsers) ──
+   Uncomment when ready:
+:root {
+  --color-gold-oklch: oklch(0.75 0.09 85);
+  --color-green-oklch: oklch(0.45 0.08 160);
+}
+*/
+
+/* ── @starting-style for entry animations ──
+   Example: elements that animate in on mount:
+.animated-entry {
+  @starting-style {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+*/
+
+/* ── light-dark() for future light theme support ──
+:root {
+  color-scheme: dark;
+}
+:root.light {
+  color-scheme: light;
+  --color-bg-base: light-dark(#0A0A12, #F5F5F5);
+}
+*/

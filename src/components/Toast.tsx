@@ -110,7 +110,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               onClick={() => dismiss(toast.id)}
             >
               <span
-                className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold leading-none"
+                className="mt-0.5 shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold leading-none"
                 aria-hidden="true"
               >
                 {icons[toast.variant]}
@@ -122,7 +122,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                   e.stopPropagation()
                   dismiss(toast.id)
                 }}
-                className="flex-shrink-0 ml-1 text-current/60 hover:text-current transition-colors"
+                className="shrink-0 ml-1 text-current/60 hover:text-current transition-colors"
                 aria-label="Закрыть уведомление"
               >
                 ✕
