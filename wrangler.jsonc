@@ -21,6 +21,10 @@
 		"head_sampling_rate": 1
 	},
 	"upload_source_maps": true,
+
+	"migrations": [
+		{ "tag": "v1", "deleted_classes": ["CounterAgent"] }
+	],
 	"workers_dev": true,
 
 	"d1_databases": [
