@@ -353,7 +353,7 @@ function DesktopDropdown({ item, pathname, t }: { item: NavItem; pathname: strin
                         : 'text-text-muted hover:text-text-secondary hover:bg-white/[0.04]'
                       }`}
                   >
-                    <span className={`w-1 h-1 rounded-full flex-shrink-0 transition-all duration-300 ${
+                    <span className={`w-1 h-1 rounded-full shrink-0 transition-all duration-300 ${
                       childActive
                         ? 'bg-gold shadow-glow-gold'
                         : 'bg-text-muted/20 group-hover:bg-gold-muted/50'
@@ -517,7 +517,7 @@ function Logo({ authorName, authorTitle }: { authorName: string; authorTitle: st
 
             {/* Decorative dash to the right of subtitle — slides under and fades */}
             <span
-              className="w-4 h-px bg-gold-muted/30 flex-shrink-0"
+              className="w-4 h-px bg-gold-muted/30 shrink-0"
               style={{
                 opacity: isHovered ? 0 : 1,
                 transform: `translateX(${isHovered ? '-100%' : '0'})`,

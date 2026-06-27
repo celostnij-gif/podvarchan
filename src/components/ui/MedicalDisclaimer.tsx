@@ -11,7 +11,7 @@ export function MedicalDisclaimer({ className = '' }: MedicalDisclaimerProps) {
     <div
       className={`mt-8 p-4 rounded-xl border border-border-base bg-bg-surface/85 flex gap-3 items-start ${className}`}
     >
-      <span className="text-text-muted text-lg flex-shrink-0 mt-0.5" aria-hidden="true">
+      <span className="text-text-muted text-lg shrink-0 mt-0.5" aria-hidden="true">
         ℹ️
       </span>
       <p className="text-xs text-text-muted leading-relaxed">
