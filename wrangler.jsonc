@@ -21,6 +21,16 @@
 		"head_sampling_rate": 1
 	},
 	"upload_source_maps": true,
+
+	"durable_objects": {
+		"bindings": [
+			{ "name": "COUNTER", "class_name": "CounterAgent" }
+		]
+	},
+
+	"migrations": [
+		{ "tag": "v1", "deleted_classes": ["CounterAgent"] }
+	],
 	"workers_dev": true,
 
 	"d1_databases": [
