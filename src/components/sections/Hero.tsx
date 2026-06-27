@@ -1,44 +1,5 @@
-'use client'
-
-import { motion, useScroll, useTransform } from 'framer-motion'
-import { useTranslations } from 'next-intl'
-import Image from 'next/image'
 import { Link } from '@/i18n/routing'
-import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
-
-/* ── Decorative floating orbs ── */
-
-function FloatingOrbs() {
-  const { shouldReduceAnimations } = useDeviceCapabilities()
-
-  if (shouldReduceAnimations) return null
-
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-      {/* Orb 1 */}
-      <div
-        className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full
-                   bg-gradient-to-br from-gold/[0.04] via-transparent to-transparent blur-3xl
-                   animate-hero-orb"
-        style={{ animationDelay: '0s' }}
-      />
-      {/* Orb 2 */}
-      <div
-        className="absolute top-1/3 -left-48 w-[400px] h-[400px] rounded-full
-                   bg-gradient-to-tr from-green/[0.03] via-transparent to-transparent blur-3xl
-                   animate-hero-orb"
-        style={{ animationDelay: '3s' }}
-      />
-      {/* Orb 3 */}
-      <div
-        className="absolute bottom-0 right-1/4 w-[300px] h-[300px] rounded-full
-                   bg-gradient-to-t from-gold/[0.02] via-transparent to-transparent blur-3xl
-                   animate-hero-orb"
-        style={{ animationDelay: '5s' }}
-      />
-    </div>
-  )
-}
+import HeroParallaxBackground from './HeroParallaxBackground'
 
 /* ── Deterministic decoration points ── */
 
@@ -57,80 +18,65 @@ const DECORATION_POINTS = [
   { x: 10, y: 50, opacity: 0.25 },
 ] as const
 
-/* ── Hero Background Image with Parallax ── */
+/* ── Floating Orbs (pure CSS animation) ── */
 
-function HeroBackgroundImage() {
-  const { scrollY } = useScroll()
-  const { shouldReduceAnimations } = useDeviceCapabilities()
-  // Parallax: фон рухається повільніше за контент при скролі
-  const imgY = useTransform(scrollY, [0, 800], [0, 150])
-
+function FloatingOrbs() {
   return (
-    <motion.div
-      style={{ y: shouldReduceAnimations ? 0 : imgY }}
-      className="absolute inset-0 overflow-hidden"
-      aria-hidden="true"
-    >
-      <div className="relative w-full h-full">
-        <Image
-          src="/images/hero-bg.webp"
-          alt=""
-          fill
-          className="object-cover object-center"
-          priority
-          sizes="100vw"
-        />
-      </div>
-      {/* Dark gradient overlays for readability — static, not parallax */}
-      <div className="absolute inset-0 bg-gradient-to-b from-bg-deep/80 via-bg-deep/50 to-bg-deep/80" />
-      <div className="absolute inset-0 bg-gradient-to-r from-bg-deep/60 via-transparent to-bg-deep/20" />
-      <div className="absolute inset-0 bg-gradient-to-t from-bg-base via-transparent to-transparent" />
-    </motion.div>
+    <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+      <div
+        className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full
+                   bg-gradient-to-br from-gold/[0.04] via-transparent to-transparent blur-3xl
+                   animate-hero-orb"
+        style={{ animationDelay: '0s' }}
+      />
+      <div
+        className="absolute top-1/3 -left-48 w-[400px] h-[400px] rounded-full
+                   bg-gradient-to-tr from-green/[0.03] via-transparent to-transparent blur-3xl
+                   animate-hero-orb"
+        style={{ animationDelay: '3s' }}
+      />
+      <div
+        className="absolute bottom-0 right-1/4 w-[300px] h-[300px] rounded-full
+                   bg-gradient-to-t from-gold/[0.02] via-transparent to-transparent blur-3xl
+                   animate-hero-orb"
+        style={{ animationDelay: '5s' }}
+      />
+    </div>
   )
 }
 
-/* ── Background Decorations ── */
+/* ── Background Decorations (pure CSS) ── */
 
 function BackgroundDecorations() {
-  const { shouldReduceAnimations } = useDeviceCapabilities()
-
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-      {/* Dot pattern overlay — lightweight, keep on all devices */}
+      {/* Dot pattern overlay */}
       <div className="absolute inset-0 opacity-[0.03]"
            style={{ backgroundImage: 'radial-gradient(circle, rgba(201,169,110,0.5) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
-
-      {/* Ambient glow top — keep, it's just CSS */}
+      {/* Ambient glow top */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-gradient-hero opacity-30 blur-[120px]" />
-
-      {!shouldReduceAnimations && (
-        <>
-          {/* Decorative rings — SVG lightweight */}
-          <svg className="absolute top-1/4 right-1/6 w-64 h-64 opacity-[0.04]" viewBox="0 0 200 200" fill="none">
-            <circle cx="100" cy="100" r="80" stroke="url(#ringGrad)" strokeWidth="0.5" />
-            <circle cx="100" cy="100" r="60" stroke="url(#ringGrad)" strokeWidth="0.3" />
-            <circle cx="100" cy="100" r="95" stroke="url(#ringGrad)" strokeWidth="0.2" />
-            <defs>
-              <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#C9A96E" stopOpacity="0" />
-                <stop offset="50%" stopColor="#C9A96E" stopOpacity="0.3" />
-                <stop offset="100%" stopColor="#C9A96E" stopOpacity="0" />
-              </linearGradient>
-            </defs>
-          </svg>
-
-          {/* Decorative rhombus with rotation animation */}
-          <svg
-            className="absolute bottom-1/3 left-1/6 w-32 h-32 opacity-[0.03] animate-rotate-slow"
-            viewBox="0 0 100 100"
-          >
-            <rect x="10" y="10" width="80" height="80" rx="4"
-                  stroke="url(#ringGrad)" strokeWidth="0.5" fill="none" transform="rotate(45 50 50)" />
-          </svg>
-        </>
-      )}
-
-      {/* Scattered dots — lightweight, keep */}
+      {/* Decorative SVG rings */}
+      <svg className="absolute top-1/4 right-1/6 w-64 h-64 opacity-[0.04] motion-reduce:hidden" viewBox="0 0 200 200" fill="none">
+        <circle cx="100" cy="100" r="80" stroke="url(#ringGrad)" strokeWidth="0.5" />
+        <circle cx="100" cy="100" r="60" stroke="url(#ringGrad)" strokeWidth="0.3" />
+        <circle cx="100" cy="100" r="95" stroke="url(#ringGrad)" strokeWidth="0.2" />
+        <defs>
+          <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#C9A96E" stopOpacity="0" />
+            <stop offset="50%" stopColor="#C9A96E" stopOpacity="0.3" />
+            <stop offset="100%" stopColor="#C9A96E" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+      </svg>
+      {/* Decorative rhombus with rotation animation */}
+      <svg
+        className="absolute bottom-1/3 left-1/6 w-32 h-32 opacity-[0.03] animate-rotate-slow motion-reduce:hidden"
+        viewBox="0 0 100 100"
+      >
+        <rect x="10" y="10" width="80" height="80" rx="4"
+              stroke="url(#ringGrad)" strokeWidth="0.5" fill="none" transform="rotate(45 50 50)" />
+      </svg>
+      {/* Scattered dots */}
       {DECORATION_POINTS.map((point, i) => (
         <div
           key={i}
@@ -146,14 +92,14 @@ function BackgroundDecorations() {
   )
 }
 
-/* ── Scroll Indicator ── */
+/* ── Scroll Indicator (pure CSS animation) ── */
 
 function ScrollIndicator() {
   return (
     <div
       className="absolute bottom-6 left-1/2 -translate-x-1/2 w-5 h-8 rounded-full
                  border border-white/10 flex items-start justify-center pt-2
-                 animate-scroll-indicator"
+                 animate-scroll-indicator motion-reduce:opacity-0"
       aria-hidden="true"
     >
       <span className="w-1 h-1.5 rounded-full bg-gold/50 block" />
@@ -161,40 +107,25 @@ function ScrollIndicator() {
   )
 }
 
-/* ── Welcome Badge ── */
+/* ── Hero Component (Server Component) ── */
 
-function WelcomeBadge({ t, commonT }: { t: (key: string) => string; commonT: (key: string) => string }) {
-  return (
-    <div
-      className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full
-                 bg-white/[0.04] border border-white/[0.06] backdrop-blur-sm
-                 animate-fade-in-up"
-      style={{ animationDelay: '200ms' }}
-    >
-      <span className="relative flex w-2 h-2">
-        <span className="absolute inset-0 rounded-full bg-green" />
-      </span>
-      <span className="text-xs md:text-sm text-text-muted tracking-wide">
-        {commonT('authorName')} · {t('badge')}
-      </span>
-    </div>
-  )
+interface HeroProps {
+  t: {
+    (key: string): string
+    rich: (key: string, props?: Record<string, (chunks: React.ReactNode) => React.ReactNode>) => React.ReactNode
+  }
+  commonT: (key: string) => string
 }
 
-/* ── Hero Component ── */
-
-export default function Hero() {
-  const t = useTranslations('hero')
-  const commonT = useTranslations('common')
-
+export default function Hero({ t, commonT }: HeroProps) {
   return (
     <section
       className="relative min-h-[90vh] md:min-h-screen flex flex-col justify-center overflow-hidden
                  bg-gradient-to-b from-bg-deep via-bg-base to-bg-base pt-[72px] pb-16 md:pt-[92px] md:pb-20"
       aria-label={t('ariaLabel')}
     >
-      {/* Background layers */}
-      <HeroBackgroundImage />
+      {/* Background layers — parallax extracted to client component */}
+      <HeroParallaxBackground />
       <FloatingOrbs />
       <BackgroundDecorations />
 
@@ -202,7 +133,19 @@ export default function Hero() {
       <div className="relative z-10 w-full max-w-container mx-auto px-gutter md:mt-[120px]">
         <div className="max-w-3xl mx-auto text-center">
           {/* Welcome badge */}
-          <WelcomeBadge t={t} commonT={commonT} />
+          <div
+            className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full
+                       bg-white/[0.04] border border-white/[0.06] backdrop-blur-sm
+                       animate-fade-in-up"
+            style={{ animationDelay: '200ms' }}
+          >
+            <span className="relative flex w-2 h-2">
+              <span className="absolute inset-0 rounded-full bg-green" />
+            </span>
+            <span className="text-xs md:text-sm text-text-muted tracking-wide">
+              {commonT('authorName')} · {t('badge')}
+            </span>
+          </div>
 
           {/* Heading */}
           <h1
@@ -220,7 +163,7 @@ export default function Hero() {
           {/* Subtitle */}
           <p
             className="mt-6 text-base md:text-lg lg:text-xl text-[#D0CDDC] leading-relaxed
-                       max-w-2xl mx-auto animate-fade-in-up"
+                       max-w-2xl mx-auto animate-fade-in-up motion-reduce:animate-none"
             style={{ animationDelay: '440ms', textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}
           >
             {t('subtitle')}
@@ -228,7 +171,7 @@ export default function Hero() {
 
           {/* Benefits */}
           <ul
-            className="mt-8 flex flex-wrap justify-center gap-3 animate-fade-in-up"
+            className="mt-8 flex flex-wrap justify-center gap-3 animate-fade-in-up motion-reduce:animate-none"
             style={{ animationDelay: '560ms' }}
           >
             {['benefit1', 'benefit2', 'benefit3'].map((key, i) => (

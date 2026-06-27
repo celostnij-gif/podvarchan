@@ -30,20 +30,6 @@
 	"kv_namespaces": [
 		{ "binding": "RATE_LIMIT_KV", "id": "2f39c831b94841b3b30d7b6246c2a221" }
 	],
-	"durable_objects": {
-		"bindings": [
-			{
-				"name": "CounterAgent",
-				"class_name": "CounterAgent",
-			},
-		],
-	},
-	"migrations": [
-		{
-			"tag": "v1",
-			"delete_classes": ["CounterAgent"],
-		},
-	],
 
 	"vars": {
 		"NEXTJS_ENV": "production",

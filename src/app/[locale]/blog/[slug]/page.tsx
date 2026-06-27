@@ -47,7 +47,7 @@ export default async function BlogPostPage({ params }: Props) {
   const allPosts = getAllBlogPosts(locale)
   const relatedPosts = allPosts
     .filter(p => p.categorySlug === post.categorySlug && p.slug !== slug)
-    .slice(0, 2)
+    .slice(0, 4)
     .map(p => ({ slug: p.slug, title: p.title }))
 
   const jsonLd = articleSchema({

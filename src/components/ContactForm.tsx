@@ -48,7 +48,6 @@ export default function ContactForm() {
   const [errors, setErrors] = useState<FormErrors>({})
   const [status, setStatus] = useState<SubmitStatus>('idle')
   const [serverError, setServerError] = useState('')
-  const [turnstileReady, setTurnstileReady] = useState(false)
 
   const nameRef = useRef<HTMLInputElement>(null)
   const emailRef = useRef<HTMLInputElement>(null)
@@ -59,6 +58,21 @@ export default function ContactForm() {
   const widgetContainerRef = useRef<HTMLDivElement>(null)
   const widgetIdRef = useRef<string | undefined>(undefined)
 
+  /* ── Lazy viewport detection for Turnstile ── */
+  const formRef = useRef<HTMLFormElement>(null)
+  const [isNearViewport, setIsNearViewport] = useState(false)
+  const [turnstileReady, setTurnstileReady] = useState(false)
+
+  useEffect(() => {
+    const el = formRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setIsNearViewport(true); observer.disconnect() } },
+      { rootMargin: '200px 0px' }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
   const inputClass = [
     'w-full bg-bg-elevated border border-border-light rounded-lg px-4 py-3 text-text-primary',
     'placeholder:text-text-muted/60 font-body text-sm transition-all duration-300',
@@ -71,11 +85,14 @@ export default function ContactForm() {
 
   /* ── Turnstile ── */
 
+  /* ── Turnstile widget init (only when form is near viewport) ── */
+
   const isLocalhost =
     typeof window !== 'undefined' &&
     (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
 
   useEffect(() => {
+    if (!isNearViewport) return
     const container = widgetContainerRef.current
     if (!TURNSTILE_SITE_KEY || isLocalhost) {
       queueMicrotask(() => setTurnstileReady(true))
@@ -108,7 +125,7 @@ export default function ContactForm() {
       clearTimeout(timer)
       if (container && window.turnstile?.remove) window.turnstile.remove(container)
     }
-  }, [isLocalhost])
+  }, [isLocalhost, isNearViewport])
 
   /* ── Validation ── */
 
@@ -244,7 +261,7 @@ export default function ContactForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} noValidate className="space-y-5">
+    <form ref={formRef} onSubmit={onSubmit} noValidate className="space-y-5">
       {FIELDS.map(renderInput)}
 
       {status === 'error' && serverError && (

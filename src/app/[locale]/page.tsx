@@ -5,6 +5,7 @@ import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { aggregateRatingSchema } from '@/lib/schema'
 import type { Testimonial } from '@/types'
 import HomeClient from './home-client'
+import Hero from '@/components/sections/Hero'
 
 /* ── Metadata ── */
 
@@ -61,25 +62,28 @@ export default async function HomePage({
 }) {
   const { locale } = await params
   const messages = await getMessages()
+  const t = await getTranslations({ locale, namespace: 'hero' })
+  const commonT = await getTranslations({ locale, namespace: 'common' })
   const webPageSchema = await getWebPageSchema(locale)
 
-  /* ── AggregateRating schema from testimonials ── */
   const testimonials = (messages?.testimonials?.items as Testimonial[]) ?? []
-  const reviews = testimonials.map((t, i) => ({
-    author: t.name,
-    rating: t.rating ?? 5,
-    date: new Date(2025, 5 + (i % 12), 1).toISOString().split('T')[0],
-    text: t.text,
-    result: t.result,
-  }))
 
-  const ratingSchema = reviews.length > 0
-    ? aggregateRatingSchema(reviews)
+  const ratingSchema = testimonials.length > 0
+    ? aggregateRatingSchema(testimonials.map((t, i) => ({
+        author: t.name,
+        rating: t.rating ?? 5,
+        date: new Date(2025, 5 + (i % 12), 1).toISOString().split('T')[0],
+        text: t.text,
+        result: t.result,
+      })))
     : null
+  const pageSchemas: Record<string, unknown>[] = ratingSchema ? [webPageSchema, ratingSchema] : [webPageSchema]
 
-  const pageSchemas = ratingSchema
-    ? [webPageSchema, ratingSchema]
-    : [webPageSchema]
+  return (
+    <>
+      <Hero t={t} commonT={commonT} />
+      <HomeClient locale={locale} schemas={pageSchemas} />
+    </>
+  )
 
-  return <HomeClient locale={locale} schemas={pageSchemas} />
 }

@@ -2,7 +2,6 @@
 
 import { useTranslations } from 'next-intl'
 import dynamic from 'next/dynamic'
-import Hero from '@/components/sections/Hero'
 const ProblemsSection = dynamic(() => import('@/components/sections/ProblemsSection'), {
   loading: () => <div className="h-48 md:h-64" aria-hidden="true" />,
 })
@@ -32,41 +31,22 @@ export default function HomeClient({ locale: _locale, schemas }: { locale: strin
 
   return (
     <>
-      {/* ── Hero ── */}
-      <Hero />
-
-      {/* ── Проблемы ── */}
       <ProblemsSection />
-
-      {/* ── Метод ── */}
       <MethodSection />
-
-      {/* ── Услуги ── */}
       <ServicesSection maxCards={9} />
-
-      {/* ── Об авторе ── */}
       <AuthorPreviewSection />
-
-      {/* ── Отзывы ── */}
       <TestimonialsSection />
-
-      {/* ── FAQ ── */}
       <FAQSection />
-
-      {/* ── CTA ── */}
       <AnimatedSection as="div" variant="fadeUp">
         <SectionContainer size="md">
           <div className="relative max-w-3xl mx-auto text-center">
             <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-96 h-96 bg-gold/5 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
-
             <AnimatedText as="h2" direction="up" className="relative text-3xl md:text-4xl font-display text-text-primary">
               {t('ctaTitle')}
             </AnimatedText>
-
             <AnimatedText as="p" direction="up" delay={150} className="relative mt-6 text-base text-text-secondary leading-relaxed max-w-xl mx-auto">
               {t('ctaDescription')}
             </AnimatedText>
-
             <AnimatedText direction="up" delay={250} className="relative mt-8">
               <Link
                 href="/kontakty/"
