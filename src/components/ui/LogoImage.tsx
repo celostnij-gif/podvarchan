@@ -54,7 +54,7 @@ export function LogoImage({ className = '', priority = false }: LogoImageProps) 
     alt: '',
     width: 36,
     height: 36,
-    className: `relative z-10 shrink-0 w-8 h-8 md:w-9 md:h-9 object-contain
+    className: `relative z-10 flex-shrink-0 w-8 h-8 md:w-9 md:h-9 object-contain
                   transition-all duration-500 ease-out
                   group-hover:scale-110 group-hover:rotate-[6deg] group-hover:brightness-110
                   ${className}`,

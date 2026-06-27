@@ -10,7 +10,7 @@
     "cf-typegen": "wrangler types --env-interface CloudflareEnv ./cloudflare-env.d.ts"
   },
   "devDependencies": {
-    "@tailwindcss/typography": "^0.5.20",
+    "@tailwindcss/typography": "^0.5.19",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "typescript": "^5.9.3",
@@ -20,11 +20,11 @@
     "@opennextjs/cloudflare": "^1.19.11",
     "@stablelib/nacl": "^2.0.1",
     "@swc/helpers": "^0.5.23",
-    "@tailwindcss/postcss": "^4.3.1",
     "@types/node": "^25.9.1",
     "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
     "agents": "^0.17.0",
+    "autoprefixer": "^10.5.0",
     "framer-motion": "^12.40.0",
     "lucide-react": "^1.21.0",
     "next": "^15.5.18",
@@ -35,7 +35,7 @@
     "react-dom": "^19.2.6",
     "resend": "^6.12.4",
     "sharp": "^0.34.5",
-    "tailwindcss": "^4.3.1",
+    "tailwindcss": "^3.4.19",
     "tweetnacl": "^1.0.3"
   }
 }

@@ -263,7 +263,7 @@ export default function ContactForm() {
 
       <div className="mt-2">
         <label className="flex items-start gap-3 cursor-pointer group">
-          <div className="relative mt-0.5 shrink-0">
+          <div className="relative mt-0.5 flex-shrink-0">
             <input ref={agreedRef} type="checkbox" checked={agreed}
               onChange={(e) => { setAgreed(e.target.checked); if (e.target.checked) setErrors((prev) => ({ ...prev, agreed: undefined })) }}
               className="sr-only peer" aria-required="true" aria-describedby={errors.agreed ? 'cf-agreed-error' : undefined} />
