@@ -133,6 +133,6 @@ export default function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/|api/|\\.well-known/|favicon|images/|.*\\.(?:svg|png|jpg|jpeg|webp|avif|ico|css|js|txt|xml|json|md)$).*)',
+    '/((?!_next/|api/|\\.well-known/|favicon|images/|.*\\.(?:svg|png|jpg|jpeg|webp|avif|ico|css|js|txt|xml|json|md)(?:/|$)).*)',
   ],
 }
