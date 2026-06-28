@@ -15,10 +15,18 @@ const intlMiddleware = createMiddleware(routing)
 
 export default function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+  // P0: WWW → non-WWW redirect (301 permanent)
+  const host = request.headers.get('host') ?? ''
+  if (host.startsWith('www.')) {
+    const url = new URL(request.url)
+    url.host = host.replace(/^www\./, '')
+    return NextResponse.redirect(url.toString(), 301)
+  }
+
 
   // P0-A: locale redirect — корень / редиректит на RU (дефолтный язык)
   if (pathname === '/') {
-    return NextResponse.redirect(new URL('/ru/', request.url), 302)
+    return NextResponse.redirect(new URL('/ru/', request.url), 301)
   }
 
   // Skip API routes, static assets, well-known paths — they handle themselves
@@ -28,6 +36,30 @@ export default function middleware(request: NextRequest) {
     const url = new URL(request.url)
     url.protocol = 'https:'
     return NextResponse.redirect(url.toString(), 301)
+  }
+
+  // P1: Known-deleted pages → 410 Gone
+  const gonePages = new Set(['/masters', '/masters/'])
+  if (gonePages.has(pathname)) {
+    return new Response(null, { status: 410 })
+  }
+
+  // P2: Old .html → new URL permanent redirects (301)
+  const htmlPath = pathname.replace(/\/+$/, '') // strip trailing slashes for matching
+  const oldHtmlRedirects: Record<string, string> = {
+    '/otzyvy.html': '/ru/',
+    '/diagnostika.html': '/ru/uslugi/',
+    '/diagnostika_uk.html': '/uk/uslugi/',
+    '/uslugi_uk.html': '/uk/uslugi/',
+    '/index_uk.html': '/uk/',
+  }
+  if (oldHtmlRedirects[htmlPath]) {
+    return NextResponse.redirect(new URL(oldHtmlRedirects[htmlPath], request.url), 301)
+  }
+
+  // Unknown .html files → 410 Gone
+  if (htmlPath.endsWith('.html')) {
+    return new Response(null, { status: 410 })
   }
 
   // ── UK slug redirects ──
@@ -116,6 +148,21 @@ export default function middleware(request: NextRequest) {
   }
 
   const response = intlMiddleware(request)
+
+  // Fix 307/302 → 301 for all locale detection redirects (SEO: permanent)
+  if (response.status === 307 || response.status === 302) {
+    const location = response.headers.get('Location')
+    if (location) {
+      const redirectResponse = NextResponse.redirect(new URL(location, request.url), 301)
+      // Preserve locale cookie and other headers from intlMiddleware
+      response.headers.forEach((value, key) => {
+        if (key.toLowerCase() !== 'location') {
+          redirectResponse.headers.set(key, value)
+        }
+      })
+      return redirectResponse
+    }
+  }
 
   // Edge cache for public HTML pages — Worker hits are dramatically reduced
   // s-maxage=604800: CDN caches 7 days
