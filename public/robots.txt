@@ -28,7 +28,5 @@ Allow: /
 User-Agent: CloudflareBrowserRenderingCrawler
 Allow: /
 
-Content-Signal: ai-train=no
-Content-Signal: search=yes
 
 Sitemap: https://podvarchan.com/sitemap.xml
