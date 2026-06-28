@@ -135,6 +135,26 @@ export default async function Footer({ locale }: { locale: string }) {
           </FooterColumn>
         </div>
 
+        {/* Search prompt — full-width banner between grid and legal */}
+        <div className="mt-10 mb-6 flex flex-col items-center text-center gap-2">
+          <p className="text-sm text-text-muted leading-relaxed">
+            {t('footerSearchPrompt')}
+          </p>
+          <Link
+            href="/search/"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full
+                       bg-bg-surface/70 border border-border-base text-text-secondary
+                       hover:text-gold hover:border-gold-muted hover:bg-bg-elevated
+                       transition-all duration-200 text-sm font-medium"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8" />
+              <path d="M21 21l-4.35-4.35" />
+            </svg>
+            {t('footerSearchLink')}
+          </Link>
+        </div>
+
         {/* Bottom bar */}
         <div className="mt-12 pt-8 border-t border-border-base flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-text-muted">© {new Date().getFullYear()} {t('copyright')}</p>
