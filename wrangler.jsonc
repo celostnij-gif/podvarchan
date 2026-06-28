@@ -6,6 +6,10 @@
 		"nodejs_compat",
 		"global_fetch_strictly_public"
 	],
+	"routes": [
+		{ "pattern": "www.podvarchan.com/*", "zone_id": "9ed1252ab93408d37152d76b4c8aea72" }
+	],
+
 	"assets": {
 		"binding": "ASSETS",
 		"directory": ".open-next/assets"
