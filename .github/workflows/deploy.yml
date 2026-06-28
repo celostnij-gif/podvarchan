@@ -40,3 +40,14 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: IndexNow ping
+        run: |
+          curl -s -X POST "https://api.indexnow.org/indexnow" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "host": "podvarchan.com",
+              "key": "8a43183f603f4adb9fd469d2fc5d7cef",
+              "keyLocation": "https://podvarchan.com/8a43183f603f4adb9fd469d2fc5d7cef.txt",
+              "urlList": ["https://podvarchan.com/sitemap.xml"]
+            }'
