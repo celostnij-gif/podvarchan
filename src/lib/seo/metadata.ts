@@ -16,9 +16,9 @@ interface GenerateMetadataParams extends PageMeta {
 export function buildCanonical(path: string, locale: string): string {
   const base = SITE.url
   const localePrefix = locale === 'ru' ? '/ru' : '/uk'
-  const cleanPath = path === '/' ? '' : path.startsWith('/') ? path : `/${path}`
-  const suffix = cleanPath && !cleanPath.endsWith('/') ? '/' : ''
-  return `${base}${localePrefix}${cleanPath}${suffix}`
+  // root → just locale prefix; other paths strip leading slash
+  const cleanPath = path === '/' ? '' : path.startsWith('/') ? path.slice(1) : path
+  return `${base}${localePrefix}/${cleanPath}`
 }
 
 /**
