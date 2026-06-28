@@ -118,13 +118,13 @@ export default function middleware(request: NextRequest) {
   const response = intlMiddleware(request)
 
   // Edge cache for public HTML pages — Worker hits are dramatically reduced
-  // s-maxage=86400: CDN caches 24h, serves cached even if Worker is cold
-  // stale-while-revalidate=3600: serves stale while revalidating in background
+  // s-maxage=604800: CDN caches 7 days
+  // stale-while-revalidate=2592000: serves stale for 30d while revalidating in background
   // stale-if-error=604800: serve stale for 7d if Worker fails (mitigates free plan CPU limit)
   if (response.status < 300) {
     response.headers.set(
       'Cache-Control',
-      'public, s-maxage=86400, stale-while-revalidate=3600, stale-if-error=604800'
+      'public, s-maxage=604800, stale-while-revalidate=2592000, stale-if-error=604800'
     )
   }
 
@@ -133,6 +133,6 @@ export default function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next|_vercel|.*\\..*).*)',
+    '/((?!_next/|api/|\\.well-known/|favicon|images/|.*\\.(?:svg|png|jpg|jpeg|webp|avif|ico|css|js|txt|xml|json)$).*)',
   ],
 }
