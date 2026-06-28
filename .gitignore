@@ -62,3 +62,5 @@ nul
 
 # linkbuilder 
 /linkbuilder
+# editor workspace settings (local LSP server config)
+/.vscode/
