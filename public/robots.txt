@@ -1,39 +1,34 @@
 User-Agent: *
 Allow: /
+
 Disallow: /api/
 Disallow: /_next/
 
-User-Agent: Amazonbot
-Allow: /
-
-User-Agent: Applebot-Extended
-Allow: /
-
-User-Agent: Bytespider
-Allow: /
-
-User-Agent: CCBot
-Allow: /
-
-User-Agent: ClaudeBot
-Allow: /
-
-User-Agent: CloudflareBrowserRenderingCrawler
+User-Agent: GPTBot
 Allow: /
 
 User-Agent: Google-Extended
 Allow: /
 
-User-Agent: GPTBot
+User-Agent: ClaudeBot
 Allow: /
 
-User-Agent: meta-externalagent
+User-Agent: CCBot
 Allow: /
 
-# Content Signals — AI content usage preferences
-# https://contentsignals.org/
+User-Agent: Applebot-Extended
+Allow: /
+
+User-Agent: Amazonbot
+Allow: /
+
+User-Agent: Bytespider
+Allow: /
+
+User-Agent: CloudflareBrowserRenderingCrawler
+Allow: /
+
 Content-Signal: ai-train=no
 Content-Signal: search=yes
-Content-Signal: ai-input=no
 
 Sitemap: https://podvarchan.com/sitemap.xml
