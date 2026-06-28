@@ -48,10 +48,14 @@ export async function generateMetadata({ params }: Props) {
   const service = servicesData.find((s) => s.slug === slug)
   if (!service) return {}
 
+  const ukSlug = SERVICE_SLUG_UK[slug]
+  const ukPath = ukSlug ? `/uslugi/${ukSlug}` : undefined
+
   return seoMetadata({
     title: service.title,
     description: service.metaDescription,
     path: `/uslugi/${slug}`,
+    ukPath,
     type: 'service',
     locale,
   })

@@ -39,11 +39,15 @@ export async function generateMetadata({ params }: Props) {
   if (!category) return {}
   const t = await getTranslations({ locale, namespace: 'blog' })
 
+  const ukCat = CATEGORY_SLUG_UK[cat]
+  const ukPath = ukCat ? `/blog/kategoriya/${ukCat}` : undefined
+
   return seoMetadata({
     title: `${category.name} — ${t('pageTitle')}`,
     description: category.metaDescription,
     keywords: category.keywords,
     path: `/blog/kategoriya/${cat}`,
+    ukPath,
     locale,
   })
 }

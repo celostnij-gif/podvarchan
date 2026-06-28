@@ -22,12 +22,15 @@ export async function generateMetadata({ params }: Props) {
   const slug = resolveBlogSlug(rawSlug)
   const post = getBlogPost(slug, locale)
   if (!post) return {}
+  const ukSlug = BLOG_SLUG_UK[slug]
+  const ukPath = ukSlug ? `/blog/${ukSlug}` : undefined
 
   return seoMetadata({
     title: post.title,
     description: post.metaDescription,
     keywords: post.keywords,
     path: `/blog/${slug}`,
+    ukPath,
     type: 'article',
     ogImage: post.image,
     publishedTime: post.datePublished,

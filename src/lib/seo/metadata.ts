@@ -5,33 +5,24 @@ import type { PageMeta } from '@/types'
 interface GenerateMetadataParams extends PageMeta {
   path: string
   locale?: string
+  /** If UK slug differs from RU, pass UK path for correct hreflang and canonical */
+  ukPath?: string
 }
 
 /**
- * Строит канонический URL с учётом локали.
- * localePrefix: 'always' — обе локали имеют префикс в URL.
+ * Builds canonical URL respecting locale prefix.
+ * localePrefix: 'always' — both locales get prefix in URL.
  */
 export function buildCanonical(path: string, locale: string): string {
   const base = SITE.url
   const localePrefix = locale === 'ru' ? '/ru' : '/uk'
   const cleanPath = path.startsWith('/') ? path : `/${path}`
-  // Keep trailing slash — consistent with trailingSlash:true in next.config
   const normalizedPath = cleanPath
   return `${base}${localePrefix}${normalizedPath}`
 }
 
 /**
- * Генерирует полный объект Metadata для Next.js App Router.
- *
- * @example
- * ```ts
- * export const metadata = generateMetadata({
- *   title: 'Гипнотерапия онлайн',
- *   description: '...',
- *   path: '/uslugi/gipnoterapiya-onlayn',
- *   type: 'service',
- * })
- * ```
+ * Generates full Metadata object for Next.js App Router.
  */
 export function generateMetadata({
   title,
@@ -45,17 +36,24 @@ export function generateMetadata({
   author,
   path,
   locale = 'ru',
+  ukPath,
 }: GenerateMetadataParams): Metadata {
   const langPrefix = locale === 'ru' ? '/ru' : '/uk'
-  const canonicalUrl = canonical ?? `${SITE.url}${langPrefix}${path}/`
+  // When on UK page with different slug, use ukPath for canonical URL
+  const isUkWithUkPath = locale === 'uk' && ukPath
+  const effectivePath = isUkWithUkPath ? ukPath : path
+  const canonicalUrl = canonical ?? `${SITE.url}${langPrefix}${effectivePath}/`
   const ogLocale = locale === 'uk' ? 'uk_UA' : 'ru_RU'
   const imageUrl = ogImage ?? `${SITE.url}${SITE.defaultOgImage}`
 
-  // Build other meta tags separately to avoid fragile type casting
   const other: Record<string, string> = {}
   if (publishedTime) other['article:published_time'] = publishedTime
   if (modifiedTime) other['article:modified_time'] = modifiedTime
   if (author) other['article:author'] = author
+
+  // Hreflang: use ukPath when UK slug differs from RU slug
+  const ukHref = ukPath ? `${SITE.url}/uk${ukPath}/` : `${SITE.url}/uk${path}/`
+  const defaultHref = ukPath ? `${SITE.url}/uk${ukPath}/` : `${SITE.url}/ru${path}/`
 
   return {
     title: {
@@ -69,8 +67,8 @@ export function generateMetadata({
       canonical: canonicalUrl,
       languages: {
         ru: `${SITE.url}/ru${path}/`,
-        uk: `${SITE.url}/uk${path}/`,
-        'x-default': `${SITE.url}/ru${path}/`,
+        uk: ukHref,
+        'x-default': defaultHref,
       },
     },
     openGraph: {
@@ -111,8 +109,7 @@ export function generateMetadata({
 }
 
 /**
- * Генерирует JSON-LD скрипт для вставки в layout.tsx или страницу.
- * Использование: `<script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />`
+ * Generates JSON-LD script.
  */
 export function jsonLd(schema: Record<string, unknown>): string {
   return JSON.stringify(schema, null, 2)
