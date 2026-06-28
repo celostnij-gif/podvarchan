@@ -16,9 +16,9 @@ interface GenerateMetadataParams extends PageMeta {
 export function buildCanonical(path: string, locale: string): string {
   const base = SITE.url
   const localePrefix = locale === 'ru' ? '/ru' : '/uk'
-  const cleanPath = path.startsWith('/') ? path : `/${path}`
-  const normalizedPath = cleanPath
-  return `${base}${localePrefix}${normalizedPath}`
+  const cleanPath = path === '/' ? '' : path.startsWith('/') ? path : `/${path}`
+  const suffix = cleanPath && !cleanPath.endsWith('/') ? '/' : ''
+  return `${base}${localePrefix}${cleanPath}${suffix}`
 }
 
 /**
@@ -53,7 +53,7 @@ export function generateMetadata({
 
   // Hreflang: use ukPath when UK slug differs from RU slug
   const ukHref = ukPath ? `${SITE.url}/uk${ukPath}/` : `${SITE.url}/uk${path}/`
-  const defaultHref = ukPath ? `${SITE.url}/uk${ukPath}/` : `${SITE.url}/ru${path}/`
+  const defaultHref = `${SITE.url}/ru${path}/`
 
   return {
     title: {

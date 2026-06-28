@@ -1,7 +1,14 @@
 import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
 
 interface Props {
   params: Promise<{ slug: string[]; locale: string }>
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    robots: { index: false, follow: false },
+  }
 }
 
 /**
