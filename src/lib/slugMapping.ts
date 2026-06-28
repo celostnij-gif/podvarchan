@@ -63,7 +63,7 @@ export const BLOG_SLUG_UK: Record<string, string> = {
 /* ── Blog Categories ── */
 export const CATEGORY_SLUG_UK: Record<string, string> = {
   'trevoga': 'trivoga',
-  'gipnoterapiya': 'gipnoterapiya',
+  'gipnoterapiya': 'hipnoterapiya',
   'samosabotazh': 'samosabotazh',
   'podsoznanie': 'pidsvidomist',
   'psikhosomatika': 'psihosomatika',
