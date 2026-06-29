@@ -29,6 +29,14 @@ export default function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/ru/', request.url), 301)
   }
 
+  // P0-B: /ua/ → /uk/ locale alias redirect (ISO country code to language code)
+  // Handles any case: /UA/, /Ua/, /ua/… → /uk/…
+  const uaLocaleMatch = pathname.match(/^\/ua(\/|$)/i)
+  if (uaLocaleMatch) {
+    const rest = pathname.slice(3) // strip '/ua' prefix, keep trailing slash/path
+    return NextResponse.redirect(new URL(`/uk${rest}`, request.url), 301)
+  }
+
   // Skip API routes, static assets, well-known paths — they handle themselves
   // HTTP → HTTPS redirect (defense in depth — Cloudflare edge normally handles this)
   const proto = request.headers.get('x-forwarded-proto')
