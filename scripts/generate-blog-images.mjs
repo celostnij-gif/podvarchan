@@ -302,6 +302,16 @@ const IMAGES = [
     accent: COLORS.accentCoral,
     uk: { title: 'Тиск', sub: 'психосоматика' },
   },
+  /* ── PTSD / War trauma ── */
+  {
+    slug: 'ptsr-u-veteranov-simptomy-i-pomoshch',
+    title: 'ПТСР у ветеранов',
+    sub: 'после войны',
+    gradient: ['#1B1B1B', '#2D1B2D'],
+    symbol: '🕊️',
+    accent: COLORS.accentTeal,
+    uk: { title: 'ПТСР у ветеранів', sub: 'після війни' },
+  },
 ]
 
 function svgContent({ title, sub, gradient, symbol, accent }) {

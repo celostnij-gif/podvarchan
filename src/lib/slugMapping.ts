@@ -58,6 +58,7 @@ export const BLOG_SLUG_UK: Record<string, string> = {
   'psikhosomatika-golovokruzheniya': 'psihosomatika-zamorochennya',
   'psikhosomatika-boli-v-shee': 'psihosomatika-bolyu-v-shiyi',
   'psikhosomatika-davleniya': 'psihosomatika-tisku',
+  'ptsr-u-veteranov-simptomy-i-pomoshch': 'ptsr-u-veteraniv-oznaky-i-dopomoha',
 }
 
 /* ── Blog Categories ── */
@@ -72,6 +73,7 @@ export const CATEGORY_SLUG_UK: Record<string, string> = {
   'vygoraniye': 'vigorannya',
   'krizis': 'kriza',
   'zagalni-zapit': 'zagalni-zapit',
+  'ptsr': 'ptsr',
 }
 
 /* ── Reverse mappings (UK → RU) ── */
