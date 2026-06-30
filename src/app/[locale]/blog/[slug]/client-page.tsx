@@ -215,8 +215,14 @@ export function ClientBlogPost({ title, body, date, category, categorySlug, auth
           {/* ── Author bio ── */}
           <div className="mt-12 p-6 rounded-xl bg-bg-surface/85 border border-border-base">
             <div className="flex items-start gap-4">
-              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-gold to-gold-dark flex items-center justify-center text-xl font-display text-bg-base shrink-0">
-                ВП
+              <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-gold/20 shrink-0">
+                <Image
+                  src="/images/author-avatar.webp"
+                  alt={commonT('authorName')}
+                  width={150}
+                  height={150}
+                  className="object-cover w-full h-full"
+                />
               </div>
               <div>
                 <p className="font-display text-text-primary">{commonT('authorName')}</p>
