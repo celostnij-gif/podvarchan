@@ -226,6 +226,53 @@ export default function MetodClient() {
       </section>
 
       {/* ════════════════════════════════════════
+           PROBUDOLOGY — философия Пробудологии
+           ════════════════════════════════════════ */}
+      <section className="relative">
+        <SectionContainer size="md" background="transparent">
+          <div className="relative max-w-3xl mx-auto">
+            <AnimatedText as="h2" direction="up" className="text-3xl md:text-4xl lg:text-5xl font-display text-text-primary text-center">
+              {t('probudologyTitle')}
+            </AnimatedText>
+
+            {/* Decorative gold divider */}
+            <motion.div
+              initial={{ opacity: 0, scaleX: 0 }}
+              whileInView={{ opacity: 1, scaleX: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, ease: [0.25, 0.1, 0, 1], delay: 0.3 }}
+              className="mt-6 flex items-center justify-center gap-3"
+            >
+              <span className="w-12 h-px bg-gradient-to-r from-transparent via-gold/40 to-gold/40" />
+              <span className="w-1.5 h-1.5 rotate-45 bg-gold/60" />
+              <span className="w-12 h-px bg-gradient-to-r from-gold/40 via-gold/40 to-transparent" />
+            </motion.div>
+
+            {/* Paragraphs */}
+            <div className="mt-10 space-y-10">
+              {t('probudologyText').split('\n\n').map((text: string, i: number) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, ease: [0.25, 0.1, 0, 1], delay: 0.2 + i * 0.15 }}
+                  className="relative pl-8 md:pl-12"
+                >
+                  <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-gold/50 via-gold/20 to-transparent rounded-full" />
+                  <span className="absolute -left-[4.5px] top-1.5 w-2 h-2 rounded-full bg-gold/40" />
+                  <p className="text-base md:text-lg text-text-secondary leading-relaxed md:leading-[1.85]">
+                    {text}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </SectionContainer>
+      </section>
+
+
+      {/* ════════════════════════════════════════
            THREE COMPONENTS
            ════════════════════════════════════════ */}
       <AnimatedSection as="div" variant="fadeUp">
@@ -386,6 +433,33 @@ export default function MetodClient() {
            MEDICAL DISCLAIMER
            ════════════════════════════════════════ */}
       <MedicalDisclaimer type="crisis" />
+
+      {/* ════════════════════════════════════════
+           MISSION — Миссия и кредо
+           ════════════════════════════════════════ */}
+      <AnimatedSection as="div" variant="fadeUp">
+        <SectionContainer size="sm">
+          <div className="relative max-w-3xl mx-auto text-center">
+            <AnimatedText as="h2" direction="up" className="text-3xl md:text-4xl font-display text-text-primary">
+              {t('missionTitle')}
+            </AnimatedText>
+
+            <AnimatedText direction="up" delay={100} className="relative mt-6 text-base text-text-secondary leading-relaxed max-w-2xl mx-auto">
+              {t('missionText')}
+            </AnimatedText>
+
+            {/* Accent quote */}
+            <AnimatedText direction="up" delay={200} className="mt-8">
+              <div className="relative inline-block px-8 py-6 border-l-2 border-gold/30 text-left max-w-xl mx-auto">
+                <p className="text-base italic text-text-muted leading-relaxed">
+                  {t('missionQuote')}
+                </p>
+              </div>
+            </AnimatedText>
+          </div>
+        </SectionContainer>
+      </AnimatedSection>
+
       {/* ════════════════════════════════════════
            CTA
            ════════════════════════════════════════ */}

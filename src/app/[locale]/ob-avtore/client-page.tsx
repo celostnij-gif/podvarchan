@@ -84,7 +84,7 @@ export function ClientAboutPage() {
                 <div className="relative w-56 h-56 md:w-72 md:h-72 rounded-2xl overflow-hidden border-2 border-gold/20 shadow-glow-gold">
                   <Image
                     src="/images/about.webp"
-                    alt={commonT('authorName')}
+                    alt={t('heroFullName')}
                     fill
                     className="object-cover"
                     priority
@@ -116,6 +116,14 @@ export function ClientAboutPage() {
                   className="mt-4 text-base text-text-secondary leading-relaxed max-w-xl"
                 >
                   {t('description')}
+                </AnimatedText>
+                {/* Expanded roles */}
+                <AnimatedText
+                  direction="up"
+                  delay={250}
+                  className="mt-2 text-sm text-text-muted leading-relaxed max-w-xl"
+                >
+                  {t('heroRoles')}
                 </AnimatedText>
 
                 {/* CTA */}
@@ -228,6 +236,14 @@ export function ClientAboutPage() {
                     })}
                   </div>
                 </AnimatedText>
+                {/* Accent quote */}
+                <AnimatedText direction="up" delay={200} className="mt-8">
+                  <div className="relative pl-6 border-l-2 border-gold/30 py-2">
+                    <p className="text-base italic text-text-muted leading-relaxed">
+                      {t('personalStoryQuote')}
+                    </p>
+                  </div>
+                </AnimatedText>
               </div>
             </div>
           </div>
@@ -287,6 +303,81 @@ export function ClientAboutPage() {
               </AnimatedText>
             </motion.div>
           </div>
+        </SectionContainer>
+      </AnimatedSection>
+
+      {/* ════════════════════════════════════════
+           AUTHOR ACTIVITY — Авторская деятельность
+           ════════════════════════════════════════ */}
+      <AnimatedSection as="div" variant="fadeUp">
+        <SectionContainer size="md">
+          <AnimatedText
+            as="h2"
+            direction="up"
+            className="text-3xl md:text-4xl font-display text-text-primary text-center"
+          >
+            {t('authorActivityTitle')}
+          </AnimatedText>
+
+          <AnimatedText
+            direction="up"
+            delay={80}
+            className="mt-6 text-base text-text-secondary leading-relaxed max-w-3xl mx-auto text-center"
+          >
+            {t('authorActivityIntro')}
+          </AnimatedText>
+
+          <div className="mt-10 grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* List: Я являюсь автором */}
+            <div>
+              <AnimatedText
+                direction="up"
+                delay={100}
+                className="text-lg font-display text-gold mb-4"
+              >
+                {t('authorActivityListTitle')}
+              </AnimatedText>
+              <ul className="space-y-2">
+                {(t.raw('authorActivityItems') as string[]).map((item, i) => (
+                  <AnimatedText key={i} direction="up" delay={120 + i * 20}>
+                    <li className="flex items-start gap-2 text-sm text-text-secondary">
+                      <span className="mt-0.5 w-1.5 h-1.5 rounded-full bg-gold shrink-0" aria-hidden="true" />
+                      {item}
+                    </li>
+                  </AnimatedText>
+                ))}
+              </ul>
+            </div>
+
+            {/* List: Особое внимание уделяю */}
+            <div>
+              <AnimatedText
+                direction="up"
+                delay={100}
+                className="text-lg font-display text-gold mb-4"
+              >
+                {t('authorActivityFocusTitle')}
+              </AnimatedText>
+              <ul className="space-y-2">
+                {(t.raw('authorActivityFocus') as string[]).map((item, i) => (
+                  <AnimatedText key={i} direction="up" delay={120 + i * 20}>
+                    <li className="flex items-start gap-2 text-sm text-text-secondary">
+                      {item}
+                    </li>
+                  </AnimatedText>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* Closing statement */}
+          <AnimatedText
+            direction="up"
+            delay={200}
+            className="mt-10 text-base text-text-secondary leading-relaxed max-w-3xl mx-auto text-center italic"
+          >
+            {t('authorActivityClosing')}
+          </AnimatedText>
         </SectionContainer>
       </AnimatedSection>
 
