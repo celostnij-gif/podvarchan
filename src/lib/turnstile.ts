@@ -26,7 +26,5 @@ export function resetTurnstile(): void {
   turnstile.reset()
 }
 
-/** Публичный ключ Turnstile из переменных окружения */
-export const TURNSTILE_SITE_KEY = (
-  typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY : undefined
-) as string | undefined
+/** Публичный ключ Turnstile (публичный, встраивается в HTML/JS — безопасно) */
+export const TURNSTILE_SITE_KEY = '0x4AAAAAADYZ2z3RysEsBoQu' as const
