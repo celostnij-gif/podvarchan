@@ -65,8 +65,9 @@ export default function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(oldHtmlRedirects[htmlPath], request.url), 301)
   }
 
-  // Unknown .html files → 410 Gone
-  if (htmlPath.endsWith('.html')) {
+  // Any path containing .html (not just ending in .html) is legacy.
+  // Catches /diagnostika.html/blog/x/ and similar bot-invented paths.
+  if (pathname.includes('.html')) {
     return new Response(null, { status: 410 })
   }
 
@@ -157,11 +158,11 @@ export default function middleware(request: NextRequest) {
 
   const response = intlMiddleware(request)
 
-  // Fix 307/302 → 301 for all locale detection redirects (SEO: permanent)
+  // Fix 307/302 → 308 for all locale detection redirects (SEO: permanent, method-preserving)
   if (response.status === 307 || response.status === 302) {
     const location = response.headers.get('Location')
     if (location) {
-      const redirectResponse = NextResponse.redirect(new URL(location, request.url), 301)
+      const redirectResponse = NextResponse.redirect(new URL(location, request.url), 308)
       // Preserve locale cookie and other headers from intlMiddleware
       response.headers.forEach((value, key) => {
         if (key.toLowerCase() !== 'location') {
@@ -191,3 +192,28 @@ export const config = {
     '/((?!_next/|api/|\\.well-known/|favicon|images/|.*\\.(?:svg|png|jpg|jpeg|webp|avif|ico|css|js|txt|xml|json|md)(?:/|$)).*)',
   ],
 }
+
+// ── Regression test cases (manual curl verification) ──
+// 1. Bare path without locale prefix → 308:
+//    curl -sI https://podvarchan.com/blog/pochemu-voznikaet-panika-nochyu/
+//    → HTTP/2 308 → Location: /ru/blog/pochemu-voznikaet-panika-nochyu/
+//
+// 2. .html anywhere in path → 410 Gone:
+//    curl -sI https://podvarchan.com/diagnostika.html/blog/anything/
+//    → HTTP/2 410  (no redirect, no locale prefix added)
+//    curl -sI https://podvarchan.com/unknown.html
+//    → HTTP/2 410
+//
+// 3. 404 page → no canonical, noindex:
+//    curl https://podvarchan.com/ru/nego-sushchestvuyushchiy/
+//    → 200 (renders not-found)
+//    → <meta name="robots" content="noindex, nofollow">
+//    → NO <link rel="canonical">  (or canonical != /ru/)
+//
+// 4. Legacy .html with known mapping → 301 (unchanged):
+//    curl -sI https://podvarchan.com/otzyvy.html
+//    → HTTP/2 301 → Location: /ru/
+//
+// 5. /ua/ → /uk/ → 301 (unchanged):
+//    curl -sI https://podvarchan.com/ua/uslugi/
+//    → HTTP/2 301 → Location: /uk/uslugi/

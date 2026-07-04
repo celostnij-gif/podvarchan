@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: Props) {
   const ukCat = CATEGORY_SLUG_UK[cat]
   const ukPath = ukCat ? `/blog/kategoriya/${ukCat}` : undefined
 
-  return seoMetadata({
+  const metadata = seoMetadata({
     title: `${category.name} — ${t('pageTitle')}`,
     description: category.metaDescription,
     keywords: category.keywords,
@@ -50,6 +50,12 @@ export async function generateMetadata({ params }: Props) {
     ukPath,
     locale,
   })
+
+  // Blog category archives — thin content, noindex but keep link equity
+  return {
+    ...metadata,
+    robots: { index: false, follow: true },
+  }
 }
 
 export default async function BlogCategoryPage({ params }: Props) {
