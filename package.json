@@ -7,7 +7,12 @@
     "deploy": "npx opennextjs-cloudflare build && npx wrangler deploy",
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "cf-typegen": "wrangler types --env-interface CloudflareEnv ./cloudflare-env.d.ts"
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv ./cloudflare-env.d.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate:local": "wrangler d1 migrations apply podvarchan --local",
+    "db:migrate:prod": "wrangler d1 migrations apply podvarchan",
+    "db:seed": "tsx src/db/seed.ts",
+    "db:studio": "drizzle-kit studio"
   },
   "devDependencies": {
     "@tailwindcss/language-server": "^0.14.29",
