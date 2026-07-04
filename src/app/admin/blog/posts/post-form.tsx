@@ -1,0 +1,177 @@
+'use client'
+
+import { useActionState, useState, useCallback } from 'react'
+import Link from 'next/link'
+import { createPost, updatePost } from '@/app/admin/actions/blog'
+import { TipTapEditor } from './tiptap-editor'
+import type { PostWithTranslations } from '../types'
+
+interface Props {
+  post?: PostWithTranslations
+  categories: { id: string; slugBase: string; ruName?: string }[]
+}
+
+export function PostForm({ post, categories }: Props) {
+  const isEdit = !!post
+  const [ruContentHtml, setRuContentHtml] = useState(post?.translations.find(t => t.locale === 'ru')?.contentHtml ?? '')
+  const [ruContentJson, setRuContentJson] = useState(post?.translations.find(t => t.locale === 'ru')?.contentJson ?? '')
+  const [ukContentHtml, setUkContentHtml] = useState(post?.translations.find(t => t.locale === 'uk')?.contentHtml ?? '')
+  const [ukContentJson, setUkContentJson] = useState(post?.translations.find(t => t.locale === 'uk')?.contentJson ?? '')
+
+  const [state, formAction, pending] = useActionState(
+    async (_prev: { error?: string } | null, formData: FormData) => {
+      // Inject JSON content into formData
+      formData.set('ru_contentHtml', ruContentHtml)
+      formData.set('ru_contentJson', ruContentJson)
+      formData.set('uk_contentHtml', ukContentHtml)
+      formData.set('uk_contentJson', ukContentJson)
+      try {
+        if (isEdit) {
+          await updatePost(post!.id, formData)
+        } else {
+          await createPost(formData)
+        }
+        return null
+      } catch (err) {
+        return { error: err instanceof Error ? err.message : 'Unknown error' }
+      }
+    },
+    null,
+  )
+
+  const tr = useCallback((locale: string, field: string): string => {
+    if (!post) return ''
+    const t = post.translations.find((tr) => tr.locale === locale)
+    if (!t) return ''
+    return (t as unknown as Record<string, string | null>)[field] ?? ''
+  }, [post])
+
+  return (
+    <form action={formAction} className="space-y-6">
+      {state?.error && (
+        <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">{state.error}</div>
+      )}
+
+      <fieldset className="rounded-lg border p-4">
+        <legend className="text-sm font-semibold text-gray-700">Загальні поля</legend>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+          <div>
+            <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700">Категорія</label>
+            <select id="categoryId" name="categoryId" defaultValue={post?.categoryId ?? ''}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+              <option value="">—</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>{c.ruName ?? c.slugBase}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="status" className="block text-sm font-medium text-gray-700">Статус</label>
+            <select id="status" name="status" defaultValue={post?.status ?? 'DRAFT'}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+              <option value="DRAFT">Чернетка</option>
+              <option value="REVIEW">На рев&apos;ю</option>
+              <option value="PUBLISHED">Опубліковано</option>
+              <option value="ARCHIVED">Архів</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="readingMinutes" className="block text-sm font-medium text-gray-700">Читання (хв)</label>
+            <input id="readingMinutes" name="readingMinutes" type="number" min={0} defaultValue={post?.readingMinutes ?? 0}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+          </div>
+          <div>
+            <label htmlFor="publishedAt" className="block text-sm font-medium text-gray-700">Дата публікації</label>
+            <input id="publishedAt" name="publishedAt" type="date" defaultValue={post?.publishedAt?.slice(0, 10) ?? ''}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+          </div>
+        </div>
+      </fieldset>
+
+      {/* RU locale */}
+      <fieldset className="rounded-lg border border-blue-200 p-4">
+        <legend className="text-sm font-semibold text-blue-700">RU — переклад</legend>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label htmlFor="ru_slug" className="block text-sm font-medium text-gray-700">Slug *</label>
+            <input id="ru_slug" name="ru_slug" defaultValue={tr('ru', 'slug')} required
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+          </div>
+          <div>
+            <label htmlFor="ru_title" className="block text-sm font-medium text-gray-700">Заголовок *</label>
+            <input id="ru_title" name="ru_title" defaultValue={tr('ru', 'title')} required
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+          </div>
+          <div className="sm:col-span-2">
+            <label htmlFor="ru_excerpt" className="block text-sm font-medium text-gray-700">Короткий опис</label>
+            <textarea id="ru_excerpt" name="ru_excerpt" rows={2} defaultValue={tr('ru', 'excerpt')}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Контент (RU)</label>
+            <TipTapEditor
+              value={ruContentHtml}
+              onChange={(html, json) => { setRuContentHtml(html); setRuContentJson(json) }}
+              placeholder="Введіть текст статті..."
+            />
+            <input type="hidden" name="ru_contentHtml" value={ruContentHtml} />
+            <input type="hidden" name="ru_contentJson" value={ruContentJson} />
+          </div>
+          <div className="sm:col-span-2">
+            <label htmlFor="ru_faqJson" className="block text-sm font-medium text-gray-700">FAQ (JSON)</label>
+            <textarea id="ru_faqJson" name="ru_faqJson" rows={3} defaultValue={tr('ru', 'faqJson')}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm font-mono shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+          </div>
+        </div>
+      </fieldset>
+
+      {/* UK locale */}
+      <fieldset className="rounded-lg border border-blue-200 p-4">
+        <legend className="text-sm font-semibold text-blue-700">UK — переклад</legend>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label htmlFor="uk_slug" className="block text-sm font-medium text-gray-700">Slug *</label>
+            <input id="uk_slug" name="uk_slug" defaultValue={tr('uk', 'slug')} required
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+          </div>
+          <div>
+            <label htmlFor="uk_title" className="block text-sm font-medium text-gray-700">Заголовок *</label>
+            <input id="uk_title" name="uk_title" defaultValue={tr('uk', 'title')} required
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+          </div>
+          <div className="sm:col-span-2">
+            <label htmlFor="uk_excerpt" className="block text-sm font-medium text-gray-700">Короткий опис</label>
+            <textarea id="uk_excerpt" name="uk_excerpt" rows={2} defaultValue={tr('uk', 'excerpt')}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Контент (UK)</label>
+            <TipTapEditor
+              value={ukContentHtml}
+              onChange={(html, json) => { setUkContentHtml(html); setUkContentJson(json) }}
+              placeholder="Введіть текст статті..."
+            />
+            <input type="hidden" name="uk_contentHtml" value={ukContentHtml} />
+            <input type="hidden" name="uk_contentJson" value={ukContentJson} />
+          </div>
+          <div className="sm:col-span-2">
+            <label htmlFor="uk_faqJson" className="block text-sm font-medium text-gray-700">FAQ (JSON)</label>
+            <textarea id="uk_faqJson" name="uk_faqJson" rows={3} defaultValue={tr('uk', 'faqJson')}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm font-mono shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+          </div>
+        </div>
+      </fieldset>
+
+      <div className="flex items-center gap-3 border-t pt-4">
+        <button type="submit" disabled={pending}
+          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+          {pending ? 'Збереження...' : isEdit ? 'Зберегти зміни' : 'Створити пост'}
+        </button>
+        <Link href="/admin/blog/posts"
+          className="rounded-md px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100">
+          Скасувати
+        </Link>
+      </div>
+    </form>
+  )
+}
