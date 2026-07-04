@@ -18,13 +18,22 @@ export default function middleware(request: NextRequest) {
 
   // ── P-ADMIN: Admin route protection ──
   if (pathname.startsWith('/admin')) {
-    if (pathname === '/admin/login') return NextResponse.next()
-    if (pathname.includes('.')) return NextResponse.next()
+    // Strip trailing slash for consistent matching
+    const p = pathname.replace(/\/+$/, '')
+
+    // Login page is public
+    if (p === '/admin/login') return NextResponse.next()
+    // Static assets (fonts, icons) — let through
+    if (p.includes('.')) return NextResponse.next()
+
+    // Check for NextAuth session token
     const cookieName = request.url.startsWith('https')
       ? '__Secure-next-auth.session-token'
       : 'next-auth.session-token'
-    const sessionToken = request.cookies.get(cookieName)?.value
-    if (!sessionToken) {
+    const token = request.cookies.get(cookieName)?.value
+    if (!token) {
+      // Avoid redirect loop: if already at /admin/login[/] — let through
+      if (p === '/admin/login') return NextResponse.next()
       return NextResponse.redirect(new URL('/admin/login', request.url))
     }
     return NextResponse.next()
