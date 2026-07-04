@@ -41,6 +41,21 @@ interface KVNamespaceGetOptions<Expected> {
   cacheTtl?: number
 }
 
+/* ── Minimal D1Database type (avoids @cloudflare/workers-types dep) ── */
+interface D1Database {
+  prepare(query: string): D1PreparedStatement
+  dump(): Promise<ArrayBuffer>
+  batch<T = unknown>(statements: D1PreparedStatement[]): Promise<T[]>
+  exec(query: string): Promise<void>
+}
+interface D1PreparedStatement {
+  bind(...values: unknown[]): D1PreparedStatement
+  first<T = unknown>(colName?: string): Promise<T | null>
+  run<T = unknown>(): Promise<{ results: T[]; success: boolean }>
+  all<T = unknown>(): Promise<{ results: T[]; success: boolean }>
+  raw<T = unknown>(): Promise<T[]>
+}
+
 interface __BaseEnv_CloudflareEnv {
 	ASSETS: Fetcher;
 	NEXTJS_ENV: string;
@@ -50,7 +65,7 @@ interface __BaseEnv_CloudflareEnv {
 	CONTACT_EMAIL: string;
 	WORKER_SELF_REFERENCE: Fetcher /* podvarchan */;
 	RATE_LIMIT_KV?: KVNamespace;
-	CounterAgent: DurableObjectNamespace<import("./agents/counter").CounterAgent>;
+	DB: D1Database;
 }
 
 // Secrets set via `wrangler secret put` (not in wrangler.jsonc vars)
