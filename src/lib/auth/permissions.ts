@@ -20,6 +20,10 @@ export function canManageSettings(role: UserRole): boolean {
   return ['OWNER', 'ADMIN'].includes(role)
 }
 
+export function canViewAudit(role: UserRole): boolean {
+  return ['OWNER', 'ADMIN', 'EDITOR'].includes(role)
+}
+
 // Extend next-auth types
 declare module 'next-auth' {
   interface User {
