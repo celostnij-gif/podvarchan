@@ -84,6 +84,7 @@ export async function createCategory(formData: FormData) {
   })
 
   revalidatePath('/admin/blog/categories')
+  revalidatePath('/blog', 'layout')
   redirect('/admin/blog/categories')
 }
 
@@ -131,6 +132,7 @@ export async function updateCategory(id: string, formData: FormData) {
   })
 
   revalidatePath('/admin/blog/categories')
+  revalidatePath('/blog', 'layout')
   redirect('/admin/blog/categories')
 }
 
@@ -144,6 +146,7 @@ export async function deleteCategory(id: string) {
     createdAt: now(),
   })
   revalidatePath('/admin/blog/categories')
+  revalidatePath('/blog', 'layout')
 }
 
 /* ── Post Schemas ── */
@@ -210,6 +213,7 @@ export async function createPost(formData: FormData) {
   })
 
   revalidatePath('/admin/blog/posts')
+  revalidatePath('/blog', 'layout')
   redirect('/admin/blog/posts')
 }
 
@@ -263,6 +267,7 @@ export async function updatePost(id: string, formData: FormData) {
   })
 
   revalidatePath('/admin/blog/posts')
+  revalidatePath('/blog', 'layout')
   redirect('/admin/blog/posts')
 }
 
@@ -276,6 +281,7 @@ export async function deletePost(id: string) {
     createdAt: now(),
   })
   revalidatePath('/admin/blog/posts')
+  revalidatePath('/blog', 'layout')
 }
 
 export async function publishPost(id: string) {
@@ -290,6 +296,7 @@ export async function publishPost(id: string) {
     entityType: 'blog_post', entityId: id, afterJson: JSON.stringify({ status: newStatus }), createdAt: now(),
   })
   revalidatePath('/admin/blog/posts')
+  revalidatePath('/blog', 'layout')
 }
 
 /* ── FormData helpers ── */

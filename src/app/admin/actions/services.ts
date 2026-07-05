@@ -151,6 +151,7 @@ export async function createService(formData: FormData) {
   })
 
   revalidatePath('/admin/services')
+  revalidatePath('/uslugi', 'layout')
   redirect('/admin/services')
 }
 
@@ -295,6 +296,7 @@ export async function updateService(id: string, formData: FormData) {
 
   revalidatePath('/admin/services')
   revalidatePath(`/admin/services/${id}`)
+  revalidatePath('/uslugi', 'layout')
   redirect('/admin/services')
 }
 
@@ -325,6 +327,7 @@ export async function deleteService(id: string) {
   })
 
   revalidatePath('/admin/services')
+  revalidatePath('/uslugi', 'layout')
   redirect('/admin/services')
 }
 
@@ -357,4 +360,5 @@ export async function publishService(id: string) {
   })
 
   revalidatePath('/admin/services')
+  revalidatePath('/uslugi', 'layout')
 }

@@ -130,30 +130,54 @@ interface BlogPostItem {
  datePublished?: string
  dateModified?: string
 }
-
 /**
  * Запрашивает опубликованные услуги из D1 (или кидает ошибку для fallback).
+ * Используется в sitemap.ts = fallback на константы при ошибке.
  */
 export async function getPublishedServices(
-  _locale: string,
+  locale: string,
 ): Promise<TranslationItem[] | null> {
-  throw new Error('D1 not available')
+  const { getServices } = await import('@/lib/db/public')
+  const services = await getServices(locale)
+  return services.map((s) => ({
+    id: s.id,
+    priority: s.priority,
+    updatedAt: undefined,
+    translation: {
+      slug: s.slug,
+      title: s.title,
+      metaDescription: s.description ?? '',
+    },
+  }))
 }
 
 /**
  * Запрашивает опубликованные категории блога из D1 (или кидает ошибку для fallback).
  */
 export async function getPublishedBlogCategories(
-  _locale: string,
+  locale: string,
 ): Promise<{ translation: { slug: string } }[] | null> {
-  throw new Error('D1 not available')
+  const { getBlogCategories } = await import('@/lib/db/public')
+  const cats = await getBlogCategories(locale)
+  return cats.map((c) => ({
+    translation: { slug: c.slug },
+  }))
 }
 
 /**
  * Запрашивает опубликованные статьи блога из D1 (или кидает ошибку для fallback).
  */
 export async function getPublishedBlogPosts(
-  _locale: string,
+  locale: string,
 ): Promise<BlogPostItem[] | null> {
-  throw new Error('D1 not available')
+  const { getBlogPosts } = await import('@/lib/db/public')
+  const posts = await getBlogPosts(locale)
+  return posts.map((p) => ({
+    slug: p.slug,
+    updatedAt: p.updatedAt ? new Date(p.updatedAt) : undefined,
+    publishedAt: p.publishedAt ? new Date(p.publishedAt) : undefined,
+    translation: { slug: p.slug },
+    datePublished: p.publishedAt ?? undefined,
+    dateModified: p.updatedAt ?? undefined,
+  }))
 }

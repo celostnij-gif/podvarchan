@@ -77,6 +77,10 @@ export async function saveSeoOverride(formData: FormData) {
 
   revalidatePath('/admin/seo')
   revalidatePath(`/admin/seo/${entityType}/${entityId}`)
+  // Public page revalidation
+  if (entityType.startsWith('service')) revalidatePath('/uslugi', 'layout')
+  if (entityType.startsWith('blog')) revalidatePath('/blog', 'layout')
+  if (entityType === 'page') revalidatePath('/', 'layout')
 }
 
 /** Get SEO override for a specific entity. */
@@ -136,6 +140,8 @@ export async function bulkUpdateSeo(formData: FormData) {
   }
 
   revalidatePath('/admin/seo')
+  revalidatePath('/uslugi', 'layout')
+  revalidatePath('/blog', 'layout')
 }
 
 /** Generate CSV of audit data. */
