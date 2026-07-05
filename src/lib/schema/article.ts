@@ -66,7 +66,7 @@ export function articleSchema(params: ArticleSchemaParams): Record<string, unkno
       url: SITE.url,
       logo: {
         '@type': 'ImageObject',
-        url: `${SITE.url}/images/logo.png`,
+        url: `${SITE.url}/logo.webp`,
       },
     },
     datePublished,

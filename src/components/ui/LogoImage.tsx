@@ -50,7 +50,7 @@ export function LogoImage({ className = '', priority = false }: LogoImageProps) 
   ].join(', ')
 
   const imgProps: ImgHTMLAttributes<HTMLImageElement> = {
-    src: '/images/logo/logo-192.png',
+    src: '/images/logo/logo-192.webp',
     alt: '',
     width: 36,
     height: 36,

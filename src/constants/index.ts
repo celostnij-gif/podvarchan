@@ -7,7 +7,7 @@ export const SITE = {
   fullName: 'Podvarchan.com — гипнотерапия онлайн',
   url: 'https://podvarchan.com',
   locale: 'ru_RU',
-  defaultOgImage: '/images/og-default.jpg',
+  defaultOgImage: '/images/og-default.webp',
   themeColor: '#0A0A12',
   authorName: 'Вячеслав Подварчан',
   authorTitle: 'Гипнотерапевт онлайн',
