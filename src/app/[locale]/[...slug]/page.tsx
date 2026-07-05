@@ -21,9 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .get()
 
   if (!translation) {
-    return {
-      robots: { index: false, follow: false },
-    }
+    notFound()
   }
 
   return {
