@@ -3,6 +3,8 @@
     "dev": "next dev",
     "build": "npx opennextjs-cloudflare build",
     "start": "next start",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "eslint .",
     "deploy": "npx opennextjs-cloudflare build && npx wrangler deploy",
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
@@ -26,6 +28,7 @@
     "tsx": "^4.23.0",
     "typescript": "^5.9.3",
     "typescript-language-server": "^5.3.0",
+    "vitest": "^4.1.9",
     "wrangler": "^4.95.0"
   },
   "dependencies": {
