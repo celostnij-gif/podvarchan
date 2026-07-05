@@ -45,6 +45,11 @@ next-env.d.ts
 # cloudflare
 .wrangler/
 
+# test artifacts
+/test-results/
+/TEMP/
+playwright-report/
+
 # windows reserved filename
 nul
 

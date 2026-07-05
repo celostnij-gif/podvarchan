@@ -28,7 +28,7 @@
 	"workers_dev": true,
 
 	"d1_databases": [
-		{ "binding": "DB", "database_name": "podvarchan", "database_id": "ea2c9727-65f8-4d36-8ff1-5cfb2f4cef36" }
+		{ "binding": "DB", "database_name": "podvarchan", "database_id": "ea2c9727-65f8-4d36-8ff1-5cfb2f4cef36", "migrations_dir": "drizzle/migrations" }
 	],
 
 	"kv_namespaces": [
@@ -38,7 +38,6 @@
 		{ "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "podvarchan-inc-cache" },
 		{ "binding": "MEDIA_R2_BUCKET", "bucket_name": "podvarchan-media" }
 	],
-
 	"vars": {
 		"NEXTJS_ENV": "production",
 		"NEXT_PUBLIC_SITE_URL": "https://podvarchan.com",
@@ -46,7 +45,9 @@
 		"NEXT_PUBLIC_TURNSTILE_SITE_KEY": "0x4AAAAAADYZ2z3RysEsBoQu",
 		"CONTACT_EMAIL": "podvarchan@gmail.com",
 		"AUTH_TRUST_HOST": "true",
-		"REVALIDATE_URL": "https://podvarchan.com/api/revalidate"
+		"REVALIDATE_URL": "https://podvarchan.com/api/revalidate",
+		"AUTH_SECRET": "local-dev-secret-key-podvarchan-2026-42-chars!",
+		"ADMIN_SEED_EMAIL": "admin@podvarchan.com",
+		"ADMIN_SEED_PASSWORD": "Test1234!"
 	}
 }
-
