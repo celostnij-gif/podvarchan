@@ -4,7 +4,6 @@ import { mediaAssets } from '@/db/schema/media'
 import { getCurrentUser } from '@/lib/auth/session'
 import { canEditContent } from '@/lib/auth/permissions'
 
-export const runtime = 'edge'
 
 const ALLOWED_TYPES: Record<string, true> = {
   'image/jpeg': true,
