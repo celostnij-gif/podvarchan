@@ -18,6 +18,21 @@ interface KVNamespace {
   }): Promise<{ keys: { name: string; expiration?: number; metadata?: unknown }[]; list_complete: boolean; cursor?: string }>
 }
 
+/* ── Minimal R2Bucket type (avoids @cloudflare/workers-types dep) ── */
+interface R2Bucket {
+  put(key: string, value: ArrayBuffer | ReadableStream | string | Blob, options?: { httpMetadata?: { contentType?: string }; customMetadata?: Record<string, string> }): Promise<R2Object>
+  get(key: string): Promise<R2Object | null>
+  delete(key: string): Promise<void>
+}
+interface R2Object {
+  key: string
+  body: ReadableStream
+  bodyUsed: boolean
+  size: number
+  httpMetadata?: { contentType?: string }
+  customMetadata?: Record<string, string>
+}
+
 /* ── Minimal DurableObjectNamespace type (avoids @cloudflare/workers-types dep) ── */
 interface DurableObjectNamespace<T extends object = object> {
   idFromName(name: string): DurableObjectId;
