@@ -1,8 +1,8 @@
-import { notFound } from 'next/navigation'
 import { getDB } from '@/db'
 import { pages, pageTranslations, pageSections, pageSectionTranslations } from '@/db/schema/pages'
 import { eq, and } from 'drizzle-orm'
 import type { Metadata } from 'next'
+import NotFoundClient from '../not-found-client'
 
 interface Props {
   params: Promise<{ slug: string[]; locale: string }>
@@ -21,7 +21,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .get()
 
   if (!translation) {
-    notFound()
+    return {
+      robots: { index: false, follow: false },
+    }
   }
 
   return {
@@ -133,15 +135,14 @@ export default async function CatchAllPage({ params }: Props) {
     .get()
 
   if (!pageRow) {
-    notFound()
+    return <NotFoundClient />
   }
 
   const page = pageRow.pages
   const translation = pageRow.page_translations
-
   // Only render published CUSTOM pages
   if (page.status !== 'PUBLISHED' || page.type !== 'CUSTOM') {
-    notFound()
+    return <NotFoundClient />
   }
 
   // Load sections
