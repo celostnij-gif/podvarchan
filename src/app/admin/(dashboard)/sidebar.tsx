@@ -13,7 +13,8 @@ const navItems = [
   { href: '/admin/pages', label: 'Сторінки', icon: '📄' },
   { href: '/admin/media', label: 'Медіа', icon: '🖼️' },
   { href: '/admin/seo', label: 'SEO', icon: '🔍' },
-  { href: '/admin/settings', label: 'Налаштування', icon: '⚙️' },
+  { href: '/admin/navigation', label: 'Навігація', icon: '🧭' },
+  { href: '/admin/redirects', label: 'Редиректи', icon: '↗️' },
 ]
 
 export function AdminSidebar() {
