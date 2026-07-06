@@ -2,7 +2,6 @@ import { getDB } from '@/db'
 import { pages, pageTranslations, pageSections, pageSectionTranslations } from '@/db/schema/pages'
 import { eq, and } from 'drizzle-orm'
 import type { Metadata } from 'next'
-import Link from 'next/link'
 interface Props {
   params: Promise<{ slug: string[]; locale: string }>
 }
@@ -182,13 +181,16 @@ export default async function CatchAllPage({ params }: Props) {
 }
 
 function NotFound() {
+  /* eslint-disable @next/next/no-html-link-for-pages */
   return (
-    <main className="min-h-screen flex items-center justify-center bg-white px-4">
-      <div className="text-center">
-        <h1 className="text-6xl font-bold text-gray-900 mb-4">404</h1>
-        <p className="text-lg text-gray-600 mb-8">Страница не найдена</p>
-        <Link href="/" className="text-blue-600 hover:text-blue-800 underline">На главную</Link>
-      </div>
-    </main>
+    <html lang="ru">
+      <body style={{margin:0,background:'#fff',color:'#333',fontFamily:'sans-serif'}}>
+        <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',minHeight:'100vh',padding:'16px',textAlign:'center'}}>
+          <h1 style={{fontSize:'4rem',fontWeight:'bold',margin:'0 0 16px'}}>404</h1>
+          <p style={{fontSize:'1.125rem',color:'#666',margin:'0 0 32px'}}>Страница не найдена</p>
+          <a href="/" style={{color:'#2563eb'}}>На главную</a>
+        </div>
+      </body>
+    </html>
   )
 }
