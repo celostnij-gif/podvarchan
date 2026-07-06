@@ -66,12 +66,17 @@
 | `CLOUDFLARE_ACCOUNT_ID` | ✅ |
 | `CLOUDFLARE_DATABASE_ID` | ✅ |
 | `AUTH_SECRET` | ✅ |
+| `ADMIN_SEED_EMAIL` | ✅ |
+| `ADMIN_SEED_PASSWORD` | ✅ |
 | `NEXT_PUBLIC_SITE_URL` | ✅ |
 | `NEXT_PUBLIC_GA_ID` | ✅ |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | ✅ |
 | `CONTACT_EMAIL` | ✅ |
 | `TURNSTILE_SECRET_KEY` | ✅ |
 | `RESEND_API_KEY` | ✅ |
-
+| `DEPLOY` | ✅ |
+|
+| **Примітка:** Усі 13 secrets налаштовано станом на 2026-07-06.
 ### 9. Wrangler config
 - [ ] `wrangler.jsonc`:
   - [ ] D1 binding (`DB`) — ✅
