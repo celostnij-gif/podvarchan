@@ -28,8 +28,8 @@ export default function middleware(request: NextRequest) {
 
     // Check for NextAuth session token
     const cookieName = request.url.startsWith('https')
-      ? '__Secure-next-auth.session-token'
-      : 'next-auth.session-token'
+      ? '__Secure-authjs.session-token'
+      : 'authjs.session-token'
     const token = request.cookies.get(cookieName)?.value
     if (!token) {
       // Avoid redirect loop: if already at /admin/login[/] — let through
