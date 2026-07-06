@@ -2,8 +2,7 @@ import { getDB } from '@/db'
 import { pages, pageTranslations, pageSections, pageSectionTranslations } from '@/db/schema/pages'
 import { eq, and } from 'drizzle-orm'
 import type { Metadata } from 'next'
-import NotFoundClient from '../not-found-client'
-
+import Link from 'next/link'
 interface Props {
   params: Promise<{ slug: string[]; locale: string }>
 }
@@ -135,16 +134,15 @@ export default async function CatchAllPage({ params }: Props) {
     .get()
 
   if (!pageRow) {
-    return <NotFoundClient />
+    return <NotFound />
   }
 
   const page = pageRow.pages
   const translation = pageRow.page_translations
   // Only render published CUSTOM pages
   if (page.status !== 'PUBLISHED' || page.type !== 'CUSTOM') {
-    return <NotFoundClient />
+    return <NotFound />
   }
-
   // Load sections
   const sectionRows = await db
     .select()
@@ -179,6 +177,18 @@ export default async function CatchAllPage({ params }: Props) {
           <p className="text-gray-500">Содержимое страницы пусто</p>
         </div>
       )}
+    </main>
+  )
+}
+
+function NotFound() {
+  return (
+    <main className="min-h-screen flex items-center justify-center bg-white px-4">
+      <div className="text-center">
+        <h1 className="text-6xl font-bold text-gray-900 mb-4">404</h1>
+        <p className="text-lg text-gray-600 mb-8">Страница не найдена</p>
+        <Link href="/" className="text-blue-600 hover:text-blue-800 underline">На главную</Link>
+      </div>
     </main>
   )
 }
