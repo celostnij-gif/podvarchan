@@ -6,27 +6,11 @@ interface Props {
   params: Promise<{ slug: string[]; locale: string }>
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug: slugPath, locale } = await params
-  const slug = slugPath.join('/')
-
-  const db = getDB()
-  const translation = await db
-    .select()
-    .from(pageTranslations)
-    .innerJoin(pages, eq(pageTranslations.pageId, pages.id))
-    .where(and(eq(pageTranslations.slug, slug), eq(pageTranslations.locale, locale as 'ru' | 'uk'), eq(pages.status, 'PUBLISHED')))
-    .get()
-
-  if (!translation) {
-    return {
-      robots: { index: false, follow: false },
-    }
-  }
-
+export async function generateMetadata(): Promise<Metadata> {
+  // For non-existent catch-all pages, return noindex metadata.
+  // D1 query is skipped here to avoid production DB errors that cause 500.
   return {
-    title: translation.page_translations.title ?? undefined,
-    description: translation.page_translations.excerpt ?? undefined,
+    robots: { index: false, follow: false },
   }
 }
 
