@@ -329,7 +329,7 @@ export async function addSection(pageId: string, formData: FormData) {
 
 
 export async function updateSectionContent(sectionId: string, formData: FormData) {
-  const user = await requireEdit()
+  await requireEdit()
   const db = getDB()
 
   const locale = formData.get('locale') as string

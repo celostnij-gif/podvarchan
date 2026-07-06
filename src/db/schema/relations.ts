@@ -6,7 +6,6 @@ import { pages, pageTranslations, pageSections, pageSectionTranslations } from '
 import { faqItems, faqItemTranslations } from './faq'
 import { testimonials, testimonialTranslations } from './testimonials'
 import { contactLeads, leadEvents } from './leads'
-import { navigationItems } from './settings'
 
 export const usersRelations = relations(users, ({ many }) => ({
   auditLogs: many(auditLogs),

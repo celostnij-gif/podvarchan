@@ -44,7 +44,7 @@ export default async function TestimonialsListPage() {
           <tbody className="divide-y divide-gray-200 bg-white">
             {all.length === 0 ? (
               <tr><td colSpan={5} className="px-4 py-8 text-center text-sm text-gray-500">Відгуків ще немає.</td></tr>
-            ) : all.map(({ t, tr }) => {
+            ) : all.map(({ t }) => {
               return (
                 <tr key={t.id} className="hover:bg-gray-50">
                   <td className="whitespace-nowrap px-4 py-3"><StatusBadge status={t.status} /></td>

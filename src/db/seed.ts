@@ -18,6 +18,7 @@ import { globSync } from 'glob'
 import bcrypt from 'bcryptjs'
 import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3'
 import type { DrizzleD1Database } from 'drizzle-orm/d1'
+import type { SQLiteTable } from 'drizzle-orm/sqlite-core'
 import type { Service, BlogCategory, NavItem, BlogPost } from '@/types'
 
 let db: BetterSQLite3Database | DrizzleD1Database
@@ -180,7 +181,7 @@ export async function seed(forceDB?: typeof db): Promise<SeedReport> {
   const { eq } = await import('drizzle-orm')
   type UserRole = 'OWNER' | 'ADMIN' | 'EDITOR' | 'VIEWER'
 
-  async function insert(table: any, values: Record<string, unknown>) {
+  async function insert(table: SQLiteTable, values: Record<string, unknown>) {
     await (db as BetterSQLite3Database).insert(table).values(values).onConflictDoNothing()
   }
 

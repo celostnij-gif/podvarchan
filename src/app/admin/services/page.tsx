@@ -4,7 +4,7 @@ import { desc, eq, and, like } from 'drizzle-orm'
 import Link from 'next/link'
 import { PublishButton } from './publish-button'
 import { DeleteButton } from './delete-button'
-import type { ServiceWithTranslations } from './types'
+import type { ServiceTranslation, ServiceWithTranslations } from './types'
 
 interface Props {
   searchParams: Promise<{ status?: string; q?: string }>
@@ -42,7 +42,7 @@ export default async function ServicesListPage(props: Props) {
       })
     }
     if (row.service_translations) {
-      grouped.get(row.services.id)!.translations.push(row.service_translations as any)
+      grouped.get(row.services.id)!.translations.push(row.service_translations as unknown as ServiceTranslation)
     }
   }
   const allServices = Array.from(grouped.values())

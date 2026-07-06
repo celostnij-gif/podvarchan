@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+
 import { getDB } from '@/db'
 import { mediaAssets } from '@/db/schema/media'
 import { desc, like, or } from 'drizzle-orm'
