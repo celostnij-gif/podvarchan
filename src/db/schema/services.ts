@@ -32,5 +32,3 @@ export const serviceTranslations = sqliteTable('service_translations', {
 }, (table) => ({
   serviceLocaleIdx: index('idx_serv_trans_svc_loc').on(table.serviceId, table.locale),
 }))
-
-export const serviceRelations = null
