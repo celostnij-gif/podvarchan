@@ -15,29 +15,6 @@ const intlMiddleware = createMiddleware(routing)
 
 export default function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
-
-  // ── P-ADMIN: Admin route protection ──
-  if (pathname.startsWith('/admin')) {
-    // Strip trailing slash for consistent matching
-    const p = pathname.replace(/\/+$/, '')
-
-    // Login page is public
-    if (p === '/admin/login') return NextResponse.next()
-    // Static assets (fonts, icons) — let through
-    if (p.includes('.')) return NextResponse.next()
-
-    // Check for NextAuth session token
-    const cookieName = request.url.startsWith('https')
-      ? '__Secure-authjs.session-token'
-      : 'authjs.session-token'
-    const token = request.cookies.get(cookieName)?.value
-    if (!token) {
-      // Avoid redirect loop: if already at /admin/login[/] — let through
-      if (p === '/admin/login') return NextResponse.next()
-      return NextResponse.redirect(new URL('/admin/login', request.url))
-    }
-    return NextResponse.next()
-  }
   // P0: WWW → non-WWW redirect (301 permanent)
   const host = request.headers.get('host') ?? ''
   if (host.startsWith('www.')) {

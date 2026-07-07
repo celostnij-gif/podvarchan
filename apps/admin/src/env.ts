@@ -1,13 +1,17 @@
 import { z } from 'zod'
 
 const envSchema = z.object({
-  // Site
-  NEXT_PUBLIC_SITE_URL: z.string().url().default('https://podvarchan.com'),
-  NEXT_PUBLIC_GA_ID: z.string().min(1),
+  // Admin auth
+  AUTH_SECRET: z.string().min(1),
+  AUTH_TRUST_HOST: z.string().default('true'),
+  AUTH_URL: z.string().url().default('https://admin.podvarchan.com'),
 
-  // Contact
-  CONTACT_EMAIL: z.string().email().optional(),
-  RESEND_API_KEY: z.string().optional(),
+  // Admin seed
+  ADMIN_SEED_EMAIL: z.string().email().optional(),
+  ADMIN_SEED_PASSWORD: z.string().min(6).optional(),
+
+  // Site URL (for revalidation POST)
+  NEXT_PUBLIC_SITE_URL: z.string().url().default('https://podvarchan.com'),
 
   // Turnstile
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().optional(),
@@ -15,6 +19,10 @@ const envSchema = z.object({
 
   // Revalidation
   REVALIDATE_SECRET: z.string().optional(),
+
+  // Contact (for email on behalf)
+  CONTACT_EMAIL: z.string().email().optional(),
+  RESEND_API_KEY: z.string().optional(),
 })
 
 const parsed = envSchema.safeParse(process.env)
