@@ -1,1 +1,0 @@
-import { Drizzle } from "@drizzle/store"; export const schema = { name: "db", version: 1, stores: { users: { type: "json", primaryKey: "id" } } }

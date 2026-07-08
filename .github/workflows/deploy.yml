@@ -41,7 +41,6 @@ jobs:
           NEXT_PUBLIC_TURNSTILE_SITE_KEY: 0x4AAAAAADYZ2z3RysEsBoQu
           NEXTJS_ENV: production
           CONTACT_EMAIL: ${{ secrets.CONTACT_EMAIL }}
-          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_DATABASE_ID: ${{ secrets.CLOUDFLARE_DATABASE_ID }}
 
@@ -53,13 +52,11 @@ jobs:
           secrets: |
             TURNSTILE_SECRET_KEY
             RESEND_API_KEY
-            AUTH_SECRET
             REVALIDATE_SECRET
           command: deploy --no-autoconfig
         env:
           TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
           REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
 
       - name: IndexNow ping

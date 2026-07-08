@@ -1,5 +1,6 @@
-import { revalidateSiteLayout, revalidateSitePath } from '@/lib/revalidate'
 'use server'
+
+import { revalidateSiteLayout, revalidateSitePath } from '@/lib/revalidate'
 
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'

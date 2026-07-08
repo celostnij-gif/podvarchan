@@ -1,5 +1,6 @@
-import { revalidateSiteLayout, revalidateSitePath } from '@/lib/revalidate'
 'use server'
+
+import { revalidateSiteLayout, revalidateSitePath } from '@/lib/revalidate'
 
 import { getDB } from '@/db'
 import { seoMeta } from '@/db/schema/seo'

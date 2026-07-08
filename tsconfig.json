@@ -1,1 +1,25 @@
-{"compilerOptions": {"outDir": "dist", "sourceMap": true, "noImplicitAny": true, "module": "commonjs", "target": "es6"}}
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "downlevelIteration": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [{ "name": "next" }],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@podvarchan/shared": ["./packages/shared/src"]
+    }
+  },
+  "include": ["next-env.d.ts", "src", "cloudflare-env.d.ts", ".next/types/**/*.ts"],
+  "exclude": ["node_modules", "apps", "twilight-block-e1cd", "wrangler", "db"]
+}

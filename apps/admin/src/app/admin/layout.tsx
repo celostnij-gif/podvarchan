@@ -6,6 +6,8 @@
 
 import type { ReactNode } from 'react'
 import type { Metadata } from 'next'
+export const dynamic = 'force-dynamic'
+
 import { getAdminSession } from '@/lib/auth/session'
 import { AdminShell } from '@/components/admin'
 
