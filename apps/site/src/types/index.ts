@@ -1,0 +1,85 @@
+/* ── Service (услуга) — тільки системні поля, тексти в messages/*.json ── */
+
+export interface Service {
+  slug: string
+  category: string
+  priority: number
+  icon?: string
+  ctaLink: string
+  body?: string
+}
+
+/* ── Blog Post ── */
+
+export interface BlogPost {
+  slug: string
+  title: string
+  description: string
+  metaDescription: string
+  keywords: string[]
+  categorySlug: string
+  categoryName: string
+  datePublished: string
+  dateModified: string
+  author: string
+  readingTime: number
+  image?: string
+  imageAlt?: string
+  body?: string
+}
+
+/* ── Blog Category — тільки системні поля, тексти в messages/*.json ── */
+
+export interface BlogCategory {
+  slug: string
+  serviceSlug?: string
+}
+
+/* ── FAQ Item ── */
+
+export interface FAQItem {
+  question: string
+  answer: string
+}
+
+/* ── Breadcrumb ── */
+
+export interface BreadcrumbItem {
+  name: string
+  url: string
+}
+
+/* ── Page Metadata ── */
+
+export type PageType = 'page' | 'article' | 'service'
+
+export interface PageMeta {
+  title: string
+  description: string
+  keywords?: string[]
+  type?: PageType
+  canonical?: string
+  ogImage?: string
+  publishedTime?: string
+  modifiedTime?: string
+  author?: string
+}
+
+/* ── Navigation ── */
+
+export interface NavItem {
+  label: string
+  href: string
+  children?: NavItem[]
+}
+
+/* ── Testimonial ── */
+
+export interface Testimonial {
+  id: string
+  name: string
+  city?: string
+  text: string
+  result: string
+  rating?: number
+}

@@ -6,10 +6,14 @@
 
 # testing
 /coverage
+apps/*/.open-next/
+apps/*/node_modules/
+
 
 # next.js
 /.next/
 /out/
+apps/*/.next/
 
 # production
 /build
