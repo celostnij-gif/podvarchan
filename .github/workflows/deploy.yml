@@ -68,7 +68,7 @@ jobs:
       - name: Install dependencies
         run: |
           npm ci
-          cd apps/admin && npm ci
+          cd apps/admin && npm install --no-audit --no-fund
 
 
       - name: Build admin
