@@ -124,3 +124,13 @@ export async function publishTestimonial(id: string) {
   })
   revalidatePath('/admin/testimonials')
 }
+
+/* ── Reorder (drag-and-drop) ── */
+export async function reorderTestimonials(orderedIds: string[]) {
+  await requireEdit()
+  const db = await getActionDb()
+  for (let i = 0; i < orderedIds.length; i++) {
+    await db.update(testimonials).set({ sortOrder: i }).where(eq(testimonials.id, orderedIds[i]))
+  }
+  revalidatePath('/admin/testimonials')
+}

@@ -6,6 +6,8 @@ import { DeleteButton } from './delete-button'
 import { PublishToggle } from './publish-toggle'
 import type { PageRecord, PageTranslationRecord } from './types'
 
+export const dynamic = 'force-dynamic'
+
 interface Props {
   searchParams: Promise<{ status?: string; q?: string }>
 }
@@ -64,10 +66,10 @@ export default async function PagesListPage(props: Props) {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Сторінки</h1>
+        <h1 className="text-2xl font-bold text-zinc-100">Сторінки</h1>
         <Link
           href="/admin/pages/new"
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700"
         >
           + Нова сторінка
         </Link>
@@ -83,7 +85,7 @@ export default async function PagesListPage(props: Props) {
               const form = e.target.closest('form') as HTMLFormElement | null
               if (form) form.requestSubmit()
             }}
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
           >
             <option value="all">Всі статуси</option>
             <option value="PUBLISHED">Опубліковані</option>
@@ -95,41 +97,41 @@ export default async function PagesListPage(props: Props) {
             type="search"
             defaultValue={params.q ?? ''}
             placeholder="Пошук за назвою..."
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-64 rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
           />
           <button
             type="submit"
-            className="rounded-md bg-gray-100 px-3 py-2 text-sm text-gray-700 hover:bg-gray-200"
+            className="rounded-lg bg-zinc-700 px-4 py-2 text-sm text-zinc-200 hover:bg-zinc-600"
           >
-            Пошук
+            Знайти
           </button>
         </form>
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/40">
+        <table className="min-w-full divide-y divide-zinc-800">
+          <thead className="bg-zinc-800/30">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Назва</th>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">URL</th>
-              <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">Статус</th>
-              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Дії</th>
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">Назва</th>
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">URL</th>
+              <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-zinc-500">Статус</th>
+              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-zinc-500">Дії</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-zinc-800">
             {allPages.map((page) => {
               const slugs = getLocalizedSlug(page.translations)
               return (
-                <tr key={page.id} className="hover:bg-gray-50">
+                <tr key={page.id} className="hover:bg-zinc-800/30">
                   <td className="px-4 py-3">
-                    <Link href={`/admin/pages/${page.id}`} className="text-sm font-medium text-blue-600 hover:text-blue-800">
+                    <Link href={`/admin/pages/${page.id}`} className="text-sm font-medium text-amber-400 hover:text-amber-300">
                       {getLocalizedTitle(page.translations)}
                     </Link>
-                    <div className="text-xs text-gray-400">{page.type}</div>
+                    <div className="text-xs text-zinc-600">{page.type}</div>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-zinc-500">
                       {slugs.ru && <div>/ru/{slugs.ru}</div>}
                       {slugs.uk && <div>/uk/{slugs.uk}</div>}
                     </div>
@@ -141,9 +143,9 @@ export default async function PagesListPage(props: Props) {
                     <div className="flex items-center justify-end gap-2">
                       <Link
                         href={`/admin/pages/${page.id}`}
-                        className="rounded px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50"
+                        className="rounded px-2 py-1 text-xs font-medium text-amber-400 hover:bg-zinc-800"
                       >
-                        Редактировать
+                        Редагувати
                       </Link>
                       <DeleteButton pageId={page.id} pageTitle={getLocalizedTitle(page.translations)} />
                     </div>
@@ -153,8 +155,8 @@ export default async function PagesListPage(props: Props) {
             })}
             {allPages.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-sm text-gray-500">
-                  Страницы не найдены
+                <td colSpan={4} className="px-4 py-8 text-center text-sm text-zinc-600">
+                  Сторінки не знайдені
                 </td>
               </tr>
             )}

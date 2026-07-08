@@ -95,6 +95,16 @@ export async function deleteFaqItem(id: string) {
   redirect('/admin/faq')
 }
 
+/* ── Reorder (drag-and-drop) ── */
+export async function reorderFaqItems(orderedIds: string[]) {
+  await requireEdit()
+  const db = await getActionDb()
+  for (let i = 0; i < orderedIds.length; i++) {
+    await db.update(faqItems).set({ sortOrder: i }).where(eq(faqItems.id, orderedIds[i]))
+  }
+  revalidatePath('/admin/faq')
+}
+
 /* ── Backward-compatible aliases (old form imports use these names) ── */
 export const createFaq = createFaqItem
 export const updateFaq = updateFaqItem

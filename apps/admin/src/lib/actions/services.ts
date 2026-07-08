@@ -233,3 +233,14 @@ export async function publishService(id: string) {
   revalidatePath('/admin/services')
   revalidateSiteLayout('/uslugi')
 }
+
+/* ── Reorder (drag-and-drop) ── */
+export async function reorderServices(orderedIds: string[]) {
+  await requireEdit()
+  const db = await getActionDb()
+  for (let i = 0; i < orderedIds.length; i++) {
+    await db.update(services).set({ sortOrder: i }).where(eq(services.id, orderedIds[i]))
+  }
+  revalidatePath('/admin/services')
+  revalidateSiteLayout('/uslugi')
+}
