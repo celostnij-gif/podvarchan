@@ -14,6 +14,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     session({ session, token }) {
       if (session.user) {
+        // token.sub is auto-populated with user.id by NextAuth v5 from authorize()
+        session.user.id = token.sub as string
         session.user.role = token.role as UserRole
       }
       return session
