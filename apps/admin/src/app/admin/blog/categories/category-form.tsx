@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react'
 import Link from 'next/link'
-import { createCategory, updateCategory } from '@/app/admin/actions/blog'
+import { createCategory, updateCategory } from '@/lib/actions/blog'
 import type { CategoryWithTranslations } from '../types'
 
 interface Props {

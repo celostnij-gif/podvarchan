@@ -5,7 +5,7 @@ import { mediaAssets } from '@/db/schema/media'
 import { eq } from 'drizzle-orm'
 import { notFound } from 'next/navigation'
 import { MediaEditForm } from './form'
-import { deleteMedia } from '@/app/admin/actions/media'
+import { deleteMedia } from '@/lib/actions/media'
 
 interface Props {
   params: Promise<{ id: string }>

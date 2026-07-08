@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { updateSiteSetting, deleteSiteSetting } from '@/app/admin/actions/settings'
+import { updateSiteSetting, deleteSiteSetting } from '@/lib/actions/settings'
 
 interface Props {
   settings: { key: string; valueJson: string | null }[]

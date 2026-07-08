@@ -4,7 +4,7 @@ import { services, serviceTranslations } from '@/db/schema/services'
 import { blogPosts, blogPostTranslations } from '@/db/schema/blog'
 import { pages, pageTranslations } from '@/db/schema/pages'
 import { eq } from 'drizzle-orm'
-import { getSeoOverride } from '@/app/admin/actions/seo'
+import { getSeoOverride } from '@/lib/actions/seo'
 import { SeoEditForm } from './seo-edit-form'
 
 interface Props {

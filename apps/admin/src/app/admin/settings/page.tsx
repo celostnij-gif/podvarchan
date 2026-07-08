@@ -1,4 +1,4 @@
-import { getSiteSettings, getContactChannels } from '@/app/admin/actions/settings'
+import { getSiteSettings, getContactChannels } from '@/lib/actions/settings'
 import { ContactChannelList } from './contact-channels'
 import { SiteSettingsList } from './site-settings'
 

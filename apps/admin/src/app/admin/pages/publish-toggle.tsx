@@ -1,6 +1,6 @@
 'use client'
 
-import { updatePageMeta } from '@/app/admin/actions/pages'
+import { updatePageMeta } from '@/lib/actions/pages'
 
 interface PublishToggleProps {
   pageId: string

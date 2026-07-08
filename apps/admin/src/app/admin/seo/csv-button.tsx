@@ -1,7 +1,7 @@
 'use client'
 
 import { useTransition } from 'react'
-import { exportSeoCsv } from '@/app/admin/actions/seo'
+import { exportSeoCsv } from '@/lib/actions/seo'
 
 export function CsvExportButton() {
   const [isPending, startTransition] = useTransition()

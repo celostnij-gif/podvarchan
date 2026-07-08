@@ -1,7 +1,7 @@
 'use client'
 
 import { useFormStatus } from 'react-dom'
-import { deleteLead } from '@/app/admin/actions/leads'
+import { deleteLead } from '@/lib/actions/leads'
 
 interface Props {
   id: string

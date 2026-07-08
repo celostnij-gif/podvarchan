@@ -1,4 +1,4 @@
-import { getNavigationItems } from '@/app/admin/actions/settings'
+import { getNavigationItems } from '@/lib/actions/navigation'
 import { NavigationTree } from './navigation-tree'
 
 export const dynamic = 'force-dynamic'

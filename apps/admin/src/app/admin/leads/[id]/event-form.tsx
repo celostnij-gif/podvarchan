@@ -1,7 +1,7 @@
 'use client'
 
 import { useFormStatus } from 'react-dom'
-import { addLeadEvent } from '@/app/admin/actions/leads'
+import { addLeadEvent } from '@/lib/actions/leads'
 
 interface Props {
   leadId: string

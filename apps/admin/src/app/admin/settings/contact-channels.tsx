@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { saveContactChannel, deleteContactChannel } from '@/app/admin/actions/settings'
+import { saveContactChannel, deleteContactChannel } from '@/lib/actions/settings'
 import type { InferSelectModel } from 'drizzle-orm'
 import type { contactChannels as contactChannelsSchema } from '@/db/schema/settings'
 

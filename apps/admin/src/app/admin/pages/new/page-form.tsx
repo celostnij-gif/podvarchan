@@ -1,6 +1,6 @@
 'use client'
 
-import { createPage } from '@/app/admin/actions/pages'
+import { createPage } from '@/lib/actions/pages'
 import { useTransition } from 'react'
 import Link from 'next/link'
 

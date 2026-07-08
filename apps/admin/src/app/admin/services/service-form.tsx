@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState } from 'react'
-import { createService, updateService } from '@/app/admin/actions/services'
+import { createService, updateService } from '@/lib/actions/services'
 import Link from 'next/link'
 import type { ServiceWithTranslations } from './types'
 

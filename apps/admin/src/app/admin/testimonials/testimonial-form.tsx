@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react'
 import Link from 'next/link'
-import { createTestimonial, updateTestimonial } from '@/app/admin/actions/testimonials'
+import { createTestimonial, updateTestimonial } from '@/lib/actions/testimonials'
 
 interface TestimonialItem {
   id: string

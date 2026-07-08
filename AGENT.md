@@ -111,29 +111,33 @@
 ### ✅ Работает
 - Деплой через CI (build + wrangler deploy) — оба воркера
 - Админка отвечает на `admin.podvarchan.com` (307 → /admin/login)
-- **session.ts** — реальные `auth()` вызовы (починено 8 июля)
+- **session.ts** — реальные `auth()` вызовы
 - Логин-страница рендерится (0 `__next_error__`)
 - NextAuth: Credentials, D1 + bcrypt, JWT
 - Middleware защищает `/admin/*`
 - AUTH_SECRET, TURNSTILE_SECRET_KEY, REVALIDATE_SECRET установлены
-- Seed-админ существует в D1 (логин по ADMIN_SEED_EMAIL/PASSWORD)
+- Seed-админ существует в D1
+- **Foundation**: result.ts, db.ts, guard.ts, audit/log.ts, index.ts
+- **15 action modules** в `lib/actions/`: services, blog, faq, testimonials, leads, media, pages, seo, settings, navigation, redirects, users, audit, search
+- **Dashboard**: реальные D1-запросы (DashboardData nesting)
+- **Auth type unification**: 'USER' добавлен в UserRole
+- **Form imports**: все 30+ битых импортов исправлены
+- **Admin build**: 0 TypeScript ошибок, 35 routes
+- **Schema alignment**: все insert/set вызовы проверены против реальных shared schema колонок
 
-### ❌ Stubs (не работает)
+### ❌ Осталось
 | Компонент | Файл | Проблема |
 |-----------|------|----------|
-| **Dashboard** | `src/lib/admin/dashboard.ts` | Всегда нули |
-| **Server actions** | `src/lib/actions/*` | Stubs, нет реализации |
-| **R2 upload** | media actions | Не дописан |
-| **Audit log** | `src/lib/audit/log.ts` | Отсутствует |
-| **Формы** | `service-form.tsx` и др. | Неверные импорты |
+| **R2 upload** | media actions | Заглушка (нет загрузки в R2) |
+| **Search** | `src/lib/actions/search.ts` | Заглушка, нет полнотекстового поиска |
+| **Dashboard detail** | dashboard.ts | Только COUNT, нет черновиков/SEO/последних лидов |
 
 ### 🔜 Приоритет
-1. Протестировать логин на `admin.podvarchan.com`
-2. Dashboard — реальные D1-запросы
-3. Server actions — CRUD для контента
-4. R2 upload — загрузка медиа
-5. Audit log — логирование
-6. Формы — исправить импорты
+1. R2 upload + WebP (Stage 4)
+2. Drag-and-drop (Stage 5)
+3. Public D1 + cache invalidation (Stage 6)
+4. Regression (Stage 7)
+5. Delete old action files `src/app/admin/actions/` (clean up warnings)
 
 ## 6. Sitemap и robots.txt
 

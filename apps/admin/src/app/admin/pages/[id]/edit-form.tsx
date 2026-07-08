@@ -1,6 +1,6 @@
 'use client'
 
-import { updatePageMeta, deletePage } from '@/app/admin/actions/pages'
+import { updatePageMeta, deletePage } from '@/lib/actions/pages'
 import { useTransition } from 'react'
 import Link from 'next/link'
 import { SectionEditor } from './section-editor'

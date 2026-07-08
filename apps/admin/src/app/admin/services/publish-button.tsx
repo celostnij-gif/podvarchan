@@ -1,7 +1,7 @@
 'use client'
 
 import { useFormStatus } from 'react-dom'
-import { publishService } from '@/app/admin/actions/services'
+import { publishService } from '@/lib/actions/services'
 
 interface Props {
   id: string

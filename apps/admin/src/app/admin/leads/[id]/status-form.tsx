@@ -1,7 +1,7 @@
 'use client'
 
 import { useFormStatus } from 'react-dom'
-import { updateLeadStatus } from '@/app/admin/actions/leads'
+import { updateLeadStatus } from '@/lib/actions/leads'
 
 interface Props {
   leadId: string

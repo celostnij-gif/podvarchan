@@ -28,7 +28,7 @@ export function MediaEditForm({ asset, onDelete }: Props) {
     const formData = new FormData(form)
 
     startTransition(async () => {
-      const { updateMediaMeta } = await import('@/app/admin/actions/media')
+      const { updateMediaMeta } = await import('@/lib/actions/media')
       await updateMediaMeta(asset.id, formData)
       router.refresh()
     })

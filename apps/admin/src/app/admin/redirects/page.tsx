@@ -1,4 +1,4 @@
-import { getRedirectRules } from '@/app/admin/actions/settings'
+import { getRedirectRules } from '@/lib/actions/redirects'
 import { RedirectRulesList } from './redirect-rules-list'
 
 export const dynamic = 'force-dynamic'

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { saveRedirectRule, deleteRedirectRule, toggleRedirectRule } from '@/app/admin/actions/settings'
+import { saveRedirectRule, deleteRedirectRule, toggleRedirectRule } from '@/lib/actions/redirects'
 import type { InferSelectModel } from 'drizzle-orm'
 import type { redirectRules as redirectSchema } from '@/db/schema/settings'
 

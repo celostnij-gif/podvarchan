@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { saveNavigationItem, deleteNavigationItem, toggleNavigationItem } from '@/app/admin/actions/settings'
+import { saveNavigationItem, deleteNavigationItem, toggleNavigationItem } from '@/lib/actions/navigation'
 import type { InferSelectModel } from 'drizzle-orm'
 import type { navigationItems as navSchema } from '@/db/schema/settings'
 

@@ -1,4 +1,4 @@
-import { getAuditLogs, getAuditEntityTypes, getAuditActions } from '@/app/admin/actions/audit'
+import { getAuditLogs, getAuditEntityTypes, getAuditActions } from '@/lib/actions/audit'
 import { AuditLogTable } from './audit-table'
 import { AuditFilters } from './audit-filters'
 

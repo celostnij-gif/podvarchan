@@ -1,7 +1,7 @@
 'use client'
 
 import { useTransition } from 'react'
-import { saveSeoOverride } from '@/app/admin/actions/seo'
+import { saveSeoOverride } from '@/lib/actions/seo'
 import { useRouter } from 'next/navigation'
 
 interface EditFormProps {

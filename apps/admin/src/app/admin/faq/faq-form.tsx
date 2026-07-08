@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react'
 import Link from 'next/link'
-import { createFaq, updateFaq } from '@/app/admin/actions/faq'
+import { createFaq, updateFaq } from '@/lib/actions/faq'
 
 interface FaqItem {
   id: string

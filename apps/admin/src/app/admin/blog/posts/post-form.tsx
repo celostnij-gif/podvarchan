@@ -2,7 +2,7 @@
 
 import { useActionState, useState, useCallback } from 'react'
 import Link from 'next/link'
-import { createPost, updatePost } from '@/app/admin/actions/blog'
+import { createPost, updatePost } from '@/lib/actions/blog'
 import { TipTapEditor } from './tiptap-editor'
 import type { PostWithTranslations } from '../types'
 

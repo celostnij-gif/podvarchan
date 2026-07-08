@@ -1,7 +1,7 @@
 'use client'
 
 import { useFormStatus } from 'react-dom'
-import { deleteService } from '@/app/admin/actions/services'
+import { deleteService } from '@/lib/actions/services'
 
 interface Props {
   id: string

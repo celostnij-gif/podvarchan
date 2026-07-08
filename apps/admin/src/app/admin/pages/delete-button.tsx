@@ -1,6 +1,6 @@
 'use client'
 
-import { deletePage } from '@/app/admin/actions/pages'
+import { deletePage } from '@/lib/actions/pages'
 
 interface DeleteButtonProps {
   pageId: string

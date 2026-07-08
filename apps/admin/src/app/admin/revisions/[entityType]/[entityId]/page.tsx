@@ -1,4 +1,4 @@
-import { getRevisions } from '@/app/admin/actions/audit'
+import { getRevisions } from '@/lib/actions/audit'
 import { RevisionsList } from './revisions-list'
 
 export const dynamic = 'force-dynamic'

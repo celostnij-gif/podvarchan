@@ -1,7 +1,7 @@
 'use client'
 
 import { useFormStatus } from 'react-dom'
-import { updateInternalNote } from '@/app/admin/actions/leads'
+import { updateInternalNote } from '@/lib/actions/leads'
 import { useState } from 'react'
 
 interface Props {

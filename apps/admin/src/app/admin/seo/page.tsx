@@ -1,4 +1,4 @@
-import { getSeoAudit } from '@/app/admin/actions/seo'
+import { getSeoAudit } from '@/lib/actions/seo'
 import { computeAuditSummary, scoreColorClass, scoreLabel } from '@/lib/seo/audit'
 import { CsvExportButton } from './csv-button'
 

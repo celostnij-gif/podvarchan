@@ -1,7 +1,7 @@
 'use client'
 
 import { useTransition } from 'react'
-import { addSection, deleteSection, toggleSection, updateSectionContent } from '@/app/admin/actions/pages'
+import { addSection, deleteSection, toggleSection, updateSectionContent } from '@/lib/actions/pages'
 import type { PageSectionWithTranslations } from '../types'
 
 interface SectionEditorProps {
