@@ -1,223 +1,170 @@
 # AGENT.md: Core Guidelines and Workflow Protocol
 
 Привет! Ты — ИИ-разработчик, интегрированный в проект **Podvarchan.com**.
-Этот документ содержит фундаментальные правила работы с проектом, структуру коммуникации и протокол отслеживания прогресса. **Читай этот файл при каждом новом запуске или перезапуске сессии.**
+Этот документ содержит фундаментальные правила работы с проектом, структуру коммуникации. **Читай этот файл при каждом новом запуске или перезапуске сессии.**
 
-## 1\. Контекст проекта
+## 1. Архитектура: два воркера (сплит 8 июля 2026)
 
-* **Стек:** Next.js 15.5.18 (App Router), TypeScript, Tailwind CSS.
-* **Инфраструктура:** Cloudflare Workers (через OpenNext). Учитывай ограничения Edge-среды (флаг `nodejs\_compat`).
-* **Локализация:** `next-intl` (ru, uk). Любые изменения в текстах должны дублироваться в соответствующих JSON-файлах.
-* **Рендеринг:** В основном SSG, частично SSR (API, OpenGraph).
+Проект разделён на **два отдельных Cloudflare Worker**, которые деплоятся независимо через GitHub Actions.
 
-## 2\. Файли проекту (оновлено 2026-07-06)
+### Публичный сайт — `podvarchan` (podvarchan.com)
+- **Код:** корень `src/` (кроме админки), билд: `npm run build`
+- **Данные:** D1 (только чтение), R2 (медиа)
+- **next-intl** (ru/uk), SSG/ISR, SEO
+- **catch-all** `[...slug]/page.tsx` вызывает `notFound()` — HTTP 404
 
-### Основні файли в корені:
-- `MIGRATION_PLAN.md` — **ОСНОВНИЙ ПЛАН**. Перехід адмін-панелі на версію з Podvarchan.com.
-- `AGENT.md` — цей файл. Правила та протоколи.
-- `DEPLOY_CHECKLIST.md` — чекліст перед деплоєм.
-- `ADMIN_GUIDE.md` — посібник адмін-панелі.
+### Админ-панель — `podvarchan-admin` (admin.podvarchan.com)
+- **Код:** `apps/admin/`, билд: `cd apps/admin && npm run build`
+- **Данные:** D1 (CRUD), R2 (загрузка), KV (rate limit)
+- **Авторизация:** NextAuth v5 (Credentials, D1 + bcrypt, JWT)
+- **session.ts** — вызывает `auth()` из NextAuth (починено 8 июля)
+- **Логин:** работает с данными из ADMIN_SEED_EMAIL / ADMIN_SEED_PASSWORD (.env.local)
 
-### Основні файли в TEMP/:
-- `TEMP/TECH_REPORT_2026-06-27.md` — технічний звіт по сайту.
-- `TEMP/migration-progress.md` — **ТРЕКЕР**. Пофазовий список задач з чекбоксами. Оновлювати після кожної задачі.
+### Общее
+- **shared:** `packages/shared/` — Drizzle-схема, getDb, типы
+- **D1:** общая `podvarchan` (ID: `ea2c9727-65f8-4d36-8ff1-5cfb2f4cef36`)
+- **R2 media:** общий `podvarchan-media`
+- **Inc-cache:** раздельные бакеты (сайт: `podvarchan-inc-cache`, админка: `podvarchan-admin-inc-cache`)
 
-### Інші файли:
-- `DEPLOY_CHECKLIST.md` — чекліст перед деплоєм.
-- `ADMIN_GUIDE.md` — посібник адмін-панелі.
+## 2. Файлы проекта (обновлено 2026-07-08)
 
-## 3\. Протокол роботи і відновлення (Recovery Protocol)
+### Корень
+- `AGENT.md` — этот файл
+- `.env.local` — все секреты локально
+- `MIGRATION_PLAN.md` — старый план миграции (заморожен, сплит выполнен)
+- `ADMIN_GUIDE.md` — руководство админ-панели
 
-При втраті контексту, збої середовища або запуску нової сесії:
+### Публичный сайт
+- `src/app/[locale]/[...slug]/page.tsx` — catch-all с `notFound()`
+- `src/app/[locale]/not-found.tsx` — 404 (noindex, canonical null)
+- `src/middleware.ts` — редиректы локализации
 
-1. **Перевірити статус Git:** `git status` і `git diff`, щоб зрозуміти на чому зупинились.
-2. **Прочитати `MIGRATION_PLAN.md`:** Визначити поточну фазу міграції адмін-панелі.
-3. **Перевірити `src/app/admin/`:** Які сторінки вже переписані, які ще ні.
-4. **Прочитати `AGENT.md`:** Оновити контекст правил проекту.
+### Админ-панель (`apps/admin/`)
+- `src/lib/auth/session.ts` — **ВАЖНО**: auth() (починено 8 июля)
+- `src/auth.ts` / `src/auth.config.ts` — NextAuth
+- `src/middleware.ts` — защита `/admin/*`
+- `src/app/api/auth/[...nextauth]/route.ts` — NextAuth handler
+- `wrangler.jsonc` — D1, R2, KV конфиг
 
+### CI/CD
+- `.github/workflows/deploy.yml` — 2 jobs: site + admin
 
-* **Міграція, а не нова розробка:** Всі зміни — копіювання та адаптація файлів з `C:/buff/Podvarchan.com/`. Не писати з нуля.
-* **Атомарність фазами:** Виконуй одну фазу з `MIGRATION_PLAN.md` за раз. Не змішувати фази.
-* **Build після кожної фази:** `npm run build` — 0 помилок перед коммітом.
-* **Комміт після фази:** `git commit -m "feat(admin): Migration Phase X — назва"`
-* **Джерело truth:** `MIGRATION_PLAN.md` в корені проекту. Старі файли планів видалено.
-* **Безпека Cloudflare:** Не використовуй Node.js API несумісні з Workers.
+## 3. Протокол восстановления (Recovery Protocol)
 
-## 5\. Порядок виконання міграції
+При потере контекста или запуске новой сессии:
 
-1. При старті сесії — прочитай `MIGRATION_PLAN.md` (поточна фаза) та `AGENT.md` (правила).
-2. Вибери першу невиконану задачу з поточної фази.
-3. Проаналізуй файли-джерела в `C:/buff/Podvarchan.com/` та поточні файли в бекапі.
-4. Виконай копіювання/адаптацію.
-5. Протестуй: `npm run build` — 0 помилок.
-6. Якщо фаза завершена — `git add`, `git commit -m "feat(admin): Migration Phase X — назва"`, `git push`.
-7. Перейди до наступної фази.
+1. **Прочитать AGENT.md** — архитектура, состояние, todo
+2. **Проверить Git:** `git status`, `git log --oneline -5`
+3. **Проверить CI:** последний запуск Actions (оба воркера)
+4. **Проверить админку:** `curl -sL https://admin.podvarchan.com/admin/login | grep -c __next_error__` → 0
+5. **Проверить сайт:** `curl -sL -o /dev/null -w "%{http_code}" https://podvarchan.com/ru/nesuschestvuet-xyz/` → 404
 
-## 6\. Інфраструктура та конфігурація
+### Правила
+- **НЕ ТРОГАТЬ** админ-воркер когда работаешь с публичным сайтом и наоборот
+- **НЕ ДЕПЛОИТЬ** локально (`npx wrangler deploy`) — только push в `master`
+- **ВСЕГДА билдить** после изменений: `npm run build` или `cd apps/admin && npm run build`
+- **НЕ ПРАВИТЬ** not-found.tsx, robots.ts, middleware-редиректы, canonical
+- **НЕ ПРАВИТЬ** рабочие страницы сайта без явного запроса
 
-### 6.1. GitHub Actions
-**GitHub Actions** — основний пайплайн. Тригер: push в `master`.
-Workflow: `.github/workflows/deploy.yml`.
+## 4. Инфраструктура и деплой
 
-### 6.2. Secrets в GitHub
+### 4.1. GitHub Actions
+**Триггер:** push в `master`. Workflow: `.github/workflows/deploy.yml`
+- `deploy-site` — сборка + деплой `podvarchan`
+- `deploy-admin` — сборка + деплой `podvarchan-admin`
 
-| Secret | Призначення |
-|---|---|
-| CLOUDFLARE_API_TOKEN | Токен для wrangler deploy |
-| CLOUDFLARE_ACCOUNT_ID | Cloudflare Account ID |
-| CLOUDFLARE_DATABASE_ID | Database ID для D1 bindings |
-| AUTH_SECRET | Secret для NextAuth |
-| NEXT_PUBLIC_SITE_URL | https://podvarchan.com |
-| NEXT_PUBLIC_GA_ID | G-42W6951F8L |
-| NEXT_PUBLIC_TURNSTILE_SITE_KEY | 0x4AAAAAADYZ2z3RysEsBoQu |
-| CONTACT_EMAIL | podvarchan@gmail.com |
-| RESEND_API_KEY | Для Email Sending |
-| ADMIN_SEED_EMAIL | Email для seed-адміна |
-| ADMIN_SEED_PASSWORD | Пароль для seed-адміна |
-| DEPLOY | Флаг для GitHub Actions |
+### 4.2. Secrets в GitHub (все 15 установлены)
+| Secret | Назначение |
+|--------|-----------|
+| `CLOUDFLARE_API_TOKEN` | Токен wrangler deploy |
+| `CLOUDFLARE_ACCOUNT_ID` | `d2d025682352e4f90336d295deef3fce` |
+| `CLOUDFLARE_DATABASE_ID` | D1 database ID |
+| `AUTH_SECRET` | NextAuth JWT |
+| `AUTH_URL` | `https://admin.podvarchan.com` |
+| `NEXT_PUBLIC_SITE_URL` | `https://podvarchan.com` |
+| `NEXT_PUBLIC_GA_ID` | Google Analytics |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Turnstile |
+| `TURNSTILE_SECRET_KEY` | Turnstile verify |
+| `CONTACT_EMAIL` | `podvarchan@gmail.com` |
+| `RESEND_API_KEY` | Resend email |
+| `REVALIDATE_SECRET` | API revalidate |
+| `ADMIN_SEED_EMAIL` | Seed admin |
+| `ADMIN_SEED_PASSWORD` | Seed admin пароль |
+| `DEPLOY` | Флаг CI |
 
-| Secret (необов'язкові) | Призначення |
-|---|---|
-| AUTH_GOOGLE_ID | Google OAuth Client ID |
-| AUTH_GOOGLE_SECRET | Google OAuth Client Secret |
-| TURNSTILE_SECRET_KEY | Secret для Turnstile перевірки |
-| REVALIDATE_SECRET | Secret для revalidation API |
+### 4.3. Secrets на воркере (Cloudflare, установлены через API 8 июля)
+- `AUTH_SECRET`, `TURNSTILE_SECRET_KEY`, `REVALIDATE_SECRET`
+- `AUTH_URL` — в `vars:` в `apps/admin/wrangler.jsonc`
 
-### 6.3. Wrangler config
-- `wrangler.jsonc` — основний конфіг.
-- `compatibility_date: "2026-06-27"`.
-- `compatibility_flags: ["nodejs_compat", "global_fetch_strictly_public"]`.
-- Біндінги: `DB` (D1), `RATE_LIMIT_KV` (KV), `WORKER_SELF_REFERENCE`, `ASSETS`.
-- R2: `NEXT_INC_CACHE_R2_BUCKET`, `MEDIA_R2_BUCKET`.
+### 4.4. Wrangler configs
+- **Сайт:** корневой `wrangler.jsonc` — D1, KV, R2, ASSETS
+- **Админка:** `apps/admin/wrangler.jsonc` — те же D1/KV/R2 + отд. inc-cache
+- Compatibility: `nodejs_compat`, дата `2026-06-27`
 
-### 6.4. ЗАПРЕТ: локальний wrangler deploy
-**НІКОЛИ не використовуй `npx wrangler deploy` локально.** Деплой виключно через GitHub Actions: push в `master`.
-Виняток — тільки коли GitHub Actions недоступний і це погоджено з користувачем.
+### 4.5. @swc/helpers при npm ci
+**Симптом:** CI падает с `Missing: @swc/helpers@0.5.23 from lock file`
+**Фикс:** `npm install @swc/helpers@^0.5.23` → удалить `node_modules` + `package-lock.json` → `npm install`
+**Правило:** не редактировать lock-файл вручную
 
-### 6.5. РЕШЕНИЕ: помилка `@swc/helpers` при `npm ci`
+## 5. Текущее состояние админ-панели (2026-07-08)
 
-**Симптом:** GitHub Actions падає на `npm ci` з `Missing: @swc/helpers@0.5.23 from lock file`.
-**Причина:** npm 11 (локально) резолвить `@swc/helpers@0.5.15` в `package-lock.json`, але npm 10.9.2 (CI) потребує `0.5.23` через те, що `next` та інші пакети очікують новішу версію.
-**Фікс TRY 1 (не спрацював):** Ручне редагування `package-lock.json` (bump 0.5.15→0.5.23) — npm install знову писав 0.5.15.
-**Фікс TRY 2 (спрацював):**
-1. `npm install @swc/helpers@0.5.23` — додати як явну залежність в `package.json` з `^0.5.23`.
-2. Видалити `node_modules` та `package-lock.json`.
-3. `npm install` — повна перегенерація lock-файлу.
-4. Коміт: `7dd96e0` ("fix: regenerate package-lock.json, add @swc/helpers@0.5.23 explicit dep").
+### ✅ Работает
+- Деплой через CI (build + wrangler deploy) — оба воркера
+- Админка отвечает на `admin.podvarchan.com` (307 → /admin/login)
+- **session.ts** — реальные `auth()` вызовы (починено 8 июля)
+- Логин-страница рендерится (0 `__next_error__`)
+- NextAuth: Credentials, D1 + bcrypt, JWT
+- Middleware защищает `/admin/*`
+- AUTH_SECRET, TURNSTILE_SECRET_KEY, REVALIDATE_SECRET установлены
+- Seed-админ существует в D1 (логин по ADMIN_SEED_EMAIL/PASSWORD)
 
-**ЗОЛОТЕ ПРАВИЛО:** Якщо `npm ci` падає з помилкою "Missing: ... from lock file" — НЕ редагуй lock-файл вручну. Додай проблемний пакет як явну залежність в `package.json` і регенеруй `package-lock.json` через `npm install`.
+### ❌ Stubs (не работает)
+| Компонент | Файл | Проблема |
+|-----------|------|----------|
+| **Dashboard** | `src/lib/admin/dashboard.ts` | Всегда нули |
+| **Server actions** | `src/lib/actions/*` | Stubs, нет реализации |
+| **R2 upload** | media actions | Не дописан |
+| **Audit log** | `src/lib/audit/log.ts` | Отсутствует |
+| **Формы** | `service-form.tsx` и др. | Неверные импорты |
 
-| Модель | ID | Контекст | Особенность |
-|---|---|---|---|
-| **Qwen3 30B A3B FP8** | `@cf/qwen/qwen3-30b-a3b-fp8` | 32K токенов | Самая мощная, reasoning. Для сложной редактуры, YMYL-рецензирования, кода, архитектурных решений. |
-| **GLM 4.7 Flash** | `@cf/zai-org/glm-4.7-flash` | 131K токенов | Быстрая, большой контекст. Для пакетной обработки, локализации, аудита переводов, ревью множества файлов за раз. |
-| **Llama 3.2 3B** | `@cf/meta/llama-3.2-3b-instruct` | 80K токенов | Лёгкие задачи: проверка орфографии, быстрые ответы, простые рерайты. |
-| **Llama 3.2 11B Vision** | `@cf/meta/llama-3.2-11b-vision-instruct` | 128K токенов | Мультимодальная. Для генерации alt-текстов, анализа скриншотов/UI. |
-| **Mistral 7B** | `@cf/mistral/mistral-7b-instruct-v0.2-lora` | 15K токенов | Базовая. Для однофайловых ревью, простых рефакторингов. |
-| **Granite 4.0 H/Micro** | `@cf/ibm-granite/granite-4.0-h-micro` | 131K токенов | Большой контекст. Для анализа больших файлов, кодовых баз. |
-| **Llama 3.2 1B** | `@cf/meta/llama-3.2-1b-instruct` | 60K токенов | Для быстрых классификаций и простых проверок. |
-| **Gemma 2B/7B** | `@cf/google/gemma-2b-it-lora` / `@cf/google/gemma-7b-it-lora` | 8K/3.5K | Компактные. Для простых переформулировок. |
+### 🔜 Приоритет
+1. Протестировать логин на `admin.podvarchan.com`
+2. Dashboard — реальные D1-запросы
+3. Server actions — CRUD для контента
+4. R2 upload — загрузка медиа
+5. Audit log — логирование
+6. Формы — исправить импорты
 
-### 7.2. Назначение ролей в плане
+## 6. Sitemap и robots.txt
 
-Каждый план (в TEMP/) ДОЛЖЕН включать таблицу назначений:
+`robots.txt` генерируется динамически (`src/app/robots.ts`). Статический `public/robots.txt` не нужен.
+Sitemap генерируется Next.js из App Router. На 2026-06-26: 132 URL (66 страниц x 2 языка).
+`middleware.ts` исключает `/robots.txt` из обработки.
 
-```md
-| Роль | Модель | Обоснование |
-|---|---|---|
-| **Executor** | `cloudflare/@cf/qwen/qwen3-30b-a3b-fp8` | Сложная задача (код/YMYL/reasoning) |
-| **Reviewer** | `cloudflare/@cf/zai-org/glm-4.7-flash` | Быстрое ревью всех файлов за раз |
-```
+## 7. Работа с AI-моделями (Cloudflare Workers AI)
 
-### 7.3. Процесс Executor → Reviewer
+### Доступные модели
+| Модель | ID | Контекст |
+|--------|-----|----------|
+| Qwen3 30B A3B FP8 | `@cf/qwen/qwen3-30b-a3b-fp8` | 32K — сложные задачи, код |
+| GLM 4.7 Flash | `@cf/zai-org/glm-4.7-flash` | 131K — быстрое ревью |
+| Llama 3.2 3B | `@cf/meta/llama-3.2-3b-instruct` | 80K — лёгкие задачи |
+| Llama 3.2 11B Vision | `@cf/meta/llama-3.2-11b-vision-instruct` | 128K — мультимодальная |
+| Mistral 7B | `@cf/mistral/mistral-7b-instruct-v0.2-lora` | 15K — базовая |
+| Granite 4.0 H/Micro | `@cf/ibm-granite/granite-4.0-h-micro` | 131K — большие файлы |
 
-1. **Executor** (я или task-агент) выполняет задачу.
-2. **Reviewer** (Cloudflare-модель через curl/node_repl) проверяет дифф:
-   - GET Diff изменений.
-   - Отправить в Cloudflare AI с промптом на проверку качества/безопасности/YMYL.
-   - Получить вердикт: `PASS` / `NEEDS FIX` / `FAIL`.
-3. Если `PASS` → commit + push.
-4. Если `NEEDS FIX` → исправить замечания → повторное ревью.
-
-### 7.4. Модель по умолчанию
-
-Если задача не указана в плане — использовать `cloudflare/@cf/qwen/qwen3-30b-a3b-fp8` как executor и `cloudflare/@cf/zai-org/glm-4.7-flash` как reviewer.
-
-### 7.5. API эндпоинт
-
+### API эндпоинт
 ```
 POST https://api.cloudflare.com/client/v4/accounts/d2d025682352e4f90336d295deef3fce/ai/v1/chat/completions
 Authorization: Bearer CLOUDFLARE_API_TOKEN (из .env)
 Body: { model: "@cf/...", messages: [...], max_tokens: N }
 ```
 
-Модели указывать явно (full ID). Эндпоинт `/v1/models` не поддерживается (405).
+### Процесс Executor → Reviewer
+1. **Executor** выполняет задачу
+2. **Reviewer** (Cloudflare AI модель) проверяет diff
+3. Вердикт: `PASS` / `NEEDS FIX` / `FAIL`
 
-## 8. Sitemap и robots.txt (2026-06-26)
-
-### 8.1. Генерация robots.txt
-
-`robots.txt` генерируется **динамически** через Next.js Metadata Route API: `src/app/robots.ts`.
-Статический файл `public/robots.txt` **не нужен** — он перекроет динамическую генерацию.
-
-Строка 31 в `robots.ts`:
-```ts
-sitemap: `${SITE.url}/sitemap.xml`,
-```
-Автоматически добавляет `Sitemap: https://podvarchan.com/sitemap.xml` в `/robots.txt`.
-
-`middleware.ts` (строка 30) исключает `/robots.txt` из обработки — путь проходит к Next.js-роуту.
-
-### 8.2. Карта сайта (sitemap.xml)
-
-Sitemap генерируется Next.js (страницы из App Router). На 2026-06-26 содержит **132 URL** (66 уникальных страниц x 2 языка).
-
-**Группы страниц:**
-| Раздел | URL на язык |
-|---|---|
-| `/` — главная | 1 |
-| `/uslugi/` — услуги (категория) | 1 |
-| `/uslugi/*` — детальные услуги | 18 |
-| `/blog/` — блог (список) | 1 |
-| `/blog/kategoriya/*` — категории блога | 7 |
-| `/blog/*` — статьи | 20 |
-| `/ob-avtore/` — об авторе | 1 |
-| `/metod/` — метод | 1 |
-| `/tseny/` — цены | 1 |
-| `/faq/` — FAQ | 1 |
-| `/kontakty/` — контакты | 1 |
-| `/politika-konfidentsialnosti/` — политика | 1 |
-| `/disclaimer/` — дисклеймер | 1 |
-
-### 8.3. Свежий слепок ссылок
-
-Последний снепшот всех URL с live-версии сохранён в `%TEMP%\live-urls-podvarchan.txt` (132 URL, отсортированы, без дублей).
-
-
-## 9. Migration Rules (оновлено 2026-07-06)
-
-### 9.1. ZERO DEGRADATION
-**Публічний сайт завжди залишається робочим.** Жоден коміт не ламає build або рендеринг.
-1. `npm run build` — 0 помилок перед кожним комітом
-2. Якщо змінювалися публічні сторінки — curl перевірка 5 ключових URL
-3. Якщо змінювалася middleware — перевірити /admin/login та /admin редиректи
-
-### 9.2. Migration Workflow
-1. Одна фаза з `MIGRATION_PLAN.md` за раз
-2. Build після кожної фази
-3. Коміт: `feat(admin): Migration Phase X — назва`
-4. Push → GitHub Actions деплой
-5. Smoke test після деплою
-
-### 9.3. Source of truth
-**Джерело:** `C:/buff/Podvarchan.com/` — копіюємо звідти.
-**Приймач:** поточний проект — адаптуємо під його структуру.
-**План:** `MIGRATION_PLAN.md` в корені проекту.
-
-### 9.4. ASK BEFORE NEXT PHASE
-Перед початком нової фази — запитати користувача.
-Формат: "Migration Phase X завершена. Дозволяєте перейти до Phase X+1 — [назва]?"
-
-### 9.5. Schema changes
-Будь-які зміни в D1 схемах виконувати через Drizzle migrations.
-Не редагувати production D1 напряму.
+## 8. Schema changes
+- Любые изменения в D1 схемах — через Drizzle migrations
+- Не редактировать production D1 напрямую
