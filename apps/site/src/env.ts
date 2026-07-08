@@ -3,7 +3,7 @@ import { z } from 'zod'
 const envSchema = z.object({
   // Site
   NEXT_PUBLIC_SITE_URL: z.string().url().default('https://podvarchan.com'),
-  NEXT_PUBLIC_GA_ID: z.string().min(1),
+  NEXT_PUBLIC_GA_ID: z.string().min(1).optional(),
 
   // Contact
   CONTACT_EMAIL: z.string().email().optional(),
