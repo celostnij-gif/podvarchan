@@ -89,12 +89,6 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: apps/admin
-          secrets: |
-            TURNSTILE_SECRET_KEY
-            AUTH_SECRET
-            AUTH_URL
-            REVALIDATE_SECRET
           command: deploy --no-autoconfig
         env:
           TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
