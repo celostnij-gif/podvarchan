@@ -73,3 +73,4 @@ nul
 /linkbuilder
 # editor workspace settings (local LSP server config)
 /.vscode/
+*.zip

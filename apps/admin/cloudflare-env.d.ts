@@ -81,6 +81,7 @@ interface __BaseEnv_CloudflareEnv {
 	WORKER_SELF_REFERENCE: Fetcher /* podvarchan */;
 	RATE_LIMIT_KV?: KVNamespace;
 	DB: D1Database;
+	MEDIA_R2_BUCKET: R2Bucket;
 }
 
 // Secrets set via `wrangler secret put` (not in wrangler.jsonc vars)

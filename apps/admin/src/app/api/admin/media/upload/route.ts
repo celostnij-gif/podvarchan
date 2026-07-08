@@ -4,7 +4,6 @@ import { mediaAssets } from '@/db/schema/media'
 import { getCurrentUser } from '@/lib/auth/session'
 import { canEditContent } from '@/lib/auth/permissions'
 
-
 const ALLOWED_TYPES: Record<string, true> = {
   'image/jpeg': true,
   'image/png': true,
@@ -45,11 +44,16 @@ export async function POST(req: NextRequest) {
 
   const id = crypto.randomUUID()
   const ext = file.name.split('.').pop() || 'bin'
-  const storageKey = `media/${id}.${ext}`
+  const now = new Date()
+  const yyyy = now.getFullYear()
+  const mm = String(now.getMonth() + 1).padStart(2, '0')
+  const storageKey = `media/${yyyy}/${mm}/${id}.${ext}`
   const bytes = await file.arrayBuffer()
 
-  // Upload to R2 via binding
-  const r2 = process.env.MEDIA_R2_BUCKET as unknown as R2Bucket | undefined
+  // Upload to R2 via Cloudflare binding (available at runtime via OpenNext)
+  const { getCloudflareContext } = await import('@opennextjs/cloudflare')
+  const { env } = getCloudflareContext()
+  const r2 = env.MEDIA_R2_BUCKET as R2Bucket | undefined
   if (!r2) {
     return NextResponse.json({ error: 'Media storage not configured' }, { status: 500 })
   }
@@ -59,21 +63,24 @@ export async function POST(req: NextRequest) {
     customMetadata: { originalName: file.name },
   })
 
-  // Build public URL — served via a Worker fetch handler or direct R2 public URL
   const publicUrl = `/api/media/${storageKey}`
+  const width = formData.get('width') ? Number(formData.get('width')) : null
+  const height = formData.get('height') ? Number(formData.get('height')) : null
+  const nowISO = now.toISOString()
 
-  const now = new Date().toISOString()
   const db = getDB()
   await db.insert(mediaAssets).values({
     id,
-    fileName: storageKey,
+    fileName: file.name,
     originalName: file.name,
     mimeType: file.type,
     size: file.size,
+    width,
+    height,
     storageKey,
     publicUrl,
     uploadedById: user.id,
-    createdAt: now,
+    createdAt: nowISO,
   })
 
   return NextResponse.json({
@@ -82,5 +89,7 @@ export async function POST(req: NextRequest) {
     fileName: file.name,
     mimeType: file.type,
     size: file.size,
+    width,
+    height,
   })
 }

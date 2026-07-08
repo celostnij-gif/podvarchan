@@ -62,7 +62,3 @@ export async function deleteMedia(id: string) {
   redirect('/admin/media')
 }
 
-export async function uploadFile(_formData: FormData) {
-  await requireEdit()
-  throw new Error('R2 upload not yet implemented — see Stage 4')
-}

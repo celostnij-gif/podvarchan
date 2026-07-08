@@ -4,6 +4,7 @@ import { getDB } from '@/db'
 import { mediaAssets } from '@/db/schema/media'
 import { desc, like, or } from 'drizzle-orm'
 import Link from 'next/link'
+import { UploadZone } from '@/components/admin/media/UploadZone'
 
 interface Props {
   searchParams: Promise<{ q?: string }>
@@ -29,30 +30,32 @@ export default async function MediaListPage(props: Props) {
   const params = await props.searchParams
   const db = getDB()
 
-  const conditions = []
-  if (params.q) {
-    const q = `%${params.q}%`
-    conditions.push(
-      or(
-        like(mediaAssets.originalName, q),
-        like(mediaAssets.fileName, q),
-      )
-    )
-  }
+  const baseQuery = db.select().from(mediaAssets)
 
-  const rows = await db
-    .select()
-    .from(mediaAssets)
-    .orderBy(desc(mediaAssets.createdAt))
-    .all()
+  const filtered = params.q
+    ? await baseQuery
+        .where(
+          or(
+            like(mediaAssets.originalName, `%${params.q}%`),
+            like(mediaAssets.fileName, `%${params.q}%`),
+          )
+        )
+        .orderBy(desc(mediaAssets.createdAt))
+        .all()
+    : await baseQuery.orderBy(desc(mediaAssets.createdAt)).all()
 
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Медіатека</h1>
-        <span className="text-sm text-gray-500">
-          Всього: {rows.length}
+        <h1 className="text-2xl font-bold text-gray-100">Медіатека</h1>
+        <span className="text-sm text-gray-400">
+          Всього: {filtered.length}
         </span>
+      </div>
+
+      {/* Upload zone */}
+      <div className="mb-8">
+        <UploadZone />
       </div>
 
       {/* Search */}
@@ -63,18 +66,18 @@ export default async function MediaListPage(props: Props) {
             type="search"
             defaultValue={params.q ?? ''}
             placeholder="Пошук за назвою..."
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-64 rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-gray-200 placeholder-gray-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
           />
           <button
             type="submit"
-            className="rounded-md bg-gray-100 px-3 py-2 text-sm text-gray-700 hover:bg-gray-200"
+            className="rounded-lg bg-zinc-700 px-4 py-2 text-sm text-gray-200 hover:bg-zinc-600"
           >
             Пошук
           </button>
           {params.q && (
             <Link
               href="/admin/media"
-              className="text-sm text-gray-500 hover:text-gray-700"
+              className="text-sm text-gray-400 hover:text-gray-200"
             >
               × Скинути
             </Link>
@@ -83,19 +86,23 @@ export default async function MediaListPage(props: Props) {
       </div>
 
       {/* Grid */}
-      {rows.length === 0 ? (
-        <div className="rounded-lg border bg-white py-12 text-center text-sm text-gray-500">
-          {params.q ? 'Нічого не знайдено.' : 'Медіатека порожня. Завантажте файли через API.'}
+      {filtered.length === 0 ? (
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 py-16 text-center">
+          <p className="text-sm text-gray-500">
+            {params.q
+              ? 'Нічого не знайдено.'
+              : 'Медіатека порожня. Перетягніть файли в зону вище, щоб завантажити.'}
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {rows.map((asset) => (
+          {filtered.map((asset) => (
             <Link
               key={asset.id}
               href={`/admin/media/${asset.id}`}
-              className="group rounded-lg border bg-white p-2 transition-shadow hover:shadow-md"
+              className="group rounded-xl border border-zinc-800 bg-zinc-900/60 p-2 transition-all hover:border-zinc-700 hover:bg-zinc-800/60 hover:shadow-lg"
             >
-              <div className="mb-2 flex aspect-square items-center justify-center overflow-hidden rounded-md bg-gray-50">
+              <div className="mb-2 flex aspect-square items-center justify-center overflow-hidden rounded-lg bg-zinc-800/80">
                 {asset.mimeType?.startsWith('image/') && asset.mimeType !== 'image/svg+xml' ? (
                   <img
                     src={asset.publicUrl || ''}
@@ -109,10 +116,10 @@ export default async function MediaListPage(props: Props) {
                   </span>
                 )}
               </div>
-              <div className="truncate text-xs text-gray-700" title={asset.originalName || ''}>
+              <div className="truncate px-0.5 text-xs text-gray-300" title={asset.originalName || ''}>
                 {asset.originalName || '—'}
               </div>
-              <div className="text-xs text-gray-400">
+              <div className="px-0.5 text-xs text-gray-500">
                 {asset.size ? formatSize(asset.size) : '—'}
                 {asset.mimeType && ` · ${asset.mimeType.split('/').pop()}`}
               </div>

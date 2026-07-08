@@ -65,6 +65,7 @@ const postSchema = z.object({
 /* ── Category Actions ── */
 
 export async function createCategory(formData: FormData) {
+  const userId = await requireEdit()
   const db = await getActionDb()
   const translations = [
     { locale: 'ru', slug: formData.get('ru_slug'), name: formData.get('ru_name'), description: formData.get('ru_description') },
@@ -82,12 +83,13 @@ export async function createCategory(formData: FormData) {
   for (const t of data.translations) {
     await db.insert(blogCategoryTranslations).values({ id: crypto.randomUUID(), categoryId: id, locale: t.locale, slug: t.slug, name: t.name || null, description: t.description || null })
   }
-  await writeAuditLog({ userId: '', action: 'CREATE', entityType: 'BLOG_CATEGORY', entityId: id, after: data })
+  await writeAuditLog({ userId, action: 'CREATE', entityType: 'BLOG_CATEGORY', entityId: id, after: data })
   revalidatePath('/admin/blog/categories')
   redirect('/admin/blog/categories')
 }
 
 export async function updateCategory(id: string, formData: FormData) {
+  const userId = await requireEdit()
   const db = await getActionDb()
   const existing = await db.select().from(blogCategories).where(eq(blogCategories.id, id)).get()
   if (!existing) throw new Error('Category not found')
@@ -110,17 +112,18 @@ export async function updateCategory(id: string, formData: FormData) {
       await db.insert(blogCategoryTranslations).values({ id: crypto.randomUUID(), categoryId: id, locale: t.locale, slug: t.slug, name: t.name || null, description: t.description || null })
     }
   }
-  await writeAuditLog({ userId: '', action: 'UPDATE', entityType: 'BLOG_CATEGORY', entityId: id, before: existing, after: data })
+  await writeAuditLog({ userId, action: 'UPDATE', entityType: 'BLOG_CATEGORY', entityId: id, before: existing, after: data })
   revalidatePath('/admin/blog/categories')
   redirect('/admin/blog/categories')
 }
 
 export async function deleteCategory(id: string) {
+  const userId = await requireEdit()
   const db = await getActionDb()
   const existing = await db.select().from(blogCategories).where(eq(blogCategories.id, id)).get()
   if (!existing) throw new Error('Category not found')
   await db.delete(blogCategories).where(eq(blogCategories.id, id))
-  await writeAuditLog({ userId: '', action: 'DELETE', entityType: 'BLOG_CATEGORY', entityId: id, before: existing })
+  await writeAuditLog({ userId, action: 'DELETE', entityType: 'BLOG_CATEGORY', entityId: id, before: existing })
   revalidatePath('/admin/blog/categories')
   redirect('/admin/blog/categories')
 }
@@ -128,6 +131,7 @@ export async function deleteCategory(id: string) {
 /* ── Post Actions ── */
 
 export async function createPost(formData: FormData) {
+  const userId = await requireEdit()
   const db = await getActionDb()
   const translations = [
     { locale: 'ru', slug: formData.get('ru_slug'), title: formData.get('ru_title'), excerpt: formData.get('ru_excerpt'), contentJson: formData.get('ru_contentJson'), contentHtml: formData.get('ru_contentHtml'), tableOfContentsJson: formData.get('ru_tableOfContentsJson'), faqJson: formData.get('ru_faqJson') },
@@ -157,13 +161,14 @@ export async function createPost(formData: FormData) {
       tableOfContentsJson: t.tableOfContentsJson || null, faqJson: t.faqJson || null,
     })
   }
-  await writeAuditLog({ userId: '', action: 'CREATE', entityType: 'BLOG_POST', entityId: id, after: data })
+  await writeAuditLog({ userId, action: 'CREATE', entityType: 'BLOG_POST', entityId: id, after: data })
   revalidatePath('/admin/blog/posts')
   revalidateSiteLayout('/blog')
   redirect('/admin/blog/posts')
 }
 
 export async function updatePost(id: string, formData: FormData) {
+  const userId = await requireEdit()
   const db = await getActionDb()
   const existing = await db.select().from(blogPosts).where(eq(blogPosts.id, id)).get()
   if (!existing) throw new Error('Post not found')
@@ -203,7 +208,7 @@ export async function updatePost(id: string, formData: FormData) {
       })
     }
   }
-  await writeAuditLog({ userId: '', action: 'UPDATE', entityType: 'BLOG_POST', entityId: id, before: existing, after: data })
+  await writeAuditLog({ userId, action: 'UPDATE', entityType: 'BLOG_POST', entityId: id, before: existing, after: data })
   revalidatePath('/admin/blog/posts')
   revalidatePath(`/admin/blog/posts/${id}`)
   revalidateSiteLayout('/blog')
@@ -211,24 +216,26 @@ export async function updatePost(id: string, formData: FormData) {
 }
 
 export async function deletePost(id: string) {
+  const userId = await requireEdit()
   const db = await getActionDb()
   const existing = await db.select().from(blogPosts).where(eq(blogPosts.id, id)).get()
   if (!existing) throw new Error('Post not found')
   await db.delete(blogPosts).where(eq(blogPosts.id, id))
-  await writeAuditLog({ userId: '', action: 'DELETE', entityType: 'BLOG_POST', entityId: id, before: existing })
+  await writeAuditLog({ userId, action: 'DELETE', entityType: 'BLOG_POST', entityId: id, before: existing })
   revalidatePath('/admin/blog/posts')
   revalidateSiteLayout('/blog')
   redirect('/admin/blog/posts')
 }
 
 export async function publishPost(id: string) {
+  const userId = await requireEdit()
   const db = await getActionDb()
   const existing = await db.select().from(blogPosts).where(eq(blogPosts.id, id)).get()
   if (!existing) throw new Error('Post not found')
   const newStatus = existing.status === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED'
   await db.update(blogPosts).set({ status: newStatus, updatedAt: await now() }).where(eq(blogPosts.id, id))
   await writeAuditLog({
-    userId: '', action: newStatus === 'PUBLISHED' ? 'PUBLISH' : 'UNPUBLISH',
+    userId, action: newStatus === 'PUBLISHED' ? 'PUBLISH' : 'UNPUBLISH',
     entityType: 'BLOG_POST', entityId: id, after: { status: newStatus },
   })
   revalidatePath('/admin/blog/posts')
