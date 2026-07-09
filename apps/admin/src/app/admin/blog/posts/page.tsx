@@ -9,6 +9,21 @@ interface Props {
 }
 
 export default async function BlogPostsPage(props: Props) {
+  try {
+    return await BlogPostsPageContent(props)
+  } catch (e) {
+    return (
+      <div className="p-8">
+        <h1 className="text-2xl font-bold mb-4 text-red-400">Помилка</h1>
+        <pre className="bg-zinc-900 p-4 rounded-lg text-sm text-red-300 font-mono overflow-auto max-w-full whitespace-pre-wrap">
+          {e instanceof Error ? `${e.message}\n\n${e.stack}` : String(e)}
+        </pre>
+      </div>
+    )
+  }
+}
+
+async function BlogPostsPageContent(props: Props) {
   const params = await props.searchParams
   const db = getDB()
 
