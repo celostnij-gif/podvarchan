@@ -4,6 +4,7 @@ import { useActionState, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { createPost, updatePost } from '@/lib/actions/blog'
 import { TipTapEditor } from './tiptap-editor'
+import { MediaPickerDialog } from '@/components/admin/media/MediaPickerDialog'
 import type { PostWithTranslations } from '../types'
 
 interface Props {
@@ -17,6 +18,8 @@ export function PostForm({ post, categories }: Props) {
   const [ruContentJson, setRuContentJson] = useState(post?.translations.find(t => t.locale === 'ru')?.contentJson ?? '')
   const [ukContentHtml, setUkContentHtml] = useState(post?.translations.find(t => t.locale === 'uk')?.contentHtml ?? '')
   const [ukContentJson, setUkContentJson] = useState(post?.translations.find(t => t.locale === 'uk')?.contentJson ?? '')
+  const [coverImageUrl, setCoverImageUrl] = useState(post?.coverImageId ?? '')
+  const [showCoverPicker, setShowCoverPicker] = useState(false)
 
   const [state, formAction, pending] = useActionState(
     async (_prev: { error?: string } | null, formData: FormData) => {
@@ -25,6 +28,7 @@ export function PostForm({ post, categories }: Props) {
       formData.set('ru_contentJson', ruContentJson)
       formData.set('uk_contentHtml', ukContentHtml)
       formData.set('uk_contentJson', ukContentJson)
+      formData.set('coverImageId', coverImageUrl)
       try {
         if (isEdit) {
           await updatePost(post!.id, formData)
@@ -86,7 +90,67 @@ export function PostForm({ post, categories }: Props) {
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
           </div>
         </div>
+
+        {/* Cover image */}
+        <div className="mt-4 border-t pt-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Обкладинка посту</label>
+          <div className="flex items-start gap-4">
+            <div className="flex-1">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={coverImageUrl}
+                  onChange={(e) => setCoverImageUrl(e.target.value)}
+                  placeholder="/images/blog/photo.webp або /api/media/..."
+                  className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCoverPicker(true)}
+                  className="rounded-md bg-gray-100 px-3 py-2 text-sm text-gray-700 hover:bg-gray-200"
+                >
+                  Медіатека
+                </button>
+                {coverImageUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setCoverImageUrl('')}
+                    className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600 hover:bg-red-100"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            </div>
+            {coverImageUrl && (
+              <div className="shrink-0 overflow-hidden rounded-lg border bg-gray-50" style={{ width: 160, height: 90 }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={coverImageUrl}
+                  alt="Обкладинка"
+                  className="h-full w-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                    (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                  }}
+                />
+                <div className="hidden flex items-center justify-center h-full text-xs text-gray-400">
+                  Невірний URL
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </fieldset>
+
+      <MediaPickerDialog
+        open={showCoverPicker}
+        onClose={() => setShowCoverPicker(false)}
+        onSelect={(asset) => {
+          if (asset.publicUrl) setCoverImageUrl(asset.publicUrl)
+          setShowCoverPicker(false)
+        }}
+      />
 
       {/* RU locale */}
       <fieldset className="rounded-lg border border-blue-200 p-4">
