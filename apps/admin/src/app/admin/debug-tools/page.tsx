@@ -2,7 +2,6 @@ import { getDB } from '@/db'
 import { getCloudflareContext } from '@opennextjs/cloudflare'
 
 export const dynamic = 'force-dynamic'
-export const runtime = 'edge'
 
 export default async function DebugPage() {
   const results: { label: string; ok: boolean; error?: string }[] = []
@@ -19,7 +18,7 @@ export default async function DebugPage() {
   // Test 2: Basic D1 query
   try {
     const stmt = env.DB.prepare('SELECT 1 as test')
-    const r = await stmt.run()
+    await stmt.run()
     results.push({ label: 'D1 basic query (env.DB.prepare().run())', ok: true })
   } catch (e) {
     results.push({ label: 'D1 basic query', ok: false, error: String(e) })
@@ -28,7 +27,7 @@ export default async function DebugPage() {
   // Test 3: FAQ query (known working)
   try {
     const stmt = env.DB.prepare('SELECT COUNT(*) as count FROM faq_items')
-    const r = await stmt.run()
+    await stmt.run()
     results.push({ label: 'FAQ table query (SELECT COUNT FROM faq_items)', ok: true })
   } catch (e) {
     results.push({ label: 'FAQ table query', ok: false, error: String(e) })
@@ -37,7 +36,7 @@ export default async function DebugPage() {
   // Test 4: Blog posts query (known failing)
   try {
     const stmt = env.DB.prepare('SELECT COUNT(*) as count FROM blog_posts')
-    const r = await stmt.run()
+    await stmt.run()
     results.push({ label: 'Blog posts table query (SELECT COUNT FROM blog_posts)', ok: true })
   } catch (e) {
     results.push({ label: 'Blog posts table query', ok: false, error: String(e) })
@@ -46,7 +45,7 @@ export default async function DebugPage() {
   // Test 5: Services query
   try {
     const stmt = env.DB.prepare('SELECT COUNT(*) as count FROM services')
-    const r = await stmt.run()
+    await stmt.run()
     results.push({ label: 'Services table query', ok: true })
   } catch (e) {
     results.push({ label: 'Services table query', ok: false, error: String(e) })
@@ -55,7 +54,7 @@ export default async function DebugPage() {
   // Test 6: Pages query
   try {
     const stmt = env.DB.prepare('SELECT COUNT(*) as count FROM pages')
-    const r = await stmt.run()
+    await stmt.run()
     results.push({ label: 'Pages table query', ok: true })
   } catch (e) {
     results.push({ label: 'Pages table query', ok: false, error: String(e) })
@@ -64,7 +63,7 @@ export default async function DebugPage() {
   // Test 7: Leads query
   try {
     const stmt = env.DB.prepare('SELECT COUNT(*) as count FROM contact_leads')
-    const r = await stmt.run()
+    await stmt.run()
     results.push({ label: 'Leads table query', ok: true })
   } catch (e) {
     results.push({ label: 'Leads table query', ok: false, error: String(e) })
@@ -72,7 +71,7 @@ export default async function DebugPage() {
 
   // Test 8: Drizzle getDB()
   try {
-    const db = getDB()
+    getDB()
     results.push({ label: 'Drizzle getDB() works', ok: true })
   } catch (e) {
     results.push({ label: 'Drizzle getDB() works', ok: false, error: String(e) })
