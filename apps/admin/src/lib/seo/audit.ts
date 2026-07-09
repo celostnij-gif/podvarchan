@@ -270,9 +270,9 @@ export function computeAuditSummary(rows: SeoUrlRow[]): AuditSummary {
 }
 
 export function scoreColorClass(score: number): string {
-  if (score >= 40) return 'text-green-600 bg-green-50'
-  if (score >= 20) return 'text-yellow-600 bg-yellow-50'
-  return 'text-red-600 bg-red-50'
+  if (score >= 40) return 'text-green-400 bg-green-900/30 border border-green-700/30'
+  if (score >= 20) return 'text-yellow-400 bg-yellow-900/30 border border-yellow-700/30'
+  return 'text-red-400 bg-red-900/30 border border-red-700/30'
 }
 
 export function scoreLabel(score: number): string {

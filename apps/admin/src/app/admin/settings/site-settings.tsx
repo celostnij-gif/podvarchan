@@ -43,36 +43,36 @@ export function SiteSettingsList({ settings }: Props) {
     <div>
       <table className="w-full text-sm border-collapse">
         <thead>
-          <tr className="bg-gray-100">
-            <th className="text-left p-2 border">Ключ</th>
-            <th className="text-left p-2 border">Значення</th>
-            <th className="p-2 border w-32">Дії</th>
+          <tr className="bg-zinc-800/30">
+            <th className="text-left p-2 border border-zinc-700 text-zinc-500 font-medium">Ключ</th>
+            <th className="text-left p-2 border border-zinc-700 text-zinc-500 font-medium">Значення</th>
+            <th className="p-2 border border-zinc-700 text-zinc-500 font-medium w-32">Дії</th>
           </tr>
         </thead>
         <tbody>
           {settings.map((s) =>
             editing === s.key ? (
               <tr key={s.key}>
-                <td colSpan={3} className="p-2 border">
+                <td colSpan={3} className="p-2 border border-zinc-700">
                   <form onSubmit={handleSave} className="flex gap-2 items-start">
                     <input
-                      className="border rounded px-2 py-1 w-48"
+                      className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-2 py-1.5 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30 w-48"
                       value={key}
                       onChange={(e) => setKey(e.target.value)}
                       placeholder="Ключ"
                       required
                     />
                     <textarea
-                      className="border rounded px-2 py-1 flex-1"
+                      className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-2 py-1.5 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30 flex-1"
                       value={value}
                       onChange={(e) => setValue(e.target.value)}
                       placeholder='JSON значение или текст'
                       rows={2}
                     />
-                    <button type="submit" disabled={loading} className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
+                    <button type="submit" disabled={loading} className="rounded-lg bg-amber-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-amber-500">
                       {loading ? '...' : 'Зберегти'}
                     </button>
-                    <button type="button" onClick={() => setEditing(null)} className="px-3 py-1 rounded border hover:bg-gray-100">
+                    <button type="button" onClick={() => setEditing(null)} className="rounded-lg px-3 py-1.5 text-sm text-zinc-400 hover:bg-zinc-800">
                       Скасувати
                     </button>
                   </form>
@@ -80,13 +80,13 @@ export function SiteSettingsList({ settings }: Props) {
               </tr>
             ) : (
               <tr key={s.key}>
-                <td className="p-2 border font-mono text-xs">{s.key}</td>
-                <td className="p-2 border max-w-xs truncate">{s.valueJson}</td>
-                <td className="p-2 border">
-                  <button onClick={() => startEdit(s.key, s.valueJson)} className="text-blue-600 hover:underline mr-2">
+                <td className="p-2 border border-zinc-700 font-mono text-xs text-zinc-400">{s.key}</td>
+                <td className="p-2 border border-zinc-700 max-w-xs truncate text-zinc-300">{s.valueJson}</td>
+                <td className="p-2 border border-zinc-700">
+                  <button onClick={() => startEdit(s.key, s.valueJson)} className="text-amber-400 hover:text-amber-300 mr-2 text-sm">
                     Редагувати
                   </button>
-                  <button onClick={() => handleDelete(s.key)} className="text-red-600 hover:underline">
+                  <button onClick={() => handleDelete(s.key)} className="text-red-400 hover:text-red-300 text-sm">
                     Видалити
                   </button>
                 </td>
@@ -95,8 +95,8 @@ export function SiteSettingsList({ settings }: Props) {
           )}
           {!editing && (
             <tr>
-              <td colSpan={3} className="p-2 border">
-                <button onClick={() => startEdit('', '')} className="text-green-600 hover:underline">
+              <td colSpan={3} className="p-2 border border-zinc-700">
+                <button onClick={() => startEdit('', '')} className="text-green-400 hover:text-green-300 text-sm">
                   + Додати параметр
                 </button>
               </td>

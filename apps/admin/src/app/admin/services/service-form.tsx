@@ -53,15 +53,15 @@ export function ServiceForm({ service }: Props) {
   return (
     <form action={formAction} className="space-y-6">
       {state?.error && (
-        <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">{state.error}</div>
+        <div className="rounded-lg border border-red-900/50 bg-red-900/20 p-3 text-sm text-red-400">{state.error}</div>
       )}
 
       {/* Common fields */}
       <fieldset className="rounded-lg border p-4">
-        <legend className="text-sm font-semibold text-gray-700">Загальні поля</legend>
+        <legend className="text-sm font-semibold text-zinc-300">Загальні поля</legend>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div>
-            <label htmlFor="slugBase" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="slugBase" className="block text-sm font-medium text-zinc-300">
               Slug Base *
             </label>
             <input
@@ -69,29 +69,29 @@ export function ServiceForm({ service }: Props) {
               name="slugBase"
               defaultValue={service?.slugBase ?? ''}
               required
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
             />
           </div>
           <div>
-            <label htmlFor="icon" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="icon" className="block text-sm font-medium text-zinc-300">
               Іконка (emoji)
             </label>
             <input
               id="icon"
               name="icon"
               defaultValue={service?.icon ?? ''}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
             />
           </div>
           <div>
-            <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="category" className="block text-sm font-medium text-zinc-300">
               Категорія
             </label>
             <select
               id="category"
               name="category"
               defaultValue={service?.category ?? ''}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
             >
               <option value="">—</option>
               {CATEGORIES.map((c) => (
@@ -102,7 +102,7 @@ export function ServiceForm({ service }: Props) {
             </select>
           </div>
           <div>
-            <label htmlFor="priority" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="priority" className="block text-sm font-medium text-zinc-300">
               Пріоритет
             </label>
             <input
@@ -111,11 +111,11 @@ export function ServiceForm({ service }: Props) {
               type="number"
               min={0}
               defaultValue={service?.priority ?? 0}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
             />
           </div>
           <div>
-            <label htmlFor="sortOrder" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="sortOrder" className="block text-sm font-medium text-zinc-300">
               Порядок сортування
             </label>
             <input
@@ -124,18 +124,18 @@ export function ServiceForm({ service }: Props) {
               type="number"
               min={0}
               defaultValue={service?.sortOrder ?? 0}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
             />
           </div>
           <div>
-            <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="status" className="block text-sm font-medium text-zinc-300">
               Статус
             </label>
             <select
               id="status"
               name="status"
               defaultValue={service?.status ?? 'DRAFT'}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
             >
               <option value="DRAFT">Чернетка</option>
               <option value="PUBLISHED">Опубліковано</option>
@@ -148,7 +148,7 @@ export function ServiceForm({ service }: Props) {
                 name="featured"
                 type="checkbox"
                 defaultChecked={service?.featured ?? false}
-                className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                className="rounded border-zinc-700 text-amber-500 shadow-sm focus:border-amber-500 focus:ring-amber-500"
               />
               Рекомендований
             </label>
@@ -163,14 +163,12 @@ export function ServiceForm({ service }: Props) {
         <button
           type="submit"
           disabled={pending}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-        >
+          className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
           {pending ? 'Збереження...' : isEdit ? 'Зберегти зміни' : 'Створити послугу'}
         </button>
         <Link
           href="/admin/services"
-          className="rounded-md px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100"
-        >
+          className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-400 hover:bg-zinc-800">
           Скасувати
         </Link>
       </div>
@@ -192,13 +190,13 @@ function LocaleTab({
   const isActive = true
 
   return (
-    <fieldset className={`rounded-lg border p-4 ${isActive ? 'border-blue-200' : ''}`}>
-      <legend className={`text-sm font-semibold ${isActive ? 'text-blue-700' : 'text-gray-500'}`}>
+    <fieldset className={`rounded-lg border p-4 ${isActive ? 'border-zinc-700/50' : ''}`}>
+      <legend className={`text-sm font-semibold ${isActive ? 'text-amber-400' : 'text-zinc-600'}`}>
         {label} — переклад
       </legend>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor={`${locale}_slug`} className="block text-sm font-medium text-gray-700">
+          <label htmlFor={`${locale}_slug`} className="block text-sm font-medium text-zinc-300">
             Slug *
           </label>
           <input
@@ -206,11 +204,11 @@ function LocaleTab({
             name={`${locale}_slug`}
             defaultValue={tr(locale, 'slug')}
             required
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
           />
         </div>
         <div>
-          <label htmlFor={`${locale}_title`} className="block text-sm font-medium text-gray-700">
+          <label htmlFor={`${locale}_title`} className="block text-sm font-medium text-zinc-300">
             Назва *
           </label>
           <input
@@ -218,33 +216,33 @@ function LocaleTab({
             name={`${locale}_title`}
             defaultValue={tr(locale, 'title')}
             required
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
           />
         </div>
         <div>
-          <label htmlFor={`${locale}_shortTitle`} className="block text-sm font-medium text-gray-700">
+          <label htmlFor={`${locale}_shortTitle`} className="block text-sm font-medium text-zinc-300">
             Коротка назва
           </label>
           <input
             id={`${locale}_shortTitle`}
             name={`${locale}_shortTitle`}
             defaultValue={tr(locale, 'shortTitle')}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
           />
         </div>
         <div>
-          <label htmlFor={`${locale}_ctaText`} className="block text-sm font-medium text-gray-700">
+          <label htmlFor={`${locale}_ctaText`} className="block text-sm font-medium text-zinc-300">
             CTA текст
           </label>
           <input
             id={`${locale}_ctaText`}
             name={`${locale}_ctaText`}
             defaultValue={tr(locale, 'ctaText')}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
           />
         </div>
         <div className="sm:col-span-2">
-          <label htmlFor={`${locale}_description`} className="block text-sm font-medium text-gray-700">
+          <label htmlFor={`${locale}_description`} className="block text-sm font-medium text-zinc-300">
             Опис
           </label>
           <textarea
@@ -252,33 +250,33 @@ function LocaleTab({
             name={`${locale}_description`}
             rows={3}
             defaultValue={tr(locale, 'description')}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
           />
         </div>
         <div>
-          <label htmlFor={`${locale}_heroTitle`} className="block text-sm font-medium text-gray-700">
+          <label htmlFor={`${locale}_heroTitle`} className="block text-sm font-medium text-zinc-300">
             Hero заголовок
           </label>
           <input
             id={`${locale}_heroTitle`}
             name={`${locale}_heroTitle`}
             defaultValue={tr(locale, 'heroTitle')}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
           />
         </div>
         <div>
-          <label htmlFor={`${locale}_heroSubtitle`} className="block text-sm font-medium text-gray-700">
+          <label htmlFor={`${locale}_heroSubtitle`} className="block text-sm font-medium text-zinc-300">
             Hero підзаголовок
           </label>
           <input
             id={`${locale}_heroSubtitle`}
             name={`${locale}_heroSubtitle`}
             defaultValue={tr(locale, 'heroSubtitle')}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
           />
         </div>
         <div className="sm:col-span-2">
-          <label htmlFor={`${locale}_symptomsJson`} className="block text-sm font-medium text-gray-700">
+          <label htmlFor={`${locale}_symptomsJson`} className="block text-sm font-medium text-zinc-300">
             Симптоми (JSON)
           </label>
           <textarea
@@ -290,7 +288,7 @@ function LocaleTab({
           />
         </div>
         <div className="sm:col-span-2">
-          <label htmlFor={`${locale}_processJson`} className="block text-sm font-medium text-gray-700">
+          <label htmlFor={`${locale}_processJson`} className="block text-sm font-medium text-zinc-300">
             Процес (JSON)
           </label>
           <textarea
@@ -302,7 +300,7 @@ function LocaleTab({
           />
         </div>
         <div className="sm:col-span-2">
-          <label htmlFor={`${locale}_benefitsJson`} className="block text-sm font-medium text-gray-700">
+          <label htmlFor={`${locale}_benefitsJson`} className="block text-sm font-medium text-zinc-300">
             Переваги (JSON)
           </label>
           <textarea
@@ -314,7 +312,7 @@ function LocaleTab({
           />
         </div>
         <div className="sm:col-span-2">
-          <label htmlFor={`${locale}_faqJson`} className="block text-sm font-medium text-gray-700">
+          <label htmlFor={`${locale}_faqJson`} className="block text-sm font-medium text-zinc-300">
             FAQ (JSON)
           </label>
           <textarea

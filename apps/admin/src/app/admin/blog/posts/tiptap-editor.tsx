@@ -13,7 +13,7 @@ const ToolBtn = ({ action, label, isActive }: { action: () => void; label: strin
     type="button"
     onClick={action}
     className={`rounded px-2 py-1 text-xs font-medium transition-colors ${
-      isActive ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
+      isActive ? 'bg-zinc-700 text-amber-400' : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200'
     }`}
   >
     {label}
@@ -56,8 +56,8 @@ export function TipTapEditor({ value, onChange, placeholder }: Props) {
 
   return (
     <>
-      <div className="rounded-md border border-gray-300">
-        <div className="flex flex-wrap gap-1 border-b bg-gray-50 px-2 py-1.5">
+      <div className="rounded-lg border border-zinc-700 overflow-hidden focus-within:ring-1 focus-within:ring-amber-500/30">
+        <div className="flex flex-wrap gap-1 border-b border-zinc-700 bg-zinc-800/80 px-2 py-1.5">
           <ToolBtn action={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} label="H2"
             isActive={editor.isActive('heading', { level: 2 })} />
           <ToolBtn action={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} label="H3"
@@ -74,11 +74,11 @@ export function TipTapEditor({ value, onChange, placeholder }: Props) {
             isActive={editor.isActive('blockquote')} />
           <ToolBtn action={() => editor.chain().focus().toggleCodeBlock().run()} label="Code"
             isActive={editor.isActive('codeBlock')} />
-          <span className="mx-1 w-px bg-gray-300" />
+          <span className="mx-1 w-px bg-zinc-600" />
           <ToolBtn action={() => setShowMediaPicker(true)} label="🖼"
             isActive={editor.isActive('image')} />
         </div>
-        <EditorContent editor={editor} className="prose prose-sm max-w-none px-3 py-2 min-h-[300px] focus:outline-none" />
+        <EditorContent editor={editor} className="prose prose-sm max-w-none px-3 py-2 min-h-[300px] text-zinc-200 focus:outline-none [&_.ProseMirror]:text-zinc-200 [&_.ProseMirror]:min-h-[280px] [&_.ProseMirror_p.is-editor-empty:first-child::before]:text-zinc-600" />
       </div>
       <MediaPickerDialog
         open={showMediaPicker}

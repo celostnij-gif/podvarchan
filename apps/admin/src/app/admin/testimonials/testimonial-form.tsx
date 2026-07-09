@@ -56,49 +56,49 @@ export function TestimonialForm({ testimonial }: Props) {
 
   return (
     <form action={formAction} className="space-y-6">
-      {state?.error && <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">{state.error}</div>}
+      {state?.error && <div className="rounded-lg border border-red-900/50 bg-red-900/20 p-3 text-sm text-red-400">{state.error}</div>}
 
       <fieldset className="rounded-lg border p-4">
-        <legend className="text-sm font-semibold text-gray-700">Загальні поля</legend>
+        <legend className="text-sm font-semibold text-zinc-300">Загальні поля</legend>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div>
-            <label htmlFor="clientName" className="block text-sm font-medium text-gray-700">Ім&apos;я клієнта *</label>
+            <label htmlFor="clientName" className="block text-sm font-medium text-zinc-300">Ім&apos;я клієнта *</label>
             <input id="clientName" name="clientName" defaultValue={testimonial?.clientName ?? ''} required
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
           <div>
-            <label htmlFor="status" className="block text-sm font-medium text-gray-700">Статус</label>
+            <label htmlFor="status" className="block text-sm font-medium text-zinc-300">Статус</label>
             <select id="status" name="status" defaultValue={testimonial?.status ?? 'DRAFT'}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30">
               <option value="DRAFT">Чернетка</option>
               <option value="PUBLISHED">Опубліковано</option>
               <option value="HIDDEN">Приховано</option>
             </select>
           </div>
           <div>
-            <label htmlFor="rating" className="block text-sm font-medium text-gray-700">Рейтинг (0-5)</label>
+            <label htmlFor="rating" className="block text-sm font-medium text-zinc-300">Рейтинг (0-5)</label>
             <input id="rating" name="rating" type="number" min={0} max={5} defaultValue={testimonial?.rating ?? 0}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
           <div>
-            <label htmlFor="clientAge" className="block text-sm font-medium text-gray-700">Вік</label>
+            <label htmlFor="clientAge" className="block text-sm font-medium text-zinc-300">Вік</label>
             <input id="clientAge" name="clientAge" type="number" min={0} defaultValue={testimonial?.clientAge ?? ''}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
           <div>
-            <label htmlFor="avatarInitials" className="block text-sm font-medium text-gray-700">Ініціали аватара</label>
+            <label htmlFor="avatarInitials" className="block text-sm font-medium text-zinc-300">Ініціали аватара</label>
             <input id="avatarInitials" name="avatarInitials" maxLength={10} defaultValue={testimonial?.avatarInitials ?? ''}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
           <div>
-            <label htmlFor="source" className="block text-sm font-medium text-gray-700">Джерело</label>
+            <label htmlFor="source" className="block text-sm font-medium text-zinc-300">Джерело</label>
             <input id="source" name="source" defaultValue={testimonial?.source ?? ''}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
           <div>
-            <label htmlFor="sortOrder" className="block text-sm font-medium text-gray-700">Порядок</label>
+            <label htmlFor="sortOrder" className="block text-sm font-medium text-zinc-300">Порядок</label>
             <input id="sortOrder" name="sortOrder" type="number" min={0} defaultValue={testimonial?.sortOrder ?? 0}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
           <div className="flex items-end">
             <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
@@ -115,10 +115,10 @@ export function TestimonialForm({ testimonial }: Props) {
 
       <div className="flex items-center gap-3 border-t pt-4">
         <button type="submit" disabled={pending}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
+          className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-500 disabled:opacity-50">
           {pending ? 'Збереження...' : isEdit ? 'Зберегти зміни' : 'Створити відгук'}
         </button>
-        <Link href="/admin/testimonials" className="rounded-md px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100">Скасувати</Link>
+        <Link href="/admin/testimonials" className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-400 hover:bg-zinc-800">Скасувати</Link>
       </div>
     </form>
   )
@@ -126,24 +126,24 @@ export function TestimonialForm({ testimonial }: Props) {
 
 function LocaleSection({ locale, label, tr }: { locale: string; label: string; tr: (l: string, f: string) => string }) {
   return (
-    <fieldset className="rounded-lg border border-blue-200 p-4">
-      <legend className="text-sm font-semibold text-blue-700">{label}</legend>
+    <fieldset className="rounded-lg border border-zinc-700/50 p-4">
+      <legend className="text-sm font-semibold text-amber-400">{label}</legend>
       <div className="grid grid-cols-1 gap-4">
         <div>
-          <label htmlFor={`${locale}_text`} className="block text-sm font-medium text-gray-700">Текст відгуку *</label>
+          <label htmlFor={`${locale}_text`} className="block text-sm font-medium text-zinc-300">Текст відгуку *</label>
           <textarea id={`${locale}_text`} name={`${locale}_text`} rows={5} defaultValue={tr(locale, 'text')} required
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+            className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label htmlFor={`${locale}_problem`} className="block text-sm font-medium text-gray-700">Проблема</label>
+            <label htmlFor={`${locale}_problem`} className="block text-sm font-medium text-zinc-300">Проблема</label>
             <textarea id={`${locale}_problem`} name={`${locale}_problem`} rows={3} defaultValue={tr(locale, 'problem')}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
           <div>
-            <label htmlFor={`${locale}_result`} className="block text-sm font-medium text-gray-700">Результат</label>
+            <label htmlFor={`${locale}_result`} className="block text-sm font-medium text-zinc-300">Результат</label>
             <textarea id={`${locale}_result`} name={`${locale}_result`} rows={3} defaultValue={tr(locale, 'result')}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
         </div>
       </div>

@@ -12,8 +12,8 @@ export default async function SeoAuditPage() {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">SEO Аудит</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-zinc-100">SEO Аудит</h1>
+          <p className="mt-1 text-sm text-zinc-500">
             {summary.total} URL · Average score: {summary.avgScore}/50
           </p>
         </div>
@@ -22,52 +22,52 @@ export default async function SeoAuditPage() {
 
       {/* Summary cards */}
       <div className="mb-6 grid grid-cols-3 gap-4">
-        <div className="rounded-lg border border-green-200 bg-green-50 p-4">
-          <p className="text-2xl font-bold text-green-700">{summary.green}</p>
-          <p className="text-sm text-green-600">Good (40-50)</p>
+        <div className="rounded-lg border border-green-800/40 bg-green-900/20 p-4">
+          <p className="text-2xl font-bold text-green-400">{summary.green}</p>
+          <p className="text-sm text-green-500">Good (40-50)</p>
         </div>
-        <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
-          <p className="text-2xl font-bold text-yellow-700">{summary.yellow}</p>
-          <p className="text-sm text-yellow-600">Needs work (20-39)</p>
+        <div className="rounded-lg border border-yellow-800/40 bg-yellow-900/20 p-4">
+          <p className="text-2xl font-bold text-yellow-400">{summary.yellow}</p>
+          <p className="text-sm text-yellow-500">Needs work (20-39)</p>
         </div>
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-          <p className="text-2xl font-bold text-red-700">{summary.red}</p>
-          <p className="text-sm text-red-600">Poor (0-19)</p>
+        <div className="rounded-lg border border-red-800/40 bg-red-900/20 p-4">
+          <p className="text-2xl font-bold text-red-400">{summary.red}</p>
+          <p className="text-sm text-red-500">Poor (0-19)</p>
         </div>
       </div>
 
       {/* Audit table */}
-      <div className="overflow-x-auto rounded-lg border border-gray-200">
-        <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead className="bg-gray-50">
+      <div className="overflow-hidden rounded-xl border border-zinc-800">
+        <table className="min-w-full divide-y divide-zinc-800 text-sm">
+          <thead className="bg-zinc-800/30">
             <tr>
-              <th className="px-4 py-3 text-left font-medium text-gray-500">URL</th>
-              <th className="px-4 py-3 text-left font-medium text-gray-500">Type</th>
-              <th className="px-4 py-3 text-left font-medium text-gray-500">Title</th>
-              <th className="px-4 py-3 text-left font-medium text-gray-500">Description</th>
-              <th className="px-4 py-3 text-center font-medium text-gray-500">Score</th>
-              <th className="px-4 py-3 text-left font-medium text-gray-500">Issues</th>
+              <th className="px-4 py-3 text-left font-medium text-zinc-500">URL</th>
+              <th className="px-4 py-3 text-left font-medium text-zinc-500">Type</th>
+              <th className="px-4 py-3 text-left font-medium text-zinc-500">Title</th>
+              <th className="px-4 py-3 text-left font-medium text-zinc-500">Description</th>
+              <th className="px-4 py-3 text-center font-medium text-zinc-500">Score</th>
+              <th className="px-4 py-3 text-left font-medium text-zinc-500">Issues</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-zinc-800">
             {rows.map((row) => (
-              <tr key={row.url} className="hover:bg-gray-50">
+              <tr key={row.url} className="hover:bg-zinc-800/30">
                 <td className="px-4 py-3">
                   <a
                     href={row.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-mono text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                    className="font-mono text-xs text-amber-400 hover:text-amber-300 hover:underline"
                   >
                     {row.url}
                   </a>
                 </td>
-                <td className="px-4 py-3 text-xs text-gray-500">{row.entityType}</td>
-                <td className="max-w-[200px] truncate px-4 py-3 text-xs" title={row.title ?? ''}>
-                  {row.title ?? <span className="italic text-gray-400">—</span>}
+                <td className="px-4 py-3 text-xs text-zinc-500">{row.entityType}</td>
+                <td className="max-w-[200px] truncate px-4 py-3 text-xs text-zinc-400" title={row.title ?? ''}>
+                  {row.title ?? <span className="italic text-zinc-600">—</span>}
                 </td>
-                <td className="max-w-[250px] truncate px-4 py-3 text-xs" title={row.description ?? ''}>
-                  {row.description ?? <span className="italic text-gray-400">—</span>}
+                <td className="max-w-[250px] truncate px-4 py-3 text-xs text-zinc-400" title={row.description ?? ''}>
+                  {row.description ?? <span className="italic text-zinc-600">—</span>}
                 </td>
                 <td className="px-4 py-3 text-center">
                   <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${scoreColorClass(row.score)}`}>
@@ -76,16 +76,16 @@ export default async function SeoAuditPage() {
                 </td>
                 <td className="max-w-[200px] px-4 py-3 text-xs">
                   {row.warnings.length > 0 ? (
-                    <ul className="list-inside list-disc text-red-600">
+                    <ul className="list-inside list-disc text-red-400">
                       {row.warnings.slice(0, 2).map((w, i) => (
                         <li key={i} className="truncate" title={w}>{w}</li>
                       ))}
                       {row.warnings.length > 2 && (
-                        <li className="text-gray-400">+{row.warnings.length - 2} more</li>
+                        <li className="text-zinc-600">+{row.warnings.length - 2} more</li>
                       )}
                     </ul>
                   ) : (
-                    <span className="text-green-600">OK</span>
+                    <span className="text-green-400">OK</span>
                   )}
                 </td>
               </tr>

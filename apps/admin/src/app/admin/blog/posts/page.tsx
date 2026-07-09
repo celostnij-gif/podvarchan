@@ -52,9 +52,9 @@ export default async function BlogPostsPage(props: Props) {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Пости блогу</h1>
+        <h1 className="text-2xl font-bold text-zinc-100">Пости блогу</h1>
         <Link href="/admin/blog/posts/new"
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+          className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2">
           + Новий пост
         </Link>
       </div>
@@ -62,54 +62,54 @@ export default async function BlogPostsPage(props: Props) {
       <div className="mb-4">
         <form className="flex items-center gap-3" method="GET">
           <select name="status" defaultValue={params.status ?? 'all'}
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+            className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30">
             <option value="all">Всі статуси</option>
             <option value="PUBLISHED">Опубліковані</option>
             <option value="DRAFT">Чернетки</option>
             <option value="ARCHIVED">Архів</option>
           </select>
           <input name="q" type="search" defaultValue={params.q ?? ''} placeholder="Пошук..."
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-          <button type="submit" className="rounded-md bg-gray-100 px-3 py-2 text-sm text-gray-700 hover:bg-gray-200">Знайти</button>
+            className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
+          <button type="submit" className="rounded-lg bg-zinc-800 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-700">Знайти</button>
         </form>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="overflow-hidden rounded-xl border border-zinc-800">
+        <table className="min-w-full divide-y divide-zinc-800">
+          <thead className="bg-zinc-800/30">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Статус</th>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Заголовок (RU)</th>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Категорія</th>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Дата</th>
-              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Дії</th>
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">Статус</th>
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">Заголовок (RU)</th>
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">Категорія</th>
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">Дата</th>
+              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-zinc-500">Дії</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
+          <tbody className="divide-y divide-zinc-800">
             {allPosts.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-sm text-gray-500">
+                <td colSpan={5} className="px-4 py-8 text-center text-sm text-zinc-500">
                   Постів ще немає.{' '}
-                  <Link href="/admin/blog/posts/new" className="text-blue-600 hover:underline">Написати перший</Link>
+                  <Link href="/admin/blog/posts/new" className="text-amber-400 hover:text-amber-300">Написати перший</Link>
                 </td>
               </tr>
             ) : allPosts.map((post) => {
               const ru = post.translations.find((t) => t.locale === 'ru')
               return (
-                <tr key={post.id} className="hover:bg-gray-50">
+                <tr key={post.id} className="hover:bg-zinc-800/30">
                   <td className="whitespace-nowrap px-4 py-3">
                     <PublishBadge status={post.status} />
                   </td>
-                  <td className="px-4 py-3 text-sm font-medium text-gray-900 max-w-xs truncate">
+                  <td className="px-4 py-3 text-sm font-medium text-zinc-200 max-w-xs truncate">
                     {ru?.title ?? '—'}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-500">{post.categorySlug ?? '—'}</td>
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-500">
+                  <td className="px-4 py-3 text-sm text-zinc-500">{post.categorySlug ?? '—'}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-sm text-zinc-500">
                     {post.publishedAt ? post.publishedAt.slice(0, 10) : '—'}
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 text-right text-sm">
                     <Link href={`/admin/blog/posts/${post.id}`}
-                      className="rounded px-2 py-1 text-blue-600 hover:bg-blue-50">Редагувати</Link>
+                      className="rounded px-2 py-1 text-amber-400 hover:bg-zinc-800">Редагувати</Link>
                   </td>
                 </tr>
               )
@@ -123,10 +123,10 @@ export default async function BlogPostsPage(props: Props) {
 
 function PublishBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
-    PUBLISHED: 'bg-green-100 text-green-800',
-    DRAFT: 'bg-yellow-100 text-yellow-800',
-    REVIEW: 'bg-blue-100 text-blue-800',
-    ARCHIVED: 'bg-gray-100 text-gray-600',
+    PUBLISHED: 'bg-green-900/30 text-green-400 border border-green-700/30',
+    DRAFT: 'bg-yellow-900/30 text-yellow-400 border border-yellow-700/30',
+    REVIEW: 'bg-blue-900/30 text-blue-400 border border-blue-700/30',
+    ARCHIVED: 'bg-zinc-800 text-zinc-500 border border-zinc-700/50',
   } as const
   const labels: Record<string, string> = {
     PUBLISHED: 'Опубліковано',
@@ -135,7 +135,7 @@ function PublishBadge({ status }: { status: string }) {
     ARCHIVED: 'Архів',
   } as const
   return (
-    <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${styles[status] ?? styles.DRAFT}`}>
+    <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${styles[status] ?? styles.DRAFT}`}>
       {labels[status] ?? status}
     </span>
   )

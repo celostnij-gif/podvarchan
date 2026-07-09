@@ -53,16 +53,16 @@ export function PostForm({ post, categories }: Props) {
   return (
     <form action={formAction} className="space-y-6">
       {state?.error && (
-        <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">{state.error}</div>
+        <div className="rounded-lg border border-red-900/50 bg-red-900/20 p-3 text-sm text-red-400">{state.error}</div>
       )}
 
-      <fieldset className="rounded-lg border p-4">
-        <legend className="text-sm font-semibold text-gray-700">Загальні поля</legend>
+      <fieldset className="rounded-lg border border-zinc-700/50 p-4">
+        <legend className="text-sm font-semibold text-zinc-300">Загальні поля</legend>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
           <div>
-            <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700">Категорія</label>
+            <label htmlFor="categoryId" className="block text-sm font-medium text-zinc-300">Категорія</label>
             <select id="categoryId" name="categoryId" defaultValue={post?.categoryId ?? ''}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30">
               <option value="">—</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>{c.ruName ?? c.slugBase}</option>
@@ -70,9 +70,9 @@ export function PostForm({ post, categories }: Props) {
             </select>
           </div>
           <div>
-            <label htmlFor="status" className="block text-sm font-medium text-gray-700">Статус</label>
+            <label htmlFor="status" className="block text-sm font-medium text-zinc-300">Статус</label>
             <select id="status" name="status" defaultValue={post?.status ?? 'DRAFT'}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30">
               <option value="DRAFT">Чернетка</option>
               <option value="REVIEW">На рев&apos;ю</option>
               <option value="PUBLISHED">Опубліковано</option>
@@ -80,20 +80,20 @@ export function PostForm({ post, categories }: Props) {
             </select>
           </div>
           <div>
-            <label htmlFor="readingMinutes" className="block text-sm font-medium text-gray-700">Читання (хв)</label>
+            <label htmlFor="readingMinutes" className="block text-sm font-medium text-zinc-300">Читання (хв)</label>
             <input id="readingMinutes" name="readingMinutes" type="number" min={0} defaultValue={post?.readingMinutes ?? 0}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
           <div>
-            <label htmlFor="publishedAt" className="block text-sm font-medium text-gray-700">Дата публікації</label>
+            <label htmlFor="publishedAt" className="block text-sm font-medium text-zinc-300">Дата публікації</label>
             <input id="publishedAt" name="publishedAt" type="date" defaultValue={post?.publishedAt?.slice(0, 10) ?? ''}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
         </div>
 
         {/* Cover image */}
         <div className="mt-4 border-t pt-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Обкладинка посту</label>
+          <label className="block text-sm font-medium text-zinc-300 mb-2">Обкладинка посту</label>
           <div className="flex items-start gap-4">
             <div className="flex-1">
               <div className="flex gap-2">
@@ -102,12 +102,12 @@ export function PostForm({ post, categories }: Props) {
                   value={coverImageUrl}
                   onChange={(e) => setCoverImageUrl(e.target.value)}
                   placeholder="/images/blog/photo.webp або /api/media/..."
-                  className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="flex-1 rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
                 />
                 <button
                   type="button"
                   onClick={() => setShowCoverPicker(true)}
-                  className="rounded-md bg-gray-100 px-3 py-2 text-sm text-gray-700 hover:bg-gray-200"
+                  className="rounded-lg bg-zinc-800 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-700"
                 >
                   Медіатека
                 </button>
@@ -115,7 +115,7 @@ export function PostForm({ post, categories }: Props) {
                   <button
                     type="button"
                     onClick={() => setCoverImageUrl('')}
-                    className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600 hover:bg-red-100"
+                    className="rounded-lg bg-red-900/30 px-3 py-2 text-sm text-red-400 hover:bg-red-900/50"
                   >
                     ×
                   </button>
@@ -123,18 +123,15 @@ export function PostForm({ post, categories }: Props) {
               </div>
             </div>
             {coverImageUrl && (
-              <div className="shrink-0 overflow-hidden rounded-lg border bg-gray-50" style={{ width: 160, height: 90 }}>
+              <div className="shrink-0 overflow-hidden rounded-lg border border-zinc-700 bg-zinc-800" style={{ width: 160, height: 90 }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={coverImageUrl}
                   alt="Обкладинка"
                   className="h-full w-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                    (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                  }}
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).parentElement!.querySelector('.cover-error')?.classList.remove('hidden'); }}
                 />
-                <div className="hidden flex items-center justify-center h-full text-xs text-gray-400">
+                <div className="hidden cover-error flex items-center justify-center h-full text-xs text-zinc-500">
                   Невірний URL
                 </div>
               </div>
@@ -153,26 +150,26 @@ export function PostForm({ post, categories }: Props) {
       />
 
       {/* RU locale */}
-      <fieldset className="rounded-lg border border-blue-200 p-4">
-        <legend className="text-sm font-semibold text-blue-700">RU — переклад</legend>
+      <fieldset className="rounded-lg border border-zinc-700/50 p-4">
+        <legend className="text-sm font-semibold text-amber-400">RU — переклад</legend>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label htmlFor="ru_slug" className="block text-sm font-medium text-gray-700">Slug *</label>
+            <label htmlFor="ru_slug" className="block text-sm font-medium text-zinc-300">Slug *</label>
             <input id="ru_slug" name="ru_slug" defaultValue={tr('ru', 'slug')} required
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
           <div>
-            <label htmlFor="ru_title" className="block text-sm font-medium text-gray-700">Заголовок *</label>
+            <label htmlFor="ru_title" className="block text-sm font-medium text-zinc-300">Заголовок *</label>
             <input id="ru_title" name="ru_title" defaultValue={tr('ru', 'title')} required
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
           <div className="sm:col-span-2">
-            <label htmlFor="ru_excerpt" className="block text-sm font-medium text-gray-700">Короткий опис</label>
+            <label htmlFor="ru_excerpt" className="block text-sm font-medium text-zinc-300">Короткий опис</label>
             <textarea id="ru_excerpt" name="ru_excerpt" rows={2} defaultValue={tr('ru', 'excerpt')}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Контент (RU)</label>
+            <label className="block text-sm font-medium text-zinc-300 mb-1">Контент (RU)</label>
             <TipTapEditor
               value={ruContentHtml}
               onChange={(html, json) => { setRuContentHtml(html); setRuContentJson(json) }}
@@ -182,34 +179,34 @@ export function PostForm({ post, categories }: Props) {
             <input type="hidden" name="ru_contentJson" value={ruContentJson} />
           </div>
           <div className="sm:col-span-2">
-            <label htmlFor="ru_faqJson" className="block text-sm font-medium text-gray-700">FAQ (JSON)</label>
+            <label htmlFor="ru_faqJson" className="block text-sm font-medium text-zinc-300">FAQ (JSON)</label>
             <textarea id="ru_faqJson" name="ru_faqJson" rows={3} defaultValue={tr('ru', 'faqJson')}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm font-mono shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm font-mono text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
         </div>
       </fieldset>
 
       {/* UK locale */}
-      <fieldset className="rounded-lg border border-blue-200 p-4">
-        <legend className="text-sm font-semibold text-blue-700">UK — переклад</legend>
+      <fieldset className="rounded-lg border border-zinc-700/50 p-4">
+        <legend className="text-sm font-semibold text-amber-400">UK — переклад</legend>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label htmlFor="uk_slug" className="block text-sm font-medium text-gray-700">Slug *</label>
+            <label htmlFor="uk_slug" className="block text-sm font-medium text-zinc-300">Slug *</label>
             <input id="uk_slug" name="uk_slug" defaultValue={tr('uk', 'slug')} required
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
           <div>
-            <label htmlFor="uk_title" className="block text-sm font-medium text-gray-700">Заголовок *</label>
+            <label htmlFor="uk_title" className="block text-sm font-medium text-zinc-300">Заголовок *</label>
             <input id="uk_title" name="uk_title" defaultValue={tr('uk', 'title')} required
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
           <div className="sm:col-span-2">
-            <label htmlFor="uk_excerpt" className="block text-sm font-medium text-gray-700">Короткий опис</label>
+            <label htmlFor="uk_excerpt" className="block text-sm font-medium text-zinc-300">Короткий опис</label>
             <textarea id="uk_excerpt" name="uk_excerpt" rows={2} defaultValue={tr('uk', 'excerpt')}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Контент (UK)</label>
+            <label className="block text-sm font-medium text-zinc-300 mb-1">Контент (UK)</label>
             <TipTapEditor
               value={ukContentHtml}
               onChange={(html, json) => { setUkContentHtml(html); setUkContentJson(json) }}
@@ -219,20 +216,20 @@ export function PostForm({ post, categories }: Props) {
             <input type="hidden" name="uk_contentJson" value={ukContentJson} />
           </div>
           <div className="sm:col-span-2">
-            <label htmlFor="uk_faqJson" className="block text-sm font-medium text-gray-700">FAQ (JSON)</label>
+            <label htmlFor="uk_faqJson" className="block text-sm font-medium text-zinc-300">FAQ (JSON)</label>
             <textarea id="uk_faqJson" name="uk_faqJson" rows={3} defaultValue={tr('uk', 'faqJson')}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm font-mono shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm font-mono text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
         </div>
       </fieldset>
 
       <div className="flex items-center gap-3 border-t pt-4">
         <button type="submit" disabled={pending}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+          className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
           {pending ? 'Збереження...' : isEdit ? 'Зберегти зміни' : 'Створити пост'}
         </button>
         <Link href="/admin/blog/posts"
-          className="rounded-md px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100">
+          className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-400 hover:bg-zinc-800">
           Скасувати
         </Link>
       </div>
