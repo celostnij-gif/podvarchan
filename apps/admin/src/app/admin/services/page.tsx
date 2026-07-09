@@ -78,10 +78,6 @@ export default async function ServicesListPage(props: Props) {
           <select
             name="status"
             defaultValue={params.status ?? 'all'}
-            onChange={(e) => {
-              const form = e.target.closest('form')
-              if (form) form.requestSubmit()
-            }}
             className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
           >
             <option value="all">Всі статуси</option>
