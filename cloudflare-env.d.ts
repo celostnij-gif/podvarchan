@@ -80,6 +80,8 @@ interface __BaseEnv_CloudflareEnv {
 	CONTACT_EMAIL: string;
 	WORKER_SELF_REFERENCE: Fetcher /* podvarchan */;
 	RATE_LIMIT_KV?: KVNamespace;
+	MEDIA_R2_BUCKET?: R2Bucket;
+	NEXT_INC_CACHE_R2_BUCKET?: R2Bucket;
 	DB: D1Database;
 }
 

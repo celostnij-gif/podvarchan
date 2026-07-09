@@ -30,12 +30,13 @@ export async function getAuditLogs(options?: AuditLogFilters) {
   if (options?.userId) conditions.push(eq(auditLogs.userId, options.userId))
   if (options?.from) conditions.push(gte(auditLogs.createdAt, options.from))
   if (options?.to) conditions.push(lte(auditLogs.createdAt, options.to))
-  const where = conditions.length > 0 ? and(...conditions) : undefined
-  return db.select().from(auditLogs)
-    .where(where)
+  const query = db.select().from(auditLogs)
     .orderBy(desc(auditLogs.createdAt))
     .limit(options?.limit ?? 50)
     .offset(options?.offset ?? 0)
+  return conditions.length > 0
+    ? await query.where(and(...conditions)).all()
+    : await query.all()
 }
 
 export async function getAuditLogById(id: string) {

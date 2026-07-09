@@ -53,14 +53,14 @@ export default async function LeadsListPage(props: Props) {
     conditions.push(lte(contactLeads.createdAt, params.to))
   }
 
-  const where = conditions.length > 0 ? and(...conditions) : undefined
-
-  const rows = await db
+  const query = db
     .select()
     .from(contactLeads)
-    .where(where)
     .orderBy(desc(contactLeads.createdAt))
-    .all()
+
+  const rows = conditions.length > 0
+    ? await query.where(and(...conditions)).all()
+    : await query.all()
 
   return (
     <div>

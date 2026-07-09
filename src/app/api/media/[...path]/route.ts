@@ -8,7 +8,9 @@ export async function GET(
   const { path: pathSegments } = await params
   const storageKey = pathSegments.join('/')
 
-  const r2 = process.env.MEDIA_R2_BUCKET as unknown as R2Bucket | undefined
+  const { getCloudflareContext } = await import('@opennextjs/cloudflare')
+  const { env } = getCloudflareContext()
+  const r2 = env.MEDIA_R2_BUCKET as R2Bucket | undefined
   if (!r2) {
     return NextResponse.json({ error: 'Media storage not configured' }, { status: 500 })
   }

@@ -24,15 +24,15 @@ export default async function PagesListPage(props: Props) {
     conditions.push(like(pageTranslations.title, `%${params.q}%`))
   }
 
-  const where = conditions.length > 0 ? and(...conditions) : undefined
-
-  const rows = await db
+  const query = db
     .select()
     .from(pages)
     .leftJoin(pageTranslations, eq(pages.id, pageTranslations.pageId))
-    .where(where)
     .orderBy(desc(pages.updatedAt))
-    .all()
+
+  const rows = conditions.length > 0
+    ? await query.where(and(...conditions)).all()
+    : await query.all()
 
   // Group translations by page
   const grouped = new Map<string, PageRecord & { translations: PageTranslationRecord[] }>()

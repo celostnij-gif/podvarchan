@@ -20,17 +20,17 @@ export default async function BlogPostsPage(props: Props) {
     conditions.push(like(blogPostTranslations.title, `%${params.q}%`))
   }
 
-  const where = conditions.length > 0 ? and(...conditions) : undefined
-
-  const rows = await db
+  const query = db
     .select()
     .from(blogPosts)
     .leftJoin(blogPostTranslations, eq(blogPosts.id, blogPostTranslations.postId))
     .leftJoin(blogCategories, eq(blogPosts.categoryId, blogCategories.id))
     .leftJoin(blogCategoryTranslations, eq(blogCategories.id, blogCategoryTranslations.categoryId))
-    .where(where)
     .orderBy(desc(blogPosts.updatedAt))
-    .all()
+
+  const rows = conditions.length > 0
+    ? await query.where(and(...conditions)).all()
+    : await query.all()
 
   // Group translations
   const grouped = new Map<string, PostWithTranslations>()
