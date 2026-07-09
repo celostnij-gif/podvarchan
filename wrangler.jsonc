@@ -6,9 +6,6 @@
 		"nodejs_compat",
 		"global_fetch_strictly_public"
 	],
-	"routes": [
-		{ "pattern": "www.podvarchan.com/*", "zone_id": "9ed1252ab93408d37152d76b4c8aea72" }
-	],
 
 	"assets": {
 		"binding": "ASSETS",
@@ -45,6 +42,7 @@
 		"NEXT_PUBLIC_TURNSTILE_SITE_KEY": "0x4AAAAAADYZ2z3RysEsBoQu",
 		"CONTACT_EMAIL": "podvarchan@gmail.com",
 		"AUTH_TRUST_HOST": "true",
-		"REVALIDATE_URL": "https://podvarchan.com/api/revalidate"
+		"REVALIDATE_URL": "https://podvarchan.com/api/revalidate",
+		"AUTH_SECRET": "local-dev-secret-key-podvarchan-2026-42-chars!"
 	}
 }
