@@ -7,13 +7,16 @@ import { notFound } from 'next/navigation'
 import { PostForm } from '../post-form'
 import type { PostWithTranslations } from '../../types'
 
+const PUBLIC_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://podvarchan.com'
+
 interface Props {
   params: Promise<{ id: string }>
 }
 
 /**
  * Returns a displayable URL for a coverImageId.
- * - If it's a path (starts with /), use as-is
+ * - If it's a path (starts with /), prepend the public site URL (the admin worker
+ *   doesn't have static blog images in its assets)
  * - If it's a UUID, resolve from media_assets.publicUrl
  * - If null/empty, derive from the RU slug: /images/blog/{slug}.webp
  */
@@ -23,7 +26,8 @@ async function resolveCoverImageUrl(
   slug?: string | null,
 ): Promise<string | null> {
   if (coverImageId) {
-    if (coverImageId.startsWith('/') || coverImageId.startsWith('http')) return coverImageId
+    if (coverImageId.startsWith('/')) return `${PUBLIC_SITE_URL}${coverImageId}`
+    if (coverImageId.startsWith('http')) return coverImageId
 
     // Looks like a UUID — resolve from media_assets
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(coverImageId)
@@ -45,7 +49,7 @@ async function resolveCoverImageUrl(
 
   // Fallback: derive image path from RU slug (matches src/content/blog/ pattern)
   if (slug) {
-    return `/images/blog/${slug}.webp`
+    return `${PUBLIC_SITE_URL}/images/blog/${slug}.webp`
   }
 
   return null
