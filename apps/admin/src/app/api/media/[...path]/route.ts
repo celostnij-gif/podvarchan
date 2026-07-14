@@ -8,10 +8,8 @@ export async function GET(
   const { path: pathSegments } = await params
   const storageKey = pathSegments.join('/')
 
-  // Cloudflare Workers runtime — bindings via getCloudflareContext
-  const { getCloudflareContext } = await import('@opennextjs/cloudflare')
-  const { env } = getCloudflareContext()
-  const r2 = env.MEDIA_R2_BUCKET as R2Bucket | undefined
+  // OpenNext injects Cloudflare bindings into process.env for API routes
+  const r2 = process.env.MEDIA_R2_BUCKET as unknown as R2Bucket | undefined
 
   if (!r2) {
     return NextResponse.json({ error: 'Media storage not configured' }, { status: 500 })
@@ -31,6 +29,5 @@ export async function GET(
   }
   headers.set('Cache-Control', 'public, max-age=31536000, immutable')
 
-  // Fix: object.body may not be a ReadableStream in all runtimes
-  return new NextResponse(object.body as BodyInit, { headers })
+  return new NextResponse(object.body, { headers })
 }
