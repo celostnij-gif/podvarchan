@@ -63,21 +63,49 @@ export const analytics = {
     })
   },
 
-  pageView(path: string, title?: string) {
-    if (typeof window === 'undefined' || !window.gtag) return
-
-    window.gtag('config', process.env.NEXT_PUBLIC_GA_ID as string, {
-      page_path: path,
-      page_title: title || document.title,
-    } satisfies GtagConfig)
+  /** WhatsApp button click */
+  whatsappClick(source: string) {
+    trackEvent({
+      action: 'whatsapp_click',
+      category: 'conversion',
+      label: source,
+    })
   },
 
-  scrollDepth(slug: string, depth: number) {
+  /** Telegram button click */
+  telegramClick(source: string) {
     trackEvent({
-      action: 'scroll_depth',
+      action: 'telegram_click',
+      category: 'conversion',
+      label: source,
+    })
+  },
+
+  /** /tseny/ page view */
+  tsenyView() {
+    trackEvent({
+      action: 'tseny_view',
+      category: 'engagement',
+      label: 'tseny_page',
+    })
+  },
+
+  /** Blog scroll depth */
+  blogScroll(slug: string, depth: number) {
+    trackEvent({
+      action: 'blog_scroll',
       category: 'engagement',
       label: slug,
       value: depth,
     })
+  },
+
+  pageView(path: string, title?: string, gaId?: string) {
+    if (typeof window === 'undefined' || !window.gtag) return
+
+    window.gtag('config', gaId ?? '', {
+      page_path: path,
+      page_title: title || document.title,
+    } satisfies GtagConfig)
   },
 }

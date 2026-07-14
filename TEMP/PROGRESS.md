@@ -1,38 +1,25 @@
 # ПРОГРЕСС ДОВОДКИ АДМИНКИ (ОТ ТЕКУЩЕГО СОСТОЯНИЯ)
 
-**Дата:** 2026-07-08
+**Дата:** 2026-07-10
 **Проект:** Podvarchan.com (монорепо, 2 воркера)
 **Стек:** Next.js 15.5.20 · TypeScript strict · Tailwind CSS 3 · Drizzle ORM · Cloudflare D1/R2/KV · OpenNext 1.20.1 · NextAuth v5
 
 ---
 
-## Статус после сессии 2026-07-08
+## Актуальный статус на 2026-07-10
 
-### ✅ Что сделано в этой сессии
+### ✅ Все этапы выполнены
 
-| Задача | Файлы | Статус |
+| Этап | Задача | Статус |
 |---|---|---|
-| **Server Actions blog.ts — фикс userId** | `apps/admin/src/lib/actions/blog.ts` | 7 функций: `requireEdit()`, `userId: ''` → `userId` |
-| **Унификация стиля** | tailwind.config, globals.css, AdminShell | Спільні токени, удалён CSS bloat |
-| **Удаление 10 старых action-файлов** | `apps/admin/src/app/admin/actions/*.ts` | ✅ |
-| **R2 upload + WebP (Етап 4)** | 5 файлов | UploadZone, API route, media serving ✅ |
-| **Dashboard: users/redirects/revisions D1** | `dashboard.ts` | Реальные D1-запросы ✅ |
-| **Dashboard: drafts** | `dashboard.ts` | Черновики из services, blog, pages, faq ✅ |
-| **Search (полнотекстовый)** | `lib/actions/search.ts` | Поиск по services, blog, pages, faq, leads ✅ |
-| **Обновление TEMP** | Все файлы в `TEMP/` | ✅ |
-
-### Общий прогресс по этапам плана
-
-```
-Этап 0. Разведка/TEMP          ✅
-Этап 1. Foundation + Audit     ✅
-Этап 2. 15 модулей actions     ✅  [+ blog.ts userId fix]
-Этап 3. Dashboard              ✅  [Все метрики + drafts]
-Этап 4. R2 upload + WebP       ✅
-Этап 5. Drag-and-drop          ⏳
-Этап 6. Публичный сайт на D1   ⏳
-Этап 7. Регрессия              ✅  [TS 0, tests 32/32, build 0, SEO 32/32]
-```
+| 0 | Разведка TEMP | ✅ |
+| 1 | Foundation (result, guard, db, audit) | ✅ |
+| 2 | 15 модулей actions + фикс импортов | ✅ |
+| 3 | Dashboard на реальных D1 | ✅ |
+| 4 | R2 upload + WebP + Media Picker | ✅ |
+| 5 | Drag-and-drop (@dnd-kit) | ✅ [подтверждено 2026-07-10] |
+| 6 | Публичные страницы на D1 + инвалидация кэша | ⏳ |
+| 7 | Регрессия (TS/tests/build/SEO) | ✅ |
 
 ### Ключевые метрики
 - TypeScript: 0 ошибок (admin + site)
@@ -40,12 +27,14 @@
 - Build: 0 ошибок (оба воркера)
 - Dashboard: все метрики на реальных D1 ✅
 - Search: реализован (5 типов, 5 результатов каждый, dedup) ✅
+- Drag-and-drop: SortableList + FAQ / Услуги / Отзывы / Навигация ✅
 - **Заглушек не осталось** ✅
+- **Деплой:** последний коммит успешно задеплоен на Cloudflare (оба воркера) ✅
 
 ---
 
-## Что осталось (новые фичи)
+## Что осталось
 
-1. **Drag-and-drop** — @dnd-kit для сортировки
-2. **Публичные страницы на D1** — Этап 6
-3. **Google OAuth** / Rate limiting / графика на Dashboard
+1. **Публичные страницы на D1 + инвалидация кэша** — Этап 6 (самое важное)
+2. **Google OAuth** / Rate limiting / графика на Dashboard
+3. **Повторная регрессия** после Этапа 6

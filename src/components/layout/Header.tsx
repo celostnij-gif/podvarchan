@@ -796,11 +796,13 @@ export default function Header() {
 
                 <div className="mt-6 px-4 space-y-3">
                   <a href="https://t.me/SLAVKA_VIP" target="_blank" rel="noopener noreferrer"
+                     data-analytics-telegram="header-mobile-menu"
                      className="flex items-center gap-2.5 text-sm text-text-muted hover:text-[#0088cc] transition-colors duration-200">
                     <TelegramIcon size={16} />
                     @SLAVKA_VIP
                   </a>
                   <a href="https://wa.me/380663122069" target="_blank" rel="noopener noreferrer"
+                     data-analytics-whatsapp="header-mobile-menu"
                      className="flex items-center gap-2.5 text-sm text-text-muted hover:text-[#25D366] transition-colors duration-200">
                     <WhatsAppIcon size={16} />
                     +380 66 312 2069

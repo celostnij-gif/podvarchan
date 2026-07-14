@@ -1,7 +1,10 @@
 import { notFound } from 'next/navigation'
+import { eq } from 'drizzle-orm'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getBlogPost, getAllBlogSlugs, getAllBlogPosts, formatDate } from '@/lib/content'
 import { getBlogPostBySlug, getBlogPosts } from '@/lib/db/public'
+import { getDB } from '@/db'
+import { mediaAssets } from '@/db/schema/media'
 import { articleSchema } from '@/lib/schema'
 import { ClientBlogPost } from './client-page'
 import { BLOG_SLUG_UK, resolveBlogSlug } from '@/lib/slugMapping'
@@ -69,6 +72,8 @@ type BlogPageData =
       categorySlug: string
       readingTime: number
       slug: string
+      image?: string
+      imageAlt?: string
       relatedPosts: { slug: string; title: string }[]
       jsonLd: Record<string, unknown>
     }
@@ -94,6 +99,31 @@ async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData 
         locale,
       })
 
+      // Resolve coverImageId to a displayable URL
+      let coverImageUrl: string | null = null
+      if (post.coverImageId) {
+        if (post.coverImageId.startsWith('/') || post.coverImageId.startsWith('http')) {
+          coverImageUrl = post.coverImageId
+        } else if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(post.coverImageId)) {
+          // UUID — resolve from media_assets
+          const db = getDB()
+          const asset = await db
+            .select({ publicUrl: mediaAssets.publicUrl })
+            .from(mediaAssets)
+            .where(eq(mediaAssets.id, post.coverImageId))
+            .get()
+          coverImageUrl = asset?.publicUrl ?? null
+        }
+      }
+
+      // If D1 coverImageId is null/empty, fall back to static blog post image
+      if (!coverImageUrl) {
+        const staticPost = getBlogPost(slug, locale)
+        if (staticPost?.image) {
+          coverImageUrl = staticPost.image
+        }
+      }
+
       return {
         type: 'd1',
         title: post.title ?? '',
@@ -103,6 +133,8 @@ async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData 
         categorySlug: post.categorySlug ?? '',
         readingTime: post.readingMinutes ?? 5,
         slug,
+        image: coverImageUrl || undefined,
+        imageAlt: post.title ?? undefined,
         relatedPosts,
         jsonLd,
       }
@@ -151,6 +183,8 @@ export default async function BlogPostPage({ params }: Props) {
         author=""
         readingTime={data.readingTime}
         slug={data.slug}
+        image={data.image}
+        imageAlt={data.imageAlt}
         locale={locale}
         relatedPosts={data.relatedPosts}
         schemas={[data.jsonLd]}

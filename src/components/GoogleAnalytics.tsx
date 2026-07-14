@@ -1,39 +1,55 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import Script from 'next/script'
 import { usePathname } from 'next/navigation'
 import { analytics } from '@/lib/analytics'
 import { hasConsent } from '@/lib/consent'
 
 /**
+ * Tracks booking clicks even before cookie consent.
+ * Stores in sessionStorage, flushed to GA after consent + gtag.js load.
+ */
+function BookingClickTracker() {
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      const target = (e.target as HTMLElement).closest('[data-analytics-booking]')
+      if (target) {
+        const source = (target as HTMLElement).getAttribute('data-analytics-booking') || 'unknown'
+        try {
+          const pending = JSON.parse(sessionStorage.getItem('_pending_bookings') || '[]')
+          pending.push({ source, timestamp: Date.now() })
+          sessionStorage.setItem('_pending_bookings', JSON.stringify(pending))
+        } catch { /* ignore */ }
+      }
+    }
+    document.addEventListener('click', handleClick)
+    return () => document.removeEventListener('click', handleClick)
+  }, [])
+  return null
+}
+
+/**
  * Google Analytics 4 component.
  *
- * Подключает GA4 через <Script strategy="afterInteractive">
- * и автоматически отслеживает:
- *  - page_view при смене роута (SPA-навигация)
- *  - scroll_depth >80% на страницах /uslugi/*
- *
- * Конверсионные события (booking_click, contacts_view) проставляются
- * через data-атрибуты в HTML или через прямой вызов analytics.*.
+ * Принимает gaId как пропс от Server Component.
+ * GA загружается через <Script afterInteractive> — гарантирует, что gtag
+ * доступен до того, как сработают useEffect с событиями.
  */
-export default function GoogleAnalytics() {
+export default function GoogleAnalytics({ gaId }: { gaId?: string }) {
   const pathname = usePathname()
-  const firstRender = useRef(true)
   const prevPath = useRef(pathname)
   const scrollFired = useRef<Set<string>>(new Set())
   const [consented, setConsented] = useState(false)
+  const [gaLoaded, setGaLoaded] = useState(false)
 
-  const gaId = process.env.NEXT_PUBLIC_GA_ID
-
-  // Wait for cookie consent before loading GA
+  // ── Wait for cookie consent ──
   useEffect(() => {
     if (hasConsent()) {
       queueMicrotask(() => setConsented(true))
       return
     }
 
-    // Listen for consent given via CookieBanner
     function onConsent() {
       setConsented(true)
     }
@@ -42,81 +58,128 @@ export default function GoogleAnalytics() {
     return () => window.removeEventListener('cookie-consent-accepted', onConsent)
   }, [])
 
-  // Re-fire page view when consent is given mid-session (only on consent transition, not navigation)
+  // ── When both consent AND gtag.js are ready: flush + initial page view ──
   useEffect(() => {
-    if (consented) {
-      analytics.pageView(pathname)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [consented])
+    if (!gaId || !consented || !gaLoaded) return
 
+    // Flush pending booking clicks that happened before consent
+    try {
+      const pending = JSON.parse(sessionStorage.getItem('_pending_bookings') || '[]')
+      for (const item of pending) {
+        analytics.bookingClick(item.source)
+      }
+      sessionStorage.removeItem('_pending_bookings')
+    } catch { /* ignore */ }
+
+    // Send initial page view (with send_page_view: false in init script)
+    analytics.pageView(pathname, undefined, gaId)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [consented, gaLoaded])
+
+  // ── Track page views and contacts/tseny views on navigation ──
   useEffect(() => {
-    if (!gaId) return
+    if (!gaId || !consented || !gaLoaded) return
 
     const current = pathname
-    const cleanups: (() => void)[] = []
 
-    /* Send page view on first ever render */
-    if (firstRender.current) {
-      firstRender.current = false
-      prevPath.current = current
-      analytics.pageView(current)
-    } else if (prevPath.current !== current) {
-      analytics.pageView(current)
+    if (prevPath.current !== current) {
+      analytics.pageView(current, undefined, gaId)
       prevPath.current = current
     }
 
-    /* Track contacts page view */
     if (current.startsWith('/kontakty')) {
       analytics.contactsView()
     }
 
-    /* Scroll tracking for /uslugi/* pages */
-    if (current.startsWith('/uslugi/') && current !== '/uslugi/') {
-      const slug = current.replace(/^\/uslugi\//, '').replace(/\/$/, '')
+    if (current.startsWith('/tseny')) {
+      analytics.tsenyView()
+    }
+  }, [pathname, consented, gaLoaded, gaId])
 
-      if (!scrollFired.current.has(slug)) {
-        const handleScroll = () => {
-          const scrollHeight = document.documentElement.scrollHeight - window.innerHeight
-          const scrolled = window.scrollY
-          const percent = scrollHeight > 0 ? Math.round((scrolled / scrollHeight) * 100) : 0
+  // ── Scroll + click event listeners (separate to avoid listener re-creation on nav) ──
+  useEffect(() => {
+    if (!gaId || !consented || !gaLoaded) return
 
-          if (percent >= 80 && !scrollFired.current.has(slug)) {
-            scrollFired.current.add(slug)
-            analytics.serviceEngaged(slug)
-            window.removeEventListener('scroll', handleScroll)
+    const cleanups: (() => void)[] = []
+
+    /* Scroll: /uslugi/* pages at 80% */
+    if (pathname.startsWith('/uslugi/') && pathname !== '/uslugi/') {
+      const serviceSlug = pathname.replace(/^\/?(ru|uk)?\/?uslugi\//, '').replace(/\/$/, '')
+      const key = `uslugi-scroll:${serviceSlug}`
+      const handleScroll = () => {
+        const scrollHeight = document.documentElement.scrollHeight - window.innerHeight
+        const percent = scrollHeight > 0 ? Math.round((window.scrollY / scrollHeight) * 100) : 0
+        if (percent >= 80 && !scrollFired.current.has(key)) {
+          scrollFired.current.add(key)
+          analytics.serviceEngaged(serviceSlug)
+        }
+      }
+      window.addEventListener('scroll', handleScroll, { passive: true })
+      cleanups.push(() => window.removeEventListener('scroll', handleScroll))
+    }
+
+    /* Scroll: /blog/* posts at 50% and 90% */
+    if (pathname.startsWith('/blog/') && pathname !== '/blog/' && !pathname.startsWith('/blog/kategoriya/')) {
+      const blogSlug = pathname.replace(/^\/?(ru|uk)?\/?blog\//, '').replace(/\/$/, '')
+      const handleScroll = () => {
+        const scrollHeight = document.documentElement.scrollHeight - window.innerHeight
+        const percent = scrollHeight > 0 ? Math.round((window.scrollY / scrollHeight) * 100) : 0
+        for (const depth of [50, 90]) {
+          const key = `blog-scroll:${blogSlug}:${depth}`
+          if (percent >= depth && !scrollFired.current.has(key)) {
+            scrollFired.current.add(key)
+            analytics.blogScroll(blogSlug, depth)
           }
         }
-
-        window.addEventListener('scroll', handleScroll, { passive: true })
-        cleanups.push(() => window.removeEventListener('scroll', handleScroll))
       }
+      window.addEventListener('scroll', handleScroll, { passive: true })
+      cleanups.push(() => window.removeEventListener('scroll', handleScroll))
     }
 
-    /* Click tracking for booking buttons via data attribute */
-    const handleClick = (e: MouseEvent) => {
-      const target = (e.target as HTMLElement).closest('[data-analytics-booking]')
-      if (target) {
-        const source = (target as HTMLElement).getAttribute('data-analytics-booking') || 'unknown'
-        analytics.bookingClick(source)
+    /* WhatsApp click */
+    const handleWhatsApp = (e: MouseEvent) => {
+      const link = (e.target as HTMLElement).closest('a[href*="wa.me"]')
+      if (link) {
+        const source = (link as HTMLAnchorElement).getAttribute('data-analytics-whatsapp') || 'unknown'
+        analytics.whatsappClick(source)
       }
     }
+    document.addEventListener('click', handleWhatsApp)
+    cleanups.push(() => document.removeEventListener('click', handleWhatsApp))
 
-    document.addEventListener('click', handleClick)
-    cleanups.push(() => document.removeEventListener('click', handleClick))
+    /* Telegram click */
+    const handleTelegram = (e: MouseEvent) => {
+      const link = (e.target as HTMLElement).closest('a[href*="t.me"]')
+      if (link) {
+        const source = (link as HTMLAnchorElement).getAttribute('data-analytics-telegram') || 'unknown'
+        analytics.telegramClick(source)
+      }
+    }
+    document.addEventListener('click', handleTelegram)
+    cleanups.push(() => document.removeEventListener('click', handleTelegram))
 
     return () => { cleanups.forEach((fn) => fn()) }
-  }, [pathname, gaId])
+  }, [pathname, consented, gaLoaded, gaId])
 
-  if (!gaId || !consented) return null
+  const handleGtagLoad = useCallback(() => {
+    setGaLoaded(true)
+  }, [])
+
+  if (!gaId) return null
+
+  if (!consented) {
+    return <BookingClickTracker />
+  }
 
   return (
     <>
+      <BookingClickTracker />
       <Script
         src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
-        strategy="lazyOnload"
+        strategy="afterInteractive"
+        onLoad={handleGtagLoad}
       />
-      <Script id="google-analytics" strategy="lazyOnload">
+      <Script id="google-analytics" strategy="afterInteractive">
         {`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}

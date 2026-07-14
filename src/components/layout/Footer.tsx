@@ -60,6 +60,7 @@ export default async function Footer({ locale }: { locale: string }) {
                 href="https://t.me/SLAVKA_VIP"
                 target="_blank"
                 rel="noopener noreferrer"
+                data-analytics-telegram="footer"
                 className="w-9 h-9 flex items-center justify-center rounded-full
                            bg-bg-surface/85 border border-border-base text-text-muted
                            hover:text-gold hover:border-gold-muted hover:bg-bg-elevated
@@ -74,6 +75,7 @@ export default async function Footer({ locale }: { locale: string }) {
                 href="https://wa.me/380663122069"
                 target="_blank"
                 rel="noopener noreferrer"
+                data-analytics-whatsapp="footer"
                 className="w-9 h-9 flex items-center justify-center rounded-full
                            bg-bg-surface/85 border border-border-base text-text-muted
                            hover:text-gold hover:border-gold-muted hover:bg-bg-elevated

@@ -8,6 +8,8 @@ import { buildCanonical } from '@/lib/seo/metadata'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 
+import { getCloudflareContext } from '@opennextjs/cloudflare'
+
 const GoogleAnalytics = dynamic(() => import('@/components/GoogleAnalytics'))
 const CookieBanner = dynamic(() => import('@/components/CookieBanner'))
 const MobileStickyCTA = dynamic(() => import('@/components/layout/MobileStickyCTA'))
@@ -84,6 +86,16 @@ export default async function LocaleLayout({
   const messages = await getMessages()
   const t = await getTranslations({ locale, namespace: 'common' })
 
+  // GA ID із Cloudflare Worker env (Server Component runtime)
+  // try/catch для безпеки при статичній генерації (build time)
+  let gaId: string | undefined
+  try {
+    const { env } = getCloudflareContext()
+    gaId = env.NEXT_PUBLIC_GA_ID as string | undefined
+  } catch {
+    gaId = process.env.NEXT_PUBLIC_GA_ID
+  }
+
   /* ── JSON-LD Schema ── */
   const jsonLdSchemas = [
     personSchema({ jobTitle: t('authorTitle'), locale }),
@@ -153,7 +165,7 @@ export default async function LocaleLayout({
         <Footer locale={locale} />
       </DeviceProvider>
 
-      <GoogleAnalytics />
+      <GoogleAnalytics gaId={gaId} />
       <CookieBanner />
       <MobileStickyCTA />
 

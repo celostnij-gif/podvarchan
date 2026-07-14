@@ -10,15 +10,20 @@ import type { PostWithTranslations } from '../types'
 interface Props {
   post?: PostWithTranslations
   categories: { id: string; slugBase: string; ruName?: string }[]
+  /** Resolved cover image URL for preview (server-resolved from coverImageId) */
+  coverImageResolvedUrl?: string
 }
 
-export function PostForm({ post, categories }: Props) {
+export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
   const isEdit = !!post
   const [ruContentHtml, setRuContentHtml] = useState(post?.translations.find(t => t.locale === 'ru')?.contentHtml ?? '')
   const [ruContentJson, setRuContentJson] = useState(post?.translations.find(t => t.locale === 'ru')?.contentJson ?? '')
   const [ukContentHtml, setUkContentHtml] = useState(post?.translations.find(t => t.locale === 'uk')?.contentHtml ?? '')
   const [ukContentJson, setUkContentJson] = useState(post?.translations.find(t => t.locale === 'uk')?.contentJson ?? '')
-  const [coverImageUrl, setCoverImageUrl] = useState(post?.coverImageId ?? '')
+  // Display URL for preview/input
+  const [coverImageUrl, setCoverImageUrl] = useState(coverImageResolvedUrl ?? post?.coverImageId ?? '')
+  // Actual value to store in DB (UUID from media_assets or URL if typed manually)
+  const [coverImageIdState, setCoverImageIdState] = useState(post?.coverImageId ?? '')
   const [showCoverPicker, setShowCoverPicker] = useState(false)
 
   const [state, formAction, pending] = useActionState(
@@ -28,7 +33,7 @@ export function PostForm({ post, categories }: Props) {
       formData.set('ru_contentJson', ruContentJson)
       formData.set('uk_contentHtml', ukContentHtml)
       formData.set('uk_contentJson', ukContentJson)
-      formData.set('coverImageId', coverImageUrl)
+      formData.set('coverImageId', coverImageIdState)
       try {
         if (isEdit) {
           await updatePost(post!.id, formData)
@@ -100,8 +105,8 @@ export function PostForm({ post, categories }: Props) {
                 <input
                   type="text"
                   value={coverImageUrl}
-                  onChange={(e) => setCoverImageUrl(e.target.value)}
-                  placeholder="/images/blog/photo.webp або /api/media/..."
+                  onChange={(e) => { setCoverImageUrl(e.target.value); setCoverImageIdState(e.target.value) }}
+                  placeholder="/api/media/... або /images/..."
                   className="flex-1 rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
                 />
                 <button
@@ -114,7 +119,7 @@ export function PostForm({ post, categories }: Props) {
                 {coverImageUrl && (
                   <button
                     type="button"
-                    onClick={() => setCoverImageUrl('')}
+                    onClick={() => { setCoverImageUrl(''); setCoverImageIdState('') }}
                     className="rounded-lg bg-red-900/30 px-3 py-2 text-sm text-red-400 hover:bg-red-900/50"
                   >
                     ×
@@ -145,6 +150,7 @@ export function PostForm({ post, categories }: Props) {
         onClose={() => setShowCoverPicker(false)}
         onSelect={(asset) => {
           if (asset.publicUrl) setCoverImageUrl(asset.publicUrl)
+          if (asset.id) setCoverImageIdState(asset.id)
           setShowCoverPicker(false)
         }}
       />

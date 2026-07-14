@@ -70,6 +70,7 @@ export default function KontaktyClient() {
                       href="https://t.me/SLAVKA_VIP"
                       target="_blank"
                       rel="noopener noreferrer"
+                      data-analytics-telegram="contacts-page"
                       className="text-sm text-gold hover:text-gold-light underline-offset-4 hover:underline"
                     >
                       @SLAVKA_VIP
@@ -86,6 +87,7 @@ export default function KontaktyClient() {
                       href="https://wa.me/380663122069"
                       target="_blank"
                       rel="noopener noreferrer"
+                      data-analytics-whatsapp="contacts-page"
                       className="text-sm text-gold hover:text-gold-light underline-offset-4 hover:underline"
                     >
                       +380 66 312 2069
