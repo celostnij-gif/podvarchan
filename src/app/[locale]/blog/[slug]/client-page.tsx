@@ -212,6 +212,22 @@ export function ClientBlogPost({ title, body, date, category, categorySlug, auth
             <span className="w-8 h-px bg-gold/20" />
           </div>
 
+          {/* ── Clinical reviewer block (YMYL E-E-A-T signal) ── */}
+          {categorySlug === 'ptsr' || categorySlug === 'trevoga' || _slug?.includes('panicheskiye-ataki') || _slug?.includes('panichni-ataki') ? (
+            <div className="mt-12 p-4 rounded-lg bg-gold/[0.04] border border-gold/10">
+              <p className="text-xs text-text-muted flex items-start gap-2">
+                <svg className="w-4 h-4 mt-0.5 shrink-0 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                <span>
+                  <strong>{t('reviewedBy') || (_locale === 'uk' ? 'Матеріал перевірив' : 'Материал проверил')}:</strong>{' '}
+                  {commonT('authorName')} — {commonT('authorTitle')}.
+                  {' '}{t('reviewedDate') || (_locale === 'uk' ? 'Дата перевірки' : 'Дата проверки')}: {date}.
+                </span>
+              </p>
+            </div>
+          ) : null}
+
           {/* ── Author bio ── */}
           <div className="mt-12 p-6 rounded-xl bg-bg-surface/85 border border-border-base">
             <div className="flex items-start gap-4">

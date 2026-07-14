@@ -1,6 +1,7 @@
 import { getTranslations, getMessages } from 'next-intl/server'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { faqSchema } from '@/lib/schema'
+import { getFAQs } from '@/lib/db/public'
 import { ClientFaqPage } from './client-page'
 import type { FAQItem } from '@/types'
 
@@ -26,8 +27,26 @@ export default async function FaqPage({
 }: {
   params: Promise<{ locale: string }>
 }) {
-  const messages = await getMessages()
-  const faqItems = (messages.faqData as FAQItem[]) ?? []
+  // Try D1 first, fallback to messages
+  let faqItems: FAQItem[] = []
+
+  try {
+    const d1Items = await getFAQs((await _params).locale)
+    if (d1Items.length > 0) {
+      faqItems = d1Items.map((item) => ({
+        question: item.question,
+        answer: item.answer ?? '',
+      }))
+    }
+  } catch { /* D1 unavailable — fallback to messages */ }
+
+  if (faqItems.length === 0) {
+    const messages = await getMessages()
+    const data = (messages.faqData as FAQItem[] | undefined)
+    if (data && data.length > 0) {
+      faqItems = data
+    }
+  }
 
   const schema = faqSchema(faqItems)
 

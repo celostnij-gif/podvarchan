@@ -20,10 +20,11 @@ export default function HeroParallaxBackground() {
       <div className="relative w-full h-full">
         <Image
           src="/images/hero-bg.webp"
-          alt=""
+          alt="Спокійна атмосфера онлайн-сесії гіпнотерапії"
           fill
           className="object-cover object-center"
           priority
+          fetchPriority="high"
           sizes="100vw"
         />
       </div>

@@ -33,6 +33,7 @@ export function breadcrumbSchema(params: BreadcrumbSchemaParams): Record<string,
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     '@id': `${cleanUrl(SITE.url, localePrefix, lastUrl)}#breadcrumb`,
+    inLanguage: locale === 'uk' ? 'uk' : 'ru',
     itemListElement: items.map((item, index) => ({
       '@type': 'ListItem',
       position: index + 1,

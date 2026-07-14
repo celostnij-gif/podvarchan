@@ -5,9 +5,21 @@ import { getBlogPost, getAllBlogSlugs, getAllBlogPosts, formatDate } from '@/lib
 import { getBlogPostBySlug, getBlogPosts } from '@/lib/db/public'
 import { getDB } from '@/db'
 import { mediaAssets } from '@/db/schema/media'
-import { articleSchema } from '@/lib/schema'
+import { articleSchema, faqSchema } from '@/lib/schema'
 import { ClientBlogPost } from './client-page'
 import { BLOG_SLUG_UK, resolveBlogSlug } from '@/lib/slugMapping'
+
+/**
+ * Определяет, является ли статья клинической (YMYL) для добавления reviewedBy.
+ */
+function isClinicalArticle(categorySlug: string | null | undefined, slug: string): boolean {
+  if (!categorySlug) return false
+  const clinicalCategories = new Set(['ptsr', 'trevoga'])
+  if (clinicalCategories.has(categorySlug)) return true
+  // Также помечаем статьи о панических атаках
+  if (slug.includes('panicheskiye-ataki') || slug.includes('panichni-ataki')) return true
+  return false
+}
 
 export const revalidate = 3600
 
@@ -76,6 +88,7 @@ type BlogPageData =
       imageAlt?: string
       relatedPosts: { slug: string; title: string }[]
       jsonLd: Record<string, unknown>
+      additionalSchemas?: Record<string, unknown>[]
     }
   | { type: 'fallback'; post: import('@/types').BlogPost; locale: string; relatedPosts: { slug: string; title: string }[]; jsonLd: Record<string, unknown> }
 
@@ -89,6 +102,10 @@ async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData 
         .slice(0, 4)
         .map((p) => ({ slug: p.slug, title: p.title ?? '' }))
 
+      const clinical = isClinicalArticle(post.categorySlug, slug)
+
+      const schemas: Record<string, unknown>[] = []
+
       const jsonLd = articleSchema({
         headline: post.title ?? '',
         description: post.excerpt ?? '',
@@ -97,7 +114,19 @@ async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData 
         dateModified: post.updatedAt ?? post.publishedAt ?? new Date().toISOString(),
         authorName: '',
         locale,
+        category: clinical ? 'clinical' : undefined,
       })
+      schemas.push(jsonLd)
+
+      // Add FAQPage schema if faqJson is available
+      if (post.faqJson) {
+        try {
+          const parsedFaq = JSON.parse(post.faqJson)
+          if (Array.isArray(parsedFaq) && parsedFaq.length > 0) {
+            schemas.push(faqSchema(parsedFaq))
+          }
+        } catch { /* faqJson parse error — skip */ }
+      }
 
       // Resolve coverImageId to a displayable URL
       let coverImageUrl: string | null = null
@@ -137,6 +166,7 @@ async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData 
         imageAlt: post.title ?? undefined,
         relatedPosts,
         jsonLd,
+        additionalSchemas: schemas.slice(1), // FAQPage (1+) sans ArticleSchema
       }
     }
   } catch { /* fallback */ }
@@ -150,6 +180,7 @@ async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData 
     .slice(0, 4)
     .map((p) => ({ slug: p.slug, title: p.title }))
 
+  const clinical = isClinicalArticle(post.categorySlug, slug)
   const jsonLd = articleSchema({
     headline: post.title,
     description: post.description,
@@ -161,6 +192,7 @@ async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData 
     imageCaption: post.title,
     authorName: post.author,
     locale,
+    category: clinical ? 'clinical' : undefined,
   })
 
   return { type: 'fallback', post, locale, relatedPosts, jsonLd }
@@ -173,6 +205,7 @@ export default async function BlogPostPage({ params }: Props) {
   if (!data) notFound()
 
   if (data.type === 'd1') {
+    const allSchemas = [data.jsonLd, ...(data.additionalSchemas ?? [])]
     return (
       <ClientBlogPost
         title={data.title}
@@ -187,7 +220,7 @@ export default async function BlogPostPage({ params }: Props) {
         imageAlt={data.imageAlt}
         locale={locale}
         relatedPosts={data.relatedPosts}
-        schemas={[data.jsonLd]}
+        schemas={allSchemas}
       />
     )
   }

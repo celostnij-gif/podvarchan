@@ -73,6 +73,14 @@ nul
 
 # linkbuilder 
 /linkbuilder
+
+# migration/seed scripts (dev artifacts, not for commit)
+/scripts/_batch_*.sql
+/scripts/d1-migration-log.txt
+/scripts/migrate-*
+/scripts/run-d1-migration.mjs
+/tmp-git-log.bat
+
 # editor workspace settings (local LSP server config)
 /.vscode/
 *.zip

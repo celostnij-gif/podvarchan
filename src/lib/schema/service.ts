@@ -30,6 +30,7 @@ export function serviceSchema(params: ServiceSchemaParams): Record<string, unkno
   return {
     '@context': 'https://schema.org',
     '@type': 'Service',
+    inLanguage: locale === 'uk' ? 'uk' : 'ru',
     name,
     description,
     url: cleanUrl(SITE.url, localePrefix, url),
@@ -159,12 +160,15 @@ export function practiceSchema(locale: string = 'ru'): Record<string, unknown> {
     '@type': 'ProfessionalService',
     '@id': `${SITE.url}#practice`,
     name: SITE.fullName,
+    inLanguage: isUk ? 'uk' : 'ru',
     description: isUk
       ? 'Онлайн-гіпнотерапія: робота з тривогою, панічними атаками, самосаботажем та підсвідомістю.'
       : 'Онлайн-гипнотерапия: работа с тревогой, паническими атаками, самосаботажем и подсознанием.',
     url: SITE.url,
     logo: `${SITE.url}/logo.webp`,
     image: `${SITE.url}${SITE.defaultOgImage}`,
+    telephone: '+380663122069',
+    email: 'podvarchan@gmail.com',
     founder: {
       '@type': 'Person',
       '@id': `${SITE.url}/ob-avtore/#person`,
@@ -186,6 +190,8 @@ export function practiceSchema(locale: string = 'ru'): Record<string, unknown> {
     contactPoint: {
       '@type': 'ContactPoint',
       contactType: 'customer service',
+      telephone: '+380663122069',
+      email: 'podvarchan@gmail.com',
       url: `${SITE.url}/kontakty/`,
     },
   }

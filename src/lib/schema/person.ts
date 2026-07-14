@@ -74,6 +74,7 @@ export function personSchema(params: PersonSchemaParams = {}): Record<string, un
     name: AUTHOR.name,
     givenName: AUTHOR.givenName,
     familyName: AUTHOR.familyName,
+    inLanguage: locale === 'uk' ? 'uk' : 'ru',
     jobTitle,
     description,
     url: `${SITE.url}${AUTHOR.url}`,
@@ -89,6 +90,10 @@ export function personSchema(params: PersonSchemaParams = {}): Record<string, un
       url: `${SITE.url}/kontakty/`,
       availableLanguage: locale === 'uk' ? ['Ukrainian'] : ['Russian'],
     },
+  }
+
+  if (sameAs.length > 0) {
+    schema.sameAs = sameAs
   }
 
   if (credentials.length > 0) {
@@ -120,10 +125,6 @@ export function personSchema(params: PersonSchemaParams = {}): Record<string, un
     .map((c) => c.name)
   if (awards.length > 0) {
     schema.award = awards.length === 1 ? awards[0] : awards
-  }
-
-  if (sameAs.length > 0) {
-    schema.sameAs = sameAs
   }
 
   return schema

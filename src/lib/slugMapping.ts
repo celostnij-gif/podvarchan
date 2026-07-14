@@ -59,6 +59,7 @@ export const BLOG_SLUG_UK: Record<string, string> = {
   'psikhosomatika-boli-v-shee': 'psihosomatika-bolyu-v-shiyi',
   'psikhosomatika-davleniya': 'psihosomatika-tisku',
   'ptsr-u-veteranov-simptomy-i-pomoshch': 'ptsr-u-veteraniv-oznaky-i-dopomoha',
+  'trevoga-polnyy-putevoditel': 'trivoga-povniy-putivnik',
 }
 
 /* ── Blog Categories ── */

@@ -9,6 +9,7 @@
 import { eq, and, desc } from 'drizzle-orm'
 import { getDB } from '@/db'
 import { services, serviceTranslations } from '@/db/schema/services'
+import { faqItems, faqItemTranslations } from '@/db/schema/faq'
 import {
   blogCategories,
   blogCategoryTranslations,
@@ -52,6 +53,7 @@ export interface BlogPostPublic {
   readingMinutes: number | null
   publishedAt: string | null
   updatedAt: string | null
+  faqJson: string | null
 }
 
 export interface BlogCategoryPublic {
@@ -195,6 +197,7 @@ export async function getBlogPosts(locale: string): Promise<BlogPostPublic[]> {
     readingMinutes: r.blog_posts.readingMinutes,
     publishedAt: r.blog_posts.publishedAt,
     updatedAt: r.blog_posts.updatedAt,
+    faqJson: r.blog_post_translations.faqJson,
   }))
 }
 
@@ -277,6 +280,41 @@ export async function getPageByType(
     sections: Array.from(sectionMap.values()),
   }
 }
+// ─── FAQ (from D1 faq_items + faq_item_translations) ───
+
+export interface FAQPublic {
+  id: string
+  question: string
+  answer: string | null
+}
+
+export async function getFAQs(locale: string, group?: string): Promise<FAQPublic[]> {
+  const db = getDB()
+  const loc = locale as 'ru' | 'uk'
+  const rows = await db
+    .select()
+    .from(faqItems)
+    .innerJoin(
+      faqItemTranslations,
+      eq(faqItems.id, faqItemTranslations.faqItemId),
+    )
+    .where(
+      and(
+        eq(faqItems.status, 'PUBLISHED'),
+        eq(faqItemTranslations.locale, loc),
+        ...(group ? [eq(faqItems.group, group as 'HOME' | 'GENERAL' | 'SERVICE' | 'CONTACTS')] : []),
+      ),
+    )
+    .orderBy(faqItems.sortOrder)
+    .all()
+
+  return rows.map((r) => ({
+    id: r.faq_items.id,
+    question: r.faq_item_translations.question ?? '',
+    answer: r.faq_item_translations.answer ?? '',
+  }))
+}
+
 // ─── SEO ───
 
 export async function getSEOMeta(

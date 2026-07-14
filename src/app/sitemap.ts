@@ -90,7 +90,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       const ruUrl = `${BASE}/ru/uslugi/${service.slug}/`
       const ukSlug = SERVICE_SLUG_UK[service.slug] ?? service.slug
       const ukUrl = `${BASE}/uk/uslugi/${ukSlug}/`
-      const date = new Date()
+      const date = service.updatedAt ? new Date(service.updatedAt) : new Date('2026-07-10')
       const alternates = { ru: ruUrl, uk: ukUrl }
       entries.push({ url: ruUrl, alternates: { languages: alternates }, priority, changeFrequency: 'monthly', lastModified: date })
       entries.push({ url: ukUrl, alternates: { languages: alternates }, priority, changeFrequency: 'monthly', lastModified: date })

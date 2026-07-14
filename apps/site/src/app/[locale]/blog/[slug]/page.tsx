@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getBlogPost, getAllBlogSlugs, getAllBlogPosts, formatDate } from '@/lib/content'
 import { getBlogPostBySlug, getBlogPosts } from '@/lib/db/public'
-import { articleSchema } from '@/lib/schema'
+import { articleSchema, faqSchema } from '@/lib/schema'
 import { ClientBlogPost } from './client-page'
 import { BLOG_SLUG_UK, resolveBlogSlug } from '@/lib/slugMapping'
 
@@ -71,6 +71,7 @@ type BlogPageData =
       slug: string
       relatedPosts: { slug: string; title: string }[]
       jsonLd: Record<string, unknown>
+      additionalSchemas?: Record<string, unknown>[]
     }
   | { type: 'fallback'; post: import('@/types').BlogPost; locale: string; relatedPosts: { slug: string; title: string }[]; jsonLd: Record<string, unknown> }
 
@@ -84,6 +85,8 @@ async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData 
         .slice(0, 4)
         .map((p) => ({ slug: p.slug, title: p.title ?? '' }))
 
+      const schemas: Record<string, unknown>[] = []
+
       const jsonLd = articleSchema({
         headline: post.title ?? '',
         description: post.excerpt ?? '',
@@ -93,6 +96,17 @@ async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData 
         authorName: '',
         locale,
       })
+      schemas.push(jsonLd)
+
+      // Add FAQPage schema if faqJson is available
+      if (post.faqJson) {
+        try {
+          const parsedFaq = JSON.parse(post.faqJson)
+          if (Array.isArray(parsedFaq) && parsedFaq.length > 0) {
+            schemas.push(faqSchema(parsedFaq))
+          }
+        } catch { /* faqJson parse error — skip */ }
+      }
 
       return {
         type: 'd1',
@@ -105,6 +119,7 @@ async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData 
         slug,
         relatedPosts,
         jsonLd,
+        additionalSchemas: schemas.slice(1),
       }
     }
   } catch { /* fallback */ }
@@ -141,6 +156,7 @@ export default async function BlogPostPage({ params }: Props) {
   if (!data) notFound()
 
   if (data.type === 'd1') {
+    const allSchemas = [data.jsonLd, ...(data.additionalSchemas ?? [])]
     return (
       <ClientBlogPost
         title={data.title}
@@ -153,7 +169,7 @@ export default async function BlogPostPage({ params }: Props) {
         slug={data.slug}
         locale={locale}
         relatedPosts={data.relatedPosts}
-        schemas={[data.jsonLd]}
+        schemas={allSchemas}
       />
     )
   }

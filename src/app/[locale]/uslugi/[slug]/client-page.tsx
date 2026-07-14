@@ -420,9 +420,145 @@ function RelatedServicesSection({ service, allServices }: { service: ServiceData
   )
 }
 
+/* ── Trevoga Hub Banner (keyword cannibalization fix) ── */
+
+const TREVOGA_HUB_SLUGS = new Set([
+  'kak-izbavitsya-ot-trevogi',
+  'postoyannaya-trevoga-bez-prichiny',
+  'utrennyaya-trevoga',
+  'trevoga-pered-snom',
+  'trevoga-posle-stressa',
+  'vnutrenneye-napryazheniye',
+  'navyazchivye-mysli',
+  'strakh-budushchego',
+])
+
+function TrevogaHubBanner({ service, locale }: { service: ServiceData; locale: string }) {
+  if (!TREVOGA_HUB_SLUGS.has(service.slug)) return null
+
+  const hubPath = locale === 'uk' ? '/uk/blog/trivoga-povniy-putivnik/' : '/ru/blog/trevoga-polnyy-putevoditel/'
+  const text = locale === 'uk'
+    ? 'Ця сторінка — частина серії матеріалів про тривогу. Ознайомтеся з повним путівником.'
+    : 'Эта страница — часть серии материалов о тревоге. Ознакомьтесь с полным путеводителем.'
+  const linkText = locale === 'uk' ? 'Повний путівник по тривозі →' : 'Полный путеводитель по тревоге →'
+
+  return (
+    <AnimatedSection as="div" variant="fadeUp">
+      <SectionContainer size="md">
+        <div className="p-4 rounded-xl bg-gold/[0.04] border border-gold/10 text-center">
+          <p className="text-sm text-text-muted">
+            {text}{' '}
+            <Link href={hubPath} className="text-gold hover:text-gold-light transition-colors underline underline-offset-2">
+              {linkText}
+            </Link>
+          </p>
+        </div>
+      </SectionContainer>
+    </AnimatedSection>
+  )
+}
+
+/* ── Also Read: cross-linking service pages → relevant blog articles ── */
+
+interface BlogLink {
+  slugRu: string
+  slugUk: string
+  titleRu: string
+  titleUk: string
+}
+
+const TREVOGA_BLOG_LINKS: Record<string, BlogLink[]> = {
+  'kak-izbavitsya-ot-trevogi': [
+    { slugRu: 'kak-spravitsya-s-trevogoy', slugUk: 'yak-vporatisya-z-trivogoyu', titleRu: 'Как справиться с тревогой — 5 методов, которые реально работают', titleUk: 'Як впоратися з тривогою — 5 методів, які реально працюють' },
+    { slugRu: 'pochemu-trevoga-ne-prokhodit-godami', slugUk: 'chomu-trivoga-ne-minaye-rokarami', titleRu: 'Почему тревога не проходит годами — истинные причины', titleUk: 'Чому тривога не минає роками — істинні причини' },
+  ],
+  'postoyannaya-trevoga-bez-prichiny': [
+    { slugRu: 'pochemu-trevoga-ne-prokhodit-godami', slugUk: 'chomu-trivoga-ne-minaye-rokarami', titleRu: 'Почему тревога не проходит годами — истинные причины', titleUk: 'Чому тривога не минає роками — істинні причини' },
+    { slugRu: 'trevoga-prichiny-i-simptomy', slugUk: 'trivoga-prichini-i-simptomi', titleRu: 'Тревога: причины, симптомы и когда стоит обратиться', titleUk: 'Тривога: причини, симптоми і коли варто звернутися' },
+  ],
+  'utrennyaya-trevoga': [
+    { slugRu: 'pochemu-voznikaet-panika-nochyu', slugUk: 'chomu-vinikaye-panika-vnochi', titleRu: 'Почему возникает паника ночью — ночные панические атаки', titleUk: 'Чому виникає паніка вночі — нічні панічні атаки' },
+    { slugRu: 'kak-spravitsya-s-trevogoy', slugUk: 'yak-vporatisya-z-trivogoyu', titleRu: 'Как справиться с тревогой — 5 методов', titleUk: 'Як впоратися з тривогою — 5 методів' },
+  ],
+  'trevoga-pered-snom': [
+    { slugRu: 'pochemu-voznikaet-panika-nochyu', slugUk: 'chomu-vinikaye-panika-vnochi', titleRu: 'Почему возникает паника ночью — ночные панические атаки', titleUk: 'Чому виникає паніка вночі — нічні панічні атаки' },
+    { slugRu: 'kom-v-gorle-pri-trevoge', slugUk: 'grudka-v-gorli-pri-trivozi', titleRu: 'Ком в горле при тревоге — почему возникает и как избавиться', titleUk: 'Грудка в горлі при тривозі — чому виникає і як позбутися' },
+  ],
+  'trevoga-posle-stressa': [
+    { slugRu: 'postoyannoe-vnutrennee-napryazhenie', slugUk: 'postiyne-vnutrishnye-napruzhennya', titleRu: 'Постоянное внутреннее напряжение — причины и как снять', titleUk: 'Постійне внутрішнє напруження — причини і як зняти' },
+    { slugRu: 'kak-spravitsya-s-trevogoy', slugUk: 'yak-vporatisya-z-trivogoyu', titleRu: 'Как справиться с тревогой — 5 методов', titleUk: 'Як впоратися з тривогою — 5 методів' },
+  ],
+  'vnutrenneye-napryazheniye': [
+    { slugRu: 'postoyannoe-vnutrennee-napryazhenie', slugUk: 'postiyne-vnutrishnye-napruzhennya', titleRu: 'Постоянное внутреннее напряжение — причины и как снять', titleUk: 'Постійне внутрішнє напруження — причини і як зняти' },
+    { slugRu: 'pochemu-trevoga-ne-prokhodit-godami', slugUk: 'chomu-trivoga-ne-minaye-rokarami', titleRu: 'Почему тревога не проходит годами', titleUk: 'Чому тривога не минає роками' },
+  ],
+  'navyazchivye-mysli': [
+    { slugRu: 'kom-v-gorle-pri-trevoge', slugUk: 'grudka-v-gorli-pri-trivozi', titleRu: 'Ком в горле при тревоге', titleUk: 'Грудка в горлі при тривозі' },
+    { slugRu: 'strakh-smerti-bez-prichiny', slugUk: 'strakh-smerti-bez-prichini', titleRu: 'Страх смерти без причины', titleUk: 'Страх смерті без причини' },
+  ],
+  'strakh-budushchego': [
+    { slugRu: 'kak-perestat-boyatsya-budushchego', slugUk: 'yak-perestati-boyatisya-maybutnogo', titleRu: 'Как перестать бояться будущего — тревога о завтрашнем дне', titleUk: 'Як перестати боятися майбутнього — тривога про завтрашній день' },
+    { slugRu: 'strakh-smerti-bez-prichiny', slugUk: 'strakh-smerti-bez-prichini', titleRu: 'Страх смерти без причины', titleUk: 'Страх смерті без причини' },
+  ],
+}
+
+function TrevogaAlsoReadSection({ service, locale }: { service: ServiceData; locale: string }) {
+  const links = TREVOGA_BLOG_LINKS[service.slug]
+  if (!links || links.length === 0) return null
+
+  const isUk = locale === 'uk'
+  const title = isUk ? 'Читайте також у блозі' : 'Читайте также в блоге'
+
+  return (
+    <AnimatedSection as="section" variant="fadeUp" aria-label={title}>
+      <SectionContainer size="md" background="transparent">
+        <AnimatedText direction="up" as="h2" className="text-2xl md:text-3xl font-display text-text-primary text-center">
+          {title}
+        </AnimatedText>
+        <div className="mt-8 grid gap-4 sm:grid-cols-2">
+          {links.map((link, i) => {
+            const slug = isUk ? link.slugUk : link.slugRu
+            const itemTitle = isUk ? link.titleUk : link.titleRu
+            return (
+              <motion.div
+                key={slug}
+                variants={faqItem(i)}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+              >
+                <Link
+                  href={`/blog/${slug}/`}
+                  className="group block p-5 rounded-xl bg-bg-surface/85 border border-border-base
+                             hover:border-gold/30 hover:-translate-y-0.5
+                             transition-all duration-300"
+                >
+                  <div className="flex items-start gap-3">
+                    <svg className="w-5 h-5 mt-0.5 shrink-0 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                    </svg>
+                    <div>
+                      <h3 className="text-base font-display text-text-primary group-hover:text-gold transition-colors duration-200">
+                        {itemTitle}
+                      </h3>
+                      <span className="mt-2 inline-flex items-center gap-1 text-xs text-gold">
+                        {isUk ? 'Читати статтю →' : 'Читать статью →'}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
+            )
+          })}
+        </div>
+      </SectionContainer>
+    </AnimatedSection>
+  )
+}
+
 /* ── Main Component ── */
 
-export function ClientServicePage({ service, schemas }: Props) {
+export function ClientServicePage({ service, schemas, locale }: Props) {
   const messages = useMessages()
   const allServices = (messages?.servicesData as ServiceData[]) ?? []
 
@@ -433,6 +569,8 @@ export function ClientServicePage({ service, schemas }: Props) {
       <HeroSection service={service} />
       <SymptomsSection service={service} />
       <MethodSection service={service} />
+      <TrevogaHubBanner service={service} locale={locale} />
+      <TrevogaAlsoReadSection service={service} locale={locale} />
       <FAQSection service={service} />
       <SuitableForSection />
 

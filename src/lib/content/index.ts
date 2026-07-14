@@ -142,7 +142,7 @@ export async function getPublishedServices(
   return services.map((s) => ({
     id: s.id,
     priority: s.priority,
-    updatedAt: undefined,
+    updatedAt: s.updatedAt ? new Date(s.updatedAt) : undefined,
     translation: {
       slug: s.slug,
       title: s.title,

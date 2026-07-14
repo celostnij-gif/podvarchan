@@ -115,7 +115,28 @@ export default async function ServicePage({ params }: Props) {
   if (!data) notFound()
 
   if (data.type === 'd1') {
-    return <ClientServicePage service={data} locale={locale} />
+    // Generate Service + FAQPage schema for D1 mode
+    const schema = serviceSchema({
+      name: data.title,
+      description: data.description,
+      url: `/uslugi/${data.slug}/`,
+      locale,
+    })
+    const schemas: Record<string, unknown>[] = [schema]
+
+    // Try to parse faqJson from D1 service (loaded from service_translations.faqJson)
+    // We need to re-fetch to get faqJson since D1 data type doesn't carry it
+    try {
+      const svcFull = await getServiceBySlug(slug, locale)
+      if (svcFull?.faqJson) {
+        const parsed = JSON.parse(svcFull.faqJson)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          schemas.push(faqSchema(parsed as ServiceFaqEntry[]))
+        }
+      }
+    } catch { /* faqJson optional */ }
+
+    return <ClientServicePage service={data} locale={locale} schemas={schemas} />
   }
 
   const { service, faqs } = data

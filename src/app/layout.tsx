@@ -80,15 +80,44 @@ export default async function RootLayout({
     >
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="preload" as="image" href="/images/hero-bg.webp" />
-        <link rel="preload" as="image" href="/images/hero-bg-mobile.webp" media="(max-width: 768px)" />
+        {/* Hero image is CSS background-driven, not the LCP element (H1 text is LCP) — only preload mobile variant */}
+        <link rel="preload" as="image" href="/images/hero-bg-mobile.webp" media="(max-width: 768px)" fetchPriority="high" />
+        {/* ── Critical inline CSS for above-the-fold content (FCP/LCP optimization) ── */}
+        <style>{`
+          :root {
+            --color-bg-base: #0A0A12;
+            --color-bg-deep: #050508;
+            --color-gold: #C9A96E;
+            --color-gold-light: #E3C47A;
+            --color-gold-dark: #A8874A;
+            --color-text-primary: #ECEBF2;
+            --color-text-secondary: #B0AEBF;
+            --color-text-muted: #7C7A8F;
+            --color-border-base: #1E1E30;
+            --color-border-light: #2A2A42;
+            --color-green: #2D6A4F;
+            --color-green-light: #40916C;
+            --font-serif: 'Cormorant Garamond', Georgia, serif;
+            --font-sans: 'Inter', system-ui, sans-serif;
+            --container-max: 75rem;
+            --gutter: 1.5rem;
+          }
+          html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+          body {
+            margin: 0; background-color: #0A0A12; color: #ECEBF2;
+            font-family: var(--font-sans); line-height: 1.75;
+            overflow-x: hidden;
+          }
+          section[aria-label], .hero-section { min-height: 90vh; }
+          @media (min-width: 768px) { section[aria-label] { min-height: 100vh; } }
+        `}</style>
       <body
         className="bg-bg-base text-text-primary font-body antialiased flex flex-col min-h-screen"
         suppressHydrationWarning
       >
         <Script
           id="cleanup-extension-attributes"
-          strategy="beforeInteractive"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               (function(){

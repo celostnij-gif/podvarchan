@@ -7,6 +7,7 @@ export interface Service {
   icon?: string
   ctaLink: string
   body?: string
+  updatedAt?: string
 }
 
 /* ── Blog Post ── */

@@ -107,6 +107,15 @@ export default async function LocaleLayout({
       url: SITE.url,
       name: SITE.fullName,
       description: SITE.fullName,
+      inLanguage: locale === 'uk' ? 'uk' : 'ru',
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: {
+          '@type': 'EntryPoint',
+          urlTemplate: `${SITE.url}/${locale}/search?q={search_term_string}`,
+        },
+        'query-input': 'required name=search_term_string',
+      },
       publisher: {
         '@type': 'Person',
         '@id': `${SITE.url}/ob-avtore/#person`,
@@ -116,6 +125,7 @@ export default async function LocaleLayout({
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',
       '@id': `${SITE.url}/#breadcrumb`,
+      inLanguage: locale === 'uk' ? 'uk' : 'ru',
       itemListElement: [{
         '@type': 'ListItem',
         position: 1,
