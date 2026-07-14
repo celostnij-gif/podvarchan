@@ -22,6 +22,17 @@ interface Props {
   onSelect: (asset: MediaAsset) => void
 }
 
+/**
+ * Префікс публічного сайту — адмінка не має R2 біндінгу,
+ * тому завантажуємо медіа через головний сайт (podvarchan.com).
+ */
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://podvarchan.com'
+
+function mediaUrl(publicUrl: string | null): string {
+  if (!publicUrl) return ''
+  return publicUrl.startsWith('/') ? `${SITE_URL}${publicUrl}` : publicUrl
+}
+
 function formatSize(bytes: number | null): string {
   if (!bytes) return ''
   if (bytes < 1024) return `${bytes} B`
@@ -95,7 +106,7 @@ export function MediaPickerDialog({ open, onClose, onSelect }: Props) {
                   <div className="aspect-square overflow-hidden">
                     {asset.publicUrl ? (
                       <img
-                        src={asset.publicUrl}
+                        src={mediaUrl(asset.publicUrl)}
                         alt={asset.originalName || ''}
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                         loading="lazy"

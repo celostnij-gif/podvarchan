@@ -26,6 +26,18 @@ function formatSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
+/**
+ * Префікс публічного сайту — адмінка не має R2 біндінгу,
+ * тому завантажуємо медіа через головний сайт (podvarchan.com),
+ * де R2 налаштовано. Аналогічно resolveCoverImageUrl().
+ */
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://podvarchan.com'
+
+function mediaUrl(publicUrl: string | null): string {
+  if (!publicUrl) return ''
+  return publicUrl.startsWith('/') ? `${SITE_URL}${publicUrl}` : publicUrl
+}
+
 export default async function MediaListPage(props: Props) {
   const params = await props.searchParams
   const db = getDB()
@@ -105,7 +117,7 @@ export default async function MediaListPage(props: Props) {
               <div className="mb-2 flex aspect-square items-center justify-center overflow-hidden rounded-lg bg-zinc-800/80">
                 {asset.mimeType?.startsWith('image/') && asset.mimeType !== 'image/svg+xml' ? (
                   <img
-                    src={asset.publicUrl || ''}
+                    src={mediaUrl(asset.publicUrl)}
                     alt={asset.originalName || ''}
                     className="h-full w-full object-cover"
                     loading="lazy"

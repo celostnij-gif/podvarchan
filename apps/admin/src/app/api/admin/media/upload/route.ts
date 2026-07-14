@@ -50,8 +50,10 @@ export async function POST(req: NextRequest) {
   const storageKey = `media/${yyyy}/${mm}/${id}.${ext}`
   const bytes = await file.arrayBuffer()
 
-  // OpenNext injects Cloudflare bindings into process.env for API routes
-  const r2 = process.env.MEDIA_R2_BUCKET as unknown as R2Bucket | undefined
+  // Cloudflare Workers runtime — bindings via getCloudflareContext (same pattern as D1/DB)
+  const { getCloudflareContext } = await import('@opennextjs/cloudflare')
+  const { env } = getCloudflareContext()
+  const r2 = env.MEDIA_R2_BUCKET as R2Bucket | undefined
   if (!r2) {
     return NextResponse.json({ error: 'Media storage not configured' }, { status: 500 })
   }

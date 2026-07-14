@@ -10,6 +10,12 @@ interface LogoImageProps {
 const SIZES_ATTR = '(max-width: 768px) 32px, 36px'
 
 /**
+ * Site URL prefix — адмінка не має статичних файлів сайту,
+ * тому завантажуємо логотип з головного домену (де є public/).
+ */
+const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://podvarchan.com'
+
+/**
  * LogoImage — оптимізоване зображення логотипу з webp/avif srcSet.
  *
  * Генерує `<picture>` з:
@@ -31,26 +37,30 @@ export function LogoImage({ className = '', priority = false }: LogoImageProps) 
     return null
   }
 
+  function url(path: string) {
+    return `${BASE}${path}`
+  }
+
   const srcSetAvif = [
-    '/images/logo/logo-32.avif 32w',
-    '/images/logo/logo-48.avif 48w',
-    '/images/logo/logo-64.avif 64w',
-    '/images/logo/logo-96.avif 96w',
-    '/images/logo/logo-128.avif 128w',
-    '/images/logo/logo-192.avif 192w',
+    url('/images/logo/logo-32.avif') + ' 32w',
+    url('/images/logo/logo-48.avif') + ' 48w',
+    url('/images/logo/logo-64.avif') + ' 64w',
+    url('/images/logo/logo-96.avif') + ' 96w',
+    url('/images/logo/logo-128.avif') + ' 128w',
+    url('/images/logo/logo-192.avif') + ' 192w',
   ].join(', ')
 
   const srcSetWebp = [
-    '/images/logo/logo-32.webp 32w',
-    '/images/logo/logo-48.webp 48w',
-    '/images/logo/logo-64.webp 64w',
-    '/images/logo/logo-96.webp 96w',
-    '/images/logo/logo-128.webp 128w',
-    '/images/logo/logo-192.webp 192w',
+    url('/images/logo/logo-32.webp') + ' 32w',
+    url('/images/logo/logo-48.webp') + ' 48w',
+    url('/images/logo/logo-64.webp') + ' 64w',
+    url('/images/logo/logo-96.webp') + ' 96w',
+    url('/images/logo/logo-128.webp') + ' 128w',
+    url('/images/logo/logo-192.webp') + ' 192w',
   ].join(', ')
 
   const imgProps: ImgHTMLAttributes<HTMLImageElement> = {
-    src: '/images/logo/logo-192.webp',
+    src: url('/images/logo/logo-192.webp'),
     alt: '',
     width: 36,
     height: 36,
@@ -82,7 +92,7 @@ export function LogoImage({ className = '', priority = false }: LogoImageProps) 
         srcSet={srcSetWebp}
         sizes={SIZES_ATTR}
       />
-      {/* Fallback — PNG */}
+      {/* Fallback — WebP */}
       {/* eslint-disable-next-line jsx-a11y/alt-text -- alt is provided via imgProps spread */}
       <img {...imgProps} />
     </picture>
