@@ -11,6 +11,8 @@ export const testimonials = sqliteTable('testimonials', {
   consentConfirmed: integer('consent_confirmed', { mode: 'boolean' }).notNull().default(false),
   publishedAt: text('published_at'),
   sortOrder: integer('sort_order').notNull().default(0),
+  // Required NOT NULL in production D1
+  createdAt: text('created_at').notNull(),
 })
 
 export const testimonialTranslations = sqliteTable('testimonial_translations', {

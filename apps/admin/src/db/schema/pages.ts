@@ -2,8 +2,10 @@ import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core'
 
 export const pages = sqliteTable('pages', {
   id: text('id').primaryKey(),
-  type: text('type', { enum: ['HOME', 'METHOD', 'ABOUT', 'FAQ', 'CONTACTS', 'PRIVACY', 'DISCLAIMER', 'CUSTOM'] }).notNull(),
-  slugPattern: text('slug_pattern'),
+  // PRICING exists in production D1; slug_pattern column does NOT (do not re-add without migration)
+  type: text('type', {
+    enum: ['HOME', 'METHOD', 'ABOUT', 'FAQ', 'CONTACTS', 'PRIVACY', 'DISCLAIMER', 'PRICING', 'CUSTOM'],
+  }).notNull(),
   status: text('status', { enum: ['DRAFT', 'PUBLISHED', 'ARCHIVED'] }).notNull().default('DRAFT'),
   sortOrder: integer('sort_order').notNull().default(0),
   publishedAt: text('published_at'),
