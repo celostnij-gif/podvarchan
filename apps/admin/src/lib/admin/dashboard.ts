@@ -15,6 +15,7 @@ import { getActionDb } from '@/lib/actions/db'
 
 export interface DashboardData {
   dbAvailable: boolean
+  dbError?: string
   stats: {
     services: { total: number; published: number }
     blog: { total: number; published: number }
@@ -140,9 +141,11 @@ export async function getDashboardData(): Promise<DashboardData> {
       recentLeads: recentLeads.map(l => ({ ...l, serviceName: null })),
       drafts,
     }
-  } catch {
+  } catch (e) {
+    console.error('[dashboard]', e)
     return {
       dbAvailable: false,
+      dbError: e instanceof Error ? e.message : 'Unknown error',
       stats: { services: { total: 0, published: 0 }, blog: { total: 0, published: 0 }, leads: { total: 0, new: 0 }, testimonials: { total: 0, published: 0 }, faq: { total: 0, published: 0 }, media: { total: 0 }, users: { total: 0, active: 0 }, redirects: { total: 0 }, revisions: { total: 0 } },
       recentLeads: [],
       drafts: [],

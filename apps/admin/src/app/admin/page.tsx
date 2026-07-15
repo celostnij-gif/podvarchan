@@ -74,12 +74,15 @@ export default async function DashboardPage() {
       </div>
 
       {!data.dbAvailable && (
-        <div className="rounded-xl border border-amber-900/30 bg-gradient-to-br from-amber-500/5 to-amber-600/5 p-4">
+        <div className="rounded-xl border border-red-900/30 bg-gradient-to-br from-red-500/5 to-red-600/5 p-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+            <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-amber-200">База данных недоступна</p>
-              <p className="text-xs text-amber-400/70 mt-1">
+              <p className="text-sm font-medium text-red-200">База данных недоступна</p>
+              {'dbError' in data && data.dbError && (
+                <p className="text-xs text-red-400/70 mt-1 font-mono">{data.dbError}</p>
+              )}
+              <p className="text-xs text-zinc-500 mt-2">
                 Данные будут загружены после настройки D1 и миграции Server Actions.
               </p>
             </div>
