@@ -52,6 +52,13 @@ export default function middleware(request: NextRequest) {
     return new Response(null, { status: 410 })
   }
 
+  // P1-B: Old/renamed page slugs → 301 permanent redirect
+  // Matches /ru/meditsinskii-otkaz, /uk/meditsinskii-otkaz/, bare /meditsinskii-otkaz etc.
+  if (/^(\/(ru|uk))?\/meditsinskii-otkaz(\/|$)/.test(pathname)) {
+    const loc = pathname.startsWith('/uk') ? 'uk' : 'ru'
+    return NextResponse.redirect(new URL(`/${loc}/disclaimer/`, request.url), 301)
+  }
+
   // P2: Old .html → new URL permanent redirects (301)
   const htmlPath = pathname.replace(/\/+$/, '') // strip trailing slashes for matching
   const oldHtmlRedirects: Record<string, string> = {
