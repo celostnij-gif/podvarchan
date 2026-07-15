@@ -3,12 +3,13 @@
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { testimonials, testimonialTranslations } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
 import { canEditContent, canDelete } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
+import { revalidateSiteLayout } from '@/lib/revalidate'
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
@@ -46,10 +47,12 @@ export async function createTestimonial(formData: FormData) {
   if (!parsed.success) throw new Error(`Validation error: ${parsed.error.message}`)
   const data = parsed.data
   const id = crypto.randomUUID()
+  const ts = new Date().toISOString()
   await db.insert(testimonials).values({
     id, clientName: data.clientName || null, clientAge: data.clientAge,
     rating: data.rating, source: data.source || null,
     sortOrder: data.sortOrder, status: data.status, consentConfirmed: false,
+    createdAt: ts,
   })
   for (const t of data.translations) {
     await db.insert(testimonialTranslations).values({
@@ -59,6 +62,7 @@ export async function createTestimonial(formData: FormData) {
   }
   await writeAuditLog({ userId, action: 'CREATE', entityType: 'TESTIMONIAL', entityId: id, after: data })
   revalidatePath('/admin/testimonials')
+  revalidateSiteLayout('/')
   redirect('/admin/testimonials')
 }
 
@@ -85,7 +89,7 @@ export async function updateTestimonial(id: string, formData: FormData) {
   }).where(eq(testimonials.id, id))
   for (const t of data.translations) {
     const existingTr = await db.select().from(testimonialTranslations)
-      .where(eq(testimonialTranslations.testimonialId, id)).get()
+      .where(and(eq(testimonialTranslations.testimonialId, id), eq(testimonialTranslations.locale, t.locale))).get()
     if (existingTr) {
       await db.update(testimonialTranslations).set({ text: t.text || null, problem: t.problem || null, result: t.result || null }).where(eq(testimonialTranslations.id, existingTr.id))
     } else {
@@ -97,6 +101,7 @@ export async function updateTestimonial(id: string, formData: FormData) {
   }
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'TESTIMONIAL', entityId: id, before: existing, after: data })
   revalidatePath('/admin/testimonials')
+  revalidateSiteLayout('/')
   redirect('/admin/testimonials')
 }
 
@@ -108,6 +113,7 @@ export async function deleteTestimonial(id: string) {
   await db.delete(testimonials).where(eq(testimonials.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'TESTIMONIAL', entityId: id, before: existing })
   revalidatePath('/admin/testimonials')
+  revalidateSiteLayout('/')
   redirect('/admin/testimonials')
 }
 
@@ -123,6 +129,7 @@ export async function publishTestimonial(id: string) {
     entityType: 'TESTIMONIAL', entityId: id, after: { status: newStatus },
   })
   revalidatePath('/admin/testimonials')
+  revalidateSiteLayout('/')
 }
 
 /* ── Reorder (drag-and-drop) ── */
@@ -133,4 +140,5 @@ export async function reorderTestimonials(orderedIds: string[]) {
     await db.update(testimonials).set({ sortOrder: i }).where(eq(testimonials.id, orderedIds[i]))
   }
   revalidatePath('/admin/testimonials')
+  revalidateSiteLayout('/')
 }
