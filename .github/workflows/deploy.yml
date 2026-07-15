@@ -50,6 +50,13 @@ jobs:
               "urlList": ["https://podvarchan.com/sitemap.xml"]
             }'
 
+      - name: Deploy site to Cloudflare
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy
+
   deploy-admin:
     name: Admin (admin.podvarchan.com)
     runs-on: ubuntu-latest
