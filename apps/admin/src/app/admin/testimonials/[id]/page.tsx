@@ -28,7 +28,7 @@ export default async function EditTestimonialPage(props: Props) {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Редагувати відгук</h1>
+      <h1 className="mb-6 text-2xl font-bold text-zinc-100">Редагувати відгук</h1>
       <TestimonialForm testimonial={testimonial} />
     </div>
   )

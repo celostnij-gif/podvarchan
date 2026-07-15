@@ -10,7 +10,6 @@ interface EditFormProps {
   page: {
     id: string
     status: string
-    slugPattern: string | null
   }
   translations: PageTranslationRecord[]
   sections: PageSectionWithTranslations[]
@@ -47,15 +46,15 @@ export function EditPageForm({ page, translations, sections }: EditFormProps) {
     <div className="space-y-6">
       {/* Meta form */}
       <form action={handleSave} className="max-w-2xl space-y-6">
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">Основное</h2>
+        <div className="rounded-lg border border-zinc-700/50 bg-zinc-900/40 p-6">
+          <h2 className="mb-4 text-lg font-semibold text-zinc-100">Основное</h2>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Статус</label>
+            <label className="block text-sm font-medium text-zinc-300 mb-1">Статус</label>
             <select
               name="status"
               defaultValue={page.status}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
             >
               <option value="DRAFT">Черновик</option>
               <option value="PUBLISHED">Опубликовано</option>
@@ -65,69 +64,69 @@ export function EditPageForm({ page, translations, sections }: EditFormProps) {
         </div>
 
         {/* Russian */}
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">Русский</h2>
+        <div className="rounded-lg border border-zinc-700/50 bg-zinc-900/40 p-6">
+          <h2 className="mb-4 text-lg font-semibold text-amber-400">Русский</h2>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">URL (slug)</label>
-            <div className="flex items-center gap-1 text-sm text-gray-400">
+            <label className="block text-sm font-medium text-zinc-300 mb-1">URL (slug)</label>
+            <div className="flex items-center gap-1 text-sm text-zinc-500">
               <span>/ru/</span>
               <input
                 name="ru_slug"
                 defaultValue={ru?.slug ?? ''}
                 required
-                className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="flex-1 rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
               />
             </div>
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Заголовок</label>
+            <label className="block text-sm font-medium text-zinc-300 mb-1">Заголовок</label>
             <input
               name="ru_title"
               defaultValue={ru?.title ?? ''}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Краткое описание</label>
+            <label className="block text-sm font-medium text-zinc-300 mb-1">Краткое описание</label>
             <textarea
               name="ru_excerpt"
               defaultValue={ru?.excerpt ?? ''}
               rows={3}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
             />
           </div>
         </div>
 
         {/* Ukrainian */}
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">Украинский</h2>
+        <div className="rounded-lg border border-zinc-700/50 bg-zinc-900/40 p-6">
+          <h2 className="mb-4 text-lg font-semibold text-amber-400">Украинский</h2>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">URL (slug)</label>
-            <div className="flex items-center gap-1 text-sm text-gray-400">
+            <label className="block text-sm font-medium text-zinc-300 mb-1">URL (slug)</label>
+            <div className="flex items-center gap-1 text-sm text-zinc-500">
               <span>/uk/</span>
               <input
                 name="uk_slug"
                 defaultValue={uk?.slug ?? ''}
                 required
-                className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="flex-1 rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
               />
             </div>
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Заголовок</label>
+            <label className="block text-sm font-medium text-zinc-300 mb-1">Заголовок</label>
             <input
               name="uk_title"
               defaultValue={uk?.title ?? ''}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Краткое описание</label>
+            <label className="block text-sm font-medium text-zinc-300 mb-1">Краткое описание</label>
             <textarea
               name="uk_excerpt"
               defaultValue={uk?.excerpt ?? ''}
               rows={3}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
             />
           </div>
         </div>
@@ -137,13 +136,13 @@ export function EditPageForm({ page, translations, sections }: EditFormProps) {
             <button
               type="submit"
               disabled={isPending}
-              className="rounded-md bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+              className="rounded-lg bg-amber-600 px-6 py-2 text-sm font-medium text-white hover:bg-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 disabled:opacity-50"
             >
               {isPending ? 'Сохранение...' : 'Сохранить'}
             </button>
         <Link
           href="/admin/pages"
-          className="rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
+          className="rounded-lg bg-zinc-800 px-4 py-2 text-sm font-medium text-zinc-300 hover:bg-zinc-700"
         >
           Назад
         </Link>
@@ -152,7 +151,7 @@ export function EditPageForm({ page, translations, sections }: EditFormProps) {
             type="button"
             onClick={handleDelete}
             disabled={isPending}
-            className="rounded-md bg-red-50 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-100 disabled:opacity-50"
+            className="rounded-lg px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-900/30 disabled:opacity-50"
           >
             Удалить
           </button>

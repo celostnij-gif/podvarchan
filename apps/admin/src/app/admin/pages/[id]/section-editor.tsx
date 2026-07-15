@@ -72,7 +72,7 @@ function SectionEditorItem({ section, pageId, onRefresh }: {
   }
 
   return (
-    <div className={`rounded-lg border p-4 ${section.section.enabled ? 'border-gray-200 bg-white' : 'border-dashed border-gray-300 bg-gray-50'}`}>
+    <div className={`rounded-lg border p-4 ${section.section.enabled ? 'border-zinc-700/50 bg-zinc-900/40' : 'border-dashed border-zinc-700/30 bg-zinc-900/20'}`}>
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button
@@ -81,22 +81,22 @@ function SectionEditorItem({ section, pageId, onRefresh }: {
             disabled={isPending}
             className={`rounded px-2 py-0.5 text-xs font-medium ${
               section.section.enabled
-                ? 'bg-green-100 text-green-700'
-                : 'bg-gray-100 text-gray-500'
+                ? 'bg-green-900/30 text-green-400'
+                : 'bg-zinc-800 text-zinc-500'
             }`}
           >
             {section.section.enabled ? 'Вкл' : 'Выкл'}
           </button>
-          <span className="text-sm font-medium text-gray-900">
+          <span className="text-sm font-medium text-zinc-200">
             {SECTION_TYPE_LABELS[section.section.type] ?? section.section.type}
           </span>
-          <span className="text-xs text-gray-400">key: {section.section.key}</span>
+          <span className="text-xs text-zinc-500">key: {section.section.key}</span>
         </div>
         <button
           type="button"
           onClick={handleDelete}
           disabled={isPending}
-          className="text-xs text-red-500 hover:text-red-700 disabled:opacity-50"
+          className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50"
         >
           Удалить
         </button>
@@ -105,22 +105,22 @@ function SectionEditorItem({ section, pageId, onRefresh }: {
       {/* Content editor */}
       <div className="space-y-3">
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">RU content</label>
+          <label className="block text-xs font-medium text-zinc-400 mb-1">RU content</label>
           <textarea
             defaultValue={ru?.contentJson ?? ''}
             onChange={(e) => handleContentChange('ru', e.target.value)}
             rows={3}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-xs font-mono shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-xs font-mono text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
             placeholder='{"key": "value"}'
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">UK content</label>
+          <label className="block text-xs font-medium text-zinc-400 mb-1">UK content</label>
           <textarea
             defaultValue={uk?.contentJson ?? ''}
             onChange={(e) => handleContentChange('uk', e.target.value)}
             rows={3}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-xs font-mono shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-xs font-mono text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
             placeholder='{"key": "value"}'
           />
         </div>
@@ -150,10 +150,10 @@ export function SectionEditor({ pageId, sections }: SectionEditorProps) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-gray-900">Секции страницы</h2>
+      <h2 className="text-lg font-semibold text-zinc-100">Секции страницы</h2>
 
       {sections.length === 0 && (
-        <p className="text-sm text-gray-500">Секции не добавлены</p>
+        <p className="text-sm text-zinc-500">Секции не добавлены</p>
       )}
 
       <div className="space-y-3">
@@ -168,13 +168,13 @@ export function SectionEditor({ pageId, sections }: SectionEditorProps) {
       </div>
 
       {/* Add section form */}
-      <form action={handleAddSection} className="flex items-end gap-3 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4">
+      <form action={handleAddSection} className="flex items-end gap-3 rounded-lg border border-dashed border-zinc-700/50 bg-zinc-900/20 p-4">
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Тип секции</label>
+          <label className="block text-xs font-medium text-zinc-400 mb-1">Тип секции</label>
           <select
             name="type"
             required
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
           >
             {Object.entries(SECTION_TYPE_LABELS).map(([key, label]) => (
               <option key={key} value={key}>{label}</option>
@@ -182,19 +182,19 @@ export function SectionEditor({ pageId, sections }: SectionEditorProps) {
           </select>
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Ключ (уникальный)</label>
+          <label className="block text-xs font-medium text-zinc-400 mb-1">Ключ (уникальный)</label>
           <input
             name="key"
             required
             placeholder="main-hero"
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
           />
         </div>
         <input type="hidden" name="settings_json" value="{}" />
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-500 disabled:opacity-50"
         >
           + Добавить
         </button>

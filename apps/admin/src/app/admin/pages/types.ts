@@ -12,7 +12,6 @@ export interface PageTranslationRecord {
 export interface PageRecord {
   id: string
   type: string
-  slugPattern: string | null
   status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
   sortOrder: number
   publishedAt: string | null

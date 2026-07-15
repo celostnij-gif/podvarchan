@@ -50,7 +50,7 @@ export default async function EditPagePage(props: Props) {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold text-gray-900">
+      <h1 className="text-2xl font-bold text-zinc-100">
         Редактировать страницу
       </h1>
 

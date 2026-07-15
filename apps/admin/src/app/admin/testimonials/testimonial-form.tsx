@@ -101,9 +101,9 @@ export function TestimonialForm({ testimonial }: Props) {
               className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
           <div className="flex items-end">
-            <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+            <label className="flex items-center gap-2 text-sm font-medium text-zinc-300">
               <input name="consentConfirmed" type="checkbox" defaultChecked={testimonial?.consentConfirmed ?? false}
-                className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                className="rounded border-zinc-700 bg-zinc-800/50 text-amber-600 focus:ring-amber-500" />
               Згода підтверджена
             </label>
           </div>
