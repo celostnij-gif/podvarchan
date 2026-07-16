@@ -559,6 +559,39 @@ export async function getMediaPublicUrl(idOrUrl: string): Promise<string | null>
   return row?.publicUrl ?? null
 }
 
+/**
+ * Resolve media id to URL + variants for ResponsiveImage.
+ * Returns null if not found / pass-through if already a URL.
+ */
+export interface MediaWithVariants {
+  url: string
+  variants?: { width: number; url: string }[]
+}
+
+export async function getMediaWithVariants(idOrUrl: string): Promise<MediaWithVariants | null> {
+  if (!idOrUrl) return null
+  if (idOrUrl.startsWith('/') || idOrUrl.startsWith('http://') || idOrUrl.startsWith('https://')) {
+    return { url: idOrUrl }
+  }
+
+  const db = getDB()
+  const row = await db
+    .select({ publicUrl: mediaAssets.publicUrl, variantsJson: mediaAssets.variantsJson })
+    .from(mediaAssets)
+    .where(eq(mediaAssets.id, idOrUrl))
+    .get()
+
+  if (!row?.publicUrl) return null
+
+  const result: MediaWithVariants = { url: row.publicUrl }
+  if (row.variantsJson) {
+    try {
+      result.variants = JSON.parse(row.variantsJson)
+    } catch { /* ignore malformed JSON */ }
+  }
+  return result
+}
+
 
 // ─── Testimonials ───
 

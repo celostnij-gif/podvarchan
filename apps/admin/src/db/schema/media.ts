@@ -16,6 +16,7 @@ export const mediaAssets = sqliteTable('media_assets', {
   titleUk: text('title_uk'),
   captionRu: text('caption_ru'),
   captionUk: text('caption_uk'),
+  variantsJson: text('variants_json'),
   uploadedById: text('uploaded_by_id'),
   createdAt: text('created_at').notNull(),
 })

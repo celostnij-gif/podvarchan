@@ -18,40 +18,60 @@ interface UploadItem {
 
 /* ───── helpers ───── */
 
-async function optimizeImage(file: File): Promise<{
-  blob: Blob
-  width: number
-  height: number
+const WIDTHS = [1600, 1200, 800, 400] as const
+const QUALITY = 0.82
+
+/**
+ * Build WebP variants at standard widths using canvas.
+ * Master = largest variant (≤1600). SVG/PDF are passed through as-is.
+ */
+async function buildWebpVariants(file: File): Promise<{
+  master: { blob: Blob; width: number; height: number }
+  variants: { width: number; blob: Blob }[]
 }> {
   const img = await createImageBitmap(file)
-  let w = img.width
-  let h = img.height
+  const naturalW = img.width
+  const naturalH = img.height
 
-  // Downscale to max 1600 px keeping aspect ratio
-  const MAX = 1600
-  if (w > MAX || h > MAX) {
-    const ratio = Math.min(MAX / w, MAX / h)
-    w = Math.round(w * ratio)
-    h = Math.round(h * ratio)
+  const variants: { width: number; blob: Blob }[] = []
+  let masterBlob: Blob | null = null
+  let masterW = 0
+  let masterH = 0
+
+  for (const targetW of WIDTHS) {
+    if (targetW > naturalW) continue // skip upscaling
+    const ratio = targetW / naturalW
+    const w = Math.round(naturalW * ratio)
+    const h = Math.round(naturalH * ratio)
+
+    const canvas = document.createElement('canvas')
+    canvas.width = w
+    canvas.height = h
+    const ctx = canvas.getContext('2d')!
+    ctx.drawImage(img, 0, 0, w, h)
+
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, 'image/webp', QUALITY),
+    )
+    if (!blob) continue
+
+    variants.push({ width: w, blob })
+
+    // Largest variant = master
+    if (!masterBlob || w > masterW) {
+      masterBlob = blob
+      masterW = w
+      masterH = h
+    }
   }
 
-  const canvas = document.createElement('canvas')
-  canvas.width = w
-  canvas.height = h
-  const ctx = canvas.getContext('2d')!
-  ctx.drawImage(img, 0, 0, w, h)
   img.close()
 
-  return new Promise((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) return reject(new Error('WebP conversion failed'))
-        resolve({ blob, width: w, height: h })
-      },
-      'image/webp',
-      0.82,
-    )
-  })
+  if (!masterBlob || variants.length === 0) {
+    throw new Error('Could not generate any WebP variant')
+  }
+
+  return { master: { blob: masterBlob, width: masterW, height: masterH }, variants }
 }
 
 /* ───── component ───── */
@@ -79,7 +99,6 @@ export function UploadZone() {
       }),
     [],
   )
-
   /* process & upload a single file */
   const uploadFile = useCallback(async (item: UploadItem, file: File) => {
     const isImage = file.type.startsWith('image/') && !file.type.includes('svg')
@@ -87,13 +106,26 @@ export function UploadZone() {
     let body: FormData
     if (isImage) {
       updateItem(item.id, { status: 'optimizing' })
-      const { blob, width, height } = await optimizeImage(file)
-      // Keep original extension in name for display, but the blob is WebP
-      const webpName = file.name.replace(/\.[^.]+$/, '.webp')
-      body = new FormData()
-      body.append('file', blob, webpName)
-      body.append('width', String(width))
-      body.append('height', String(height))
+      try {
+        const { master, variants } = await buildWebpVariants(file)
+        const webpName = file.name.replace(/\.[^.]+$/, '.webp')
+        body = new FormData()
+        // Master file
+        body.append('file', master.blob, webpName)
+        body.append('width', String(master.width))
+        body.append('height', String(master.height))
+        body.append('variants', JSON.stringify(variants.map(v => ({ width: v.width }))))
+        // Append each variant blob with suffix key
+        for (const v of variants) {
+          body.append(`variant-${v.width}`, v.blob, webpName.replace('.webp', `-${v.width}.webp`))
+        }
+      } catch (err) {
+        updateItem(item.id, {
+          status: 'error',
+          error: err instanceof Error ? err.message : 'Variant generation failed',
+        })
+        return
+      }
     } else {
       body = new FormData()
       body.append('file', file)

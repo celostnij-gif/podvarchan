@@ -21,7 +21,7 @@ Public — лёгкий read-only + CDN, влезает в Free.
 | B | revalidatePublic multi-path + secrets + все мутации | ✅ 2026-07-16 |
 | C | Lists + full detail из D1 (blog/uslugi) | ✅ 2026-07-16 |
 | D | Home/sections/testimonials/nav/static pages + SEO meta wire | ✅ 2026-07-16 |
-| E | WebP variants + ResponsiveImage | ⬜ |
+| E | WebP variants + ResponsiveImage | ✅ 2026-07-16 |
 | F | YMYL publish + redirects (no D1 middleware) | ⬜ |
 | G | Admin pages/home UX (ADMIN_FIX_PLAN) | ⚠️ partial |
 | H | Regression / owner acceptance | ⬜ |
@@ -129,3 +129,17 @@ Seed не блокер. Блокер: public read path + revalidate.
 **Пруф:** `npx tsc --noEmit` → exit 0, `npm run build` → success
 
 **Следующий:** Этап E (WebP variants + ResponsiveImage)
+
+### 2026-07-16 — Этап E ✅
+
+**Суть:** WebP variants + ResponsiveImage:
+- Schema: `variants_json` колонка в `media_assets` (міграція `0002_nifty_moon_knight`)
+- Admin: `buildWebpVariants()` в UploadZone — генерує 400/800/1200/1600 WebP варіанти
+- Upload route: приймає variant blobs, зберігає в R2 + variants_json в D1
+- `getMediaWithVariants()` — публічний helper з variants
+- `ResponsiveImage` — публічний компонент з srcSet
+- Blog cover: використовує `ResponsiveImage` з variants
+
+**Пруф:** `npx tsc --noEmit` → exit 0 (root + admin), `npm run build` → success
+
+**Следующий:** Этап F (YMYL publish + redirects)

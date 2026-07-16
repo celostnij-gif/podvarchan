@@ -43,14 +43,11 @@ export async function POST(req: NextRequest) {
   }
 
   const id = crypto.randomUUID()
-  const ext = file.name.split('.').pop() || 'bin'
   const now = new Date()
   const yyyy = now.getFullYear()
   const mm = String(now.getMonth() + 1).padStart(2, '0')
-  const storageKey = `media/${yyyy}/${mm}/${id}.${ext}`
-  const bytes = await file.arrayBuffer()
 
-  // Cloudflare Workers runtime — bindings via getCloudflareContext (same pattern as D1/DB)
+  // Cloudflare Workers runtime
   const { getCloudflareContext } = await import('@opennextjs/cloudflare')
   const { env } = getCloudflareContext()
   const r2 = env.MEDIA_R2_BUCKET as R2Bucket | undefined
@@ -58,12 +55,41 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Media storage not configured' }, { status: 500 })
   }
 
-  await r2.put(storageKey, bytes, {
-    httpMetadata: { contentType: file.type },
+  // Upload master file
+  const masterKey = `media/${yyyy}/${mm}/${id}.webp`
+  const bytes = await file.arrayBuffer()
+
+  await r2.put(masterKey, bytes, {
+    httpMetadata: { contentType: 'image/webp' },
     customMetadata: { originalName: file.name },
   })
 
-  const publicUrl = `/api/media/${storageKey}`
+  // Process variant blobs
+  const variantsMeta: { width: number; url: string }[] = []
+  const variantsRaw = formData.get('variants')
+  if (variantsRaw) {
+    try {
+      const variantDefs: { width: number }[] = JSON.parse(variantsRaw as string)
+      for (const def of variantDefs) {
+        const variantFile = formData.get(`variant-${def.width}`) as File | null
+        if (!variantFile) continue
+        const variantKey = `media/${yyyy}/${mm}/${id}-${def.width}.webp`
+        const vBytes = await variantFile.arrayBuffer()
+        await r2.put(variantKey, vBytes, {
+          httpMetadata: { contentType: 'image/webp' },
+          customMetadata: { originalName: file.name },
+        })
+        variantsMeta.push({
+          width: def.width,
+          url: `/api/media/${variantKey}`,
+        })
+      }
+    } catch {
+      // variants parsing error — non-fatal, store master-only
+    }
+  }
+
+  const publicUrl = `/api/media/${masterKey}`
   const width = formData.get('width') ? Number(formData.get('width')) : null
   const height = formData.get('height') ? Number(formData.get('height')) : null
   const nowISO = now.toISOString()
@@ -73,12 +99,13 @@ export async function POST(req: NextRequest) {
     id,
     fileName: file.name,
     originalName: file.name,
-    mimeType: file.type,
-    size: file.size,
+    mimeType: 'image/webp',
+    size: bytes.byteLength,
     width,
     height,
-    storageKey,
+    storageKey: masterKey,
     publicUrl,
+    variantsJson: variantsMeta.length > 0 ? JSON.stringify(variantsMeta) : null,
     uploadedById: user.id,
     createdAt: nowISO,
   })
@@ -87,9 +114,10 @@ export async function POST(req: NextRequest) {
     id,
     url: publicUrl,
     fileName: file.name,
-    mimeType: file.type,
-    size: file.size,
+    mimeType: 'image/webp',
+    size: bytes.byteLength,
     width,
     height,
+    variants: variantsMeta,
   })
 }

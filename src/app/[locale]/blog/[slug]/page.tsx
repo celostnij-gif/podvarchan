@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getBlogPost, getAllBlogSlugs, getAllBlogPosts, formatDate } from '@/lib/content'
-import { getBlogPostBySlug, getBlogPostsByCategory, getMediaPublicUrl } from '@/lib/db/public'
+import { getBlogPostBySlug, getBlogPostsByCategory, getMediaPublicUrl, getMediaWithVariants } from '@/lib/db/public'
 import { articleSchema, faqSchema } from '@/lib/schema'
 import { ClientBlogPost } from './client-page'
 import { BLOG_SLUG_UK, resolveBlogSlug } from '@/lib/slugMapping'
@@ -83,12 +83,12 @@ type BlogPageData =
       slug: string
       image?: string
       imageAlt?: string
+      imageVariants?: { width: number; url: string }[]
       relatedPosts: { slug: string; title: string }[]
       jsonLd: Record<string, unknown>
       additionalSchemas?: Record<string, unknown>[]
     }
   | { type: 'fallback'; post: import('@/types').BlogPost; locale: string; relatedPosts: { slug: string; title: string }[]; jsonLd: Record<string, unknown> }
-
 async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData | null> {
   try {
     const post = await getBlogPostBySlug(slug, locale)
@@ -128,11 +128,15 @@ async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData 
           }
         } catch { /* faqJson parse error — skip */ }
       }
-
-      // Resolve coverImageId via single media lookup
+      // Resolve coverImageId via single media lookup — with variants
       let coverImageUrl: string | null = null
+      let coverImageVariants: { width: number; url: string }[] | undefined
       if (post.coverImageId) {
-        coverImageUrl = await getMediaPublicUrl(post.coverImageId)
+        const media = await getMediaWithVariants(post.coverImageId)
+        if (media) {
+          coverImageUrl = media.url
+          coverImageVariants = media.variants
+        }
       }
 
       // If D1 coverImageId is null/empty, fall back to static blog post image
@@ -154,10 +158,12 @@ async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData 
         slug,
         image: coverImageUrl || undefined,
         imageAlt: post.title ?? undefined,
+        imageVariants: coverImageVariants,
         relatedPosts,
         jsonLd,
         additionalSchemas: schemas.slice(1), // FAQPage (1+) sans ArticleSchema
       }
+
     }
   } catch { /* fallback */ }
 
@@ -208,6 +214,7 @@ export default async function BlogPostPage({ params }: Props) {
         slug={data.slug}
         image={data.image}
         imageAlt={data.imageAlt}
+        imageVariants={data.imageVariants}
         locale={locale}
         relatedPosts={data.relatedPosts}
         schemas={allSchemas}

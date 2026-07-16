@@ -1,8 +1,6 @@
 // ── Blog Post Client Page ──
 'use client'
 
-import Image from 'next/image'
-
 import { useTranslations } from 'next-intl'
 import { useMessages } from 'next-intl'
 import { motion } from 'framer-motion'
@@ -12,6 +10,7 @@ import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 import { Link } from '@/i18n/routing'
 import ServiceCTA from '@/components/blog/ServiceCTA'
 import { getServiceSlugByCategory } from '@/lib/serviceMapping'
+import { ResponsiveImage } from '@/components/ui/ResponsiveImage'
 
 interface RelatedPost {
   slug: string
@@ -29,12 +28,12 @@ interface Props {
   slug: string
   image?: string
   imageAlt?: string
+  imageVariants?: { width: number; url: string }[]
   locale: string
   relatedPosts: RelatedPost[]
   schemas?: Record<string, unknown>[]
 }
 
-/* ── Animation Variants ── */
 
 const heroContainer = {
   hidden: { opacity: 0 },
@@ -43,13 +42,12 @@ const heroContainer = {
     transition: { staggerChildren: 0.1, delayChildren: 0.15 },
   },
 }
-
 const heroFadeUp = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.1, 0, 1] as const } },
 }
 
-export function ClientBlogPost({ title, body, date, category, categorySlug, author, readingTime, slug: _slug, image, imageAlt, locale: _locale, relatedPosts, schemas }: Props) {
+export function ClientBlogPost({ title, body, date, category, categorySlug, author, readingTime, slug: _slug, image, imageAlt, imageVariants, locale: _locale, relatedPosts, schemas }: Props) {
   const t = useTranslations('blog')
   const commonT = useTranslations('common')
   const messages = useMessages()
@@ -136,9 +134,10 @@ export function ClientBlogPost({ title, body, date, category, categorySlug, auth
           {/* Featured image */}
           {image && (
             <div className="mb-8 rounded-xl overflow-hidden border border-border-base shadow-lg shadow-black/20">
-              <Image
+              <ResponsiveImage
                 src={image}
                 alt={imageAlt ?? title}
+                variants={imageVariants}
                 width={1200}
                 height={675}
                 className="w-full h-auto object-cover aspect-video"
@@ -232,12 +231,14 @@ export function ClientBlogPost({ title, body, date, category, categorySlug, auth
           <div className="mt-12 p-6 rounded-xl bg-bg-surface/85 border border-border-base">
             <div className="flex items-start gap-4">
               <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-gold/20 shrink-0">
-                <Image
+                <img
                   src="/images/author-avatar.webp"
                   alt={commonT('authorName')}
                   width={150}
                   height={150}
                   className="object-cover w-full h-full"
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
               <div>
