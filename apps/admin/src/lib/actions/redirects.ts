@@ -57,9 +57,9 @@ export async function saveRedirectRule(data: FormData) {
     })
     await writeAuditLog({ userId, action: 'CREATE', entityType: 'REDIRECT', entityId: newId, after: rule })
   }
-  revalidatePath('/admin/settings')
+  revalidatePath('/admin/redirects')
   await syncRedirectRulesToKv()
-  redirect('/admin/settings')
+  redirect('/admin/redirects')
 }
 
 export async function deleteRedirectRule(id: string) {
@@ -69,9 +69,9 @@ export async function deleteRedirectRule(id: string) {
   if (!existing) throw new Error('Redirect rule not found')
   await db.delete(redirectRules).where(eq(redirectRules.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'REDIRECT', entityId: id, before: existing })
-  revalidatePath('/admin/settings')
+  revalidatePath('/admin/redirects')
   await syncRedirectRulesToKv()
-  redirect('/admin/settings')
+  redirect('/admin/redirects')
 }
 
 export async function toggleRedirectRule(id: string) {
@@ -81,7 +81,7 @@ export async function toggleRedirectRule(id: string) {
   if (!existing) throw new Error('Redirect rule not found')
   await db.update(redirectRules).set({ isEnabled: !existing.isEnabled }).where(eq(redirectRules.id, id))
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'REDIRECT', entityId: id, before: existing, after: { isEnabled: !existing.isEnabled } })
-  revalidatePath('/admin/settings')
+  revalidatePath('/admin/redirects')
   await syncRedirectRulesToKv()
 }
 

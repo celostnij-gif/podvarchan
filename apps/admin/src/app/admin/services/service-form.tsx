@@ -4,6 +4,7 @@ import { useActionState } from 'react'
 import { createService, updateService } from '@/lib/actions/services'
 import Link from 'next/link'
 import type { ServiceWithTranslations } from './types'
+import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
 interface Props {
   service?: ServiceWithTranslations
@@ -35,6 +36,7 @@ export function ServiceForm({ service }: Props) {
         }
         return null
       } catch (err) {
+        if (isRedirectError(err)) throw err
         return { error: err instanceof Error ? err.message : 'Unknown error' }
       }
     },

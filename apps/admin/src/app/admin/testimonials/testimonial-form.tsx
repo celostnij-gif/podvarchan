@@ -3,6 +3,7 @@
 import { useActionState } from 'react'
 import Link from 'next/link'
 import { createTestimonial, updateTestimonial } from '@/lib/actions/testimonials'
+import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
 interface TestimonialItem {
   id: string
@@ -41,6 +42,7 @@ export function TestimonialForm({ testimonial }: Props) {
         }
         return null
       } catch (err) {
+        if (isRedirectError(err)) throw err
         return { error: err instanceof Error ? err.message : 'Unknown error' }
       }
     },

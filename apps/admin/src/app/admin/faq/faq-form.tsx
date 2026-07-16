@@ -3,6 +3,7 @@
 import { useActionState } from 'react'
 import Link from 'next/link'
 import { createFaq, updateFaq } from '@/lib/actions/faq'
+import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
 interface FaqItem {
   id: string
@@ -37,6 +38,7 @@ export function FaqForm({ faq }: Props) {
         }
         return null
       } catch (err) {
+        if (isRedirectError(err)) throw err
         return { error: err instanceof Error ? err.message : 'Unknown error' }
       }
     },

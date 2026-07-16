@@ -6,6 +6,7 @@ import { createPost, updatePost } from '@/lib/actions/blog'
 import { TipTapEditor } from './tiptap-editor'
 import { MediaPickerDialog } from '@/components/admin/media/MediaPickerDialog'
 import type { PostWithTranslations } from '../types'
+import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
 interface Props {
   post?: PostWithTranslations
@@ -42,6 +43,7 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
         }
         return null
       } catch (err) {
+        if (isRedirectError(err)) throw err
         return { error: err instanceof Error ? err.message : 'Unknown error' }
       }
     },

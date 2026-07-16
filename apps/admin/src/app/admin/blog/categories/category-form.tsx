@@ -4,6 +4,7 @@ import { useActionState } from 'react'
 import Link from 'next/link'
 import { createCategory, updateCategory } from '@/lib/actions/blog'
 import type { CategoryWithTranslations } from '../types'
+import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
 interface Props {
   category?: CategoryWithTranslations
@@ -23,6 +24,7 @@ export function CategoryForm({ category, services }: Props) {
         }
         return null
       } catch (err) {
+        if (isRedirectError(err)) throw err
         return { error: err instanceof Error ? err.message : 'Unknown error' }
       }
     },
