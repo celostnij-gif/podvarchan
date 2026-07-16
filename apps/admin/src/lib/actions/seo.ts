@@ -8,7 +8,7 @@ import { canEditContent } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
 import { runSeoAudit } from '@/lib/seo/audit'
-import { revalidateSiteLayout } from '@/lib/revalidate'
+import { revalidatePublic, revalidateAdmin, getHomeRevalidatePaths } from '@/lib/revalidate'
 import type { SeoUrlRow } from '@/lib/seo/audit'
 
 async function requireEdit(): Promise<string> {
@@ -105,11 +105,14 @@ export async function saveSeoOverride(formData: FormData) {
     })
   }
 
-  revalidatePath('/admin/seo')
-  revalidatePath(`/admin/seo/${entityType}/${entityId}`)
-  if (entityType.startsWith('service')) revalidateSiteLayout('/uslugi')
-  if (entityType.startsWith('blog')) revalidateSiteLayout('/blog')
-  if (entityType === 'page') revalidateSiteLayout('/')
+  revalidateAdmin('/admin/seo', `/admin/seo/${entityType}/${entityId}`)
+  if (entityType.startsWith('service')) {
+    void revalidatePublic({ paths: ['/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml'], type: 'layout' })
+  } else if (entityType.startsWith('blog')) {
+    void revalidatePublic({ paths: ['/ru/blog/', '/uk/blog/', '/sitemap.xml'], type: 'layout' })
+  } else if (entityType === 'page') {
+    void revalidatePublic({ paths: getHomeRevalidatePaths() })
+  }
 
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'SEO_META', entityId, after: { title, description, keywords } })
 }

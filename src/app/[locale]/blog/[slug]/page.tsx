@@ -1,10 +1,7 @@
 import { notFound } from 'next/navigation'
-import { eq } from 'drizzle-orm'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getBlogPost, getAllBlogSlugs, getAllBlogPosts, formatDate } from '@/lib/content'
-import { getBlogPostBySlug, getBlogPosts } from '@/lib/db/public'
-import { getDB } from '@/db'
-import { mediaAssets } from '@/db/schema/media'
+import { getBlogPostBySlug, getBlogPostsByCategory, getMediaPublicUrl } from '@/lib/db/public'
 import { articleSchema, faqSchema } from '@/lib/schema'
 import { ClientBlogPost } from './client-page'
 import { BLOG_SLUG_UK, resolveBlogSlug } from '@/lib/slugMapping'
@@ -96,11 +93,15 @@ async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData 
   try {
     const post = await getBlogPostBySlug(slug, locale)
     if (post) {
-      const allPosts = await getBlogPosts(locale)
-      const relatedPosts = allPosts
-        .filter((p) => p.categorySlug === post.categorySlug && p.slug !== slug)
-        .slice(0, 4)
-        .map((p) => ({ slug: p.slug, title: p.title ?? '' }))
+      // Related: only same category (SQL), not full blog load with HTML
+      let relatedPosts: { slug: string; title: string }[] = []
+      if (post.categorySlug) {
+        const inCategory = await getBlogPostsByCategory(post.categorySlug, locale)
+        relatedPosts = inCategory
+          .filter((p) => p.slug !== slug)
+          .slice(0, 4)
+          .map((p) => ({ slug: p.slug, title: p.title ?? '' }))
+      }
 
       const clinical = isClinicalArticle(post.categorySlug, slug)
 
@@ -128,21 +129,10 @@ async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData 
         } catch { /* faqJson parse error — skip */ }
       }
 
-      // Resolve coverImageId to a displayable URL
+      // Resolve coverImageId via single media lookup
       let coverImageUrl: string | null = null
       if (post.coverImageId) {
-        if (post.coverImageId.startsWith('/') || post.coverImageId.startsWith('http')) {
-          coverImageUrl = post.coverImageId
-        } else if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(post.coverImageId)) {
-          // UUID — resolve from media_assets
-          const db = getDB()
-          const asset = await db
-            .select({ publicUrl: mediaAssets.publicUrl })
-            .from(mediaAssets)
-            .where(eq(mediaAssets.id, post.coverImageId))
-            .get()
-          coverImageUrl = asset?.publicUrl ?? null
-        }
+        coverImageUrl = await getMediaPublicUrl(post.coverImageId)
       }
 
       // If D1 coverImageId is null/empty, fall back to static blog post image

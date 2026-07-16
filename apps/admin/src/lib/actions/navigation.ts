@@ -9,7 +9,7 @@ import { getCurrentUser } from '@/lib/auth/session'
 import { canManageSettings } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
-import { revalidateSiteLayout } from '@/lib/revalidate'
+import { revalidatePublic, revalidateAdmin, getHomeRevalidatePaths } from '@/lib/revalidate'
 
 async function requireSettings(): Promise<string> {
   const user = await getCurrentUser()
@@ -64,8 +64,8 @@ export async function saveNavigationItem(data: FormData) {
     })
     await writeAuditLog({ userId, action: 'CREATE', entityType: 'NAVIGATION', entityId: newId, after: item })
   }
-  revalidatePath('/admin/settings')
-  revalidateSiteLayout('/')
+  revalidateAdmin('/admin/settings')
+  void revalidatePublic({ paths: getHomeRevalidatePaths() })
   redirect('/admin/settings')
 }
 
@@ -76,8 +76,8 @@ export async function deleteNavigationItem(id: string) {
   if (!existing) throw new Error('Nav item not found')
   await db.delete(navigationItems).where(eq(navigationItems.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'NAVIGATION', entityId: id, before: existing })
-  revalidatePath('/admin/settings')
-  revalidateSiteLayout('/')
+  revalidateAdmin('/admin/settings')
+  void revalidatePublic({ paths: getHomeRevalidatePaths() })
   redirect('/admin/settings')
 }
 
@@ -88,8 +88,8 @@ export async function toggleNavigationItem(id: string) {
   if (!existing) throw new Error('Nav item not found')
   await db.update(navigationItems).set({ isEnabled: !existing.isEnabled }).where(eq(navigationItems.id, id))
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'NAVIGATION', entityId: id, before: existing, after: { isEnabled: !existing.isEnabled } })
-  revalidatePath('/admin/settings')
-  revalidateSiteLayout('/')
+  revalidateAdmin('/admin/settings')
+  void revalidatePublic({ paths: getHomeRevalidatePaths() })
 }
 
 export async function reorderNavigationItems(items: { id: string; parentId: string | null; sortOrder: number }[]) {
@@ -99,6 +99,6 @@ export async function reorderNavigationItems(items: { id: string; parentId: stri
     await db.update(navigationItems).set({ parentId: item.parentId, sortOrder: item.sortOrder }).where(eq(navigationItems.id, item.id))
   }
   await writeAuditLog({ userId, action: 'REORDER', entityType: 'NAVIGATION', entityId: 'batch', after: { items } })
-  revalidatePath('/admin/settings')
-  revalidateSiteLayout('/')
+  revalidateAdmin('/admin/settings')
+  void revalidatePublic({ paths: getHomeRevalidatePaths() })
 }

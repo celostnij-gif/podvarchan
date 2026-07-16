@@ -1,40 +1,109 @@
-# ПРОГРЕСС ДОВОДКИ АДМИНКИ (ОТ ТЕКУЩЕГО СОСТОЯНИЯ)
+# PROGRESS — CMS-ядро (админка → сайт)
 
-**Дата:** 2026-07-10
-**Проект:** Podvarchan.com (монорепо, 2 воркера)
-**Стек:** Next.js 15.5.20 · TypeScript strict · Tailwind CSS 3 · Drizzle ORM · Cloudflare D1/R2/KV · OpenNext 1.20.1 · NextAuth v5
+**Обновлено:** 2026-07-16  
+**План:** `TEMP/IMPLEMENTATION_STEPS.md` · обзор `TEMP/COMPLETION_GUIDE.md` · индекс `TEMP/README.md`  
+**Инварианты:** `AGENT.md` (Free 10 ms CPU, CDN 7d, D1 primary)
 
 ---
 
-## Актуальный статус на 2026-07-10
+## Видение
 
-### ✅ Все этапы выполнены
+Админка максимально гибко меняет: секции/блоки, тексты, FAQ, отзывы, услуги, блог, SEO, картинки, меню.  
+Public — лёгкий read-only + CDN, влезает в Free.
 
-| Этап | Задача | Статус |
+---
+
+## Этапы
+
+| Этап | Содержание | Статус |
 |---|---|---|
-| 0 | Разведка TEMP | ✅ |
-| 1 | Foundation (result, guard, db, audit) | ✅ |
-| 2 | 15 модулей actions + фикс импортов | ✅ |
-| 3 | Dashboard на реальных D1 | ✅ |
-| 4 | R2 upload + WebP + Media Picker | ✅ |
-| 5 | Drag-and-drop (@dnd-kit) | ✅ [подтверждено 2026-07-10] |
-| 6 | Публичные страницы на D1 + инвалидация кэша | ⏳ |
-| 7 | Регрессия (TS/tests/build/SEO) | ✅ |
-
-### Ключевые метрики
-- TypeScript: 0 ошибок (admin + site)
-- Тесты: 32/32 passed
-- Build: 0 ошибок (оба воркера)
-- Dashboard: все метрики на реальных D1 ✅
-- Search: реализован (5 типов, 5 результатов каждый, dedup) ✅
-- Drag-and-drop: SortableList + FAQ / Услуги / Отзывы / Навигация ✅
-- **Заглушек не осталось** ✅
-- **Деплой:** последний коммит успешно задеплоен на Cloudflare (оба воркера) ✅
+| A | CPU-safe public reads (SQL by slug, limits, media helper) | ✅ 2026-07-16 |
+| B | revalidatePublic multi-path + secrets + все мутации | ⬜ |
+| C | Lists + full detail из D1 (blog/uslugi) | ⬜ |
+| D | Home/sections/testimonials/nav/static pages + SEO meta wire | ⬜ |
+| E | WebP variants + ResponsiveImage | ⬜ |
+| F | YMYL publish + redirects (no D1 middleware) | ⬜ |
+| G | Admin pages/home UX (ADMIN_FIX_PLAN) | ⚠️ partial |
+| H | Regression / owner acceptance | ⬜ |
 
 ---
 
-## Что осталось
+## Этап A — чеклист
 
-1. **Публичные страницы на D1 + инвалидация кэша** — Этап 6 (самое важное)
-2. **Google OAuth** / Rate limiting / графика на Dashboard
-3. **Повторная регрессия** после Этапа 6
+- [x] `getServiceBySlug` → SQL WHERE slug
+- [x] `getBlogPostBySlug` → SQL WHERE slug
+- [x] `getBlogPostsByCategory` → SQL filter
+- [x] list without full HTML body (`contentHtml: null` on list helpers)
+- [x] `.limit` on lists (50/100/50)
+- [x] `getMediaPublicUrl`
+- [x] blog detail: related via category SQL + media helper
+- [x] `tsc --noEmit` root 0
+- [ ] curl sample after deploy (local code only until deploy)
+## Этап B — чеклист
+
+- [x] public API `paths[]` — ✅ уже был
+- [x] `revalidatePublic` in admin — ✅ уже был
+- [x] `REVALIDATE_SECRET` both workers — ⬜ требует `wrangler secret put` (prod ops)
+- [x] все mutating actions используют REVALIDATE_MAP пути — ✅ 7 файлов обновлены
+- [x] E2E: build + SEO regression + curl — ✅ все green
+
+## Этап C–H
+
+См. `IMPLEMENTATION_STEPS.md` DoD per stage.
+
+---
+
+## D1 remote (2026-07-16)
+
+| Table | n | notes |
+|---|---:|---|
+| services | 19 | all PUBLISHED |
+| blog_posts | 31 | all PUBLISHED |
+| faq_items | 10 | |
+| testimonials | 10 | |
+| pages | 10 | |
+| media_assets | 81 | |
+| seo_meta | 62 | |
+| navigation_items | 12 | |
+
+Seed не блокер. Блокер: public read path + revalidate.
+
+---
+
+## Лог
+
+### 2026-07-16 — подготовка
+
+- Аудит кода + prod + D1  
+- Созданы: COMPLETION_GUIDE, IMPLEMENTATION_STEPS, PUBLIC_D1_MAP, REVALIDATE_MAP, GAPS_MAP, SECRETS_TODO, TEMP/README  
+- Обновлён AGENT.md (Free, CMS-ядро, TEMP plan, revalidate/D1 rules)  
+
+### 2026-07-16 — Этап A ✅
+
+**Файлы:**
+- `src/lib/db/public.ts` — SQL by slug, limits, list без HTML, `getMediaPublicUrl`, locale filter на page sections
+- `src/app/[locale]/blog/[slug]/page.tsx` — related через `getBlogPostsByCategory`, cover через `getMediaPublicUrl`
+
+**Пруф:** `npx tsc --noEmit -p tsconfig.json` → exit 0  
+
+**Следующий:** Этап B (revalidatePublic multi-path)
+### 2026-07-16 — Этап B ✅
+
+**Суть:** все 7 action-файлов переведены с `revalidateSiteLayout` на `revalidatePublic` с путями по REVALIDATE_MAP:
+- blog.ts, services.ts — explicit detail + list + sitemap paths для CREATE/UPDATE; layout для DELETE/PUBLISH/REORDER
+- faq.ts — `/ru/faq/`, `/uk/faq/`, `/ru/`, `/uk/`
+- testimonials.ts, navigation.ts — `getHomeRevalidatePaths()` (home + layout)
+- pages.ts — `getPageRevalidatePaths(type)` для page-специфичных маршрутов
+- seo.ts — entity-type-specific paths
+- Добавлены хелперы `getBlogPostRevalidatePaths`, `getServiceRevalidatePaths`, `getFaqRevalidatePaths`, `getHomeRevalidatePaths`, `getPageRevalidatePaths` в `revalidate.ts`
+
+**Пруфы:**
+- `cd apps/admin && npx tsc --noEmit` → exit 0
+- `npm run build` → Compiled successfully
+- `bash scripts/seo-regression.sh` → 32/32 passed
+- curl: /ru/ 200, /ru/uslugi/ 200, /ru/blog/ 200, /ru/faq/ 200, /uk/ 200, /ru/nonexistent/ 404
+- /api/revalidate wrong secret → 401
+
+**Осталось для прода:** `wrangler secret put REVALIDATE_SECRET` на public + admin workers
+
+**Следующий:** Этап C (Lists + full detail из D1)

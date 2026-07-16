@@ -9,7 +9,7 @@ import { getCurrentUser } from '@/lib/auth/session'
 import { canEditContent, canDelete } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
-import { revalidateSiteLayout } from '@/lib/revalidate'
+import { revalidatePublic, revalidateAdmin, getHomeRevalidatePaths } from '@/lib/revalidate'
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
@@ -61,8 +61,8 @@ export async function createTestimonial(formData: FormData) {
     })
   }
   await writeAuditLog({ userId, action: 'CREATE', entityType: 'TESTIMONIAL', entityId: id, after: data })
-  revalidatePath('/admin/testimonials')
-  revalidateSiteLayout('/')
+  revalidateAdmin('/admin/testimonials')
+  void revalidatePublic({ paths: getHomeRevalidatePaths() })
   redirect('/admin/testimonials')
 }
 
@@ -100,8 +100,8 @@ export async function updateTestimonial(id: string, formData: FormData) {
     }
   }
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'TESTIMONIAL', entityId: id, before: existing, after: data })
-  revalidatePath('/admin/testimonials')
-  revalidateSiteLayout('/')
+  revalidateAdmin('/admin/testimonials')
+  void revalidatePublic({ paths: getHomeRevalidatePaths() })
   redirect('/admin/testimonials')
 }
 
@@ -112,8 +112,8 @@ export async function deleteTestimonial(id: string) {
   if (!existing) throw new Error('Testimonial not found')
   await db.delete(testimonials).where(eq(testimonials.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'TESTIMONIAL', entityId: id, before: existing })
-  revalidatePath('/admin/testimonials')
-  revalidateSiteLayout('/')
+  revalidateAdmin('/admin/testimonials')
+  void revalidatePublic({ paths: getHomeRevalidatePaths() })
   redirect('/admin/testimonials')
 }
 
@@ -128,8 +128,8 @@ export async function publishTestimonial(id: string) {
     userId, action: newStatus === 'PUBLISHED' ? 'PUBLISH' : 'UNPUBLISH',
     entityType: 'TESTIMONIAL', entityId: id, after: { status: newStatus },
   })
-  revalidatePath('/admin/testimonials')
-  revalidateSiteLayout('/')
+  revalidateAdmin('/admin/testimonials')
+  void revalidatePublic({ paths: getHomeRevalidatePaths() })
 }
 
 /* ── Reorder (drag-and-drop) ── */
@@ -139,6 +139,6 @@ export async function reorderTestimonials(orderedIds: string[]) {
   for (let i = 0; i < orderedIds.length; i++) {
     await db.update(testimonials).set({ sortOrder: i }).where(eq(testimonials.id, orderedIds[i]))
   }
-  revalidatePath('/admin/testimonials')
-  revalidateSiteLayout('/')
+  revalidateAdmin('/admin/testimonials')
+  void revalidatePublic({ paths: getHomeRevalidatePaths() })
 }

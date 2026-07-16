@@ -9,7 +9,7 @@ import { getCurrentUser } from '@/lib/auth/session'
 import { canEditContent, canDelete } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
-import { revalidateSiteLayout } from '@/lib/revalidate'
+import { revalidatePublic, revalidateAdmin, getServiceRevalidatePaths } from '@/lib/revalidate'
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
@@ -128,8 +128,10 @@ export async function createService(formData: FormData) {
   }
 
   await writeAuditLog({ userId, action: 'CREATE', entityType: 'SERVICE', entityId: serviceId, after: data })
-  revalidatePath('/admin/services')
-  revalidateSiteLayout('/uslugi')
+  const ruSlug = data.translations.find((t: { locale: string }) => t.locale === 'ru')?.slug || ''
+  const ukSlug = data.translations.find((t: { locale: string }) => t.locale === 'uk')?.slug || ''
+  revalidateAdmin('/admin/services')
+  void revalidatePublic({ paths: getServiceRevalidatePaths(ruSlug, ukSlug, data.featured) })
   redirect('/admin/services')
 }
 
@@ -196,9 +198,10 @@ export async function updateService(id: string, formData: FormData) {
   }
 
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'SERVICE', entityId: id, before: existing, after: data })
-  revalidatePath('/admin/services')
-  revalidatePath(`/admin/services/${id}`)
-  revalidateSiteLayout('/uslugi')
+  const ruSlug = data.translations.find((t: { locale: string }) => t.locale === 'ru')?.slug || ''
+  const ukSlug = data.translations.find((t: { locale: string }) => t.locale === 'uk')?.slug || ''
+  revalidateAdmin('/admin/services', `/admin/services/${id}`)
+  void revalidatePublic({ paths: getServiceRevalidatePaths(ruSlug, ukSlug, data.featured) })
   redirect('/admin/services')
 }
 
@@ -211,9 +214,8 @@ export async function deleteService(id: string) {
 
   await db.delete(services).where(eq(services.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'SERVICE', entityId: id, before: existing })
-
-  revalidatePath('/admin/services')
-  revalidateSiteLayout('/uslugi')
+  revalidateAdmin('/admin/services')
+  void revalidatePublic({ paths: ['/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml'], type: 'layout' })
   redirect('/admin/services')
 }
 
@@ -229,9 +231,8 @@ export async function publishService(id: string) {
   await writeAuditLog({ userId, action: newStatus === 'PUBLISHED' ? 'PUBLISH' : 'UNPUBLISH',
     entityType: 'SERVICE', entityId: id, after: { status: newStatus },
   })
-
-  revalidatePath('/admin/services')
-  revalidateSiteLayout('/uslugi')
+  revalidateAdmin('/admin/services')
+  void revalidatePublic({ paths: ['/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml'], type: 'layout' })
 }
 
 /* ── Reorder (drag-and-drop) ── */
@@ -241,6 +242,6 @@ export async function reorderServices(orderedIds: string[]) {
   for (let i = 0; i < orderedIds.length; i++) {
     await db.update(services).set({ sortOrder: i }).where(eq(services.id, orderedIds[i]))
   }
-  revalidatePath('/admin/services')
-  revalidateSiteLayout('/uslugi')
+  revalidateAdmin('/admin/services')
+  void revalidatePublic({ paths: ['/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml'], type: 'layout' })
 }

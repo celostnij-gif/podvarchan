@@ -1,10 +1,10 @@
 /**
  * Public D1 query helpers for the public-facing site.
  *
- * These functions are used in page components at RUNTIME (ISR/SSR).
- * generateStaticParams still uses constants (build-time safe).
+ * Runtime (ISR/SSR) only. Prefer SQL filters + .get() / LIMIT — never load-all + find.
+ * When D1 is unavailable (build-time), calls throw — handle at the page level with fallback.
  *
- * When D1 is unavailable (build-time SSG), calls throw — handle at the page level.
+ * Free plan: keep each cache-miss path to 1–3 cheap queries (see AGENT.md §2).
  */
 import { eq, and, desc } from 'drizzle-orm'
 import { getDB } from '@/db'
@@ -18,6 +18,15 @@ import {
 } from '@/db/schema/blog'
 import { pages, pageTranslations, pageSections, pageSectionTranslations } from '@/db/schema/pages'
 import { seoMeta } from '@/db/schema/seo'
+import { mediaAssets } from '@/db/schema/media'
+
+// ─── Limits (safety vs Free CPU / payload) ───
+
+const LIMIT_SERVICES = 50
+const LIMIT_BLOG_POSTS = 100
+const LIMIT_BLOG_CATEGORIES = 50
+const LIMIT_FAQ = 50
+const LIMIT_PAGE_SECTIONS = 40
 
 // ─── Types ───
 
@@ -46,6 +55,7 @@ export interface BlogPostPublic {
   slug: string
   title: string | null
   excerpt: string | null
+  /** Full HTML — set only on detail helpers; list helpers leave null */
   contentHtml: string | null
   categoryId: string | null
   categorySlug: string | null
@@ -87,20 +97,12 @@ export interface SEOMetaPublic {
 }
 
 // ─── Services ───
-export async function getServices(locale: string): Promise<ServicePublic[]> {
-  const db = getDB()
-  const loc = locale as 'ru' | 'uk'
-  const rows = await db
-    .select()
-    .from(services)
-    .innerJoin(serviceTranslations, eq(services.id, serviceTranslations.serviceId))
-    .where(
-      and(eq(services.status, 'PUBLISHED'), eq(serviceTranslations.locale, loc)),
-    )
-    .orderBy(services.sortOrder)
-    .all()
 
-  return rows.map((r) => ({
+function mapServiceRow(r: {
+  services: typeof services.$inferSelect
+  service_translations: typeof serviceTranslations.$inferSelect
+}): ServicePublic {
+  return {
     id: r.services.id,
     slug: r.service_translations.slug,
     title: r.service_translations.title ?? '',
@@ -118,15 +120,47 @@ export async function getServices(locale: string): Promise<ServicePublic[]> {
     priority: r.services.priority,
     featured: r.services.featured,
     updatedAt: r.services.updatedAt,
-  }))
+  }
 }
 
+export async function getServices(locale: string): Promise<ServicePublic[]> {
+  const db = getDB()
+  const loc = locale as 'ru' | 'uk'
+  const rows = await db
+    .select()
+    .from(services)
+    .innerJoin(serviceTranslations, eq(services.id, serviceTranslations.serviceId))
+    .where(
+      and(eq(services.status, 'PUBLISHED'), eq(serviceTranslations.locale, loc)),
+    )
+    .orderBy(services.sortOrder)
+    .limit(LIMIT_SERVICES)
+    .all()
+
+  return rows.map(mapServiceRow)
+}
+
+/** Single service by translation slug — no full-table scan. */
 export async function getServiceBySlug(
   slug: string,
   locale: string,
 ): Promise<ServicePublic | null> {
-  const list = await getServices(locale)
-  return list.find((s) => s.slug === slug) ?? null
+  const db = getDB()
+  const loc = locale as 'ru' | 'uk'
+  const row = await db
+    .select()
+    .from(services)
+    .innerJoin(serviceTranslations, eq(services.id, serviceTranslations.serviceId))
+    .where(
+      and(
+        eq(services.status, 'PUBLISHED'),
+        eq(serviceTranslations.locale, loc),
+        eq(serviceTranslations.slug, slug),
+      ),
+    )
+    .get()
+
+  return row ? mapServiceRow(row) : null
 }
 
 // ─── Blog categories ───
@@ -150,6 +184,7 @@ export async function getBlogCategories(
       ),
     )
     .orderBy(blogCategories.sortOrder)
+    .limit(LIMIT_BLOG_CATEGORIES)
     .all()
 
   return rows.map((r) => ({
@@ -159,11 +194,52 @@ export async function getBlogCategories(
     description: r.blog_category_translations.description,
   }))
 }
+
+// ─── Blog posts ───
+
+type BlogJoinRow = {
+  blog_posts: typeof blogPosts.$inferSelect
+  blog_post_translations: typeof blogPostTranslations.$inferSelect
+  blog_categories: typeof blogCategories.$inferSelect | null
+  blog_category_translations: typeof blogCategoryTranslations.$inferSelect | null
+}
+
+function mapBlogListRow(r: BlogJoinRow): BlogPostPublic {
+  return {
+    id: r.blog_posts.id,
+    slug: r.blog_post_translations.slug,
+    title: r.blog_post_translations.title,
+    excerpt: r.blog_post_translations.excerpt,
+    contentHtml: null,
+    categoryId: r.blog_posts.categoryId,
+    categorySlug: r.blog_category_translations?.slug ?? null,
+    categoryName: r.blog_category_translations?.name ?? null,
+    coverImageId: r.blog_posts.coverImageId,
+    readingMinutes: r.blog_posts.readingMinutes,
+    publishedAt: r.blog_posts.publishedAt,
+    updatedAt: r.blog_posts.updatedAt,
+    faqJson: r.blog_post_translations.faqJson,
+  }
+}
+
+function mapBlogDetailRow(r: BlogJoinRow): BlogPostPublic {
+  return {
+    ...mapBlogListRow(r),
+    contentHtml: r.blog_post_translations.contentHtml,
+  }
+}
+
+/** Published posts for lists/sitemap — without contentHtml (CPU/payload). */
 export async function getBlogPosts(locale: string): Promise<BlogPostPublic[]> {
   const db = getDB()
   const loc = locale as 'ru' | 'uk'
   const rows = await db
-    .select()
+    .select({
+      blog_posts: blogPosts,
+      blog_post_translations: blogPostTranslations,
+      blog_categories: blogCategories,
+      blog_category_translations: blogCategoryTranslations,
+    })
     .from(blogPosts)
     .innerJoin(
       blogPostTranslations,
@@ -184,40 +260,114 @@ export async function getBlogPosts(locale: string): Promise<BlogPostPublic[]> {
       ),
     )
     .orderBy(desc(blogPosts.publishedAt))
+    .limit(LIMIT_BLOG_POSTS)
     .all()
 
-  return rows.map((r) => ({
-    id: r.blog_posts.id,
-    slug: r.blog_post_translations.slug,
-    title: r.blog_post_translations.title,
-    excerpt: r.blog_post_translations.excerpt,
-    contentHtml: r.blog_post_translations.contentHtml,
-    categoryId: r.blog_posts.categoryId,
-    categorySlug: r.blog_category_translations?.slug ?? null,
-    categoryName: r.blog_category_translations?.name ?? null,
-    coverImageId: r.blog_posts.coverImageId,
-    readingMinutes: r.blog_posts.readingMinutes,
-    publishedAt: r.blog_posts.publishedAt,
-    updatedAt: r.blog_posts.updatedAt,
-    faqJson: r.blog_post_translations.faqJson,
-  }))
+  return rows.map((r) =>
+    mapBlogListRow({
+      blog_posts: r.blog_posts,
+      blog_post_translations: r.blog_post_translations,
+      blog_categories: r.blog_categories,
+      blog_category_translations: r.blog_category_translations,
+    }),
+  )
 }
 
+/** Single post by translation slug — includes contentHtml. */
 export async function getBlogPostBySlug(
   slug: string,
   locale: string,
 ): Promise<BlogPostPublic | null> {
-  const list = await getBlogPosts(locale)
-  return list.find((p) => p.slug === slug) ?? null
+  const db = getDB()
+  const loc = locale as 'ru' | 'uk'
+  const row = await db
+    .select({
+      blog_posts: blogPosts,
+      blog_post_translations: blogPostTranslations,
+      blog_categories: blogCategories,
+      blog_category_translations: blogCategoryTranslations,
+    })
+    .from(blogPosts)
+    .innerJoin(
+      blogPostTranslations,
+      eq(blogPosts.id, blogPostTranslations.postId),
+    )
+    .leftJoin(blogCategories, eq(blogPosts.categoryId, blogCategories.id))
+    .leftJoin(
+      blogCategoryTranslations,
+      and(
+        eq(blogCategories.id, blogCategoryTranslations.categoryId),
+        eq(blogCategoryTranslations.locale, loc),
+      ),
+    )
+    .where(
+      and(
+        eq(blogPosts.status, 'PUBLISHED'),
+        eq(blogPostTranslations.locale, loc),
+        eq(blogPostTranslations.slug, slug),
+      ),
+    )
+    .get()
+
+  if (!row) return null
+  return mapBlogDetailRow({
+    blog_posts: row.blog_posts,
+    blog_post_translations: row.blog_post_translations,
+    blog_categories: row.blog_categories,
+    blog_category_translations: row.blog_category_translations,
+  })
 }
 
+/** Posts in a category by category translation slug — list shape (no HTML body). */
 export async function getBlogPostsByCategory(
-  slug: string,
+  categorySlug: string,
   locale: string,
 ): Promise<BlogPostPublic[]> {
-  const list = await getBlogPosts(locale)
-  return list.filter((p) => p.categorySlug === slug)
+  const db = getDB()
+  const loc = locale as 'ru' | 'uk'
+  const rows = await db
+    .select({
+      blog_posts: blogPosts,
+      blog_post_translations: blogPostTranslations,
+      blog_categories: blogCategories,
+      blog_category_translations: blogCategoryTranslations,
+    })
+    .from(blogPosts)
+    .innerJoin(
+      blogPostTranslations,
+      eq(blogPosts.id, blogPostTranslations.postId),
+    )
+    .innerJoin(blogCategories, eq(blogPosts.categoryId, blogCategories.id))
+    .innerJoin(
+      blogCategoryTranslations,
+      and(
+        eq(blogCategories.id, blogCategoryTranslations.categoryId),
+        eq(blogCategoryTranslations.locale, loc),
+        eq(blogCategoryTranslations.slug, categorySlug),
+      ),
+    )
+    .where(
+      and(
+        eq(blogPosts.status, 'PUBLISHED'),
+        eq(blogPostTranslations.locale, loc),
+      ),
+    )
+    .orderBy(desc(blogPosts.publishedAt))
+    .limit(LIMIT_BLOG_POSTS)
+    .all()
+
+  return rows.map((r) =>
+    mapBlogListRow({
+      blog_posts: r.blog_posts,
+      blog_post_translations: r.blog_post_translations,
+      blog_categories: r.blog_categories,
+      blog_category_translations: r.blog_category_translations,
+    }),
+  )
 }
+
+// ─── Pages ───
+
 export async function getPageByType(
   type:
     | 'HOME'
@@ -227,6 +377,7 @@ export async function getPageByType(
     | 'CONTACTS'
     | 'PRIVACY'
     | 'DISCLAIMER'
+    | 'PRICING'
     | 'CUSTOM',
   locale: string,
 ): Promise<PagePublic | null> {
@@ -252,12 +403,16 @@ export async function getPageByType(
     .from(pageSections)
     .leftJoin(
       pageSectionTranslations,
-      eq(pageSections.id, pageSectionTranslations.sectionId),
+      and(
+        eq(pageSections.id, pageSectionTranslations.sectionId),
+        eq(pageSectionTranslations.locale, loc),
+      ),
     )
     .where(
       and(eq(pageSections.pageId, row.pages.id), eq(pageSections.enabled, true)),
     )
     .orderBy(pageSections.sortOrder)
+    .limit(LIMIT_PAGE_SECTIONS)
     .all()
 
   const sectionMap = new Map<string, PageSectionPublic>()
@@ -282,7 +437,8 @@ export async function getPageByType(
     sections: Array.from(sectionMap.values()),
   }
 }
-// ─── FAQ (from D1 faq_items + faq_item_translations) ───
+
+// ─── FAQ ───
 
 export interface FAQPublic {
   id: string
@@ -304,10 +460,13 @@ export async function getFAQs(locale: string, group?: string): Promise<FAQPublic
       and(
         eq(faqItems.status, 'PUBLISHED'),
         eq(faqItemTranslations.locale, loc),
-        ...(group ? [eq(faqItems.group, group as 'HOME' | 'GENERAL' | 'SERVICE' | 'CONTACTS')] : []),
+        ...(group
+          ? [eq(faqItems.group, group as 'HOME' | 'GENERAL' | 'SERVICE' | 'CONTACTS')]
+          : []),
       ),
     )
     .orderBy(faqItems.sortOrder)
+    .limit(LIMIT_FAQ)
     .all()
 
   return rows.map((r) => ({
@@ -344,4 +503,26 @@ export async function getSEOMeta(
     description: row.description,
     keywords: row.keywords,
   }
+}
+
+// ─── Media ───
+
+/**
+ * Resolve media id or pass-through absolute/relative URL.
+ * One cheap .get() — do not call in a tight loop over large lists.
+ */
+export async function getMediaPublicUrl(idOrUrl: string): Promise<string | null> {
+  if (!idOrUrl) return null
+  if (idOrUrl.startsWith('/') || idOrUrl.startsWith('http://') || idOrUrl.startsWith('https://')) {
+    return idOrUrl
+  }
+
+  const db = getDB()
+  const row = await db
+    .select({ publicUrl: mediaAssets.publicUrl })
+    .from(mediaAssets)
+    .where(eq(mediaAssets.id, idOrUrl))
+    .get()
+
+  return row?.publicUrl ?? null
 }

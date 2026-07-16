@@ -12,7 +12,7 @@ import { getCurrentUser } from '@/lib/auth/session'
 import { canEditContent, canDelete } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
-import { revalidateSiteLayout } from '@/lib/revalidate'
+import { revalidatePublic, revalidateAdmin, getBlogPostRevalidatePaths } from '@/lib/revalidate'
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
@@ -84,9 +84,17 @@ export async function createCategory(formData: FormData) {
     await db.insert(blogCategoryTranslations).values({ id: crypto.randomUUID(), categoryId: id, locale: t.locale, slug: t.slug, name: t.name || null, description: t.description || null })
   }
   await writeAuditLog({ userId, action: 'CREATE', entityType: 'BLOG_CATEGORY', entityId: id, after: data })
-  revalidatePath('/admin/blog/categories')
+  revalidateAdmin('/admin/blog/categories')
+  revalidatePublic({ paths: [
+    '/ru/blog/',
+    '/uk/blog/',
+    '/ru/blog/kategoriya/' + translations.find(t => t.locale === 'ru')?.slug + '/',
+    '/uk/blog/kategoriya/' + translations.find(t => t.locale === 'uk')?.slug + '/',
+    '/sitemap.xml',
+  ] })
   redirect('/admin/blog/categories')
 }
+
 
 export async function updateCategory(id: string, formData: FormData) {
   const userId = await requireEdit()
@@ -113,7 +121,14 @@ export async function updateCategory(id: string, formData: FormData) {
     }
   }
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'BLOG_CATEGORY', entityId: id, before: existing, after: data })
-  revalidatePath('/admin/blog/categories')
+  revalidateAdmin('/admin/blog/categories')
+  void revalidatePublic({ paths: [
+    '/ru/blog/',
+    '/uk/blog/',
+    '/ru/blog/kategoriya/' + data.translations.find(t => t.locale === 'ru')?.slug + '/',
+    '/uk/blog/kategoriya/' + data.translations.find(t => t.locale === 'uk')?.slug + '/',
+    '/sitemap.xml',
+  ] })
   redirect('/admin/blog/categories')
 }
 
@@ -124,7 +139,9 @@ export async function deleteCategory(id: string) {
   if (!existing) throw new Error('Category not found')
   await db.delete(blogCategories).where(eq(blogCategories.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'BLOG_CATEGORY', entityId: id, before: existing })
-  revalidatePath('/admin/blog/categories')
+  revalidateAdmin('/admin/blog/categories')
+  // Revalidate blog area (list + category pages affected)
+  void revalidatePublic({ paths: ['/ru/blog/', '/uk/blog/', '/sitemap.xml'], type: 'layout' })
   redirect('/admin/blog/categories')
 }
 
@@ -162,8 +179,10 @@ export async function createPost(formData: FormData) {
     })
   }
   await writeAuditLog({ userId, action: 'CREATE', entityType: 'BLOG_POST', entityId: id, after: data })
-  revalidatePath('/admin/blog/posts')
-  revalidateSiteLayout('/blog')
+  const ruSlug = data.translations.find((t: { locale: string }) => t.locale === 'ru')?.slug || ''
+  const ukSlug = data.translations.find((t: { locale: string }) => t.locale === 'uk')?.slug || ''
+  revalidateAdmin('/admin/blog/posts')
+  void revalidatePublic({ paths: getBlogPostRevalidatePaths(ruSlug, ukSlug) })
   redirect('/admin/blog/posts')
 }
 
@@ -209,9 +228,10 @@ export async function updatePost(id: string, formData: FormData) {
     }
   }
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'BLOG_POST', entityId: id, before: existing, after: data })
-  revalidatePath('/admin/blog/posts')
-  revalidatePath(`/admin/blog/posts/${id}`)
-  revalidateSiteLayout('/blog')
+  const ruSlug = data.translations.find((t: { locale: string }) => t.locale === 'ru')?.slug || ''
+  const ukSlug = data.translations.find((t: { locale: string }) => t.locale === 'uk')?.slug || ''
+  revalidateAdmin('/admin/blog/posts', `/admin/blog/posts/${id}`)
+  void revalidatePublic({ paths: getBlogPostRevalidatePaths(ruSlug, ukSlug) })
   redirect('/admin/blog/posts')
 }
 
@@ -222,8 +242,8 @@ export async function deletePost(id: string) {
   if (!existing) throw new Error('Post not found')
   await db.delete(blogPosts).where(eq(blogPosts.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'BLOG_POST', entityId: id, before: existing })
-  revalidatePath('/admin/blog/posts')
-  revalidateSiteLayout('/blog')
+  revalidateAdmin('/admin/blog/posts')
+  void revalidatePublic({ paths: ['/ru/blog/', '/uk/blog/', '/sitemap.xml'], type: 'layout' })
   redirect('/admin/blog/posts')
 }
 
@@ -238,6 +258,6 @@ export async function publishPost(id: string) {
     userId, action: newStatus === 'PUBLISHED' ? 'PUBLISH' : 'UNPUBLISH',
     entityType: 'BLOG_POST', entityId: id, after: { status: newStatus },
   })
-  revalidatePath('/admin/blog/posts')
-  revalidateSiteLayout('/blog')
+  revalidateAdmin('/admin/blog/posts')
+  void revalidatePublic({ paths: ['/ru/blog/', '/uk/blog/', '/sitemap.xml'], type: 'layout' })
 }

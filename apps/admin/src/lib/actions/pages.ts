@@ -9,7 +9,7 @@ import { getCurrentUser } from '@/lib/auth/session'
 import { canEditContent, canDelete } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
-import { revalidateSiteLayout } from '@/lib/revalidate'
+import { revalidatePublic, revalidateAdmin, getPageRevalidatePaths, getHomeRevalidatePaths } from '@/lib/revalidate'
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
@@ -166,10 +166,8 @@ export async function updatePage(id: string, formData: FormData) {
     before: existing,
     after: data,
   })
-  revalidatePath('/admin/pages')
-  revalidatePath(`/admin/pages/${id}`)
-  revalidatePath('/admin/home')
-  await revalidateSiteLayout('/')
+  revalidateAdmin('/admin/pages', `/admin/pages/${id}`, '/admin/home')
+  void revalidatePublic({ paths: getPageRevalidatePaths(existing.type) })
 }
 
 /** Primary save from edit form (meta + translations). */
@@ -185,9 +183,8 @@ export async function deletePage(id: string) {
   if (existing.type === 'HOME') throw new Error('Головну сторінку не можна видалити')
   await db.delete(pages).where(eq(pages.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'PAGE', entityId: id, before: existing })
-  revalidatePath('/admin/pages')
-  revalidatePath('/admin/home')
-  await revalidateSiteLayout('/')
+  revalidateAdmin('/admin/pages', '/admin/home')
+  void revalidatePublic({ paths: getPageRevalidatePaths(existing.type) })
   redirect('/admin/pages')
 }
 
@@ -214,10 +211,8 @@ export async function publishPage(id: string) {
     before: existing,
     after: { status: newStatus },
   })
-  revalidatePath('/admin/pages')
-  revalidatePath(`/admin/pages/${id}`)
-  revalidatePath('/admin/home')
-  await revalidateSiteLayout('/')
+  revalidateAdmin('/admin/pages', `/admin/pages/${id}`, '/admin/home')
+  void revalidatePublic({ paths: getPageRevalidatePaths(existing.type) })
 }
 
 /* ── Home content (structured contentJson) ── */
@@ -340,10 +335,8 @@ export async function updateHomeContent(formData: FormData) {
     entityId: home.id,
     after: { type: 'HOME', ...d },
   })
-  revalidatePath('/admin/home')
-  revalidatePath('/admin/pages')
-  revalidatePath(`/admin/pages/${home.id}`)
-  await revalidateSiteLayout('/')
+  revalidateAdmin('/admin/home', '/admin/pages', `/admin/pages/${home.id}`)
+  void revalidatePublic({ paths: getHomeRevalidatePaths() })
 }
 
 /* ── Section schemas ── */
@@ -405,9 +398,8 @@ export async function addSection(pageId: string, formData: FormData) {
     entityId: sectionId,
     after: { pageId, key, type },
   })
-  revalidatePath(`/admin/pages/${pageId}`)
-  revalidatePath('/admin/home')
-  await revalidateSiteLayout('/')
+  revalidateAdmin(`/admin/pages/${pageId}`, '/admin/home')
+  void revalidatePublic({ paths: getHomeRevalidatePaths() })
 }
 
 export async function updateSectionContent(sectionId: string, formData: FormData) {
@@ -459,10 +451,8 @@ export async function updateSectionContent(sectionId: string, formData: FormData
     before: existing,
     after: { key, type: typeRaw },
   })
-  revalidatePath(`/admin/pages/${existing.pageId}`)
-  revalidatePath('/admin/pages')
-  revalidatePath('/admin/home')
-  await revalidateSiteLayout('/')
+  revalidateAdmin(`/admin/pages/${existing.pageId}`, '/admin/pages', '/admin/home')
+  void revalidatePublic({ paths: getHomeRevalidatePaths() })
 }
 
 async function upsertSectionTranslation(
@@ -507,9 +497,8 @@ export async function toggleSection(sectionId: string, enabled: boolean) {
     before: existing,
     after: { enabled },
   })
-  revalidatePath(`/admin/pages/${existing.pageId}`)
-  revalidatePath('/admin/home')
-  await revalidateSiteLayout('/')
+  revalidateAdmin(`/admin/pages/${existing.pageId}`, '/admin/home')
+  void revalidatePublic({ paths: getHomeRevalidatePaths() })
 }
 
 export async function reorderSections(pageId: string, orderedIds: string[]) {
@@ -545,7 +534,6 @@ export async function deleteSection(sectionId: string) {
     entityId: sectionId,
     before: existing,
   })
-  revalidatePath(`/admin/pages/${existing.pageId}`)
-  revalidatePath('/admin/home')
-  await revalidateSiteLayout('/')
+  revalidateAdmin(`/admin/pages/${existing.pageId}`, '/admin/home')
+  void revalidatePublic({ paths: getHomeRevalidatePaths() })
 }
