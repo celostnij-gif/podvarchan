@@ -50,12 +50,7 @@ export async function generateMetadata({ params }: Props) {
     ukPath,
     locale,
   })
-
-  // Blog category archives — thin content, noindex but keep link equity
-  return {
-    ...metadata,
-    robots: { index: false, follow: true },
-  }
+  return metadata
 }
 
 export default async function BlogCategoryPage({ params }: Props) {

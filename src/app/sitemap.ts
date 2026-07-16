@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next'
-import { SITE, SERVICES, BLOG_CATEGORIES, STATIC_PAGES } from '@/constants'
-import { getAllBlogPosts, getPublishedServices, getPublishedBlogPosts, getPublishedBlogCategories } from '@/lib/content'
-import { SERVICE_SLUG_UK, BLOG_SLUG_UK, CATEGORY_SLUG_UK } from '@/lib/slugMapping'
+import { SITE, SERVICES, STATIC_PAGES } from '@/constants'
+import { getAllBlogPosts, getPublishedServices, getPublishedBlogPosts } from '@/lib/content'
+import { SERVICE_SLUG_UK, BLOG_SLUG_UK } from '@/lib/slugMapping'
 
 const BASE = SITE.url
 
@@ -97,25 +97,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  /* ── 3. Категории блога — D1 + fallback ── */
-  try {
-    const catsRu = await getPublishedBlogCategories('ru')
-    if (!catsRu || catsRu.length === 0) throw new Error('no data')
-    for (const cat of catsRu) {
-      const [ru, uk] = makeLocalized(`/blog/kategoriya/${cat.translation.slug}/`, 0.6, 'weekly')
-      entries.push(ru, uk)
-    }
-  } catch {
-    for (const category of BLOG_CATEGORIES) {
-      const ruUrl = `${BASE}/ru/blog/kategoriya/${category.slug}/`
-      const ukCat = CATEGORY_SLUG_UK[category.slug] ?? category.slug
-      const ukUrl = `${BASE}/uk/blog/kategoriya/${ukCat}/`
-      const date = new Date()
-      const alternates = { ru: ruUrl, uk: ukUrl }
-      entries.push({ url: ruUrl, alternates: { languages: alternates }, priority: 0.6, changeFrequency: 'weekly', lastModified: date })
-      entries.push({ url: ukUrl, alternates: { languages: alternates }, priority: 0.6, changeFrequency: 'weekly', lastModified: date })
-    }
-  }
 
   /* ── 4. Статьи блога — D1 + fallback ── */
   try {
