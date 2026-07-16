@@ -312,6 +312,16 @@ const IMAGES = [
     accent: COLORS.accentTeal,
     uk: { title: 'ПТСР у ветеранів', sub: 'після війни' },
   },
+  /* ── Anxiety guide ── */
+  {
+    slug: 'trevoga-polnyy-putevoditel',
+    title: 'Тревога',
+    sub: 'полный путеводитель',
+    gradient: ['#2D1B1B', '#4A2525'],
+    symbol: '📖',
+    accent: COLORS.accentRose,
+    uk: { title: 'Тривога', sub: 'повний путівник' },
+  },
 ]
 
 function svgContent({ title, sub, gradient, symbol, accent }) {
