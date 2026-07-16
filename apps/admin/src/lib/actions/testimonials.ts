@@ -4,9 +4,9 @@ import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { eq, and } from 'drizzle-orm'
-import { testimonials, testimonialTranslations } from '@podvarchan/shared'
+import { testimonials, testimonialTranslations, redirectRules, seoMeta } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
-import { canEditContent, canDelete } from '@/lib/auth/permissions'
+import { canEditContent, canDelete, canPublish } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
 import { revalidatePublic, revalidateAdmin, getHomeRevalidatePaths } from '@/lib/revalidate'
@@ -123,6 +123,27 @@ export async function publishTestimonial(id: string) {
   const existing = await db.select().from(testimonials).where(eq(testimonials.id, id)).get()
   if (!existing) throw new Error('Testimonial not found')
   const newStatus = existing.status === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED'
+
+  // YMYL: only OWNER/ADMIN can publish, requires consent
+  if (newStatus === 'PUBLISHED') {
+    const user = await getCurrentUser()
+    if (!user || !canPublish(user.role)) throw new Error('Only OWNER or ADMIN can publish testimonials')
+
+    if (!existing.consentConfirmed) throw new Error('Cannot publish testimonial without confirmed consent')
+
+    const translations = await db
+      .select()
+      .from(testimonialTranslations)
+      .where(eq(testimonialTranslations.testimonialId, id))
+      .all()
+
+    const ruTr = translations.find(t => t.locale === 'ru')
+    const ukTr = translations.find(t => t.locale === 'uk')
+
+    if (!ruTr?.text) throw new Error('RU testimonial text is required for publishing')
+    if (!ukTr?.text) throw new Error('UK testimonial text is required for publishing')
+  }
+
   await db.update(testimonials).set({ status: newStatus }).where(eq(testimonials.id, id))
   await writeAuditLog({
     userId, action: newStatus === 'PUBLISHED' ? 'PUBLISH' : 'UNPUBLISH',

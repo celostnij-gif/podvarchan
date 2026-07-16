@@ -4,9 +4,9 @@ import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { eq, and } from 'drizzle-orm'
-import { services, serviceTranslations } from '@podvarchan/shared'
+import { services, serviceTranslations, redirectRules, seoMeta } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
-import { canEditContent, canDelete } from '@/lib/auth/permissions'
+import { canEditContent, canDelete, canPublish } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
 import { revalidatePublic, revalidateAdmin, getServiceRevalidatePaths } from '@/lib/revalidate'
@@ -156,9 +156,40 @@ export async function updateService(id: string, formData: FormData) {
   }
 
   const data = parsed.data
-  const ts = await now()
 
-  // Slug uniqueness (exclude self)
+  // If service was PUBLISHED and slug changed → insert 301 redirect
+  if (existing.status === 'PUBLISHED') {
+    const oldTranslations = await db
+      .select()
+      .from(serviceTranslations)
+      .where(eq(serviceTranslations.serviceId, id))
+      .all()
+    const redirectTs = await now()
+    for (const newT of data.translations) {
+      const oldT = oldTranslations.find(t => t.locale === newT.locale)
+      if (oldT && oldT.slug !== newT.slug) {
+        const oldPath = `/${newT.locale}/uslugi/${oldT.slug}/`
+        const newPath = `/${newT.locale}/uslugi/${newT.slug}/`
+        const existingRule = await db
+          .select()
+          .from(redirectRules)
+          .where(and(eq(redirectRules.fromPath, oldPath), eq(redirectRules.toPath, newPath)))
+          .get()
+        if (!existingRule) {
+          await db.insert(redirectRules).values({
+            id: crypto.randomUUID(),
+            fromPath: oldPath,
+            toPath: newPath,
+            statusCode: 301,
+            isEnabled: true,
+            hitCount: 0,
+            createdAt: redirectTs,
+          })
+        }
+      }
+    }
+  }
+
   const duplicate = await db.select().from(services)
     .where(and(eq(services.slugBase, data.slugBase), eq(services.id, id))).get()
   if (!duplicate) {
@@ -166,6 +197,8 @@ export async function updateService(id: string, formData: FormData) {
       .where(eq(services.slugBase, data.slugBase)).get()
     if (slugConflict) throw new Error(`Service with slugBase "${data.slugBase}" already exists`)
   }
+
+  const ts = await now()
 
   await db.update(services).set({
     slugBase: data.slugBase, icon: data.icon || null, category: data.category || null,
@@ -227,6 +260,33 @@ export async function publishService(id: string) {
   if (!existing) throw new Error('Service not found')
 
   const newStatus = existing.status === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED'
+
+  // YMYL: only OWNER/ADMIN can publish
+  if (newStatus === 'PUBLISHED') {
+    const user = await getCurrentUser()
+    if (!user || !canPublish(user.role)) throw new Error('Only OWNER or ADMIN can publish')
+
+    const translations = await db
+      .select()
+      .from(serviceTranslations)
+      .where(eq(serviceTranslations.serviceId, id))
+      .all()
+
+    const ruTr = translations.find(t => t.locale === 'ru')
+    const ukTr = translations.find(t => t.locale === 'uk')
+
+    if (!ruTr?.title || !ruTr?.slug) throw new Error('RU translation must have non-empty title and slug')
+    if (!ukTr?.title || !ukTr?.slug) throw new Error('UK translation must have non-empty title and slug')
+
+    // Require meta description
+    const meta = ruTr.seoMetaId
+      ? await db.select().from(seoMeta).where(eq(seoMeta.id, ruTr.seoMetaId)).get()
+      : null
+    const hasMetaDesc = meta?.description && meta.description.length > 0
+    const hasDesc = ruTr.description && ruTr.description.length >= 50
+    if (!hasMetaDesc && !hasDesc) throw new Error('Service must have a meta description (seo_meta.description or description >= 50 chars)')
+  }
+
   await db.update(services).set({ status: newStatus, updatedAt: await now() }).where(eq(services.id, id))
   await writeAuditLog({ userId, action: newStatus === 'PUBLISHED' ? 'PUBLISH' : 'UNPUBLISH',
     entityType: 'SERVICE', entityId: id, after: { status: newStatus },

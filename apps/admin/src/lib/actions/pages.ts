@@ -4,9 +4,9 @@ import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { eq, and } from 'drizzle-orm'
-import { pages, pageTranslations, pageSections, pageSectionTranslations } from '@podvarchan/shared'
+import { pages, pageTranslations, pageSections, pageSectionTranslations, redirectRules, seoMeta } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
-import { canEditContent, canDelete } from '@/lib/auth/permissions'
+import { canEditContent, canDelete, canPublish } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
 import { revalidatePublic, revalidateAdmin, getPageRevalidatePaths, getHomeRevalidatePaths } from '@/lib/revalidate'
@@ -146,6 +146,39 @@ export async function updatePage(id: string, formData: FormData) {
   if (translations.length === 0) throw new Error('Потрібен хоча б один переклад (slug)')
 
   const data = parsed.data
+
+  // If page was PUBLISHED and slug changed → insert 301 redirect
+  if (existing.status === 'PUBLISHED') {
+    const oldTranslations = await db
+      .select()
+      .from(pageTranslations)
+      .where(eq(pageTranslations.pageId, id))
+      .all()
+    for (const newT of data.translations) {
+      const oldT = oldTranslations.find(t => t.locale === newT.locale)
+      if (oldT && oldT.slug !== newT.slug) {
+        const oldPath = `/${newT.locale}/${oldT.slug}/`
+        const newPath = `/${newT.locale}/${newT.slug}/`
+        const existingRule = await db
+          .select()
+          .from(redirectRules)
+          .where(and(eq(redirectRules.fromPath, oldPath), eq(redirectRules.toPath, newPath)))
+          .get()
+        if (!existingRule) {
+          await db.insert(redirectRules).values({
+            id: crypto.randomUUID(),
+            fromPath: oldPath,
+            toPath: newPath,
+            statusCode: 301,
+            isEnabled: true,
+            hitCount: 0,
+            createdAt: now(),
+          })
+        }
+      }
+    }
+  }
+
   const ts = now()
   await db
     .update(pages)
@@ -194,6 +227,33 @@ export async function publishPage(id: string) {
   const existing = await db.select().from(pages).where(eq(pages.id, id)).get()
   if (!existing) throw new Error('Сторінку не знайдено')
   const newStatus = existing.status === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED'
+
+  // YMYL: only OWNER/ADMIN can publish
+  if (newStatus === 'PUBLISHED') {
+    const user = await getCurrentUser()
+    if (!user || !canPublish(user.role)) throw new Error('Only OWNER or ADMIN can publish')
+
+    const translations = await db
+      .select()
+      .from(pageTranslations)
+      .where(eq(pageTranslations.pageId, id))
+      .all()
+
+    const ruTr = translations.find(t => t.locale === 'ru')
+    const ukTr = translations.find(t => t.locale === 'uk')
+
+    if (!ruTr?.title || !ruTr?.slug) throw new Error('RU translation must have non-empty title and slug')
+    if (!ukTr?.title || !ukTr?.slug) throw new Error('UK translation must have non-empty title and slug')
+
+    // Require meta description
+    const meta = ruTr.seoMetaId
+      ? await db.select().from(seoMeta).where(eq(seoMeta.id, ruTr.seoMetaId)).get()
+      : null
+    const hasMetaDesc = meta?.description && meta.description.length > 0
+    const hasExcerpt = ruTr.excerpt && ruTr.excerpt.length >= 50
+    if (!hasMetaDesc && !hasExcerpt) throw new Error('Page must have a meta description (seo_meta.description or excerpt >= 50 chars)')
+  }
+
   const ts = now()
   await db
     .update(pages)
@@ -214,9 +274,6 @@ export async function publishPage(id: string) {
   revalidateAdmin('/admin/pages', `/admin/pages/${id}`, '/admin/home')
   void revalidatePublic({ paths: getPageRevalidatePaths(existing.type) })
 }
-
-/* ── Home content (structured contentJson) ── */
-
 const homeContentSchema = z.object({
   ru_slug: z.string().min(1).default('/'),
   uk_slug: z.string().min(1).default('/'),
