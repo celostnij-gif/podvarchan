@@ -1,6 +1,6 @@
 'use client'
 
-import { useMessages, useTranslations } from 'next-intl'
+import { useTranslations, useMessages } from 'next-intl'
 import { Link } from '@/i18n/routing'
 import { useSetBreadcrumbs, useRegisterSchemas } from '@/providers/BreadcrumbsProvider'
 import SuitableForSection from '@/components/sections/SuitableForSection'
@@ -19,28 +19,48 @@ interface ServiceData {
   metaDescription: string
   keywords: string[]
   cta: string
+  /** D1-only fields — may be undefined in fallback mode */
+  heroTitle?: string | null
+  heroSubtitle?: string | null
+  symptomsJson?: string | null
+  processJson?: string | null
+  benefitsJson?: string | null
+  faqJson?: string | null
+  icon?: string | null
 }
 
 interface Props {
   service: ServiceData
   locale: string
   schemas?: Record<string, unknown>[]
+  allServices?: ServiceData[]
+}
+/* ── Symptoms from D1 JSON or messages (localized) ── */
+
+function getSymptomsFromD1(svc: ServiceData): Array<{ icon: string; title: string; desc: string }> | null {
+  if (!svc.symptomsJson) return null
+  try {
+    const parsed = JSON.parse(svc.symptomsJson)
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed as Array<{ icon: string; title: string; desc: string }>
+    }
+  } catch { /* invalid json */ }
+  return null
 }
 
-/* ── Symptoms from messages (localized) ── */
+/* ── Symptoms from messages (localized fallback) ── */
 
 function getSymptoms(messages: Record<string, unknown>, slug: string): Array<{ icon: string; title: string; desc: string }> {
   const allSymptoms = (messages as unknown as Record<string, Record<string, Array<{ icon: string; title: string; desc: string }>>>)?.['serviceSymptoms'] as Record<string, Array<{ icon: string; title: string; desc: string }>> | undefined
   return allSymptoms?.[slug] ?? allSymptoms?.['gipnoterapiya-onlayn'] ?? []
 }
+
 /* ── Related services mapping ── */
 
 const RELATED_SERVICES: Record<string, string[]> = {
   'gipnoterapiya-onlayn': ['trevoga-i-panicheskiye-ataki', 'rabota-s-podsoznaniem', 'samosabotazh-i-bloki'],
-  'trevoga-i-panicheskiye-ataki': ['gipnoterapiya-onlayn', 'psikhosomatika', 'lichnostnyy-krizis'],
-  'rabota-s-podsoznaniem': ['gipnoterapiya-onlayn', 'samosabotazh-i-bloki', 'lichnostnyy-krizis'],
-  'samosabotazh-i-bloki': ['neyverennost-i-strakh-provala', 'rabota-s-podsoznaniem', 'gipnoterapiya-onlayn'],
-  'emotsionalnoye-vygoraniye': ['lichnostnyy-krizis', 'gipnoterapiya-onlayn', 'psikhosomatika'],
+
+/* ── Related services mapping ── */
   'neyverennost-i-strakh-provala': ['samosabotazh-i-bloki', 'gipnoterapiya-onlayn', 'rabota-s-podsoznaniem'],
   'psikhosomatika': ['gipnoterapiya-onlayn', 'trevoga-i-panicheskiye-ataki', 'lichnostnyy-krizis'],
   'lichnostnyy-krizis': ['gipnoterapiya-onlayn', 'rabota-s-podsoznaniem', 'emotsionalnoye-vygoraniye'],
@@ -232,10 +252,15 @@ function MethodSection({ service }: { service: ServiceData }) {
 /* ── Symptoms Section ── */
 
 function SymptomsSection({ service }: { service: ServiceData }) {
-  const messages = useMessages()
   const t = useTranslations('serviceSection')
-  const symptoms = getSymptoms(messages, service.slug)
+  const messages = useMessages()
 
+  // Try D1 symptomsJson first, fallback to messages
+  let symptoms = getSymptomsFromD1(service)
+  if (!symptoms) {
+    symptoms = getSymptoms(messages, service.slug)
+  }
+  if (symptoms.length === 0) return null
   return (
     <AnimatedSection as="section" variant="fadeUp" aria-label={t('symptomsTitle')}>
       <SectionContainer size="md">
@@ -286,16 +311,27 @@ function SymptomsSection({ service }: { service: ServiceData }) {
     </AnimatedSection>
   )
 }
-/* ── FAQ Section ── */
-
 function FAQSection({ service }: { service: ServiceData }) {
-  const messages = useMessages()
   const t = useTranslations('serviceSection')
-  const serviceFaqs = (messages?.serviceFaqs as Record<string, Array<{ question: string; answer: string }>>) ?? {}
-  const defaultFaqs = (messages?.serviceFaqs?._default as Array<{ question: string; answer: string }>) ?? []
-  const faqs = serviceFaqs[service.slug] || defaultFaqs
-  if (faqs.length === 0) return null
+  const messages = useMessages()
 
+  // Try D1 faqJson first
+  let faqs: Array<{ question: string; answer: string }> = []
+  if (service.faqJson) {
+    try {
+      const parsed = JSON.parse(service.faqJson)
+      if (Array.isArray(parsed)) faqs = parsed
+    } catch { /* invalid json */ }
+  }
+
+  // Fallback to messages if no D1 faqs
+  if (faqs.length === 0) {
+    const serviceFaqs = (messages?.serviceFaqs as Record<string, Array<{ question: string; answer: string }>>) ?? {}
+    const defaultFaqs = (messages?.serviceFaqs?._default as Array<{ question: string; answer: string }>) ?? []
+    faqs = serviceFaqs[service.slug] || defaultFaqs
+  }
+
+  if (faqs.length === 0) return null
   return (
     <AnimatedSection as="section" variant="fadeUp" aria-label={t('faqTitle')}>
       <SectionContainer size="md" background="transparent">
@@ -558,10 +594,11 @@ function TrevogaAlsoReadSection({ service, locale }: { service: ServiceData; loc
 
 /* ── Main Component ── */
 
-export function ClientServicePage({ service, schemas, locale }: Props) {
+export function ClientServicePage({ service, schemas, locale, allServices: allServicesProp }: Props) {
   const messages = useMessages()
-  const allServices = (messages?.servicesData as ServiceData[]) ?? []
 
+  // Use D1 allServices if provided, fallback to messages
+  const allServices = allServicesProp ?? ((messages?.servicesData as ServiceData[]) ?? [])
   useRegisterSchemas(schemas ?? [])
 
   return (

@@ -1,15 +1,16 @@
 import { notFound } from 'next/navigation'
-import { getTranslations, getMessages } from 'next-intl/server'
+import { getTranslations } from 'next-intl/server'
 import { BLOG_CATEGORIES } from '@/constants'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
-import { getBlogPostMetasByCategory } from '@/lib/content-metas'
+import { getBlogPostsByCategory } from '@/lib/db/public'
 import { ClientBlogCategory } from './client-page'
 import { CATEGORY_SLUG_UK, resolveCategorySlug } from '@/lib/slugMapping'
-
+import type { BlogPostPublic } from '@/lib/db/public'
+import type { BlogPost } from '@/types'
 
 export const dynamicParams = false
-/* ── Local type for blog category data from messages ── */
-interface BlogCategoryMsg {
+
+interface BlogCategoryMeta {
   slug: string
   name: string
   description: string
@@ -18,10 +19,23 @@ interface BlogCategoryMsg {
   serviceSlug?: string
 }
 
+function getCategoryMeta(cat: string): BlogCategoryMeta | null {
+  const catEntry = BLOG_CATEGORIES.find((c) => c.slug === cat)
+  if (!catEntry) return null
+  return {
+    slug: catEntry.slug,
+    name: catEntry.slug.charAt(0).toUpperCase() + catEntry.slug.slice(1),
+    description: '',
+    metaDescription: '',
+    keywords: [],
+    serviceSlug: catEntry.serviceSlug,
+  }
+}
+
 export async function generateStaticParams() {
   const ruCats = BLOG_CATEGORIES.map((cat) => ({ cat: cat.slug }))
   const ukCats = BLOG_CATEGORIES.map((cat) => ({ cat: CATEGORY_SLUG_UK[cat.slug] })).filter(
-    (c) => c.cat !== undefined
+    (c) => c.cat !== undefined,
   )
   return [...ruCats, ...ukCats]
 }
@@ -33,16 +47,14 @@ interface Props {
 export async function generateMetadata({ params }: Props) {
   const { cat: rawCat, locale } = await params
   const cat = resolveCategorySlug(rawCat)
-  const messages = await getMessages({ locale })
-  const blogCategories = (messages.blogCategories as BlogCategoryMsg[])
-  const category = blogCategories.find((c) => c.slug === cat)
+  const category = getCategoryMeta(cat)
   if (!category) return {}
   const t = await getTranslations({ locale, namespace: 'blog' })
 
   const ukCat = CATEGORY_SLUG_UK[cat]
   const ukPath = ukCat ? `/blog/kategoriya/${ukCat}` : undefined
 
-  const metadata = seoMetadata({
+  return seoMetadata({
     title: `${category.name} — ${t('pageTitle')}`,
     description: category.metaDescription,
     keywords: category.keywords,
@@ -50,18 +62,40 @@ export async function generateMetadata({ params }: Props) {
     ukPath,
     locale,
   })
-  return metadata
+}
+
+function mapPost(p: BlogPostPublic): Omit<BlogPost, 'body'> {
+  return {
+    slug: p.slug,
+    title: p.title ?? '',
+    description: p.excerpt ?? '',
+    metaDescription: p.excerpt ?? '',
+    keywords: [],
+    categorySlug: p.categorySlug ?? '',
+    categoryName: p.categoryName ?? '',
+    datePublished: p.publishedAt ?? '',
+    dateModified: '',
+    author: '',
+    readingTime: p.readingMinutes ?? 5,
+    image: p.coverImageId ?? undefined,
+    imageAlt: undefined,
+  }
 }
 
 export default async function BlogCategoryPage({ params }: Props) {
   const { cat: rawCat, locale } = await params
   const cat = resolveCategorySlug(rawCat)
-  const messages = await getMessages({ locale })
-  const blogCategories = (messages.blogCategories as BlogCategoryMsg[])
-  const category = blogCategories.find((c) => c.slug === cat)
+  const category = getCategoryMeta(cat)
   if (!category) notFound()
 
-  const posts = getBlogPostMetasByCategory(cat, locale)
+  let posts: Omit<BlogPost, 'body'>[] = []
+
+  try {
+    const d1Posts = await getBlogPostsByCategory(cat, locale)
+    posts = d1Posts.map(mapPost)
+  } catch {
+    // D1 unavailable — client shows empty state
+  }
 
   return <ClientBlogCategory category={category} posts={posts} locale={locale} />
 }

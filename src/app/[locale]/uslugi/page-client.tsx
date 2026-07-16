@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useTranslations, useMessages } from 'next-intl'
+import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/routing'
 import { SERVICE_ICONS } from '@/constants'
 import { ServiceIcon } from '@/components/ui/Icons'
@@ -117,12 +117,9 @@ function ServiceCard({ service, index }: { service: ServiceItem; index: number }
 }
 
 /* ── Services Page ── */
-
-export function UslugiClient() {
+export function UslugiClient({ services }: { services: ServiceItem[] }) {
   const t = useTranslations('services')
   const commonT = useTranslations('common')
-  const messages = useMessages()
-  const servicesData = (messages?.servicesData as ServiceItem[]) ?? []
 
   // Set breadcrumbs via layout context
   useSetBreadcrumbs([
@@ -132,7 +129,6 @@ export function UslugiClient() {
 
   return (
     <>
-      {/* ── Hero Section ── */}
       <section className="relative overflow-hidden pt-16 pb-10 md:pt-20 md:pb-14">
         <div className="relative z-10 w-full max-w-container mx-auto px-gutter text-left">
           <div className="max-w-3xl">
@@ -150,7 +146,7 @@ export function UslugiClient() {
             <h1 className="mt-4 text-4xl md:text-5xl lg:text-6xl font-display text-gold-premium leading-tight animate-fade-in-down" style={{ animationDelay: '0.05s' }}>
               {t('pageTitle')}
             </h1>
-
+                {services.length} {t('directions') || 'направлений'}
             {/* Description */}
             <p className="mt-4 text-lg text-text-secondary leading-relaxed max-w-2xl animate-fade-in-down" style={{ animationDelay: '0.1s' }}>
               {t('pageDescription')}
@@ -160,7 +156,7 @@ export function UslugiClient() {
             <div className="mt-8 flex items-center gap-6 text-sm text-text-muted animate-fade-in-down" style={{ animationDelay: '0.15s' }}>
               <span className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-gold" />
-                {servicesData.length} {t('directions') || 'направлений'}
+                {services.length} {t('directions') || 'направлений'}
               </span>
               <span className="w-px h-4 bg-border-base" aria-hidden="true" />
               <span className="flex items-center gap-2">
@@ -176,7 +172,7 @@ export function UslugiClient() {
       <AnimatedSection as="div" variant="fadeUp" staggerDelay={0.04}>
         <SectionContainer size="md">
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-2">
-            {servicesData.map((service, index) => (
+            {services.map((service, index) => (
               <ServiceCard key={service.slug} service={service} index={index} />
             ))}
           </div>

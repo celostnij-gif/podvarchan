@@ -18,8 +18,8 @@ Public — лёгкий read-only + CDN, влезает в Free.
 | Этап | Содержание | Статус |
 |---|---|---|
 | A | CPU-safe public reads (SQL by slug, limits, media helper) | ✅ 2026-07-16 |
-| B | revalidatePublic multi-path + secrets + все мутации | ⬜ |
-| C | Lists + full detail из D1 (blog/uslugi) | ⬜ |
+| B | revalidatePublic multi-path + secrets + все мутации | ✅ 2026-07-16 |
+| C | Lists + full detail из D1 (blog/uslugi) | ✅ 2026-07-16 |
 | D | Home/sections/testimonials/nav/static pages + SEO meta wire | ⬜ |
 | E | WebP variants + ResponsiveImage | ⬜ |
 | F | YMYL publish + redirects (no D1 middleware) | ⬜ |
@@ -106,4 +106,15 @@ Seed не блокер. Блокер: public read path + revalidate.
 
 **Осталось для прода:** `wrangler secret put REVALIDATE_SECRET` на public + admin workers
 
-**Следующий:** Этап C (Lists + full detail из D1)
+**Следующий:** Этап D (Home/sections/testimonials/nav/static pages + SEO meta wire)
+
+### 2026-07-16 — Этап C ✅
+
+**Суть:** списки та повний detail з D1 для blog/uslugi:
+- `/uslugi/` — server loader з `getServices()`, fallback на messages
+- `/uslugi/[slug]/` — full D1 fields (symptoms/process/benefits/faq JSON)
+- `/blog/` — server wrapper `getBlogPosts()` + `getBlogCategories()`, client винесено в `page-client.tsx`
+- `/blog/kategoriya/[cat]/` — D1 query `getBlogPostsByCategory()`
+- SEO meta через `getSEOMeta()`
+
+**Пруф:** `npx tsc --noEmit` → exit 0, `npm run build` → success

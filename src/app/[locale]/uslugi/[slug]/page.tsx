@@ -4,7 +4,7 @@ import { SERVICES } from '@/constants'
 import { SERVICE_SLUG_UK, resolveServiceSlug } from '@/lib/slugMapping'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { serviceSchema, faqSchema } from '@/lib/schema'
-import { getServiceBySlug } from '@/lib/db/public'
+import { getServiceBySlug, getServices, getSEOMeta } from '@/lib/db/public'
 import { ClientServicePage } from './client-page'
 
 export const revalidate = 3600
@@ -38,7 +38,7 @@ interface Props {
 export async function generateStaticParams() {
   const ruSlugs = SERVICES.map((service) => ({ slug: service.slug }))
   const ukSlugs = SERVICES.map((service) => ({ slug: SERVICE_SLUG_UK[service.slug] })).filter(
-    (s) => s.slug !== undefined
+    (s) => s.slug !== undefined,
   )
   return [...ruSlugs, ...ukSlugs]
 }
@@ -53,11 +53,14 @@ export async function generateMetadata({ params }: Props) {
   try {
     const svc = await getServiceBySlug(slug, locale)
     if (svc) {
+      const seo = svc.id ? await getSEOMeta('service', svc.id, locale) : null
+      const title = seo?.title ?? svc.title
+      const description = seo?.description ?? svc.description ?? ''
       const ukSlug = SERVICE_SLUG_UK[slug]
       const ukPath = ukSlug ? `/uslugi/${ukSlug}` : undefined
       return seoMetadata({
-        title: svc.title,
-        description: svc.description ?? '',
+        title,
+        description,
         path: `/uslugi/${slug}`,
         ukPath,
         type: 'service',
@@ -85,16 +88,82 @@ export async function generateMetadata({ params }: Props) {
   })
 }
 
-// ─── Page component ───
+// ─── Types ───
 
-type ServicePageData = { type: 'd1'; slug: string; title: string; shortTitle: string; description: string; metaDescription: string; keywords: string[]; cta: string } | { type: 'fallback'; service: ServicesMessage; locale: string; faqs: ServiceFaqEntry[] }
+type ServicePageData =
+  | {
+      type: 'd1'
+      slug: string
+      title: string
+      shortTitle: string
+      description: string
+      metaDescription: string
+      keywords: string[]
+      cta: string
+      heroTitle: string | null
+      heroSubtitle: string | null
+      symptomsJson: string | null
+      processJson: string | null
+      benefitsJson: string | null
+      faqJson: string | null
+      icon: string | null
+      allServices: Array<{
+        slug: string
+        title: string
+        shortTitle: string
+        description: string
+        cta: string
+      }>
+    }
+  | {
+      type: 'fallback'
+      service: ServicesMessage
+      locale: string
+      faqs: ServiceFaqEntry[]
+      allServices: ServicesMessage[]
+    }
+
+// ─── Loader ───
 
 async function loadService(slug: string, locale: string): Promise<ServicePageData | null> {
   // Try D1 first
   try {
     const svc = await getServiceBySlug(slug, locale)
     if (svc) {
-      return { type: 'd1', slug: svc.slug, title: svc.title, shortTitle: svc.shortTitle ?? '', description: svc.description ?? '', metaDescription: svc.description ?? '', keywords: [], cta: svc.ctaText ?? '' }
+      const seo = svc.id ? await getSEOMeta('service', svc.id, locale) : null
+
+      let allServices: ServicePageData['allServices'] = []
+      try {
+        const allSvc = await getServices(locale)
+        allServices = allSvc.map((s) => ({
+          slug: s.slug,
+          title: s.title,
+          shortTitle: s.shortTitle ?? '',
+          description: s.description ?? '',
+          cta: s.ctaText ?? '',
+        }))
+      } catch {
+        // related services best-effort
+      }
+
+      return {
+        type: 'd1',
+        slug: svc.slug,
+        title: seo?.title ?? svc.title,
+        shortTitle: svc.shortTitle ?? '',
+        description: seo?.description ?? svc.description ?? '',
+        metaDescription: seo?.description ?? svc.description ?? '',
+        keywords: seo?.keywords ? seo.keywords.split(',').map((k: string) => k.trim()) : [],
+        cta: svc.ctaText ?? '',
+        heroTitle: svc.heroTitle,
+        heroSubtitle: svc.heroSubtitle,
+        symptomsJson: svc.symptomsJson,
+        processJson: svc.processJson,
+        benefitsJson: svc.benefitsJson,
+        faqJson: svc.faqJson,
+        icon: svc.icon,
+        allServices,
+      }
     }
   } catch { /* fallback */ }
 
@@ -105,8 +174,17 @@ async function loadService(slug: string, locale: string): Promise<ServicePageDat
   if (!service) return null
   const withFaqs = messages as unknown as MessagesWithFaqs
   const faqs = withFaqs.serviceFaqs?.[slug] ?? []
-  return { type: 'fallback' as const, service, locale, faqs }
+
+  return {
+    type: 'fallback',
+    service,
+    locale,
+    faqs,
+    allServices: servicesData,
+  }
 }
+
+// ─── Page ───
 
 export default async function ServicePage({ params }: Props) {
   const { slug: rawSlug, locale } = await params
@@ -115,7 +193,6 @@ export default async function ServicePage({ params }: Props) {
   if (!data) notFound()
 
   if (data.type === 'd1') {
-    // Generate Service + FAQPage schema for D1 mode
     const schema = serviceSchema({
       name: data.title,
       description: data.description,
@@ -124,22 +201,19 @@ export default async function ServicePage({ params }: Props) {
     })
     const schemas: Record<string, unknown>[] = [schema]
 
-    // Try to parse faqJson from D1 service (loaded from service_translations.faqJson)
-    // We need to re-fetch to get faqJson since D1 data type doesn't carry it
-    try {
-      const svcFull = await getServiceBySlug(slug, locale)
-      if (svcFull?.faqJson) {
-        const parsed = JSON.parse(svcFull.faqJson)
+    if (data.faqJson) {
+      try {
+        const parsed = JSON.parse(data.faqJson)
         if (Array.isArray(parsed) && parsed.length > 0) {
           schemas.push(faqSchema(parsed as ServiceFaqEntry[]))
         }
-      }
-    } catch { /* faqJson optional */ }
+      } catch { /* faqJson optional */ }
+    }
 
     return <ClientServicePage service={data} locale={locale} schemas={schemas} />
   }
 
-  const { service, faqs } = data
+  const { service, faqs, allServices } = data
   const schema = serviceSchema({
     name: service.title,
     description: service.description,
@@ -152,5 +226,5 @@ export default async function ServicePage({ params }: Props) {
     schemas.push(faqSchema(faqs))
   }
 
-  return <ClientServicePage service={service} locale={locale} schemas={schemas} />
+  return <ClientServicePage service={service} locale={locale} schemas={schemas} allServices={allServices} />
 }
