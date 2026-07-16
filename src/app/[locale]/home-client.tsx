@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl'
 import dynamic from 'next/dynamic'
+import type { TestimonialPublic, FAQPublic, PageSectionPublic } from '@/lib/db/public'
 const ProblemsSection = dynamic(() => import('@/components/sections/ProblemsSection'), {
   loading: () => <div className="h-48 md:h-64" aria-hidden="true" />,
 })
@@ -25,7 +26,19 @@ import { AnimatedText, AnimatedSection, SectionContainer } from '@/components/ui
 import { Link } from '@/i18n/routing'
 import { useRegisterSchemas } from '@/providers/BreadcrumbsProvider'
 
-export default function HomeClient({ locale: _locale, schemas }: { locale: string; schemas?: Record<string, unknown>[] }) {
+export default function HomeClient({
+  locale: _locale,
+  schemas,
+  d1Testimonials,
+  d1Faqs,
+  d1Sections: _d1Sections,
+}: {
+  locale: string
+  schemas?: Record<string, unknown>[]
+  d1Testimonials?: TestimonialPublic[]
+  d1Faqs?: FAQPublic[]
+  d1Sections?: PageSectionPublic[]
+}) {
   const t = useTranslations('home')
   useRegisterSchemas(schemas ?? [])
 
@@ -35,8 +48,8 @@ export default function HomeClient({ locale: _locale, schemas }: { locale: strin
       <MethodSection />
       <ServicesSection maxCards={9} />
       <AuthorPreviewSection />
-      <TestimonialsSection />
-      <FAQSection />
+      <TestimonialsSection d1Items={d1Testimonials} />
+      <FAQSection d1Items={d1Faqs} />
       <AnimatedSection as="div" variant="fadeUp">
         <SectionContainer size="md">
           <div className="relative max-w-3xl mx-auto text-center">

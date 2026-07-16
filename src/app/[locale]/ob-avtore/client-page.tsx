@@ -9,7 +9,7 @@ import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 import { Link } from '@/i18n/routing'
 import { AUTHOR } from '@/constants'
 import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
-
+import type { PageSectionPublic } from '@/lib/db/public'
 /* ── Animation presets ── */
 
 
@@ -37,7 +37,7 @@ function HeroBackgroundParallax() {
 
 /* ── Component ── */
 
-export function ClientAboutPage() {
+export function ClientAboutPage({ d1Sections: _d1Sections }: { d1Sections?: PageSectionPublic[] } = {}) {
   const t = useTranslations('pages.about')
   const commonT = useTranslations('common')
 

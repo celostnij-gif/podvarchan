@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
+import { getPageByType } from '@/lib/db/public'
 import { ClientAboutPage } from './client-page'
 
 export async function generateMetadata({
@@ -19,6 +20,17 @@ export async function generateMetadata({
   })
 }
 
-export default async function AboutPage() {
-  return <ClientAboutPage />
+export default async function AboutPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
+  const { locale } = await params
+
+  let d1Page: Awaited<ReturnType<typeof getPageByType>> | null = null
+  try {
+    d1Page = await getPageByType('ABOUT', locale)
+  } catch { /* D1 unavailable */ }
+
+  return <ClientAboutPage d1Sections={d1Page?.sections ?? []} />
 }

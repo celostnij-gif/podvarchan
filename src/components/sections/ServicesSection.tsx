@@ -7,21 +7,23 @@
  import { AnimatedSection, SectionContainer } from '@/components/ui'
  import { ServiceIcon } from '@/components/ui/Icons'
  import { SERVICE_ICONS } from '@/constants'
+ import type { ServicePublic } from '@/lib/db/public'
  
  /* ── Тип для servicesData из переводов ── */
+ 
+ interface ServiceItem {
+   slug: string
+   title: string
+   shortTitle: string
+   description: string
+   metaDescription: string
+   keywords: string[]
+   cta: string
+ }
+ 
+ /* ── Premium easing ── */
+ const easePremium = [0.25, 0.1, 0, 1] as const
 
-interface ServiceItem {
-  slug: string
-  title: string
-  shortTitle: string
-  description: string
-  metaDescription: string
-  keywords: string[]
-  cta: string
-}
-
-/* ── Premium easing ── */
-const easePremium = [0.25, 0.1, 0, 1] as const
 
 /* ── Section animation variants ── */
 
@@ -43,13 +45,27 @@ const cardVariants = {
     transition: { delay: i * 0.06, duration: 0.55, ease: easePremium },
   }),
 }
-
-/* ── Компонент ── */
-
-export default function ServicesSection({ maxCards }: { maxCards?: number } = {}) {
+export default function ServicesSection({
+  d1Services,
+  maxCards,
+}: {
+  d1Services?: ServicePublic[]
+  maxCards?: number
+} = {}) {
   const t = useTranslations('servicesSection')
   const messages = useMessages()
-  const services = (messages?.servicesData as ServiceItem[]) ?? []
+  const messagesServices = (messages?.servicesData as ServiceItem[]) ?? []
+  const services: ServiceItem[] = d1Services && d1Services.length > 0
+    ? d1Services.map(s => ({
+        slug: s.slug,
+        title: s.title,
+        shortTitle: s.shortTitle ?? '',
+        description: s.description ?? '',
+        metaDescription: s.description ?? '',
+        keywords: [],
+        cta: s.ctaText ?? '',
+      }))
+    : messagesServices
 
   if (services.length === 0) return null
 

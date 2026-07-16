@@ -5,6 +5,7 @@ import { useTranslations, useMessages } from 'next-intl'
 import { Link } from '@/i18n/routing'
 import { FaqAccordion, AnimatedSection, SectionContainer } from '@/components/ui'
 import type { FAQItem } from '@/types'
+import type { FAQPublic } from '@/lib/db/public'
 
 const easePremium = [0.25, 0.1, 0, 1] as const
 
@@ -26,11 +27,20 @@ const faqItemVariants = {
     transition: { delay: i * 0.06, duration: 0.5, ease: easePremium },
   }),
 }
-
-export default function FAQSection() {
+export default function FAQSection({
+  d1Items,
+}: {
+  d1Items?: FAQPublic[]
+} = {}) {
   const faqT = useTranslations('faqSection')
   const messages = useMessages()
-  const faqItems = (messages?.faqData as FAQItem[]) ?? []
+  const messagesItems = (messages?.faqData as FAQItem[]) ?? []
+  const faqItems: FAQItem[] = d1Items && d1Items.length > 0
+    ? d1Items.map(item => ({
+        question: item.question,
+        answer: item.answer ?? '',
+      }))
+    : messagesItems
 
   return (
     <AnimatedSection as="section" variant="fadeUp" aria-labelledby="faq-heading">

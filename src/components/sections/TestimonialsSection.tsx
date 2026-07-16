@@ -6,6 +6,7 @@ import { useTranslations, useMessages } from 'next-intl'
 import { TiltCard, AnimatedSection, SectionContainer } from '@/components/ui'
 import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
 import type { Testimonial } from '@/types'
+import type { TestimonialPublic } from '@/lib/db/public'
 
 const AUTO_PLAY_INTERVAL = 6000 // ms — slower for lower CPU load
 
@@ -25,12 +26,25 @@ const variants = {
     transition: { duration: 0.4, ease: [0.25, 0.1, 0, 1] as const },
   }),
 }
-
-export default function TestimonialsSection() {
+export default function TestimonialsSection({
+  d1Items,
+}: {
+  d1Items?: TestimonialPublic[]
+} = {}) {
   const t = useTranslations('testimonials')
   const messages = useMessages()
   const { shouldReduceAnimations } = useDeviceCapabilities()
-  const items = (messages?.testimonials?.items as Testimonial[]) ?? []
+  const messagesItems = (messages?.testimonials?.items as Testimonial[]) ?? []
+  const items: Testimonial[] = d1Items && d1Items.length > 0
+    ? d1Items.map(item => ({
+        id: item.id,
+        name: item.name ?? '',
+        city: item.city ?? undefined,
+        text: item.text ?? '',
+        result: item.result ?? '',
+        rating: item.rating ?? 5,
+      }))
+    : messagesItems
   const [[page, direction], setPage] = useState([0, 0])
   const itemIndex = Math.abs(page) % (items.length || 1)
 

@@ -9,6 +9,7 @@ import { useSetBreadcrumbs } from '@/providers/BreadcrumbsProvider'
 import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 import { Link } from '@/i18n/routing'
 import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
+import type { PageSectionPublic } from '@/lib/db/public'
 
 /* ── Animation presets ── */
 
@@ -68,7 +69,7 @@ function HeroBackgroundImage() {
 
 /* ── Page ── */
 
-export default function MetodClient() {
+export default function MetodClient({ d1Sections: _d1Sections }: { d1Sections?: PageSectionPublic[] } = {}) {
   const t = useTranslations('pages.metod')
   const methodT = useTranslations('method')
   const commonT = useTranslations('common')

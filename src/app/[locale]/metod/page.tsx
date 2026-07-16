@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
+import { getPageByType } from '@/lib/db/public'
 import MetodClient from './client-page'
 
 type Props = {
@@ -18,6 +19,15 @@ export async function generateMetadata({ params }: Props) {
   })
 }
 
-export default function MetodPage() {
-  return <MetodClient />
+export default async function MetodPage({
+  params,
+}: Props) {
+  const { locale } = await params
+
+  let d1Page: Awaited<ReturnType<typeof getPageByType>> | null = null
+  try {
+    d1Page = await getPageByType('METHOD', locale)
+  } catch { /* D1 unavailable */ }
+
+  return <MetodClient d1Sections={d1Page?.sections ?? []} />
 }

@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
+import { getPageByType, getContactChannels } from '@/lib/db/public'
 import KontaktyClient from './client-page'
 
 type Props = {
@@ -18,6 +19,19 @@ export async function generateMetadata({ params }: Props) {
   })
 }
 
-export default async function KontaktyPage() {
-  return <KontaktyClient />
+export default async function KontaktyPage({
+  params,
+}: Props) {
+  const { locale } = await params
+
+  let d1Channels: Awaited<ReturnType<typeof getContactChannels>> = []
+  let d1Page: Awaited<ReturnType<typeof getPageByType>> | null = null
+  try {
+    ;[d1Page, d1Channels] = await Promise.all([
+      getPageByType('CONTACTS', locale),
+      getContactChannels(),
+    ])
+  } catch { /* D1 unavailable */ }
+
+  return <KontaktyClient d1Channels={d1Channels} d1Sections={d1Page?.sections ?? []} />
 }

@@ -5,11 +5,12 @@ import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/routing'
 import { AnimatedSection, AnimatedText, SectionContainer, FaqAccordion, PageHero } from '@/components/ui'
 import { useRegisterSchemas } from '@/providers/BreadcrumbsProvider'
+import type { PageSectionPublic } from '@/lib/db/public'
 
 /* ── Animation variants ── */
-
 interface TsenyClientProps {
   schemas?: Record<string, unknown>[]
+  d1Sections?: PageSectionPublic[]
 }
 
 const cardVariants = {
@@ -119,7 +120,7 @@ function PricingCard({
 
 /* ── Main Component ── */
 
-export function TsenyClient({ schemas }: TsenyClientProps) {
+export function TsenyClient({ schemas, d1Sections: _d1Sections }: TsenyClientProps) {
   const t = useTranslations('tseny')
   const commonT = useTranslations('common')
   useRegisterSchemas(schemas ?? [])

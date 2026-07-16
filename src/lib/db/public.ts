@@ -19,6 +19,12 @@ import {
 import { pages, pageTranslations, pageSections, pageSectionTranslations } from '@/db/schema/pages'
 import { seoMeta } from '@/db/schema/seo'
 import { mediaAssets } from '@/db/schema/media'
+import { testimonials, testimonialTranslations } from '@/db/schema/testimonials'
+import {
+  navigationItems,
+  contactChannels,
+  siteSettings,
+} from '@/db/schema/settings'
 
 // ─── Limits (safety vs Free CPU / payload) ───
 
@@ -94,6 +100,32 @@ export interface SEOMetaPublic {
   title: string | null
   description: string | null
   keywords: string | null
+}
+
+export interface TestimonialPublic {
+  id: string
+  name: string | null
+  city: string | null
+  text: string | null
+  result: string | null
+  rating: number | null
+  publishedAt: string | null
+}
+
+export interface NavItemPublic {
+  id: string
+  href: string | null
+  label: string
+  children?: NavItemPublic[]
+}
+
+export interface ContactChannelPublic {
+  id: string
+  type: string
+  label: string | null
+  value: string | null
+  url: string | null
+  isPrimary: boolean
 }
 
 // ─── Services ───
@@ -525,4 +557,137 @@ export async function getMediaPublicUrl(idOrUrl: string): Promise<string | null>
     .get()
 
   return row?.publicUrl ?? null
+}
+
+
+// ─── Testimonials ───
+
+/**
+ * Published testimonials with consent, ordered by sortOrder.
+ * Returns max 20 items with locale-specific text.
+ */
+export async function getTestimonials(locale: string): Promise<TestimonialPublic[]> {
+  const db = getDB()
+  const loc = locale as 'ru' | 'uk'
+  const rows = await db
+    .select({
+      id: testimonials.id,
+      name: testimonials.clientName,
+      text: testimonialTranslations.text,
+      result: testimonialTranslations.result,
+      rating: testimonials.rating,
+      publishedAt: testimonials.publishedAt,
+    })
+    .from(testimonials)
+    .leftJoin(
+      testimonialTranslations,
+      and(
+        eq(testimonials.id, testimonialTranslations.testimonialId),
+        eq(testimonialTranslations.locale, loc),
+      ),
+    )
+    .where(
+      and(
+        eq(testimonials.status, 'PUBLISHED'),
+        eq(testimonials.consentConfirmed, true),
+      ),
+    )
+    .orderBy(testimonials.sortOrder)
+    .limit(20)
+
+  return rows.map(r => ({
+    id: r.id,
+    name: r.name,
+    city: null,
+    text: r.text,
+    result: r.result,
+    rating: r.rating,
+    publishedAt: r.publishedAt,
+  }))
+}
+
+// ─── Navigation ───
+
+/**
+ * Enabled navigation items for a location, ordered by sortOrder.
+ * Children are nested under parent items (single level).
+ */
+export async function getNavigation(
+  location: 'HEADER' | 'FOOTER' | 'MOBILE',
+  locale: string,
+): Promise<NavItemPublic[]> {
+  const db = getDB()
+  const rows = await db
+    .select()
+    .from(navigationItems)
+    .where(
+      and(
+        eq(navigationItems.location, location),
+        eq(navigationItems.isEnabled, true),
+      ),
+    )
+    .orderBy(navigationItems.sortOrder)
+    .limit(40)
+
+  // Resolve label by locale
+  const parents = rows.filter(r => !r.parentId)
+  const children = rows.filter(r => r.parentId)
+
+  return parents.map(p => {
+    const label = locale === 'uk' && p.labelUk ? p.labelUk : (p.labelRu ?? p.labelUk ?? '')
+    const item: NavItemPublic = { id: p.id, href: p.href, label }
+    const kids = children
+      .filter(c => c.parentId === p.id)
+      .map(c => ({
+        id: c.id,
+        href: c.href,
+        label: locale === 'uk' && c.labelUk ? c.labelUk : (c.labelRu ?? c.labelUk ?? ''),
+      }))
+    if (kids.length > 0) item.children = kids
+    return item
+  })
+}
+
+// ─── Contact Channels ───
+
+/**
+ * Enabled contact channels ordered by sortOrder.
+ */
+export async function getContactChannels(): Promise<ContactChannelPublic[]> {
+  const db = getDB()
+  const rows = await db
+    .select()
+    .from(contactChannels)
+    .where(eq(contactChannels.isEnabled, true))
+    .orderBy(contactChannels.sortOrder)
+  return rows.map(r => ({
+    id: r.id,
+    type: r.type,
+    label: r.label,
+    value: r.value,
+    url: r.url,
+    isPrimary: r.isPrimary,
+  }))
+
+}
+
+// ─── Site Settings ───
+
+/**
+ * Get a single site setting by key, returns parsed value or null.
+ */
+export async function getSiteSetting(key: string): Promise<unknown | null> {
+  const db = getDB()
+  const row = await db
+    .select({ valueJson: siteSettings.valueJson })
+    .from(siteSettings)
+    .where(eq(siteSettings.key, key))
+    .get()
+
+  if (!row?.valueJson) return null
+  try {
+    return JSON.parse(row.valueJson)
+  } catch {
+    return null
+  }
 }

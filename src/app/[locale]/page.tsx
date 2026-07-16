@@ -6,6 +6,7 @@ import { aggregateRatingSchema } from '@/lib/schema'
 import type { Testimonial } from '@/types'
 import HomeClient from './home-client'
 import Hero from '@/components/sections/Hero'
+import { getPageByType, getTestimonials, getFAQs } from '@/lib/db/public'
 
 /* ── Metadata ── */
 
@@ -53,8 +54,6 @@ async function getWebPageSchema(locale: string) {
   }
 }
 
-/* ── Home Page ── */
-
 export default async function HomePage({
   params,
 }: {
@@ -66,15 +65,27 @@ export default async function HomePage({
   const commonT = await getTranslations({ locale, namespace: 'common' })
   const webPageSchema = await getWebPageSchema(locale)
 
-  const testimonials = (messages?.testimonials?.items as Testimonial[]) ?? []
+  // D1 data with fallback
+  let d1Testimonials: Awaited<ReturnType<typeof getTestimonials>> = []
+  let d1Faqs: Awaited<ReturnType<typeof getFAQs>> = []
+  let d1Home: Awaited<ReturnType<typeof getPageByType>> | null = null
 
-  const ratingSchema = testimonials.length > 0
-    ? aggregateRatingSchema(testimonials.map((t, i) => ({
-        author: t.name,
+  try {
+    ;[d1Home, d1Testimonials, d1Faqs] = await Promise.all([
+      getPageByType('HOME', locale),
+      getTestimonials(locale),
+      getFAQs(locale, 'HOME'),
+    ])
+  } catch { /* D1 unavailable — fallback to messages */ }
+
+  const testimonials = (messages?.testimonials?.items as Testimonial[]) ?? []
+  const ratingSchema = testimonials.length > 0 || d1Testimonials.length > 0
+    ? aggregateRatingSchema((d1Testimonials.length > 0 ? d1Testimonials : testimonials).map((t, i) => ({
+        author: t.name ?? '',
         rating: t.rating ?? 5,
         date: new Date(2025, 5 + (i % 12), 1).toISOString().split('T')[0],
-        text: t.text,
-        result: t.result,
+        text: t.text ?? '',
+        result: t.result ?? '',
       })))
     : null
   const pageSchemas: Record<string, unknown>[] = ratingSchema ? [webPageSchema, ratingSchema] : [webPageSchema]
@@ -82,8 +93,13 @@ export default async function HomePage({
   return (
     <>
       <Hero t={t} commonT={commonT} />
-      <HomeClient locale={locale} schemas={pageSchemas} />
+      <HomeClient
+        locale={locale}
+        schemas={pageSchemas}
+        d1Testimonials={d1Testimonials}
+        d1Faqs={d1Faqs}
+        d1Sections={d1Home?.sections ?? []}
+      />
     </>
   )
-
 }

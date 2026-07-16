@@ -4,9 +4,16 @@ import { useTranslations } from 'next-intl'
 import { AnimatedText, SectionContainer, PageHero } from '@/components/ui'
 import ContactForm from '@/components/ContactForm'
 import { TelegramIcon, WhatsAppIcon, EmailIcon } from '@/components/ui/Icons'
-
 import MedicalDisclaimer from '@/components/MedicalDisclaimer'
-export default function KontaktyClient() {
+import type { ContactChannelPublic, PageSectionPublic } from '@/lib/db/public'
+
+export default function KontaktyClient({
+  d1Channels: _d1Channels,
+  d1Sections: _d1Sections,
+}: {
+  d1Channels?: ContactChannelPublic[]
+  d1Sections?: PageSectionPublic[]
+} = {}) {
   const t = useTranslations('contacts')
   const commonT = useTranslations('common')
 

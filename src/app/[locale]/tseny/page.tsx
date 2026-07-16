@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { SITE } from '@/constants'
+import { getPageByType } from '@/lib/db/public'
 import { TsenyClient } from './client-page'
 
 export async function generateMetadata({
@@ -62,5 +63,10 @@ export default async function TsenyPage({
   const { locale } = await params
   const offerSchema = await getOfferSchema(locale)
 
-  return <TsenyClient schemas={[offerSchema]} />
+  let d1Page: Awaited<ReturnType<typeof getPageByType>> | null = null
+  try {
+    d1Page = await getPageByType('PRICING', locale)
+  } catch { /* D1 unavailable */ }
+
+  return <TsenyClient schemas={[offerSchema]} d1Sections={d1Page?.sections ?? []} />
 }

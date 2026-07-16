@@ -20,7 +20,7 @@ Public — лёгкий read-only + CDN, влезает в Free.
 | A | CPU-safe public reads (SQL by slug, limits, media helper) | ✅ 2026-07-16 |
 | B | revalidatePublic multi-path + secrets + все мутации | ✅ 2026-07-16 |
 | C | Lists + full detail из D1 (blog/uslugi) | ✅ 2026-07-16 |
-| D | Home/sections/testimonials/nav/static pages + SEO meta wire | ⬜ |
+| D | Home/sections/testimonials/nav/static pages + SEO meta wire | ✅ 2026-07-16 |
 | E | WebP variants + ResponsiveImage | ⬜ |
 | F | YMYL publish + redirects (no D1 middleware) | ⬜ |
 | G | Admin pages/home UX (ADMIN_FIX_PLAN) | ⚠️ partial |
@@ -106,8 +106,6 @@ Seed не блокер. Блокер: public read path + revalidate.
 
 **Осталось для прода:** `wrangler secret put REVALIDATE_SECRET` на public + admin workers
 
-**Следующий:** Этап D (Home/sections/testimonials/nav/static pages + SEO meta wire)
-
 ### 2026-07-16 — Этап C ✅
 
 **Суть:** списки та повний detail з D1 для blog/uslugi:
@@ -118,3 +116,16 @@ Seed не блокер. Блокер: public read path + revalidate.
 - SEO meta через `getSEOMeta()`
 
 **Пруф:** `npx tsc --noEmit` → exit 0, `npm run build` → success
+
+
+### 2026-07-16 — Этап D ✅
+
+**Суть:** публічні сторінки з D1 (home + static pages):
+- `getTestimonials`, `getNavigation`, `getContactChannels`, `getSiteSetting` — нові helpers в `public.ts`
+- `ServicesSection`, `TestimonialsSection`, `FAQSection` — приймають `d1Items` пропси з fallback на messages
+- Home (`page.tsx`) — D1 запити `getPageByType('HOME')` + `getTestimonials` + `getFAQs`
+- Static pages: `/metod/` (METHOD), `/ob-avtore/` (ABOUT), `/tseny/` (PRICING), `/kontakty/` (CONTACTS + `getContactChannels`) — D1 з fallback
+
+**Пруф:** `npx tsc --noEmit` → exit 0, `npm run build` → success
+
+**Следующий:** Этап E (WebP variants + ResponsiveImage)
