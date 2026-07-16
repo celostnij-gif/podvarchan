@@ -10,6 +10,7 @@ import { canEditContent, canDelete, canPublish } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
 import { revalidatePublic, revalidateAdmin, getServiceRevalidatePaths } from '@/lib/revalidate'
+import { syncRedirectRulesToKv } from './redirects'
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
@@ -189,6 +190,7 @@ export async function updateService(id: string, formData: FormData) {
       }
     }
   }
+  await syncRedirectRulesToKv()
 
   const duplicate = await db.select().from(services)
     .where(and(eq(services.slugBase, data.slugBase), eq(services.id, id))).get()

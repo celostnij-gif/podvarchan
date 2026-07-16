@@ -10,6 +10,7 @@ import { canEditContent, canDelete, canPublish } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
 import { revalidatePublic, revalidateAdmin, getPageRevalidatePaths, getHomeRevalidatePaths } from '@/lib/revalidate'
+import { syncRedirectRulesToKv } from './redirects'
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
@@ -178,6 +179,7 @@ export async function updatePage(id: string, formData: FormData) {
       }
     }
   }
+  await syncRedirectRulesToKv()
 
   const ts = now()
   await db

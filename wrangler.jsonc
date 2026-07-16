@@ -29,7 +29,8 @@
 	],
 
 	"kv_namespaces": [
-		{ "binding": "RATE_LIMIT_KV", "id": "2f39c831b94841b3b30d7b6246c2a221" }
+		{ "binding": "RATE_LIMIT_KV", "id": "2f39c831b94841b3b30d7b6246c2a221" },
+		{ "binding": "KV_BINDING", "id": "2f39c831b94841b3b30d7b6246c2a221" }
 	],
 	"r2_buckets": [
 		{ "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "podvarchan-inc-cache" },

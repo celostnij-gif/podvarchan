@@ -22,7 +22,7 @@ Public — лёгкий read-only + CDN, влезает в Free.
 | C | Lists + full detail из D1 (blog/uslugi) | ✅ 2026-07-16 |
 | D | Home/sections/testimonials/nav/static pages + SEO meta wire | ✅ 2026-07-16 |
 | E | WebP variants + ResponsiveImage | ✅ 2026-07-16 |
-| F | YMYL publish + redirects (no D1 middleware) | ⬜ |
+| F | YMYL publish + redirects (no D1 middleware) | ✅ 2026-07-16 |
 | G | Admin pages/home UX (ADMIN_FIX_PLAN) | ⚠️ partial |
 | H | Regression / owner acceptance | ⬜ |
 

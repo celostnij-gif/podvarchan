@@ -1,5 +1,4 @@
 'use server'
-
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
@@ -9,6 +8,7 @@ import { getCurrentUser } from '@/lib/auth/session'
 import { canManageSettings } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
+import { getCloudflareContext } from '@opennextjs/cloudflare'
 
 async function requireSettings(): Promise<string> {
   const user = await getCurrentUser()
@@ -58,6 +58,7 @@ export async function saveRedirectRule(data: FormData) {
     await writeAuditLog({ userId, action: 'CREATE', entityType: 'REDIRECT', entityId: newId, after: rule })
   }
   revalidatePath('/admin/settings')
+  await syncRedirectRulesToKv()
   redirect('/admin/settings')
 }
 
@@ -69,6 +70,7 @@ export async function deleteRedirectRule(id: string) {
   await db.delete(redirectRules).where(eq(redirectRules.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'REDIRECT', entityId: id, before: existing })
   revalidatePath('/admin/settings')
+  await syncRedirectRulesToKv()
   redirect('/admin/settings')
 }
 
@@ -80,6 +82,7 @@ export async function toggleRedirectRule(id: string) {
   await db.update(redirectRules).set({ isEnabled: !existing.isEnabled }).where(eq(redirectRules.id, id))
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'REDIRECT', entityId: id, before: existing, after: { isEnabled: !existing.isEnabled } })
   revalidatePath('/admin/settings')
+  await syncRedirectRulesToKv()
 }
 
 export async function updateRedirectHitCount(id: string) {
@@ -87,4 +90,21 @@ export async function updateRedirectHitCount(id: string) {
   const existing = await db.select().from(redirectRules).where(eq(redirectRules.id, id)).get()
   if (!existing) throw new Error('Redirect rule not found')
   await db.update(redirectRules).set({ hitCount: (existing.hitCount ?? 0) + 1 }).where(eq(redirectRules.id, id))
+}
+
+/* ── KV sync: serialize all enabled redirect rules to shared KV ── */
+export async function syncRedirectRulesToKv() {
+  try {
+    const db = await getActionDb()
+    const rules = await db.select().from(redirectRules).where(eq(redirectRules.isEnabled, true)).all()
+    const map: Record<string, { to: string; code: number }> = {}
+    for (const r of rules) {
+      map[r.fromPath] = { to: r.toPath, code: r.statusCode }
+    }
+    const { env } = getCloudflareContext()
+    const kv = env.KV_BINDING as KVNamespace
+    await kv.put('redirect_rules', JSON.stringify(map))
+  } catch (err) {
+    console.error('syncRedirectRulesToKv failed:', String(err))
+  }
 }

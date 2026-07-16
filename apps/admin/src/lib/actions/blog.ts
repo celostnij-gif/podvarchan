@@ -13,6 +13,7 @@ import { canEditContent, canDelete, canPublish } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
 import { revalidatePublic, revalidateAdmin, getBlogPostRevalidatePaths } from '@/lib/revalidate'
+import { syncRedirectRulesToKv } from './redirects'
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
@@ -236,6 +237,8 @@ export async function updatePost(id: string, formData: FormData) {
       }
     }
   }
+  await syncRedirectRulesToKv()
+
 
   const ts = await now()
   await db.update(blogPosts).set({
