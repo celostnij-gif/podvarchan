@@ -1,5 +1,9 @@
 import type { BlockDefinition } from './types'
-import { HeroEditor, TextBlockEditor, StatsEditor, CTAEditor } from './editors'
+import {
+  HeroEditor, TextBlockEditor, StatsEditor, CTAEditor,
+  ImageTextEditor, TimelineEditor, GalleryEditor,
+  VideoEmbedEditor, ServicesGridEditor, FaqGroupRefEditor,
+} from './editors'
 
 /**
  * Block Registry — центральный реестр всех типов блоков.
@@ -129,7 +133,6 @@ registerBlock({
   labelUk: 'Відгуки',
   icon: '💬',
   description: 'Ссылка на блок отзывов (отображает отзывы из CRM)',
-  editor: CTAEditor, // Reuse CTA layout since it has similar fields
   defaultContent: { title: '' },
   fields: [
     { name: 'title', type: 'text', label: 'Заголовок', labelUk: 'Заголовок' },
@@ -142,10 +145,110 @@ registerBlock({
   labelUk: 'Форма контактів',
   icon: '📬',
   description: 'Блок с формой обратной связи',
-  editor: CTAEditor, // Reuse CTA layout
   defaultContent: { title: '', subtitle: '' },
   fields: [
     { name: 'title', type: 'text', label: 'Заголовок', labelUk: 'Заголовок' },
     { name: 'subtitle', type: 'textarea', label: 'Подзаголовок', labelUk: 'Підзаголовок' },
+  ],
+})
+
+registerBlock({
+  type: 'image-text',
+  label: 'Изображение + текст',
+  labelUk: 'Зображення + текст',
+  icon: '🖼️',
+  description: 'Блок с изображением и текстом, настраиваемое расположение',
+  editor: ImageTextEditor,
+  defaultContent: { title: '', body: '', image: '', imageAlt: '', imagePosition: 'left' },
+  fields: [
+    { name: 'title', type: 'text', label: 'Заголовок', labelUk: 'Заголовок' },
+    { name: 'body', type: 'textarea', label: 'Текст (HTML)', labelUk: 'Текст (HTML)' },
+    { name: 'image', type: 'image', label: 'Изображение', labelUk: 'Зображення' },
+    { name: 'imageAlt', type: 'text', label: 'Alt текст', labelUk: 'Alt текст' },
+    { name: 'imagePosition', type: 'text', label: 'Расположение', labelUk: 'Розташування' },
+  ],
+})
+
+registerBlock({
+  type: 'timeline',
+  label: 'Таймлайн',
+  labelUk: 'Таймлайн',
+  icon: '📅',
+  description: 'Хронология событий с годами и описаниями',
+  editor: TimelineEditor,
+  defaultContent: { title: '', items: [] },
+  fields: [
+    { name: 'title', type: 'text', label: 'Заголовок', labelUk: 'Заголовок' },
+    { name: 'items', type: 'array', label: 'События', labelUk: 'Події',
+      itemFields: [
+        { name: 'year', type: 'text', label: 'Год', labelUk: 'Рік' },
+        { name: 'title', type: 'text', label: 'Заголовок', labelUk: 'Заголовок' },
+        { name: 'description', type: 'textarea', label: 'Описание', labelUk: 'Опис' },
+      ],
+    },
+  ],
+})
+
+registerBlock({
+  type: 'gallery',
+  label: 'Галерея',
+  labelUk: 'Галерея',
+  icon: '🏞️',
+  description: 'Галерея изображений с подписями и сортировкой',
+  editor: GalleryEditor,
+  defaultContent: { title: '', images: [] },
+  fields: [
+    { name: 'title', type: 'text', label: 'Заголовок', labelUk: 'Заголовок' },
+    { name: 'images', type: 'array', label: 'Изображения', labelUk: 'Зображення',
+      itemFields: [
+        { name: 'url', type: 'image', label: 'URL', labelUk: 'URL' },
+        { name: 'alt', type: 'text', label: 'Alt', labelUk: 'Alt' },
+        { name: 'caption', type: 'text', label: 'Подпись', labelUk: 'Підпис' },
+      ],
+    },
+  ],
+})
+
+registerBlock({
+  type: 'video-embed',
+  label: 'Видео',
+  labelUk: 'Відео',
+  icon: '🎬',
+  description: 'Встраиваемое видео (YouTube / Vimeo)',
+  editor: VideoEmbedEditor,
+  defaultContent: { title: '', videoUrl: '', caption: '' },
+  fields: [
+    { name: 'title', type: 'text', label: 'Заголовок', labelUk: 'Заголовок' },
+    { name: 'videoUrl', type: 'text', label: 'Ссылка', labelUk: 'Посилання' },
+    { name: 'caption', type: 'text', label: 'Подпись', labelUk: 'Підпис' },
+  ],
+})
+
+registerBlock({
+  type: 'services-grid',
+  label: 'Сетка услуг',
+  labelUk: 'Сітка послуг',
+  icon: '⚕️',
+  description: 'Ссылка на блок услуг (отображает услуги из CRM)',
+  editor: ServicesGridEditor,
+  defaultContent: { title: '', subtitle: '', showFeatured: false, maxItems: 6 },
+  fields: [
+    { name: 'title', type: 'text', label: 'Заголовок', labelUk: 'Заголовок' },
+    { name: 'subtitle', type: 'textarea', label: 'Подзаголовок', labelUk: 'Підзаголовок' },
+    { name: 'showFeatured', type: 'boolean', label: 'Только избранные', labelUk: 'Тільки обрані' },
+  ],
+})
+
+registerBlock({
+  type: 'faq-group-ref',
+  label: 'FAQ группа',
+  labelUk: 'FAQ група',
+  icon: '❓',
+  description: 'Ссылка на группу FAQ (отображает вопросы из CRM)',
+  editor: FaqGroupRefEditor,
+  defaultContent: { title: '', group: 'GENERAL' },
+  fields: [
+    { name: 'title', type: 'text', label: 'Заголовок', labelUk: 'Заголовок' },
+    { name: 'group', type: 'text', label: 'Группа', labelUk: 'Група' },
   ],
 })

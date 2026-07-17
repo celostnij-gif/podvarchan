@@ -34,8 +34,11 @@ export interface BlockDefinition {
   description: string
   fields: FieldDefinition[]
   defaultContent: Record<string, unknown>
-  /** Editor form component — receives content + onChange */
-  editor: ComponentType<BlockEditorProps>
+  /**
+   * Editor form component — receives content + onChange.
+   * If omitted, DynamicBlockEditor auto-generates form from `fields`.
+   */
+  editor?: ComponentType<BlockEditorProps>
 }
 
 /** Props passed to each block's editor component */
