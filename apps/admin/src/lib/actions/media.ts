@@ -62,3 +62,22 @@ export async function deleteMedia(id: string) {
   redirect('/admin/media')
 }
 
+/**
+ * Batch delete media assets by IDs (no redirect — returns JSON for client).
+ * Used by the MediaListPage client component for mass operations.
+ */
+export async function deleteMediaBatch(ids: string[]): Promise<{ deleted: number; errors: number }> {
+  const userId = await requireEdit()
+  const db = await getActionDb()
+  let deleted = 0
+  let errors = 0
+  for (const id of ids) {
+    const existing = await db.select().from(mediaAssets).where(eq(mediaAssets.id, id)).get()
+    if (!existing) { errors++; continue }
+    await db.delete(mediaAssets).where(eq(mediaAssets.id, id))
+    await writeAuditLog({ userId, action: 'DELETE', entityType: 'MEDIA', entityId: id, before: existing })
+    deleted++
+  }
+  revalidatePath('/admin/media')
+  return { deleted, errors }
+}
