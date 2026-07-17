@@ -4,6 +4,7 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { getBlockDefinition, serializeBlockContent } from '@/lib/blocks/registry'
 import { DynamicBlockEditor } from '@/lib/blocks/DynamicBlockEditor'
 import { BlockPreview } from '@/lib/blocks/BlockPreview'
+import { saveBlockTemplate } from '@/lib/actions/blockTemplates'
 import type { BlockContent, FieldDefinition } from '@/lib/blocks/types'
 
 interface BlockEditorPanelProps {
@@ -30,10 +31,8 @@ export function BlockEditorPanel({ sectionType, sectionKey, content, onSave, isP
   const [localUk, setLocalUk] = useState<Record<string, unknown>>(content.uk)
 
   // Sync from props when content changes externally (e.g. after save)
-  useEffect(() => {
-    setLocalRu(content.ru)
-    setLocalUk(content.uk)
-  }, [content.ru, content.uk])
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { setLocalRu(content.ru); setLocalUk(content.uk) }, [content.ru, content.uk])
 
   // Debounce save ref
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -74,19 +73,29 @@ export function BlockEditorPanel({ sectionType, sectionKey, content, onSave, isP
           <span className="text-xs text-zinc-500">key: {sectionKey}</span>
         </div>
 
-        {/* Preview toggle */}
-        <button
-          type="button"
-          onClick={() => setShowPreview(!showPreview)}
-          className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all ${
-            showPreview
-              ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-600/30'
-              : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50 border border-transparent'
-          }`}
-        >
-          <span className="text-xs">👁</span>
-          {showPreview ? 'Скрыть превью' : 'Превью'}
-        </button>
+        {/* Actions */}
+        <div className="flex items-center gap-1.5">
+          {/* Save as template */}
+          <SaveAsTemplateButton
+            sectionType={sectionType}
+            contentRu={localRu}
+            contentUk={localUk}
+          />
+
+          {/* Preview toggle */}
+          <button
+            type="button"
+            onClick={() => setShowPreview(!showPreview)}
+            className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all ${
+              showPreview
+                ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-600/30'
+                : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50 border border-transparent'
+            }`}
+          >
+            <span className="text-xs">👁</span>
+            {showPreview ? 'Скрыть превью' : 'Превью'}
+          </button>
+        </div>
       </div>
 
       {/* Layout: editor + preview (side by side when preview is shown) */}
@@ -214,6 +223,94 @@ function EditorSlot({
     return <Editor content={content} onChange={onChange} locale={locale} />
   }
   return <DynamicBlockEditor content={content} onChange={onChange} locale={locale} fields={fields} />
+}
+
+/* ── Save as template button with inline name prompt ── */
+
+function SaveAsTemplateButton({
+  sectionType,
+  contentRu,
+  contentUk,
+}: {
+  sectionType: string
+  contentRu: Record<string, unknown>
+  contentUk: Record<string, unknown>
+}) {
+  const [showPrompt, setShowPrompt] = useState(false)
+  const [name, setName] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [done, setDone] = useState(false)
+  const def = getBlockDefinition(sectionType)
+
+  const handleSave = async () => {
+    if (!name.trim()) return
+    setSaving(true)
+    try {
+      await saveBlockTemplate({
+        name: name.trim(),
+        sectionType,
+        contentRu: serializeBlockContent(contentRu),
+        contentUk: serializeBlockContent(contentUk),
+      })
+      setDone(true)
+      setTimeout(() => {
+        setShowPrompt(false)
+        setDone(false)
+        setName('')
+      }, 1500)
+    } catch {
+      // ignore
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (showPrompt) {
+    return (
+      <div className="flex items-center gap-1.5">
+        {done ? (
+          <span className="text-xs text-green-400">✅ Сохранено</span>
+        ) : (
+          <>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleSave(); if (e.key === 'Escape') setShowPrompt(false) }}
+              placeholder={def?.label ?? 'Название шаблона'}
+              autoFocus
+              className="w-36 rounded border border-zinc-700 bg-zinc-800/60 px-2 py-1.5 text-xs text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none"
+            />
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={saving || !name.trim()}
+              className="rounded px-2 py-1.5 text-xs text-amber-400 hover:bg-zinc-800 disabled:opacity-50"
+            >
+              {saving ? '…' : 'Save'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowPrompt(false)}
+              className="rounded px-2 py-1.5 text-xs text-zinc-500 hover:bg-zinc-800"
+            >
+              ✕
+            </button>
+          </>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => setShowPrompt(true)}
+      className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50 transition-all"
+      title="Сохранить как шаблон"
+    >
+      📚 Шаблон
+    </button>
+  )
 }
 
 /* ── Fallback: raw JSON textarea for unknown types ── */

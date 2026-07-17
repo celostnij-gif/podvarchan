@@ -65,9 +65,8 @@ export default function MediaListPage() {
     }
   }, [])
 
-  useEffect(() => {
-    fetchAssets(searchQuery)
-  }, [fetchAssets, searchQuery])
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { fetchAssets(searchQuery) }, [fetchAssets, searchQuery])
 
   // Debounce search
   const [searchInput, setSearchInput] = useState('')
