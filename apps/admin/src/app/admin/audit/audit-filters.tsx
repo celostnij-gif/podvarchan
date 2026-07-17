@@ -30,16 +30,16 @@ export function AuditFilters({ entityTypes, actions }: Props) {
   return (
     <div className="flex flex-wrap gap-3 items-end">
       <div>
-        <label className="block text-xs text-gray-500 mb-1">Тип сутності</label>
-        <select value={entityType} onChange={(e) => setEntityType(e.target.value)} className="border rounded px-2 py-1 text-sm">
+        <label htmlFor="entityType" className="block text-xs text-gray-500 mb-1">Тип сутності</label>
+        <select id="entityType" value={entityType} onChange={(e) => setEntityType(e.target.value)} className="border rounded px-2 py-1 text-sm">
           <option value="">Всі</option>
           {entityTypes.map((t) => <option key={t} value={t}>{t}</option>)}
         </select>
       </div>
 
       <div>
-        <label className="block text-xs text-gray-500 mb-1">Дія</label>
-        <select value={action} onChange={(e) => setAction(e.target.value)} className="border rounded px-2 py-1 text-sm">
+        <label htmlFor="action" className="block text-xs text-gray-500 mb-1">Дія</label>
+        <select id="action" value={action} onChange={(e) => setAction(e.target.value)} className="border rounded px-2 py-1 text-sm">
           <option value="">Всі</option>
           {actions.map((a) => <option key={a} value={a}>{a}</option>)}
         </select>
