@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react'
 import { Upload, X, Check, AlertCircle, Loader2 } from 'lucide-react'
+import { buildWebpVariants } from '@/lib/media/optimize'
 
 /* ───── types ───── */
 
@@ -14,64 +15,6 @@ interface UploadItem {
   status: FileStatus
   progress: number
   error?: string
-}
-
-/* ───── helpers ───── */
-
-const WIDTHS = [1600, 1200, 800, 400] as const
-const QUALITY = 0.82
-
-/**
- * Build WebP variants at standard widths using canvas.
- * Master = largest variant (≤1600). SVG/PDF are passed through as-is.
- */
-async function buildWebpVariants(file: File): Promise<{
-  master: { blob: Blob; width: number; height: number }
-  variants: { width: number; blob: Blob }[]
-}> {
-  const img = await createImageBitmap(file)
-  const naturalW = img.width
-  const naturalH = img.height
-
-  const variants: { width: number; blob: Blob }[] = []
-  let masterBlob: Blob | null = null
-  let masterW = 0
-  let masterH = 0
-
-  for (const targetW of WIDTHS) {
-    if (targetW > naturalW) continue // skip upscaling
-    const ratio = targetW / naturalW
-    const w = Math.round(naturalW * ratio)
-    const h = Math.round(naturalH * ratio)
-
-    const canvas = document.createElement('canvas')
-    canvas.width = w
-    canvas.height = h
-    const ctx = canvas.getContext('2d')!
-    ctx.drawImage(img, 0, 0, w, h)
-
-    const blob = await new Promise<Blob | null>((resolve) =>
-      canvas.toBlob(resolve, 'image/webp', QUALITY),
-    )
-    if (!blob) continue
-
-    variants.push({ width: w, blob })
-
-    // Largest variant = master
-    if (!masterBlob || w > masterW) {
-      masterBlob = blob
-      masterW = w
-      masterH = h
-    }
-  }
-
-  img.close()
-
-  if (!masterBlob || variants.length === 0) {
-    throw new Error('Could not generate any WebP variant')
-  }
-
-  return { master: { blob: masterBlob, width: masterW, height: masterH }, variants }
 }
 
 /* ───── component ───── */

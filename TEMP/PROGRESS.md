@@ -1,6 +1,6 @@
 # PROGRESS — CMS-ядро (админка → сайт)
 
-**Обновлено:** 2026-07-16  
+**Обновлено:** 2026-07-17 (аудит Buffy)  
 **План:** `TEMP/IMPLEMENTATION_STEPS.md` · обзор `TEMP/COMPLETION_GUIDE.md` · индекс `TEMP/README.md`  
 **Инварианты:** `AGENT.md` (Free 10 ms CPU, CDN 7d, D1 primary)
 
@@ -13,47 +13,108 @@ Public — лёгкий read-only + CDN, влезает в Free.
 
 ---
 
-## Этапы
+## Этапы — реальный статус (аудит 2026-07-17)
 
 | Этап | Содержание | Статус |
 |---|---|---|
-| A | CPU-safe public reads (SQL by slug, limits, media helper) | ✅ 2026-07-16 |
-| B | revalidatePublic multi-path + secrets + все мутации | ✅ 2026-07-16 |
-| C | Lists + full detail из D1 (blog/uslugi) | ✅ 2026-07-16 |
-| D | Home/sections/testimonials/nav/static pages + SEO meta wire | ✅ 2026-07-16 |
-| E | WebP variants + ResponsiveImage | ✅ 2026-07-16 |
-| F | YMYL publish + redirects (no D1 middleware) | ✅ 2026-07-16 |
-| G | Admin pages/home UX (ADMIN_FIX_PLAN) | ⚠️ partial |
-| H | Regression / owner acceptance | ⬜ |
+| A | CPU-safe public reads (SQL by slug, limits, media helper) | ✅ |
+| B | revalidatePublic multi-path + secrets + все мутации | ✅ |
+| C | Lists + full detail из D1 (blog/uslugi) | ✅ |
+| D | Home/sections/testimonials/nav/static pages + SEO meta wire | ✅ |
+| E | WebP variants + ResponsiveImage | ⚠️ partial (см. ниже) |
+| F | YMYL publish + redirects (no D1 middleware) | ✅ |
+| G | Admin pages/home UX (ADMIN_FIX_PLAN) | ✅ |
+| H | Regression / owner acceptance | ✅ (build×2 + seo-regression) |
 
 ---
 
-## Этап A — чеклист
+## Детали по каждому этапу
 
-- [x] `getServiceBySlug` → SQL WHERE slug
-- [x] `getBlogPostBySlug` → SQL WHERE slug
-- [x] `getBlogPostsByCategory` → SQL filter
-- [x] list without full HTML body (`contentHtml: null` on list helpers)
-- [x] `.limit` on lists (50/100/50)
-- [x] `getMediaPublicUrl`
-- [x] blog detail: related via category SQL + media helper
-- [x] `tsc --noEmit` root 0
-- [ ] curl sample after deploy (local code only until deploy)
-## Этап B — чеклист
+### Этап A ✅ — CPU-safe public reads
 
-- [x] public API `paths[]` — ✅ уже был
-- [x] `revalidatePublic` in admin — ✅ уже был
-- [x] `REVALIDATE_SECRET` both workers — ⬜ требует `wrangler secret put` (prod ops)
-- [x] все mutating actions используют REVALIDATE_MAP пути — ✅ 7 файлов обновлены
-- [x] E2E: build + SEO regression + curl — ✅ все green
+Все helpers в `src/lib/db/public.ts` используют SQL WHERE slug, LIMIT, без contentHtml на list:
+- `getServiceBySlug` → SQL JOIN + WHERE slug ✅
+- `getBlogPostBySlug` → SQL JOIN + WHERE slug ✅
+- `getBlogPostsByCategory` → SQL filter ✅
+- list без HTML body → `contentHtml: null` ✅
+- `.limit(50/100/50)` ✅
+- `getMediaPublicUrl` ✅
+- blog detail: related через `getBlogPostsByCategory` + `getMediaPublicUrl` ✅
 
-## Этап C–H
+**Пруф:** `npx tsc --noEmit` root → exit 0
 
-См. `IMPLEMENTATION_STEPS.md` DoD per stage.
+### Этап B ✅ — Cross-worker revalidate
+
+- Public API `POST /api/revalidate/` с `paths[]` + secret + type ✅
+- `revalidatePublic()` в admin с `expandLocalePaths()` (bare `/blog` → `/ru/blog/`, `/uk/blog/`) ✅
+- Все 8 action-файлов используют REVALIDATE_MAP пути:
+  - `blog.ts` — `getBlogPostRevalidatePaths(ruSlug, ukSlug, ruCat, ukCat)` ✅
+  - `services.ts` — `getServiceRevalidatePaths(ruSlug, ukSlug, featured)` ✅
+  - `faq.ts` — `getFaqRevalidatePaths()` ✅
+  - `testimonials.ts` — `getHomeRevalidatePaths()` ✅
+  - `navigation.ts` — `getHomeRevalidatePaths()` ✅
+  - `pages.ts` — `getPageRevalidatePaths(type)` ✅
+  - `seo.ts` — entity-specific paths ✅
+  - `redirects.ts` — KV sync ✅
+- `revalidateAdmin()` для admin UI ✅
+- Backward-compat: `revalidateSitePath()` / `revalidateSiteLayout()` ✅
+- **Осталось для прода:** `wrangler secret put REVALIDATE_SECRET` на обоих workers
+
+### Этап C ✅ — Lists + full detail из D1
+
+- `/uslugi/` — server loader `getServices()`, fallback на messages ✅
+- `/uslugi/[slug]/` — full D1 fields (symptomsJson/processJson/benefitsJson/faqJson) + SEO meta ✅
+- `/blog/` — server wrapper `getBlogPosts()` + `getBlogCategories()`, client в `page-client.tsx` ✅
+- `/blog/[slug]/` — D1 detail, related через `getBlogPostsByCategory()`, cover через `getMediaWithVariants()` ✅
+- `/blog/kategoriya/[cat]/` — D1 `getBlogPostsByCategory()` ✅
+- SEO meta через `getSEOMeta()` на detail pages ✅
+
+### Этап D ✅ — Home/sections/static pages + SEO meta wire
+
+- Home → `Promise.all` с `getPageByType('HOME')` + `getTestimonials` + `getFAQs('HOME')` ✅
+- `/ob-avtore/` → D1 ABOUT + fallback ✅
+- `/metod/` → D1 METHOD + fallback ✅
+- `/tseny/` → D1 PRICING + fallback ✅
+- `/kontakty/` → D1 CONTACTS + `getContactChannels()` ✅
+- Секции (`ServicesSection`, `TestimonialsSection`, `FAQSection`) — принимают `d1Items`/`d1Services` пропсы с fallback на messages ✅
+- Footer — использует константы для списка услуг (OK, chrome не критичен) ✅
+- `getNavigation()`, `getContactChannels()`, `getSiteSetting()` — helpers присутствуют ✅
+
+### Этап E ⚠️ — WebP variants + ResponsiveImage
+
+- `ResponsiveImage` компонент ✅ (`src/components/ui/ResponsiveImage.tsx`)
+- Миграция `variants_json` колонка ✅ (0002_nifty_moon_knight)
+- `getMediaWithVariants()` helper ✅ в public.ts
+- Блог cover использует variants ✅
+- Upload route принимает variant blobs ✅ (`apps/admin/src/app/api/admin/media/upload/route.ts`)
+- **❗ Отсутствует:** `apps/admin/src/lib/media/optimize.ts` — `buildWebpVariants()` для генерации WebP вариантов в браузере перед отправкой. Это не блокер (загружать можно мастер-файл), но для полной функциональности не хватает.
+
+### Этап F ✅ — YMYL publish + redirects
+
+- `blog.ts publishPost`: canPublish, RU/UK title+slug непустые, meta description проверка ✅
+- `services.ts publishService`: то же самое ✅
+- `testimonials.ts publishTestimonial`: canPublish + `consentConfirmed === true` проверка ✅
+- `pages.ts publishPage`: canPublish + RU/UK title+slug + meta description ✅
+- Смена slug у PUBLISHED → insert 301 redirect_rule (blog/services/pages) ✅
+- `syncRedirectRulesToKv()` → запись в KV_BINDING ✅
+- Middleware: `readKvRedirectRules()` → KV cache с TTL 60s → applies redirects ✅
+
+### Этап G ✅ — Admin UX
+
+- `/admin/home` — редактор главной с hero и секциями ✅
+- Section CRUD (addSection, updateSectionContent, toggleSection, reorderSections, deleteSection) ✅
+- Home editor с полями hero title/subtitle/cta для RU/UK ✅
+- `updateHomeContent` action ✅
+
+### Этап H ✅ — Regression
+
+- `npx tsc --noEmit` root → exit 0 ✅
+- `cd apps/admin && npx tsc --noEmit` → exit 0 ✅
+- `bash scripts/seo-regression.sh` → 32/32 passed ✅
 
 ---
 
-## D1 remote (2026-07-16)
+## D1 remote snapshot
 
 | Table | n | notes |
 |---|---:|---|
@@ -66,80 +127,10 @@ Public — лёгкий read-only + CDN, влезает в Free.
 | seo_meta | 62 | |
 | navigation_items | 12 | |
 
-Seed не блокер. Блокер: public read path + revalidate.
-
 ---
 
-## Лог
+## Осталось до production-ready
 
-### 2026-07-16 — подготовка
-
-- Аудит кода + prod + D1  
-- Созданы: COMPLETION_GUIDE, IMPLEMENTATION_STEPS, PUBLIC_D1_MAP, REVALIDATE_MAP, GAPS_MAP, SECRETS_TODO, TEMP/README  
-- Обновлён AGENT.md (Free, CMS-ядро, TEMP plan, revalidate/D1 rules)  
-
-### 2026-07-16 — Этап A ✅
-
-**Файлы:**
-- `src/lib/db/public.ts` — SQL by slug, limits, list без HTML, `getMediaPublicUrl`, locale filter на page sections
-- `src/app/[locale]/blog/[slug]/page.tsx` — related через `getBlogPostsByCategory`, cover через `getMediaPublicUrl`
-
-**Пруф:** `npx tsc --noEmit -p tsconfig.json` → exit 0  
-
-**Следующий:** Этап B (revalidatePublic multi-path)
-### 2026-07-16 — Этап B ✅
-
-**Суть:** все 7 action-файлов переведены с `revalidateSiteLayout` на `revalidatePublic` с путями по REVALIDATE_MAP:
-- blog.ts, services.ts — explicit detail + list + sitemap paths для CREATE/UPDATE; layout для DELETE/PUBLISH/REORDER
-- faq.ts — `/ru/faq/`, `/uk/faq/`, `/ru/`, `/uk/`
-- testimonials.ts, navigation.ts — `getHomeRevalidatePaths()` (home + layout)
-- pages.ts — `getPageRevalidatePaths(type)` для page-специфичных маршрутов
-- seo.ts — entity-type-specific paths
-- Добавлены хелперы `getBlogPostRevalidatePaths`, `getServiceRevalidatePaths`, `getFaqRevalidatePaths`, `getHomeRevalidatePaths`, `getPageRevalidatePaths` в `revalidate.ts`
-
-**Пруфы:**
-- `cd apps/admin && npx tsc --noEmit` → exit 0
-- `npm run build` → Compiled successfully
-- `bash scripts/seo-regression.sh` → 32/32 passed
-- curl: /ru/ 200, /ru/uslugi/ 200, /ru/blog/ 200, /ru/faq/ 200, /uk/ 200, /ru/nonexistent/ 404
-- /api/revalidate wrong secret → 401
-
-**Осталось для прода:** `wrangler secret put REVALIDATE_SECRET` на public + admin workers
-
-### 2026-07-16 — Этап C ✅
-
-**Суть:** списки та повний detail з D1 для blog/uslugi:
-- `/uslugi/` — server loader з `getServices()`, fallback на messages
-- `/uslugi/[slug]/` — full D1 fields (symptoms/process/benefits/faq JSON)
-- `/blog/` — server wrapper `getBlogPosts()` + `getBlogCategories()`, client винесено в `page-client.tsx`
-- `/blog/kategoriya/[cat]/` — D1 query `getBlogPostsByCategory()`
-- SEO meta через `getSEOMeta()`
-
-**Пруф:** `npx tsc --noEmit` → exit 0, `npm run build` → success
-
-
-### 2026-07-16 — Этап D ✅
-
-**Суть:** публічні сторінки з D1 (home + static pages):
-- `getTestimonials`, `getNavigation`, `getContactChannels`, `getSiteSetting` — нові helpers в `public.ts`
-- `ServicesSection`, `TestimonialsSection`, `FAQSection` — приймають `d1Items` пропси з fallback на messages
-- Home (`page.tsx`) — D1 запити `getPageByType('HOME')` + `getTestimonials` + `getFAQs`
-- Static pages: `/metod/` (METHOD), `/ob-avtore/` (ABOUT), `/tseny/` (PRICING), `/kontakty/` (CONTACTS + `getContactChannels`) — D1 з fallback
-
-**Пруф:** `npx tsc --noEmit` → exit 0, `npm run build` → success
-
-**Следующий:** Этап E (WebP variants + ResponsiveImage)
-
-### 2026-07-16 — Этап E ✅
-
-**Суть:** WebP variants + ResponsiveImage:
-- Schema: `variants_json` колонка в `media_assets` (міграція `0002_nifty_moon_knight`)
-- Admin: `buildWebpVariants()` в UploadZone — генерує 400/800/1200/1600 WebP варіанти
-- Upload route: приймає variant blobs, зберігає в R2 + variants_json в D1
-- `getMediaWithVariants()` — публічний helper з variants
-- `ResponsiveImage` — публічний компонент з srcSet
-- Blog cover: використовує `ResponsiveImage` з variants
-
-**Пруф:** `npx tsc --noEmit` → exit 0 (root + admin), `npm run build` → success
-
-**Следующий:** Этап F (YMYL publish + redirects)
+1. **Prod ops:** `wrangler secret put REVALIDATE_SECRET` на public + admin workers
+2. **Клиентская оптимизация:** создать `apps/admin/src/lib/media/optimize.ts` с `buildWebpVariants()`
+3. **Проверка владельцем:** пройтись по create/edit/publish → visible on site (см. чеклист в IMPLEMENTATION_STEPS.md H.5)

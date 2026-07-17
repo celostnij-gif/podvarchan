@@ -191,6 +191,32 @@ export default async function middleware(request: NextRequest) {
 
   const response = intlMiddleware(request)
 
+  // Fix 307/302 → 308 for all locale detection redirects (SEO: permanent, method-preserving)
+  if (response.status === 307 || response.status === 302) {
+    const location = response.headers.get('Location')
+    if (location) {
+      const redirectResponse = NextResponse.redirect(new URL(location, request.url), 308)
+      // Preserve locale cookie and other headers from intlMiddleware
+      response.headers.forEach((value, key) => {
+        if (key.toLowerCase() !== 'location') {
+          redirectResponse.headers.set(key, value)
+        }
+      })
+      return redirectResponse
+    }
+  }
+
+  // Edge cache for public HTML pages — Worker hits are dramatically reduced
+  // s-maxage=604800: CDN caches 7 days
+  // stale-while-revalidate=2592000: serves stale for 30d while revalidating in background
+  // stale-if-error=604800: serve stale for 7d if Worker fails (mitigates free plan CPU limit)
+  if (response.status < 300) {
+    response.headers.set(
+      'Cache-Control',
+      'public, s-maxage=604800, stale-while-revalidate=2592000, stale-if-error=604800'
+    )
+  }
+
   return response
 }
 
