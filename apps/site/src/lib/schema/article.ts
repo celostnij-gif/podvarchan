@@ -45,7 +45,7 @@ export function articleSchema(params: ArticleSchemaParams): Record<string, unkno
       : cleanUrl(SITE.url, image)
     : undefined
 
-  return {
+  const schema: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline,
@@ -71,6 +71,12 @@ export function articleSchema(params: ArticleSchemaParams): Record<string, unkno
     },
     datePublished,
     dateModified,
-    image: imageSchema,
   }
+
+  // P0: Включаем image только если он реально задан (иначе RSC сериализует undefined в "$undefined")
+  if (imageSchema !== undefined) {
+    schema.image = imageSchema
+  }
+
+  return schema
 }

@@ -75,7 +75,11 @@ export function articleSchema(params: ArticleSchemaParams): Record<string, unkno
     },
     datePublished,
     dateModified,
-    image: imageSchema,
+  }
+
+  // P0: Включаем image только если он реально задан (иначе RSC сериализует undefined в "$undefined")
+  if (imageSchema !== undefined) {
+    schema.image = imageSchema
   }
 
   // YMYL: додаємо reviewedBy для клінічних категорій (ПТСР, панічні атаки, тривога)

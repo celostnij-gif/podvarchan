@@ -93,7 +93,6 @@ async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData 
         url: `/blog/${slug}/`,
         datePublished: post.publishedAt ?? new Date().toISOString(),
         dateModified: post.updatedAt ?? post.publishedAt ?? new Date().toISOString(),
-        authorName: '',
         locale,
       })
       schemas.push(jsonLd)
@@ -164,7 +163,6 @@ export default async function BlogPostPage({ params }: Props) {
         date={data.date}
         category={data.category}
         categorySlug={data.categorySlug}
-        author=""
         readingTime={data.readingTime}
         slug={data.slug}
         locale={locale}

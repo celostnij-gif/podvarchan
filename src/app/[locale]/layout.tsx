@@ -117,21 +117,14 @@ export default async function LocaleLayout({
         'query-input': 'required name=search_term_string',
       },
       publisher: {
-        '@type': 'Person',
-        '@id': `${SITE.url}/ob-avtore/#person`,
+        '@type': 'Organization',
+        name: SITE.fullName,
+        url: SITE.url,
+        logo: {
+          '@type': 'ImageObject',
+          url: `${SITE.url}/logo.webp`,
+        },
       },
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
-      '@id': `${SITE.url}/#breadcrumb`,
-      inLanguage: locale === 'uk' ? 'uk' : 'ru',
-      itemListElement: [{
-        '@type': 'ListItem',
-        position: 1,
-        name: t('siteName'),
-        url: `${SITE.url}/${locale}/`,
-      }],
     },
   ]
 

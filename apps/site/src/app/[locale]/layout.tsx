@@ -96,20 +96,14 @@ export default async function LocaleLayout({
       name: SITE.fullName,
       description: SITE.fullName,
       publisher: {
-        '@type': 'Person',
-        '@id': `${SITE.url}/ob-avtore/#person`,
+        '@type': 'Organization',
+        name: SITE.fullName,
+        url: SITE.url,
+        logo: {
+          '@type': 'ImageObject',
+          url: `${SITE.url}/logo.webp`,
+        },
       },
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
-      '@id': `${SITE.url}/#breadcrumb`,
-      itemListElement: [{
-        '@type': 'ListItem',
-        position: 1,
-        name: t('siteName'),
-        url: `${SITE.url}/${locale}/`,
-      }],
     },
   ]
 

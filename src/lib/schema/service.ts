@@ -180,10 +180,6 @@ export function practiceSchema(locale: string = 'ru'): Record<string, unknown> {
     areaServed: [
       { '@type': 'Country', name: 'UA' },
       { '@type': 'Country', name: 'RU' },
-      {
-        '@type': 'AdministrativeArea',
-        name: isUk ? 'Онлайн (для української діаспори у всьому світі)' : 'Онлайн (для русскоязычной диаспоры по всему миру)',
-      },
     ],
     priceRange,
     offers,

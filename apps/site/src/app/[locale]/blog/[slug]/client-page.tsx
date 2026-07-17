@@ -24,7 +24,7 @@ interface Props {
   date: string
   category: string
   categorySlug: string
-  author: string
+  author?: string
   readingTime: number
   slug: string
   image?: string

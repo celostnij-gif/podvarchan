@@ -113,7 +113,6 @@ async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData 
         url: `/blog/${slug}/`,
         datePublished: post.publishedAt ?? new Date().toISOString(),
         dateModified: post.updatedAt ?? post.publishedAt ?? new Date().toISOString(),
-        authorName: '',
         locale,
         category: clinical ? 'clinical' : undefined,
       })
@@ -209,7 +208,6 @@ export default async function BlogPostPage({ params }: Props) {
         date={data.date}
         category={data.category}
         categorySlug={data.categorySlug}
-        author=""
         readingTime={data.readingTime}
         slug={data.slug}
         image={data.image}
@@ -223,8 +221,7 @@ export default async function BlogPostPage({ params }: Props) {
   }
 
   const { post } = data
-  return (
-    <ClientBlogPost
+  return (      <ClientBlogPost
       title={post.title}
       body={post.body ?? ''}
       date={formatDate(post.datePublished, locale)}
