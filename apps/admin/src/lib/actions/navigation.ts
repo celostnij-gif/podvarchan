@@ -64,9 +64,9 @@ export async function saveNavigationItem(data: FormData) {
     })
     await writeAuditLog({ userId, action: 'CREATE', entityType: 'NAVIGATION', entityId: newId, after: item })
   }
-  revalidateAdmin('/admin/settings')
+  revalidateAdmin('/admin/navigation', '/admin/settings')
   void revalidatePublic({ paths: getHomeRevalidatePaths() })
-  redirect('/admin/settings')
+  redirect('/admin/navigation')
 }
 
 export async function deleteNavigationItem(id: string) {
@@ -76,9 +76,9 @@ export async function deleteNavigationItem(id: string) {
   if (!existing) throw new Error('Nav item not found')
   await db.delete(navigationItems).where(eq(navigationItems.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'NAVIGATION', entityId: id, before: existing })
-  revalidateAdmin('/admin/settings')
+  revalidateAdmin('/admin/navigation', '/admin/settings')
   void revalidatePublic({ paths: getHomeRevalidatePaths() })
-  redirect('/admin/settings')
+  redirect('/admin/navigation')
 }
 
 export async function toggleNavigationItem(id: string) {
@@ -88,7 +88,7 @@ export async function toggleNavigationItem(id: string) {
   if (!existing) throw new Error('Nav item not found')
   await db.update(navigationItems).set({ isEnabled: !existing.isEnabled }).where(eq(navigationItems.id, id))
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'NAVIGATION', entityId: id, before: existing, after: { isEnabled: !existing.isEnabled } })
-  revalidateAdmin('/admin/settings')
+  revalidateAdmin('/admin/navigation', '/admin/settings')
   void revalidatePublic({ paths: getHomeRevalidatePaths() })
 }
 
@@ -99,6 +99,6 @@ export async function reorderNavigationItems(items: { id: string; parentId: stri
     await db.update(navigationItems).set({ parentId: item.parentId, sortOrder: item.sortOrder }).where(eq(navigationItems.id, item.id))
   }
   await writeAuditLog({ userId, action: 'REORDER', entityType: 'NAVIGATION', entityId: 'batch', after: { items } })
-  revalidateAdmin('/admin/settings')
+  revalidateAdmin('/admin/navigation')
   void revalidatePublic({ paths: getHomeRevalidatePaths() })
 }

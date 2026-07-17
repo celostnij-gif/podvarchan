@@ -55,11 +55,11 @@ export function ContactChannelList({ channels }: Props) {
           </label>
         </div>
         <div className="flex gap-1">
-          <button type="submit" disabled={loading} className="rounded-lg bg-amber-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-amber-500">
-            {loading ? '...' : 'Збр'}
+          <button type="submit" disabled={loading} className="rounded-lg bg-amber-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-amber-500 disabled:opacity-50">
+            {loading ? '…' : 'Зберегти'}
           </button>
           <button type="button" onClick={() => setEditing(null)} className="rounded-lg px-3 py-1.5 text-sm text-zinc-400 hover:bg-zinc-800">
-            X
+            Скасувати
           </button>
         </div>
       </form>
@@ -75,14 +75,19 @@ export function ContactChannelList({ channels }: Props) {
           </div>
         ) : (
           <div key={ch.id} className="flex items-center gap-3 p-2.5 border border-zinc-700/50 rounded-lg bg-zinc-900/30">
-            <span className={`px-2 py-0.5 rounded text-xs font-medium ${ch.isEnabled ? 'bg-green-900/30 text-green-400 border border-green-700/30' : 'bg-zinc-800 text-zinc-500 border border-zinc-700/50'}`}>
+            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${ch.isEnabled ? 'bg-green-900/30 text-green-400 border border-green-700/30' : 'bg-zinc-800 text-zinc-500 border border-zinc-700/50'}`}>
+              {ch.type === 'TELEGRAM' && '📱'}
+              {ch.type === 'WHATSAPP' && '💬'}
+              {ch.type === 'EMAIL' && '✉️'}
+              {ch.type === 'PHONE' && '📞'}
+              {ch.type === 'CUSTOM' && '🔗'}
               {ch.type}
             </span>
-            <span className="flex-1 text-sm text-zinc-200">{ch.label}</span>
-            <span className="text-sm text-zinc-400">{ch.value}</span>
-            {ch.isPrimary && <span className="text-xs bg-amber-900/30 text-amber-400 border border-amber-700/30 px-1.5 py-0.5 rounded">PRIMARY</span>}
-            <button onClick={() => setEditing(ch.id)} className="text-amber-400 hover:text-amber-300 text-sm">Ред</button>
-            <button onClick={() => handleDelete(ch.id)} className="text-red-400 hover:text-red-300 text-sm">Дел</button>
+            <span className="flex-1 text-sm text-zinc-200 font-medium">{ch.label}</span>
+            <span className="text-sm text-zinc-400 truncate max-w-[200px]">{ch.value}</span>
+            {ch.isPrimary && <span className="text-xs bg-amber-900/30 text-amber-400 border border-amber-700/30 px-1.5 py-0.5 rounded font-medium">PRIMARY</span>}
+            <button onClick={() => setEditing(ch.id)} className="rounded px-2 py-1 text-xs text-amber-400 hover:bg-zinc-800 hover:text-amber-300 transition-colors">Редагувати</button>
+            <button onClick={() => handleDelete(ch.id)} className="rounded px-2 py-1 text-xs text-red-400 hover:bg-zinc-800 hover:text-red-300 transition-colors">Видалити</button>
           </div>
         )
       )}

@@ -1,109 +1,297 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { updateSiteSetting, deleteSiteSetting } from '@/lib/actions/settings'
 
 interface Props {
   settings: { key: string; valueJson: string | null }[]
 }
 
-export function SiteSettingsList({ settings }: Props) {
-  const [editing, setEditing] = useState<string | null>(null)
-  const [key, setKey] = useState('')
-  const [value, setValue] = useState('')
+/* ── Known key definitions ── */
+
+interface KnownKeyDef {
+  key: string
+  label: string
+  description: string
+  type: 'text' | 'textarea' | 'url' | 'email' | 'json'
+  placeholder?: string
+}
+
+const KNOWN_KEYS: KnownKeyDef[] = [
+  { key: 'site_name', label: 'Название сайта', description: 'Используется в SEO и соцсетях', type: 'text', placeholder: 'Podvarchan.com' },
+  { key: 'site_description', label: 'Описание сайта', description: 'Краткое описание для SEO', type: 'textarea', placeholder: 'Гипнотерапия онлайн' },
+  { key: 'contact_email', label: 'Email для связи', description: 'Основной email контактов', type: 'email', placeholder: 'info@podvarchan.com' },
+  { key: 'social_links', label: 'Ссылки на соцсети', description: 'JSON-массив {platform, url}', type: 'json', placeholder: '[{"platform":"telegram","url":"https://t.me/..."}]' },
+  { key: 'working_hours', label: 'Часы работы', description: 'График работы в читаемом формате', type: 'text', placeholder: 'Пн-Пт 10:00–20:00' },
+  { key: 'analytics_id', label: 'ID аналитики', description: 'Google Analytics / GTM ID', type: 'text', placeholder: 'G-XXXXXXXXXX' },
+  { key: 'turnstile_site_key', label: 'Turnstile Site Key', description: 'Cloudflare Turnstile widget key', type: 'text', placeholder: '0x4AAAA...' },
+]
+
+const KNOWN_MAP = new Map(KNOWN_KEYS.map((k) => [k.key, k]))
+
+/* ── Inline editor for a single setting ── */
+
+function SettingInlineEditor({
+  settingKey,
+  valueJson,
+  onSave,
+  onDelete,
+  onCancel,
+}: {
+  settingKey: string
+  valueJson: string | null
+  onSave: (key: string, value: string) => Promise<void>
+  onDelete: (key: string) => Promise<void>
+  onCancel: () => void
+}) {
+  const [localKey, setLocalKey] = useState(settingKey)
+  const [localValue, setLocalValue] = useState(valueJson ?? '')
   const [loading, setLoading] = useState(false)
+  const isNew = !valueJson && !KNOWN_MAP.has(settingKey) // only show key edit for new custom keys
+  const known = KNOWN_MAP.get(localKey)
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     try {
-      await updateSiteSetting(key, value)
-      setEditing(null)
-      setKey('')
-      setValue('')
-    } catch (err) {
-      console.error(err)
+      await onSave(localKey, localValue)
     } finally {
       setLoading(false)
     }
   }
 
-  async function handleDelete(k: string) {
-    if (!confirm('Видалити налаштування?')) return
-    await deleteSiteSetting(k)
-  }
+  return (
+    <form onSubmit={handleSave} className="space-y-3 rounded-lg border border-zinc-700/50 bg-zinc-800/40 p-4">
+      <div className="flex items-start gap-3">
+        {/* Key field */}
+        <div className="flex-1">
+          <label className="mb-1 block text-xs font-medium text-zinc-500">
+            {known ? (
+              <span className="text-amber-400/80">{known.label}</span>
+            ) : (
+              'Ключ'
+            )}
+          </label>
+          {isNew ? (
+            <input
+              value={localKey}
+              onChange={(e) => setLocalKey(e.target.value)}
+              list="known-keys-suggest"
+              className="w-full rounded-lg border border-zinc-700 bg-zinc-900/60 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
+              placeholder="Введите или выберите ключ"
+              required
+            />
+          ) : (
+            <div className="rounded-lg border border-zinc-700/30 bg-zinc-900/40 px-3 py-2 text-sm text-zinc-300">
+              {localKey}
+              {known && (
+                <span className="ml-2 text-xs text-zinc-600">{known.description}</span>
+              )}
+            </div>
+          )}
+          <datalist id="known-keys-suggest">
+            {KNOWN_KEYS.filter((k) => k.key !== settingKey).map((k) => (
+              <option key={k.key} value={k.key} label={k.label} />
+            ))}
+          </datalist>
+        </div>
+      </div>
 
-  function startEdit(k: string, v: string | null) {
-    setEditing(k)
-    setKey(k)
-    setValue(v ?? '')
-  }
+      {/* Value field */}
+      <div>
+        <label className="mb-1 block text-xs font-medium text-zinc-500">
+          {known ? (known.type === 'json' ? 'Значение (JSON)' : 'Значение') : 'Значение (JSON или текст)'}
+        </label>
+        {known && (known.type === 'text' || known.type === 'email') ? (
+          <input
+            value={localValue}
+            onChange={(e) => setLocalValue(e.target.value)}
+            type={known.type === 'email' ? 'email' : 'text'}
+            className="w-full rounded-lg border border-zinc-700 bg-zinc-900/60 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
+            placeholder={known.placeholder}
+          />
+        ) : (
+          <textarea
+            value={localValue}
+            onChange={(e) => setLocalValue(e.target.value)}
+            rows={known?.type === 'json' ? 4 : 3}
+            className="w-full rounded-lg border border-zinc-700 bg-zinc-900/60 px-3 py-2 text-sm font-mono text-zinc-200 placeholder-zinc-600 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
+            placeholder={known?.placeholder ?? 'Значение'}
+          />
+        )}
+        {known?.type === 'json' && (
+          <p className="mt-1 text-xs text-zinc-600">
+            JSON должен быть валидным — используйте двойные кавычки
+          </p>
+        )}
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center gap-2">
+        <button
+          type="submit"
+          disabled={loading}
+          className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-500 disabled:opacity-50 transition-colors"
+        >
+          {loading ? '…' : 'Зберегти'}
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="rounded-lg px-4 py-2 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-zinc-300 transition-colors"
+        >
+          Скасувати
+        </button>
+        {!isNew && (
+          <button
+            type="button"
+            onClick={() => { if (confirm('Видалити налаштування?')) onDelete(localKey) }}
+            className="ml-auto rounded-lg px-4 py-2 text-sm text-red-400 hover:bg-red-900/30 hover:text-red-300 transition-colors"
+          >
+            Видалити
+          </button>
+        )}
+      </div>
+    </form>
+  )
+}
+
+/* ── Main component ── */
+
+export function SiteSettingsList({ settings }: Props) {
+  const [editing, setEditing] = useState<string | null>(null)
+  const [filter, setFilter] = useState<'all' | 'known' | 'custom'>('all')
+
+  const handleSave = useCallback(async (key: string, value: string) => {
+    await updateSiteSetting(key, value)
+    setEditing(null)
+  }, [])
+
+  const handleDelete = useCallback(async (key: string) => {
+    await deleteSiteSetting(key)
+    setEditing(null)
+  }, [])
+
+  const knownKeys = settings.filter((s) => KNOWN_MAP.has(s.key))
+  const customKeys = settings.filter((s) => !KNOWN_MAP.has(s.key))
+  const displayed = filter === 'all' ? settings : filter === 'known' ? knownKeys : customKeys
 
   return (
-    <div>
-      <table className="w-full text-sm border-collapse">
-        <thead>
-          <tr className="bg-zinc-800/30">
-            <th className="text-left p-2 border border-zinc-700 text-zinc-500 font-medium">Ключ</th>
-            <th className="text-left p-2 border border-zinc-700 text-zinc-500 font-medium">Значення</th>
-            <th className="p-2 border border-zinc-700 text-zinc-500 font-medium w-32">Дії</th>
-          </tr>
-        </thead>
-        <tbody>
-          {settings.map((s) =>
-            editing === s.key ? (
-              <tr key={s.key}>
-                <td colSpan={3} className="p-2 border border-zinc-700">
-                  <form onSubmit={handleSave} className="flex gap-2 items-start">
-                    <input
-                      className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-2 py-1.5 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30 w-48"
-                      value={key}
-                      onChange={(e) => setKey(e.target.value)}
-                      placeholder="Ключ"
-                      required
-                    />
-                    <textarea
-                      className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-2 py-1.5 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30 flex-1"
-                      value={value}
-                      onChange={(e) => setValue(e.target.value)}
-                      placeholder='JSON значение или текст'
-                      rows={2}
-                    />
-                    <button type="submit" disabled={loading} className="rounded-lg bg-amber-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-amber-500">
-                      {loading ? '...' : 'Зберегти'}
-                    </button>
-                    <button type="button" onClick={() => setEditing(null)} className="rounded-lg px-3 py-1.5 text-sm text-zinc-400 hover:bg-zinc-800">
-                      Скасувати
-                    </button>
-                  </form>
-                </td>
-              </tr>
-            ) : (
-              <tr key={s.key}>
-                <td className="p-2 border border-zinc-700 font-mono text-xs text-zinc-400">{s.key}</td>
-                <td className="p-2 border border-zinc-700 max-w-xs truncate text-zinc-300">{s.valueJson}</td>
-                <td className="p-2 border border-zinc-700">
-                  <button onClick={() => startEdit(s.key, s.valueJson)} className="text-amber-400 hover:text-amber-300 mr-2 text-sm">
-                    Редагувати
-                  </button>
-                  <button onClick={() => handleDelete(s.key)} className="text-red-400 hover:text-red-300 text-sm">
-                    Видалити
-                  </button>
-                </td>
-              </tr>
-            )
+    <div className="space-y-4">
+      {/* Filter tabs */}
+      <div className="flex items-center gap-2 border-b border-zinc-800 pb-2">
+        {(['all', 'known', 'custom'] as const).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setFilter(tab)}
+            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+              filter === tab
+                ? 'bg-amber-600/20 text-amber-400'
+                : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50'
+            }`}
+          >
+            {tab === 'all' ? 'Все' : tab === 'known' ? 'Известные' : 'Пользовательские'}
+            <span className="ml-1.5 rounded-full bg-zinc-800 px-1.5 py-0.5 text-[10px]">
+              {tab === 'all' ? settings.length : tab === 'known' ? knownKeys.length : customKeys.length}
+            </span>
+          </button>
+        ))}
+        <div className="flex-1" />
+        {!editing && (
+          <button
+            onClick={() => setEditing('__new__')}
+            className="rounded-lg px-3 py-1.5 text-xs font-medium text-green-400 hover:bg-green-900/20 hover:text-green-300 transition-colors"
+          >
+            + Додати параметр
+          </button>
+        )}
+      </div>
+
+      {/* Known keys section — structured display */}
+      {filter !== 'custom' &&
+        knownKeys.map((s) =>
+          editing === s.key ? (
+            <SettingInlineEditor
+              key={s.key}
+              settingKey={s.key}
+              valueJson={s.valueJson}
+              onSave={handleSave}
+              onDelete={handleDelete}
+              onCancel={() => setEditing(null)}
+            />
+          ) : (
+            <div
+              key={s.key}
+              className="group flex items-start gap-3 rounded-lg border border-zinc-700/50 bg-zinc-900/30 p-3 hover:border-zinc-600/50 transition-colors cursor-pointer"
+              onClick={() => setEditing(s.key)}
+            >
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-amber-400/90">{KNOWN_MAP.get(s.key)?.label ?? s.key}</span>
+                  <span className="rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] font-mono text-zinc-500">{s.key}</span>
+                </div>
+                {KNOWN_MAP.get(s.key)?.description && (
+                  <p className="mt-0.5 text-xs text-zinc-600">{KNOWN_MAP.get(s.key)!.description}</p>
+                )}
+                <div className="mt-1.5 text-sm text-zinc-300 truncate">{s.valueJson}</div>
+              </div>
+              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="rounded bg-amber-600/10 px-1.5 py-0.5 text-[10px] text-amber-500">редагувати</span>
+              </div>
+            </div>
+          ),
+        )}
+
+      {/* Custom keys section — compact table */}
+      {filter !== 'known' &&
+        customKeys.map((s) =>
+          editing === s.key ? (
+            <SettingInlineEditor
+              key={s.key}
+              settingKey={s.key}
+              valueJson={s.valueJson}
+              onSave={handleSave}
+              onDelete={handleDelete}
+              onCancel={() => setEditing(null)}
+            />
+          ) : (
+            <div
+              key={s.key}
+              className="group flex items-start gap-3 rounded-lg border border-zinc-800 bg-zinc-900/20 p-2.5 hover:border-zinc-700/50 transition-colors cursor-pointer"
+              onClick={() => setEditing(s.key)}
+            >
+              <code className="shrink-0 rounded bg-zinc-800/60 px-2 py-1 text-xs text-zinc-400">{s.key}</code>
+              <span className="flex-1 truncate text-sm text-zinc-500">{s.valueJson}</span>
+              <span className="shrink-0 rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] text-zinc-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                ред
+              </span>
+            </div>
+          ),
+        )}
+
+      {/* Empty state */}
+      {displayed.length === 0 && (
+        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-zinc-800 py-8 text-zinc-600">
+          <p className="text-sm">Нет параметров</p>
+          {filter !== 'all' && (
+            <button onClick={() => setFilter('all')} className="mt-2 text-xs text-amber-500 hover:text-amber-400">
+              Показать все
+            </button>
           )}
-          {!editing && (
-            <tr>
-              <td colSpan={3} className="p-2 border border-zinc-700">
-                <button onClick={() => startEdit('', '')} className="text-green-400 hover:text-green-300 text-sm">
-                  + Додати параметр
-                </button>
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+        </div>
+      )}
+
+      {/* New setting editor */}
+      {editing === '__new__' && (
+        <SettingInlineEditor
+          key="__new__"
+          settingKey=""
+          valueJson={null}
+          onSave={handleSave}
+          onDelete={handleDelete}
+          onCancel={() => setEditing(null)}
+        />
+      )}
     </div>
   )
 }
