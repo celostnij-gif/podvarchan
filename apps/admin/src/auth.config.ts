@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs'
 import { getDB } from '@/db'
 import { users } from '@/db/schema/auth'
 import { eq } from 'drizzle-orm'
+import { checkLoginRateLimit, resetLoginRateLimit, getClientIp } from '@/lib/rateLimit'
 
 export default {
   providers: [
@@ -12,11 +13,18 @@ export default {
         email: {},
         password: {},
       },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
         const email = credentials?.email as string | undefined
         const password = credentials?.password as string | undefined
 
         if (!email || !password) return null
+
+        // Rate limit check — 5 attempts per 15 min per IP
+        const ip = request ? getClientIp(request as unknown as Request) : '127.0.0.1'
+        const allowed = await checkLoginRateLimit(ip)
+        if (!allowed) {
+          throw new Error('TOO_MANY_ATTEMPTS')
+        }
 
         const db = getDB()
         const user = await db
@@ -29,6 +37,9 @@ export default {
 
         const isValid = await bcrypt.compare(password, user.passwordHash)
         if (!isValid) return null
+
+        // Successful login — reset counter
+        await resetLoginRateLimit(ip)
 
         return {
           id: user.id,
