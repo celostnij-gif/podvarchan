@@ -1,10 +1,15 @@
 import type { NextAuthConfig } from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
+import { CredentialsSignin } from 'next-auth'
 import bcrypt from 'bcryptjs'
 import { getDB } from '@/db'
 import { users } from '@/db/schema/auth'
 import { eq } from 'drizzle-orm'
 import { checkLoginRateLimit, resetLoginRateLimit, getClientIp } from '@/lib/rateLimit'
+
+class TooManyAttempts extends CredentialsSignin {
+  code = 'TOO_MANY_ATTEMPTS'
+}
 
 export default {
   providers: [
@@ -23,7 +28,7 @@ export default {
         const ip = request ? getClientIp(request as unknown as Request) : '127.0.0.1'
         const allowed = await checkLoginRateLimit(ip)
         if (!allowed) {
-          throw new Error('TOO_MANY_ATTEMPTS')
+          throw new TooManyAttempts()
         }
 
         const db = getDB()

@@ -25,12 +25,14 @@ export default function AdminLoginPage() {
         redirect: false,
       })
 
+      if (result?.code === 'TOO_MANY_ATTEMPTS') {
+        setError('Забагато невдалих спроб. Спробуйте через 15 хвилин.')
+        setLoading(false)
+        return
+      }
+
       if (result?.error) {
-        if (result.error === 'TOO_MANY_ATTEMPTS') {
-          setError('Забагато невдалих спроб. Спробуйте через 15 хвилин.')
-        } else {
-          setError('Невірний email або пароль')
-        }
+        setError('Невірний email або пароль')
         setLoading(false)
         return
       }
