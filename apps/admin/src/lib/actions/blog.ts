@@ -14,6 +14,7 @@ import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
 import { revalidatePublic, revalidateAdmin, getBlogPostRevalidatePaths } from '@/lib/revalidate'
 import { syncRedirectRulesToKv } from './redirects'
+import { requirePublish, assertBilingual, assertMetaPresent } from './ymyl'
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
@@ -163,6 +164,13 @@ export async function createPost(formData: FormData) {
   })
   if (!parsed.success) throw new Error(`Validation error: ${parsed.error.message}`)
   const data = parsed.data
+  if (data.status === 'PUBLISHED') {
+    await requirePublish()
+    const ruTr = data.translations.find((t) => t.locale === 'ru')
+    const ukTr = data.translations.find((t) => t.locale === 'uk')
+    assertBilingual(ruTr, ukTr, 'Post')
+    await assertMetaPresent(ruTr!, db, 'Post')
+  }
   const id = crypto.randomUUID()
   const ts = await now()
   await db.insert(blogPosts).values({
@@ -204,6 +212,18 @@ export async function updatePost(id: string, formData: FormData) {
   })
   if (!parsed.success) throw new Error(`Validation error: ${parsed.error.message}`)
   const data = parsed.data
+  if (data.status === 'PUBLISHED') {
+    await requirePublish()
+    const ruTr = data.translations.find((t) => t.locale === 'ru')
+    const ukTr = data.translations.find((t) => t.locale === 'uk')
+    assertBilingual(ruTr, ukTr, 'Post')
+    const existingRu = await db
+      .select({ seoMetaId: blogPostTranslations.seoMetaId })
+      .from(blogPostTranslations)
+      .where(and(eq(blogPostTranslations.postId, id), eq(blogPostTranslations.locale, 'ru')))
+      .get()
+    await assertMetaPresent({ ...ruTr, seoMetaId: existingRu?.seoMetaId ?? null }, db, 'Post')
+  }
 
   // If post was PUBLISHED and slug changed → insert 301 redirect
   if (existing.status === 'PUBLISHED') {

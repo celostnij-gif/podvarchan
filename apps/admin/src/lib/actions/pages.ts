@@ -11,6 +11,7 @@ import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
 import { revalidatePublic, revalidateAdmin, getPageRevalidatePaths, getHomeRevalidatePaths } from '@/lib/revalidate'
 import { syncRedirectRulesToKv } from './redirects'
+import { requirePublish, assertBilingual, assertMetaPresent } from './ymyl'
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
@@ -112,6 +113,13 @@ export async function createPage(formData: FormData) {
   })
   if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
   const data = parsed.data
+  if (data.status === 'PUBLISHED') {
+    await requirePublish()
+    const ruTr = data.translations.find((t) => t.locale === 'ru')
+    const ukTr = data.translations.find((t) => t.locale === 'uk')
+    assertBilingual(ruTr, ukTr, 'Page')
+    await assertMetaPresent(ruTr!, db, 'Page')
+  }
   const id = crypto.randomUUID()
   const ts = now()
 
@@ -147,6 +155,18 @@ export async function updatePage(id: string, formData: FormData) {
   if (translations.length === 0) throw new Error('Потрібен хоча б один переклад (slug)')
 
   const data = parsed.data
+  if (data.status === 'PUBLISHED') {
+    await requirePublish()
+    const ruTr = data.translations.find((t) => t.locale === 'ru')
+    const ukTr = data.translations.find((t) => t.locale === 'uk')
+    assertBilingual(ruTr, ukTr, 'Page')
+    const existingRu = await db
+      .select({ seoMetaId: pageTranslations.seoMetaId })
+      .from(pageTranslations)
+      .where(and(eq(pageTranslations.pageId, id), eq(pageTranslations.locale, 'ru')))
+      .get()
+    await assertMetaPresent({ ...ruTr, seoMetaId: existingRu?.seoMetaId ?? null }, db, 'Page')
+  }
 
   // If page was PUBLISHED and slug changed → insert 301 redirect
   if (existing.status === 'PUBLISHED') {

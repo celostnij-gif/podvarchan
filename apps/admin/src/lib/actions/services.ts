@@ -11,6 +11,7 @@ import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
 import { revalidatePublic, revalidateAdmin, getServiceRevalidatePaths } from '@/lib/revalidate'
 import { syncRedirectRulesToKv } from './redirects'
+import { requirePublish, assertBilingual, assertMetaPresent } from './ymyl'
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
@@ -101,6 +102,13 @@ export async function createService(formData: FormData) {
   }
 
   const data = parsed.data
+  if (data.status === 'PUBLISHED') {
+    await requirePublish()
+    const ruTr = data.translations.find((t) => t.locale === 'ru')
+    const ukTr = data.translations.find((t) => t.locale === 'uk')
+    assertBilingual(ruTr, ukTr, 'Service')
+    await assertMetaPresent(ruTr!, db, 'Service')
+  }
   const serviceId = crypto.randomUUID()
   const ts = await now()
 
@@ -157,6 +165,18 @@ export async function updateService(id: string, formData: FormData) {
   }
 
   const data = parsed.data
+  if (data.status === 'PUBLISHED') {
+    await requirePublish()
+    const ruTr = data.translations.find((t) => t.locale === 'ru')
+    const ukTr = data.translations.find((t) => t.locale === 'uk')
+    assertBilingual(ruTr, ukTr, 'Service')
+    const existingRu = await db
+      .select({ seoMetaId: serviceTranslations.seoMetaId })
+      .from(serviceTranslations)
+      .where(and(eq(serviceTranslations.serviceId, id), eq(serviceTranslations.locale, 'ru')))
+      .get()
+    await assertMetaPresent({ ...ruTr, seoMetaId: existingRu?.seoMetaId ?? null }, db, 'Service')
+  }
 
   // If service was PUBLISHED and slug changed → insert 301 redirect
   if (existing.status === 'PUBLISHED') {
