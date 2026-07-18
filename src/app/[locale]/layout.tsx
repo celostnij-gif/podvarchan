@@ -7,6 +7,8 @@ import { personSchema, practiceSchema } from '@/lib/schema'
 import { buildCanonical } from '@/lib/seo/metadata'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import { getNavigation } from '@/lib/db/public'
+import type { NavItem } from '@/types'
 
 import { getCloudflareContext } from '@opennextjs/cloudflare'
 
@@ -85,6 +87,11 @@ export default async function LocaleLayout({
   const { locale } = await params
   const messages = await getMessages()
   const t = await getTranslations({ locale, namespace: 'common' })
+  const headerNav: NavItem[] = (await getNavigation('HEADER', locale).catch(() => [])).map((n) => ({
+    href: n.href ?? '#',
+    label: n.label,
+    children: n.children?.map((c) => ({ href: c.href ?? '#', label: c.label })),
+  }))
 
   // GA ID із Cloudflare Worker env (Server Component runtime)
   // try/catch для безпеки при статичній генерації (build time)
@@ -168,7 +175,7 @@ export default async function LocaleLayout({
 
       <DeviceProvider>
         <ToastProvider>
-          <Header />
+          <Header navItems={headerNav.length > 0 ? headerNav : undefined} />
 
           <main id="main-content" className="flex-1 min-h-[calc(100vh-4rem)]">
             <BreadcrumbsProvider>

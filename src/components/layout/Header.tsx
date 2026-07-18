@@ -535,7 +535,7 @@ function Logo({ authorName, authorTitle }: { authorName: string; authorTitle: st
 
 /* ── Header Component ── */
 
-export default function Header() {
+export default function Header({ navItems }: { navItems?: NavItem[] }) {
   const pathname = usePathname()
   const t = useTranslations('common')
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -610,7 +610,7 @@ export default function Header() {
             {/* ── Desktop Navigation ── */}
             <nav className="hidden lg:flex items-center" aria-label={t('nav.main')}>
               <ul className="flex items-center gap-0.5">
-                {MAIN_NAV.filter(item => item.href !== '/search/').map((item) => (
+                {(navItems ?? MAIN_NAV).filter(item => item.href !== '/search/').map((item) => (
                   <DesktopDropdown key={item.href} item={item} pathname={pathname} t={t} />
                 ))}
               </ul>
@@ -749,7 +749,7 @@ export default function Header() {
 
               <nav className="px-4 pb-8" aria-label={t('nav.mobile')}>
                 <div className="space-y-1">
-                  {MAIN_NAV.filter(item => item.href !== '/search/').map((item, idx) => (
+                  {(navItems ?? MAIN_NAV).filter(item => item.href !== '/search/').map((item, idx) => (
                     <MobileNavItem
                       key={item.href}
                       item={item}

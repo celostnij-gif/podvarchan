@@ -1,13 +1,8 @@
 import type { ReactNode } from 'react'
-import { getTranslations, getMessages } from 'next-intl/server'
+import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/routing'
-import { SERVICES } from '@/constants'
+import { getServices, getBlogCategories } from '@/lib/db/public'
 
-/* ── Local type for blog category data from messages ── */
-interface BlogCategoryMsg {
-  slug: string
-  name: string
-}
 
 /* ── Footer Column ── */
 
@@ -34,9 +29,8 @@ function FooterLink({ href, children }: { href: string; children: ReactNode }) {
 
 export default async function Footer({ locale }: { locale: string }) {
   const t = await getTranslations({ locale, namespace: 'common' })
-  const t_services = await getTranslations({ locale, namespace: 'services' })
-  const messages = await getMessages()
-  const blogCategories = (messages?.blogCategories as BlogCategoryMsg[]) ?? []
+  const services = await getServices(locale).catch(() => [])
+  const blogCategories = await getBlogCategories(locale).catch(() => [])
 
   return (
     <footer className="relative border-t border-border-base bg-bg-deep overflow-hidden" role="contentinfo">
@@ -104,9 +98,9 @@ export default async function Footer({ locale }: { locale: string }) {
 
           {/* Services */}
           <FooterColumn title={t('footerServices')}>
-            {SERVICES.slice(0, 5).map((s) => (
+            {services.slice(0, 5).map((s) => (
               <FooterLink key={s.slug} href={`/uslugi/${s.slug}/`}>
-                {t_services(`${s.slug}.shortTitle` as `${string}.shortTitle`)}
+                {s.shortTitle ?? s.title ?? s.slug}
               </FooterLink>
             ))}
             <FooterLink href="/uslugi/">{t('footerAllServices')} <span aria-hidden="true">→</span></FooterLink>
@@ -116,7 +110,7 @@ export default async function Footer({ locale }: { locale: string }) {
           <FooterColumn title={t('footerBlog')}>
             {blogCategories.slice(0, 4).map((cat) => (
               <FooterLink key={cat.slug} href={`/blog/kategoriya/${cat.slug}/`}>
-                {cat.name}
+                {cat.name ?? cat.slug}
               </FooterLink>
             ))}
             <FooterLink href="/blog/">{t('footerAllArticles')} <span aria-hidden="true">→</span></FooterLink>
