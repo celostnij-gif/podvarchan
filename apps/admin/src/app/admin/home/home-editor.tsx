@@ -22,6 +22,7 @@ interface HomeEditorProps {
 
 export function HomeEditor({ pageId, status, tr, hero, sections }: HomeEditorProps) {
   const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
 
   // State for hero editor — синхронизирован с hero пропами при первом рендере
   const [ruHero, setRuHero] = useState({ title: hero.ru.title, subtitle: hero.ru.subtitle, cta: hero.ru.cta })
@@ -38,10 +39,11 @@ export function HomeEditor({ pageId, status, tr, hero, sections }: HomeEditorPro
     formData.set('uk_heroCta', ukHero.cta)
 
     startTransition(async () => {
+      setError(null)
       try {
         await updateHomeContent(formData)
       } catch (err) {
-        alert(`Ошибка: ${err instanceof Error ? err.message : 'Неизвестная ошибка'}`)
+        setError(err instanceof Error ? err.message : 'Неизвестная ошибка')
       }
     })
   }
@@ -127,7 +129,7 @@ export function HomeEditor({ pageId, status, tr, hero, sections }: HomeEditorPro
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-zinc-300 mb-1">Заголовок (title)</label>
+          <label className="block text-sm font-medium text-zinc-300 mb-1">Назва (title)</label>
           <input
             name="uk_title"
             defaultValue={tr.uk?.title ?? ''}
@@ -136,7 +138,7 @@ export function HomeEditor({ pageId, status, tr, hero, sections }: HomeEditorPro
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-zinc-300 mb-1">Краткое описание (excerpt)</label>
+          <label className="block text-sm font-medium text-zinc-300 mb-1">Короткий опис (excerpt)</label>
           <textarea
             name="uk_excerpt"
             defaultValue={tr.uk?.excerpt ?? ''}
@@ -164,6 +166,7 @@ export function HomeEditor({ pageId, status, tr, hero, sections }: HomeEditorPro
       <input type="hidden" name="uk_heroCta" value={ukHero.cta} />
 
       <div className="flex items-center gap-3">
+        {error && <p className="text-sm text-red-400">{error}</p>}
         <button
           type="submit"
           disabled={isPending}

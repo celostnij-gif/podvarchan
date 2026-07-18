@@ -1,18 +1,20 @@
 'use client'
 
 import { createPage } from '@/lib/actions/pages'
-import { useTransition } from 'react'
+import { useTransition, useState } from 'react'
 import Link from 'next/link'
 
 export function PageForm() {
   const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
 
   async function handleSubmit(formData: FormData) {
     startTransition(async () => {
+      setError(null)
       try {
         await createPage(formData)
       } catch (err) {
-        alert(`Ошибка: ${err instanceof Error ? err.message : 'Неизвестная ошибка'}`)
+        setError(err instanceof Error ? err.message : 'Неизвестная ошибка')
       }
     })
   }
@@ -88,7 +90,7 @@ export function PageForm() {
           </div>
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-zinc-300 mb-1">Заголовок</label>
+          <label className="block text-sm font-medium text-zinc-300 mb-1">Назва (title)</label>
           <input
             name="uk_title"
             className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
@@ -96,7 +98,7 @@ export function PageForm() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-zinc-300 mb-1">Краткое описание</label>
+          <label className="block text-sm font-medium text-zinc-300 mb-1">Короткий опис (excerpt)</label>
           <textarea
             name="uk_excerpt"
             rows={3}
@@ -104,6 +106,7 @@ export function PageForm() {
           />
         </div>
       </div>
+        {error && <p className="text-sm text-red-400 mb-4">{error}</p>}
 
       <div className="flex items-center gap-3">
         <button

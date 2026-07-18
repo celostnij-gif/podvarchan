@@ -24,6 +24,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 interface SectionEditorProps {
   pageId: string
@@ -170,11 +171,12 @@ export function SectionEditor({ pageId, sections }: SectionEditorProps) {
   const [showLibrary, setShowLibrary] = useState(false)
   const [sectionOrder, setSectionOrder] = useState<string[] | null>(null)
   const [savingOrder, setSavingOrder] = useState(false)
+  const router = useRouter()
+  const [addError, setAddError] = useState<string | null>(null)
 
-  // Simple refresh by forcing a page reload
-  const refresh = () => {
-    window.location.reload()
-  }
+  const refresh = useCallback(() => {
+    router.refresh()
+  }, [router])
 
   const blockDefs = getAllBlockDefinitions()
 
@@ -214,11 +216,12 @@ export function SectionEditor({ pageId, sections }: SectionEditorProps) {
 
   const handleAddSection = (formData: FormData) => {
     startTransition(async () => {
+      setAddError(null)
       try {
         await addSection(pageId, formData)
         refresh()
       } catch (err) {
-        alert(`Ошибка: ${err instanceof Error ? err.message : 'Неизвестная ошибка'}`)
+        setAddError(err instanceof Error ? err.message : 'Неизвестная ошибка')
       }
     })
   }
@@ -302,6 +305,7 @@ export function SectionEditor({ pageId, sections }: SectionEditorProps) {
             + Добавить
           </button>
         </form>
+        {addError && <p className="text-sm text-red-400 mt-2">{addError}</p>}
 
         {/* Divider */}
         <div className="relative mb-3">

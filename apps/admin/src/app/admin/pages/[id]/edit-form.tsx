@@ -1,7 +1,7 @@
 'use client'
 
 import { updatePageMeta, deletePage } from '@/lib/actions/pages'
-import { useTransition } from 'react'
+import { useTransition, useState } from 'react'
 import Link from 'next/link'
 import { SectionEditor } from './section-editor'
 import type { PageTranslationRecord, PageSectionWithTranslations } from '../types'
@@ -17,16 +17,18 @@ interface EditFormProps {
 
 export function EditPageForm({ page, translations, sections }: EditFormProps) {
   const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
 
   const ru = translations.find((t) => t.locale === 'ru')
   const uk = translations.find((t) => t.locale === 'uk')
 
   async function handleSave(formData: FormData) {
     startTransition(async () => {
+      setError(null)
       try {
         await updatePageMeta(page.id, formData)
       } catch (err) {
-        alert(`Ошибка: ${err instanceof Error ? err.message : 'Неизвестная ошибка'}`)
+        setError(err instanceof Error ? err.message : 'Неизвестная ошибка')
       }
     })
   }
@@ -34,10 +36,11 @@ export function EditPageForm({ page, translations, sections }: EditFormProps) {
   async function handleDelete() {
     if (!confirm('Удалить страницу навсегда?')) return
     startTransition(async () => {
+      setError(null)
       try {
         await deletePage(page.id)
       } catch (err) {
-        alert(`Ошибка: ${err instanceof Error ? err.message : 'Неизвестная ошибка'}`)
+        setError(err instanceof Error ? err.message : 'Неизвестная ошибка')
       }
     })
   }
@@ -113,7 +116,7 @@ export function EditPageForm({ page, translations, sections }: EditFormProps) {
             </div>
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-zinc-300 mb-1">Заголовок</label>
+            <label className="block text-sm font-medium text-zinc-300 mb-1">Назва (title)</label>
             <input
               name="uk_title"
               defaultValue={uk?.title ?? ''}
@@ -121,7 +124,7 @@ export function EditPageForm({ page, translations, sections }: EditFormProps) {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-zinc-300 mb-1">Краткое описание</label>
+            <label className="block text-sm font-medium text-zinc-300 mb-1">Короткий опис (excerpt)</label>
             <textarea
               name="uk_excerpt"
               defaultValue={uk?.excerpt ?? ''}
@@ -130,6 +133,7 @@ export function EditPageForm({ page, translations, sections }: EditFormProps) {
             />
           </div>
         </div>
+        {error && <p className="text-sm text-red-400 mb-4">{error}</p>}
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
