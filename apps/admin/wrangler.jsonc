@@ -49,6 +49,7 @@
   ],
   "vars": {
     "NEXT_PUBLIC_SITE_URL": "https://podvarchan.com",
+    "PUBLIC_SITE_URL": "https://podvarchan.com",
     "AUTH_TRUST_HOST": "true",
     "AUTH_URL": "https://admin.podvarchan.com",
     "NEXT_PUBLIC_TURNSTILE_SITE_KEY": "0x4AAAAAADYZ2z3RysEsBoQu",

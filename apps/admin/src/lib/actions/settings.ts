@@ -9,6 +9,7 @@ import { getCurrentUser } from '@/lib/auth/session'
 import { canManageSettings } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
+import { revalidatePublic, getHomeRevalidatePaths } from '@/lib/revalidate'
 
 async function requireSettings(): Promise<string> {
   const user = await getCurrentUser()
@@ -38,6 +39,7 @@ export async function updateSiteSetting(key: string, valueJson: string) {
   }
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'SETTING', entityId: key, before: existing, after: { valueJson } })
   revalidatePath('/admin/settings')
+  void revalidatePublic({ paths: getHomeRevalidatePaths(), type: 'layout' })
 }
 
 export async function deleteSiteSetting(key: string) {
@@ -48,6 +50,7 @@ export async function deleteSiteSetting(key: string) {
   await db.delete(siteSettings).where(eq(siteSettings.key, key))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'SETTING', entityId: key, before: existing })
   revalidatePath('/admin/settings')
+  void revalidatePublic({ paths: getHomeRevalidatePaths(), type: 'layout' })
 }
 
 /* ── Contact Channels ── */
@@ -97,6 +100,7 @@ export async function saveContactChannel(data: FormData) {
     await writeAuditLog({ userId, action: 'CREATE', entityType: 'CONTACT_CHANNEL', entityId: newId, after: ch })
   }
   revalidatePath('/admin/settings')
+  void revalidatePublic({ paths: getHomeRevalidatePaths(), type: 'layout' })
   redirect('/admin/settings')
 }
 
@@ -108,6 +112,7 @@ export async function deleteContactChannel(id: string) {
   await db.delete(contactChannels).where(eq(contactChannels.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'CONTACT_CHANNEL', entityId: id, before: existing })
   revalidatePath('/admin/settings')
+  void revalidatePublic({ paths: getHomeRevalidatePaths(), type: 'layout' })
   redirect('/admin/settings')
 }
 
@@ -119,4 +124,5 @@ export async function reorderContactChannels(ids: string[]) {
   }
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'CONTACT_CHANNEL', entityId: 'batch', after: { order: ids } })
   revalidatePath('/admin/settings')
+  void revalidatePublic({ paths: getHomeRevalidatePaths(), type: 'layout' })
 }
