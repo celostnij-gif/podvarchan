@@ -6,6 +6,7 @@ import Link from 'next/link'
 import type { ServiceWithTranslations } from './types'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import { TipTapEditor } from '@/components/admin/editor/TipTapEditor'
+import { StructuredListEditor } from '@/components/admin/StructuredListEditor'
 
 interface Props {
   service?: ServiceWithTranslations
@@ -275,52 +276,54 @@ function LocaleTab({
           />
         </div>
         <div className="sm:col-span-2">
-          <label htmlFor={`${locale}_symptomsJson`} className="block text-sm font-medium text-zinc-300">
-            Симптоми (JSON)
-          </label>
-          <textarea
-            id={`${locale}_symptomsJson`}
-            name={`${locale}_symptomsJson`}
-            rows={4}
-            defaultValue={tr(locale, 'symptomsJson')}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm font-mono shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          <StructuredListEditor
+            value={tr(locale, 'symptomsJson')}
+            onChange={(v) => {
+              const input = document.getElementById(`${locale}_symptomsJson_hidden`) as HTMLInputElement
+              if (input) input.value = v
+            }}
+            fields={[
+              { key: 'icon', label: 'Іконка (emoji)' },
+              { key: 'title', label: 'Назва' },
+              { key: 'desc', label: 'Опис' },
+            ]}
+            emptyItem={{ icon: '', title: '', desc: '' }}
+            label="Симптоми"
           />
+          <input type="hidden" id={`${locale}_symptomsJson_hidden`} name={`${locale}_symptomsJson`}
+            defaultValue={tr(locale, 'symptomsJson')} />
         </div>
         <div className="sm:col-span-2">
-          <label htmlFor={`${locale}_processJson`} className="block text-sm font-medium text-zinc-300">
-            Процес (JSON)
-          </label>
-          <textarea
-            id={`${locale}_processJson`}
-            name={`${locale}_processJson`}
-            rows={4}
-            defaultValue={tr(locale, 'processJson')}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm font-mono shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          <StructuredListEditor
+            value={tr(locale, 'faqJson')}
+            onChange={(v) => {
+              const input = document.getElementById(`${locale}_faqJson_hidden`) as HTMLInputElement
+              if (input) input.value = v
+            }}
+            fields={[
+              { key: 'question', label: 'Питання' },
+              { key: 'answer', label: 'Відповідь', type: 'textarea' },
+            ]}
+            emptyItem={{ question: '', answer: '' }}
+            label="FAQ"
           />
-        </div>
-        <div className="sm:col-span-2">
-          <label htmlFor={`${locale}_benefitsJson`} className="block text-sm font-medium text-zinc-300">
-            Переваги (JSON)
-          </label>
-          <textarea
-            id={`${locale}_benefitsJson`}
-            name={`${locale}_benefitsJson`}
-            rows={4}
-            defaultValue={tr(locale, 'benefitsJson')}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm font-mono shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          />
-        </div>
-        <div className="sm:col-span-2">
-          <label htmlFor={`${locale}_faqJson`} className="block text-sm font-medium text-zinc-300">
-            FAQ (JSON)
-          </label>
-          <textarea
-            id={`${locale}_faqJson`}
-            name={`${locale}_faqJson`}
-            rows={4}
-            defaultValue={tr(locale, 'faqJson')}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm font-mono shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          />
+          <input type="hidden" id={`${locale}_faqJson_hidden`} name={`${locale}_faqJson`}
+            defaultValue={tr(locale, 'faqJson')} />
+        <details className="sm:col-span-2">
+          <summary className="cursor-pointer text-xs text-zinc-500 hover:text-zinc-300 select-none">Розширені JSON поля (процес, переваги)</summary>
+          <div className="grid grid-cols-1 gap-4 mt-3">
+            <div>
+              <label className="block text-xs font-medium text-zinc-400 mb-1">Процес (JSON)</label>
+              <textarea name={`${locale}_processJson`} rows={3} defaultValue={tr(locale, 'processJson')}
+                className="w-full rounded border border-zinc-700 bg-zinc-900/50 px-2 py-1 text-xs font-mono text-zinc-200" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-zinc-400 mb-1">Переваги (JSON)</label>
+              <textarea name={`${locale}_benefitsJson`} rows={3} defaultValue={tr(locale, 'benefitsJson')}
+                className="w-full rounded border border-zinc-700 bg-zinc-900/50 px-2 py-1 text-xs font-mono text-zinc-200" />
+            </div>
+          </div>
+        </details>
         </div>
       </div>
     </fieldset>
