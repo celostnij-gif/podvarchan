@@ -2,13 +2,13 @@ import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { BLOG_CATEGORIES } from '@/constants'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
-import { getBlogPostsByCategory } from '@/lib/db/public'
+import { getBlogPostsByCategory, getBlogCategories } from '@/lib/db/public'
 import { ClientBlogCategory } from './client-page'
 import { CATEGORY_SLUG_UK, resolveCategorySlug } from '@/lib/slugMapping'
 import type { BlogPostPublic } from '@/lib/db/public'
 import type { BlogPost } from '@/types'
 
-export const dynamicParams = false
+export const dynamicParams = true
 
 interface BlogCategoryMeta {
   slug: string
@@ -19,8 +19,27 @@ interface BlogCategoryMeta {
   serviceSlug?: string
 }
 
-function getCategoryMeta(cat: string): BlogCategoryMeta | null {
-  const catEntry = BLOG_CATEGORIES.find((c) => c.slug === cat)
+async function resolveCategoryMeta(
+  rawCat: string,
+  locale: string,
+): Promise<BlogCategoryMeta | null> {
+  const canonical = resolveCategorySlug(rawCat)
+  try {
+    const cats = await getBlogCategories(locale)
+    const found = cats.find((c) => c.slug === rawCat || c.slug === canonical)
+    if (found) {
+      return {
+        slug: rawCat,
+        name: found.name ?? rawCat,
+        description: found.description ?? '',
+        metaDescription: found.description ?? '',
+        keywords: [],
+      }
+    }
+  } catch {
+    // D1 unavailable — fall through to const fallback
+  }
+  const catEntry = BLOG_CATEGORIES.find((c) => c.slug === canonical)
   if (!catEntry) return null
   return {
     slug: catEntry.slug,
@@ -46,19 +65,19 @@ interface Props {
 
 export async function generateMetadata({ params }: Props) {
   const { cat: rawCat, locale } = await params
-  const cat = resolveCategorySlug(rawCat)
-  const category = getCategoryMeta(cat)
+  const category = await resolveCategoryMeta(rawCat, locale)
   if (!category) return {}
   const t = await getTranslations({ locale, namespace: 'blog' })
 
-  const ukCat = CATEGORY_SLUG_UK[cat]
+  const canonical = resolveCategorySlug(rawCat)
+  const ukCat = CATEGORY_SLUG_UK[canonical]
   const ukPath = ukCat ? `/blog/kategoriya/${ukCat}` : undefined
 
   return seoMetadata({
     title: `${category.name} — ${t('pageTitle')}`,
     description: category.metaDescription,
     keywords: category.keywords,
-    path: `/blog/kategoriya/${cat}`,
+    path: `/blog/kategoriya/${rawCat}`,
     ukPath,
     locale,
   })
@@ -84,14 +103,13 @@ function mapPost(p: BlogPostPublic): Omit<BlogPost, 'body'> {
 
 export default async function BlogCategoryPage({ params }: Props) {
   const { cat: rawCat, locale } = await params
-  const cat = resolveCategorySlug(rawCat)
-  const category = getCategoryMeta(cat)
+  const category = await resolveCategoryMeta(rawCat, locale)
   if (!category) notFound()
 
   let posts: Omit<BlogPost, 'body'>[] = []
 
   try {
-    const d1Posts = await getBlogPostsByCategory(cat, locale)
+    const d1Posts = await getBlogPostsByCategory(rawCat, locale)
     posts = d1Posts.map(mapPost)
   } catch {
     // D1 unavailable — client shows empty state
