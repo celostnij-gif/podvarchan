@@ -20,13 +20,13 @@ const ToolBtn = ({ action, label, isActive }: { action: () => void; label: strin
   </button>
 )
 
-interface Props {
+interface TipTapEditorProps {
   value: string
   onChange: (html: string, json: string) => void
   placeholder?: string
 }
 
-export function TipTapEditor({ value, onChange, placeholder }: Props) {
+export function TipTapEditor({ value, onChange, placeholder }: TipTapEditorProps) {
   const [showMediaPicker, setShowMediaPicker] = useState(false)
 
   const editor = useEditor({
@@ -78,7 +78,7 @@ export function TipTapEditor({ value, onChange, placeholder }: Props) {
           <ToolBtn action={() => setShowMediaPicker(true)} label="🖼"
             isActive={editor.isActive('image')} />
         </div>
-        <EditorContent editor={editor} className="prose prose-sm max-w-none px-3 py-2 min-h-[300px] text-zinc-200 focus:outline-none [&_.ProseMirror]:text-zinc-200 [&_.ProseMirror]:min-h-[280px] [&_.ProseMirror_p.is-editor-empty:first-child::before]:text-zinc-600" />
+        <EditorContent editor={editor} className="prose prose-sm max-w-none px-3 py-2 min-h-[200px] text-zinc-200 focus:outline-none [&_.ProseMirror]:text-zinc-200 [&_.ProseMirror]:min-h-[180px] [&_.ProseMirror_p.is-editor-empty:first-child::before]:text-zinc-600" />
       </div>
       <MediaPickerDialog
         open={showMediaPicker}

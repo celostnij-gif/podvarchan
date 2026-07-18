@@ -1,9 +1,10 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import Link from 'next/link'
 import { createTestimonial, updateTestimonial } from '@/lib/actions/testimonials'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
+import { TipTapEditor } from '@/components/admin/editor/TipTapEditor'
 
 interface TestimonialItem {
   id: string
@@ -127,14 +128,15 @@ export function TestimonialForm({ testimonial }: Props) {
 }
 
 function LocaleSection({ locale, label, tr }: { locale: string; label: string; tr: (l: string, f: string) => string }) {
+  const [textHtml, setTextHtml] = useState(tr(locale, 'text'))
   return (
     <fieldset className="rounded-lg border border-zinc-700/50 p-4">
       <legend className="text-sm font-semibold text-amber-400">{label}</legend>
       <div className="grid grid-cols-1 gap-4">
         <div>
           <label htmlFor={`${locale}_text`} className="block text-sm font-medium text-zinc-300">Текст відгуку *</label>
-          <textarea id={`${locale}_text`} name={`${locale}_text`} rows={5} defaultValue={tr(locale, 'text')} required
-            className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
+          <input type="hidden" name={`${locale}_text`} value={textHtml} />
+          <TipTapEditor value={textHtml} onChange={(html) => setTextHtml(html)} placeholder="Текст відгуку..." />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>

@@ -22,7 +22,7 @@ export function faqSchema(items: FAQItem[]): Record<string, unknown> {
       name: item.question,
       acceptedAnswer: {
         '@type': 'Answer',
-        text: item.answer,
+        text: item.answer.replace(/<[^>]*>/g, ''),
       },
     })),
   }

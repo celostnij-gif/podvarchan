@@ -68,9 +68,8 @@ export default function FaqAccordion({ question, answer, compact = false }: FaqA
         className="overflow-hidden"
       >
         <div className={compact ? 'px-5 pb-4' : 'px-5 pb-5'}>
-          <p className={`leading-relaxed ${compact ? 'text-sm text-text-secondary' : 'text-sm text-text-muted'}`}>
-            {answer}
-          </p>
+          <p className={`leading-relaxed ${compact ? 'text-sm text-text-secondary' : 'text-sm text-text-muted'}`}
+            dangerouslySetInnerHTML={{ __html: answer }} />
         </div>
       </motion.div>
     </div>

@@ -1,10 +1,11 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import { createService, updateService } from '@/lib/actions/services'
 import Link from 'next/link'
 import type { ServiceWithTranslations } from './types'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
+import { TipTapEditor } from '@/components/admin/editor/TipTapEditor'
 
 interface Props {
   service?: ServiceWithTranslations
@@ -189,6 +190,7 @@ function LocaleTab({
   _service?: ServiceWithTranslations
   tr: (locale: string, field: string) => string
 }) {
+  const [descriptionHtml, setDescriptionHtml] = useState(tr(locale, 'description'))
   const isActive = true
 
   return (
@@ -247,13 +249,8 @@ function LocaleTab({
           <label htmlFor={`${locale}_description`} className="block text-sm font-medium text-zinc-300">
             Опис
           </label>
-          <textarea
-            id={`${locale}_description`}
-            name={`${locale}_description`}
-            rows={3}
-            defaultValue={tr(locale, 'description')}
-            className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
-          />
+          <input type="hidden" name={`${locale}_description`} value={descriptionHtml} />
+          <TipTapEditor value={descriptionHtml} onChange={(html) => setDescriptionHtml(html)} placeholder="Опис послуги..." />
         </div>
         <div>
           <label htmlFor={`${locale}_heroTitle`} className="block text-sm font-medium text-zinc-300">

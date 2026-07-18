@@ -3,7 +3,7 @@
 import { useActionState, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { createPost, updatePost } from '@/lib/actions/blog'
-import { TipTapEditor } from './tiptap-editor'
+import { TipTapEditor } from '@/components/admin/editor/TipTapEditor'
 import { MediaPickerDialog } from '@/components/admin/media/MediaPickerDialog'
 import type { PostWithTranslations } from '../types'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
