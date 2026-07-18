@@ -31,9 +31,17 @@ export default async function EditServicePage(props: Props) {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">
-        Редагувати: {svc.slugBase}
-      </h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">
+          Редагувати: {svc.slugBase}
+        </h1>
+        <a
+          href={`/admin/seo/service/${svc.id}`}
+          className="inline-flex items-center gap-1 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-700 transition-colors"
+        >
+          SEO
+        </a>
+      </div>
       <ServiceForm service={svc} />
     </div>
   )

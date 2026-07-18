@@ -1,5 +1,7 @@
 'use client'
 
+import ViewOnSiteLink from '@/components/admin/ViewOnSiteLink'
+
 import Link from 'next/link'
 import { SortableList } from '@/components/admin/SortableList'
 import { reorderServices } from '@/lib/actions/services'
@@ -60,6 +62,9 @@ export function ServicesSortableList({ items }: { items: ServiceRow[] }) {
               <Link href={`/admin/services/${item.id}`} className="rounded px-2 py-1 text-amber-400 hover:bg-zinc-800">
                 Ред
               </Link>
+              {item.status === 'PUBLISHED' && item.slugBase && (
+                <ViewOnSiteLink href={`/ru/uslugi/${item.slugBase}`} />
+              )}
               <DeleteButton id={item.id} />
             </div>
           </div>

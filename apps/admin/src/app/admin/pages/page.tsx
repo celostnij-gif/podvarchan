@@ -1,3 +1,4 @@
+import ViewOnSiteLink from '@/components/admin/ViewOnSiteLink'
 import { getDB } from '@/db'
 import { pages, pageTranslations } from '@/db/schema/pages'
 import { desc, eq, and, like } from 'drizzle-orm'
@@ -143,6 +144,9 @@ export default async function PagesListPage(props: Props) {
                       >
                         Редагувати
                       </Link>
+                      {page.status === 'PUBLISHED' && slugs.ru && (
+                        <ViewOnSiteLink href={`/ru/${slugs.ru}`} />
+                      )}
                       <DeleteButton pageId={page.id} pageTitle={getLocalizedTitle(page.translations)} />
                     </div>
                   </td>

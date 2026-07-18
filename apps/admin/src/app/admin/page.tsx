@@ -69,8 +69,30 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-zinc-100">Дашборд</h1>
-        <p className="text-sm text-zinc-500 mt-1">Общая статистика сайта</p>
+        <h1 className="text-2xl font-bold text-zinc-100">Панель керування</h1>
+        <p className="text-sm text-zinc-500 mt-1">Загальна статистика сайту</p>
+      </div>
+
+      {/* Quick actions */}
+      <div className="flex flex-wrap gap-2">
+        <Link href="/admin/blog/posts/new" className="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-500 transition-colors">
+          + Новий пост
+        </Link>
+        <Link href="/admin/services/new" className="inline-flex items-center gap-1.5 rounded-lg bg-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-200 hover:bg-zinc-600 transition-colors">
+          + Нова послуга
+        </Link>
+        <Link href="/admin/testimonials/new" className="inline-flex items-center gap-1.5 rounded-lg bg-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-200 hover:bg-zinc-600 transition-colors">
+          + Новий відгук
+        </Link>
+        <Link href="/admin/faq/new" className="inline-flex items-center gap-1.5 rounded-lg bg-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-200 hover:bg-zinc-600 transition-colors">
+          + Нове FAQ
+        </Link>
+        <Link href="/admin/settings" className="inline-flex items-center gap-1.5 rounded-lg bg-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-200 hover:bg-zinc-600 transition-colors">
+          Налаштування
+        </Link>
+        <a href="https://podvarchan.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-lg bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-400 hover:bg-zinc-700 transition-colors">
+          Сайт ↗
+        </a>
       </div>
 
       {!data.dbAvailable && (
@@ -78,12 +100,12 @@ export default async function DashboardPage() {
           <div className="flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-red-200">База данных недоступна</p>
+              <p className="text-sm font-medium text-red-200">База даних недоступна</p>
               {'dbError' in data && data.dbError && (
                 <p className="text-xs text-red-400/70 mt-1 font-mono">{data.dbError}</p>
               )}
               <p className="text-xs text-zinc-500 mt-2">
-                Данные будут загружены после настройки D1 и миграции Server Actions.
+                Дані будуть завантажені після налаштування D1 та міграції Server Actions.
               </p>
             </div>
           </div>
@@ -91,14 +113,14 @@ export default async function DashboardPage() {
       )}
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-        <StatCard icon={Layers} label="Услуги" value={stats.services.total} sub={`${stats.services.published} опубликовано`} href="/admin/services" color="blue" />
-        <StatCard icon={FileText} label="Статьи" value={stats.blog.total} sub={`${stats.blog.published} опубликовано`} href="/admin/blog" color="green" />
-        <StatCard icon={MessageSquare} label="Заявки" value={stats.leads.total} sub={`${stats.leads.new} новых`} href="/admin/leads" color="amber" />
-        <StatCard icon={HelpCircle} label="FAQ" value={stats.faq.total} sub={`${stats.faq.published} опубликовано`} href="/admin/faq" color="purple" />
-        <StatCard icon={Image} label="Медиа" value={stats.media.total} href="/admin/media" color="pink" />
-        <StatCard icon={Users} label="Пользователи" value={stats.users.total} sub={`${stats.users.active} активных`} href="/admin/users" color="indigo" />
-        <StatCard icon={ArrowLeftRight} label="Редиректы" value={stats.redirects.total} href="/admin/redirects" color="zinc" />
-        <StatCard icon={History} label="Ревизии" value={stats.revisions.total} color="zinc" />
+        <StatCard icon={Layers} label="Послуги" value={stats.services.total} sub={`${stats.services.published} опубліковано`} href="/admin/services" color="blue" />
+        <StatCard icon={FileText} label="Пости" value={stats.blog.total} sub={`${stats.blog.published} опубліковано`} href="/admin/blog" color="green" />
+        <StatCard icon={MessageSquare} label="Заявки" value={stats.leads.total} sub={`${stats.leads.new} нових`} href="/admin/leads" color="amber" />
+        <StatCard icon={HelpCircle} label="FAQ" value={stats.faq.total} sub={`${stats.faq.published} опубліковано`} href="/admin/faq" color="purple" />
+        <StatCard icon={Image} label="Медіа" value={stats.media.total} href="/admin/media" color="pink" />
+        <StatCard icon={Users} label="Користувачі" value={stats.users.total} sub={`${stats.users.active} активних`} href="/admin/users" color="indigo" />
+        <StatCard icon={ArrowLeftRight} label="Редиректи" value={stats.redirects.total} href="/admin/redirects" color="zinc" />
+        <StatCard icon={History} label="Ревізії" value={stats.revisions.total} color="zinc" />
       </div>
 
       {/* Recent Leads */}
@@ -107,10 +129,10 @@ export default async function DashboardPage() {
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-semibold text-zinc-200 flex items-center gap-2">
               <MessageSquare className="w-4 h-4" />
-              Последние заявки
+              Останні заявки
             </h2>
             <Link href="/admin/leads" className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-1">
-              Все заявки <ArrowRight className="w-3 h-3" />
+              Всі заявки <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
           <div className="space-y-2">
@@ -137,7 +159,7 @@ export default async function DashboardPage() {
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-semibold text-zinc-200 flex items-center gap-2">
               <Clock className="w-4 h-4" />
-              Черновики
+              Чернетки
             </h2>
           </div>
           <div className="space-y-2">

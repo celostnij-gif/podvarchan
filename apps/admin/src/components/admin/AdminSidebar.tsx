@@ -40,21 +40,21 @@ export interface AdminSidebarProps {
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    label: 'Главная',
+    label: 'Головне',
     items: [
-      { label: 'Дашборд', href: '/admin', icon: LayoutDashboard },
+      { label: 'Панель керування', href: '/admin', icon: LayoutDashboard },
     ],
   },
   {
     label: 'Контент',
     items: [
-      { label: 'Услуги', href: '/admin/services', icon: Puzzle },
+      { label: 'Послуги', href: '/admin/services', icon: Puzzle },
       { label: 'Блог', href: '/admin/blog', icon: FileText },
       { label: 'FAQ', href: '/admin/faq', icon: HelpCircle },
-      { label: 'Отзывы', href: '/admin/testimonials', icon: MessageSquare },
-      { label: 'Главная', href: '/admin/home', icon: FileText },
-      { label: 'Страницы', href: '/admin/pages', icon: FileText },
-      { label: 'Медиа', href: '/admin/media', icon: Image },
+      { label: 'Відгуки', href: '/admin/testimonials', icon: MessageSquare },
+      { label: 'Головна', href: '/admin/home', icon: FileText },
+      { label: 'Сторінки', href: '/admin/pages', icon: FileText },
+      { label: 'Медіа', href: '/admin/media', icon: Image },
     ],
   },
   {
@@ -66,10 +66,10 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Система',
     items: [
-      { label: 'Навигация', href: '/admin/navigation', icon: Navigation },
-      { label: 'Пользователи', href: '/admin/users', icon: Users },
-      { label: 'Настройки', href: '/admin/settings', icon: Settings },
-      { label: 'Редиректы', href: '/admin/redirects', icon: ArrowLeftRight },
+      { label: 'Навігація', href: '/admin/navigation', icon: Navigation },
+      { label: 'Користувачі', href: '/admin/users', icon: Users },
+      { label: 'Налаштування', href: '/admin/settings', icon: Settings },
+      { label: 'Редиректи', href: '/admin/redirects', icon: ArrowLeftRight },
       { label: 'Журнал', href: '/admin/audit', icon: ClipboardList },
     ],
   },

@@ -1,3 +1,4 @@
+import ViewOnSiteLink from '@/components/admin/ViewOnSiteLink'
 import { getDB } from '@/db'
 import { blogPosts, blogPostTranslations, blogCategories, blogCategoryTranslations } from '@/db/schema/blog'
 import { eq, desc, and, like } from 'drizzle-orm'
@@ -110,6 +111,9 @@ export default async function BlogPostsPage(props: Props) {
                   <td className="whitespace-nowrap px-4 py-3 text-right text-sm">
                     <Link href={`/admin/blog/posts/${post.id}`}
                       className="rounded px-2 py-1 text-amber-400 hover:bg-zinc-800">Редагувати</Link>
+                    {post.status === 'PUBLISHED' && ru?.slug && (
+                      <ViewOnSiteLink href={`/ru/blog/${ru.slug}`} />
+                    )}
                   </td>
                 </tr>
               )

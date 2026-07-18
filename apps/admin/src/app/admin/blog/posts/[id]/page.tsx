@@ -104,7 +104,15 @@ export default async function EditPostPage(props: Props) {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Редагувати пост</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">Редагувати пост</h1>
+        <a
+          href={`/admin/seo/blog_post/${post.id}`}
+          className="inline-flex items-center gap-1 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-700 transition-colors"
+        >
+          SEO
+        </a>
+      </div>
       <PostForm
         post={post}
         categories={Array.from(grouped.values())}
