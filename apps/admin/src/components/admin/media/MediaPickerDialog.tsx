@@ -23,8 +23,10 @@ interface Props {
 }
 
 /**
- * Префікс публічного сайту — адмінка не має R2 біндінгу,
- * тому завантажуємо медіа через головний сайт (podvarchan.com).
+ * SITE_URL — публічний origin, з якого віддається медіа (/api/media/...).
+ * Адмінка МАЄ R2-біндінг (MEDIA_R2_BUCKET у wrangler.jsonc) і завантажує
+ * медіа у власний R2 через /api/admin/media/upload (НЕ через головний сайт).
+ * SITE_URL потрібен лише для побудови абсолютних preview-URL у <img>.
  */
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://podvarchan.com'
 

@@ -29,9 +29,10 @@ function formatSize(bytes: number | null): string {
 }
 
 /**
- * Префікс публічного сайту — адмінка не має R2 біндінгу,
- * тому завантажуємо медіа через головний сайт (podvarchan.com).
- * Аналогічно resolveCoverImageUrl() у blog/posts/[id]/page.tsx.
+ * SITE_URL — публічний origin для побудови абсолютних media-URL.
+ * Адмінка МАЄ R2-біндінг (MEDIA_R2_BUCKET) і пише медіа у власний R2;
+ * SITE_URL використовується лише для відображення (аналогічно
+ * resolveCoverImageUrl() у blog/posts/[id]/page.tsx).
  */
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://podvarchan.com'
 
