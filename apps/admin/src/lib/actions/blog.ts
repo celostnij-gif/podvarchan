@@ -48,17 +48,17 @@ const postTranslationSchema = z.object({
   excerpt: z.string().optional().default(''),
   contentJson: z.string().optional().default(''),
   contentHtml: z.string().optional().default(''),
-  tableOfContentsJson: z.string().optional().default(''),
+  tableOfContentsJson: z.string().nullable().default(''),
   faqJson: z.string().optional().default(''),
 })
 
 const postSchema = z.object({
   categoryId: z.string().optional().default(''),
-  authorId: z.string().optional().default(''),
+  authorId: z.string().nullable().default(''),
   coverImageId: z.string().optional().default(''),
   readingMinutes: z.coerce.number().int().min(0).optional().default(0),
   publishedAt: z.string().optional().default(''),
-  scheduledAt: z.string().optional().default(''),
+  scheduledAt: z.string().nullable().default(''),
   status: z.enum(['DRAFT', 'REVIEW', 'SCHEDULED', 'PUBLISHED', 'ARCHIVED']).optional().default('DRAFT'),
   translations: z.array(postTranslationSchema).min(1).max(2),
 })
