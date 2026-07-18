@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/routing'
-import { getServices, getBlogCategories } from '@/lib/db/public'
+import { getServices, getBlogCategories, getContactChannels, getSiteSetting } from '@/lib/db/public'
 
 
 /* ── Footer Column ── */
@@ -31,6 +31,9 @@ export default async function Footer({ locale }: { locale: string }) {
   const t = await getTranslations({ locale, namespace: 'common' })
   const services = await getServices(locale).catch(() => [])
   const blogCategories = await getBlogCategories(locale).catch(() => [])
+  const contactChannels = await getContactChannels().catch(() => [])
+  const rawEmail = await getSiteSetting('contactEmail').catch(() => null)
+  const contactEmail = typeof rawEmail === 'string' ? rawEmail : 'podvarchan@gmail.com'
 
   return (
     <footer className="relative border-t border-border-base bg-bg-deep overflow-hidden" role="contentinfo">
@@ -81,7 +84,7 @@ export default async function Footer({ locale }: { locale: string }) {
                 </svg>
               </a>
               <a
-                href="mailto:podvarchan@gmail.com"
+                href={`mailto:${contactEmail}`}
                 className="w-9 h-9 flex items-center justify-center rounded-full
                            bg-bg-surface/85 border border-border-base text-text-muted
                            hover:text-gold hover:border-gold-muted hover:bg-bg-elevated
@@ -119,12 +122,27 @@ export default async function Footer({ locale }: { locale: string }) {
           {/* Contacts */}
           <FooterColumn title={t('footerContacts')}>
             <FooterLink href="/kontakty/">{t('cta.booking')}</FooterLink>
-            <li>
-              <a href="mailto:podvarchan@gmail.com"
-                 className="text-sm text-text-muted hover:text-green-light transition-colors duration-200">
-                podvarchan@gmail.com
-              </a>
-            </li>
+            {contactChannels.length > 0 ? (
+              contactChannels.map((ch) => (
+                <li key={ch.id}>
+                  <a
+                    href={ch.url ?? (ch.type.toLowerCase() === 'email' ? `mailto:${ch.value ?? ''}` : '#')}
+                    target={ch.url ? '_blank' : undefined}
+                    rel={ch.url ? 'noopener noreferrer' : undefined}
+                    className="text-sm text-text-muted hover:text-green-light transition-colors duration-200"
+                  >
+                    {ch.label ?? ch.value ?? ch.type}
+                  </a>
+                </li>
+              ))
+            ) : (
+              <li>
+                <a href={`mailto:${contactEmail}`}
+                   className="text-sm text-text-muted hover:text-green-light transition-colors duration-200">
+                  {contactEmail}
+                </a>
+              </li>
+            )}
             <FooterLink href="/faq/">FAQ</FooterLink>
             <FooterLink href="/ob-avtore/">{t('nav.about')}</FooterLink>
             <FooterLink href="/metod/">{t('nav.method')}</FooterLink>
