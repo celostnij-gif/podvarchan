@@ -1,28 +1,30 @@
 'use client'
 
-import { useActionState, useState } from 'react'
+import { useActionState, useState, useRef } from 'react'
 import { createService, updateService } from '@/lib/actions/services'
 import Link from 'next/link'
 import type { ServiceWithTranslations } from './types'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import { TipTapEditor } from '@/components/admin/editor/TipTapEditor'
 import { StructuredListEditor } from '@/components/admin/StructuredListEditor'
+import { slugify } from '@/lib/slugify'
 
 interface Props {
   service?: ServiceWithTranslations
 }
 
-const CATEGORIES = [
-  'gipnoterapiya',
-  'trevoga',
-  'podsoznanie',
-  'samosabotazh',
-  'vygoraniye',
-  'neyverennost',
-  'psikhosomatika',
-  'krizis',
-  'tsifrovoy-detoks',
-  'zagalni-zapit',
+const CATEGORY_OPTIONS: { value: string; label: string }[] = [
+  { value: '', label: '— Без категорії —' },
+  { value: 'gipnoterapiya', label: 'Гіпнотерапія' },
+  { value: 'trevoga', label: 'Тривога' },
+  { value: 'podsoznanie', label: 'Підсвідомість' },
+  { value: 'samosabotazh', label: 'Самосаботаж' },
+  { value: 'vygoraniye', label: 'Вигорання' },
+  { value: 'neyverennost', label: 'Невпевненість' },
+  { value: 'psikhosomatika', label: 'Психосоматика' },
+  { value: 'krizis', label: 'Криза' },
+  { value: 'tsifrovoy-detoks', label: 'Цифровий детокс' },
+  { value: 'zagalni-zapit', label: 'Загальний запит' },
 ]
 
 export function ServiceForm({ service }: Props) {
@@ -54,28 +56,35 @@ export function ServiceForm({ service }: Props) {
     return typeof val === 'string' ? val : ''
   }
 
+  // Auto-slug state: derive slugBase and locale slugs from ruTitle on create
+  const [ruTitle, setRuTitle] = useState(tr('ru', 'title'))
+  const [slugBase, setSlugBase] = useState(service?.slugBase ?? '')
+  const [ruSlug, setRuSlug] = useState(tr('ru', 'slug'))
+  const [ukSlug, setUkSlug] = useState(tr('uk', 'slug'))
+  const slugAutoRef = useRef(!isEdit) // only auto-derive on create
+
+  function handleRuTitleChange(v: string) {
+    setRuTitle(v)
+    if (!slugAutoRef.current) return
+    const s = slugify(v)
+    setSlugBase(s)
+    setRuSlug(s)
+    if (!ukSlug) setUkSlug(s)
+  }
+
   return (
     <form action={formAction} className="space-y-6">
       {state?.error && (
         <div className="rounded-lg border border-red-900/50 bg-red-900/20 p-3 text-sm text-red-400">{state.error}</div>
       )}
 
+      {/* Hidden slugBase — managed by state */}
+      <input type="hidden" name="slugBase" value={slugBase} />
+
       {/* Common fields */}
-      <fieldset className="rounded-lg border p-4">
-        <legend className="text-sm font-semibold text-zinc-300">Загальні поля</legend>
+      <fieldset className="rounded-lg border border-zinc-700/50 p-4">
+        <legend className="text-sm font-semibold text-zinc-300">Основні параметри</legend>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div>
-            <label htmlFor="slugBase" className="block text-sm font-medium text-zinc-300">
-              Slug Base *
-            </label>
-            <input
-              id="slugBase"
-              name="slugBase"
-              defaultValue={service?.slugBase ?? ''}
-              required
-              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
-            />
-          </div>
           <div>
             <label htmlFor="icon" className="block text-sm font-medium text-zinc-300">
               Іконка (emoji)
@@ -84,6 +93,7 @@ export function ServiceForm({ service }: Props) {
               id="icon"
               name="icon"
               defaultValue={service?.icon ?? ''}
+              placeholder="🧠"
               className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
             />
           </div>
@@ -97,12 +107,26 @@ export function ServiceForm({ service }: Props) {
               defaultValue={service?.category ?? ''}
               className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
             >
-              <option value="">—</option>
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
+              {CATEGORY_OPTIONS.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
                 </option>
               ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="status" className="block text-sm font-medium text-zinc-300">
+              Статус
+            </label>
+            <select
+              id="status"
+              name="status"
+              defaultValue={service?.status ?? 'DRAFT'}
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
+            >
+              <option value="DRAFT">Чернетка</option>
+              <option value="PUBLISHED">Опубліковано</option>
+              <option value="ARCHIVED">Архів</option>
             </select>
           </div>
           <div>
@@ -120,7 +144,7 @@ export function ServiceForm({ service }: Props) {
           </div>
           <div>
             <label htmlFor="sortOrder" className="block text-sm font-medium text-zinc-300">
-              Порядок сортування
+              Порядок у списку
             </label>
             <input
               id="sortOrder"
@@ -131,39 +155,71 @@ export function ServiceForm({ service }: Props) {
               className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
             />
           </div>
-          <div>
-            <label htmlFor="status" className="block text-sm font-medium text-zinc-300">
-              Статус
-            </label>
-            <select
-              id="status"
-              name="status"
-              defaultValue={service?.status ?? 'DRAFT'}
-              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
-            >
-              <option value="DRAFT">Чернетка</option>
-              <option value="PUBLISHED">Опубліковано</option>
-              <option value="ARCHIVED">Архів</option>
-            </select>
-          </div>
-          <div className="flex items-end">
-            <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+          <div className="flex items-end pb-2">
+            <label className="flex items-center gap-2 text-sm font-medium text-zinc-300 cursor-pointer">
               <input
                 name="featured"
                 type="checkbox"
                 defaultChecked={service?.featured ?? false}
                 className="rounded border-zinc-700 text-amber-500 shadow-sm focus:border-amber-500 focus:ring-amber-500"
               />
-              Рекомендований
+              Рекомендована послуга
             </label>
           </div>
         </div>
+
+        {/* Advanced: show slug fields for edit or as override */}
+        <details className="mt-4" open={isEdit}>
+          <summary className="cursor-pointer select-none text-xs text-zinc-500 hover:text-zinc-300">
+            {isEdit ? 'Slug (URL-ідентифікатор)' : 'Розширені налаштування slug (автоматичний)'}
+          </summary>
+          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div>
+              <label className="block text-xs font-medium text-zinc-400 mb-1">Slug Base (внутрішній)</label>
+              <input
+                value={slugBase}
+                onChange={(e) => { slugAutoRef.current = false; setSlugBase(e.target.value) }}
+                className="w-full rounded border border-zinc-700 bg-zinc-900/50 px-2 py-1.5 text-xs font-mono text-zinc-200 focus:border-amber-500/50 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-zinc-400 mb-1">Slug RU</label>
+              <input
+                value={ruSlug}
+                onChange={(e) => { slugAutoRef.current = false; setRuSlug(e.target.value) }}
+                className="w-full rounded border border-zinc-700 bg-zinc-900/50 px-2 py-1.5 text-xs font-mono text-zinc-200 focus:border-amber-500/50 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-zinc-400 mb-1">Slug UK</label>
+              <input
+                value={ukSlug}
+                onChange={(e) => { slugAutoRef.current = false; setUkSlug(e.target.value) }}
+                className="w-full rounded border border-zinc-700 bg-zinc-900/50 px-2 py-1.5 text-xs font-mono text-zinc-200 focus:border-amber-500/50 focus:outline-none"
+              />
+            </div>
+          </div>
+        </details>
       </fieldset>
 
-      <LocaleTab label="RU" locale="ru" _service={service} tr={tr} />
-      <LocaleTab label="UK" locale="uk" _service={service} tr={tr} />
+      <LocaleTab
+        label="🇷🇺 Російська"
+        locale="ru"
+        tr={tr}
+        titleValue={ruTitle}
+        slugValue={ruSlug}
+        onTitleChange={handleRuTitleChange}
+      />
+      <LocaleTab
+        label="🇺🇦 Українська"
+        locale="uk"
+        tr={tr}
+        titleValue={tr('uk', 'title')}
+        slugValue={ukSlug}
+        onTitleChange={() => {}}
+      />
 
-      <div className="flex items-center gap-3 border-t pt-4">
+      <div className="flex items-center gap-3 border-t border-zinc-800 pt-4">
         <button
           type="submit"
           disabled={pending}
@@ -183,47 +239,54 @@ export function ServiceForm({ service }: Props) {
 function LocaleTab({
   label,
   locale,
-  _service,
   tr,
+  titleValue,
+  slugValue,
+  onTitleChange,
 }: {
   label: string
   locale: string
-  _service?: ServiceWithTranslations
   tr: (locale: string, field: string) => string
+  titleValue: string
+  slugValue: string
+  onTitleChange: (v: string) => void
 }) {
   const [descriptionHtml, setDescriptionHtml] = useState(tr(locale, 'description'))
-  const isActive = true
+
+  // Structured list states
+  const [symptomsJson, setSymptomsJson] = useState(tr(locale, 'symptomsJson'))
+  const [processJson, setProcessJson] = useState(tr(locale, 'processJson'))
+  const [benefitsJson, setBenefitsJson] = useState(tr(locale, 'benefitsJson'))
+  const [faqJson, setFaqJson] = useState(tr(locale, 'faqJson'))
 
   return (
-    <fieldset className={`rounded-lg border p-4 ${isActive ? 'border-zinc-700/50' : ''}`}>
-      <legend className={`text-sm font-semibold ${isActive ? 'text-amber-400' : 'text-zinc-600'}`}>
-        {label} — переклад
-      </legend>
+    <fieldset className="rounded-lg border border-zinc-700/50 p-4">
+      <legend className="text-sm font-semibold text-amber-400">{label}</legend>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div>
-          <label htmlFor={`${locale}_slug`} className="block text-sm font-medium text-zinc-300">
-            Slug *
-          </label>
-          <input
-            id={`${locale}_slug`}
-            name={`${locale}_slug`}
-            defaultValue={tr(locale, 'slug')}
-            required
-            className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
-          />
-        </div>
-        <div>
+
+        {/* Hidden slug — controlled by parent */}
+        <input type="hidden" name={`${locale}_slug`} value={slugValue} />
+
+        <div className="sm:col-span-2">
           <label htmlFor={`${locale}_title`} className="block text-sm font-medium text-zinc-300">
-            Назва *
+            Назва послуги *
           </label>
           <input
             id={`${locale}_title`}
             name={`${locale}_title`}
-            defaultValue={tr(locale, 'title')}
+            defaultValue={titleValue}
+            onChange={(e) => locale === 'ru' && onTitleChange(e.target.value)}
             required
+            placeholder={locale === 'ru' ? 'Наприклад: Гіпнотерапія' : 'Наприклад: Гіпнотерапія (UK)'}
             className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
           />
+          {locale === 'ru' && slugValue && (
+            <p className="mt-1 text-xs text-zinc-500">
+              URL: <span className="font-mono text-zinc-400">/{locale}/uslugi/{slugValue}/</span>
+            </p>
+          )}
         </div>
+
         <div>
           <label htmlFor={`${locale}_shortTitle`} className="block text-sm font-medium text-zinc-300">
             Коротка назва
@@ -235,27 +298,23 @@ function LocaleTab({
             className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
           />
         </div>
+
         <div>
           <label htmlFor={`${locale}_ctaText`} className="block text-sm font-medium text-zinc-300">
-            CTA текст
+            Текст кнопки CTA
           </label>
           <input
             id={`${locale}_ctaText`}
             name={`${locale}_ctaText`}
             defaultValue={tr(locale, 'ctaText')}
+            placeholder="Записатися на консультацію"
             className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
           />
         </div>
-        <div className="sm:col-span-2">
-          <label htmlFor={`${locale}_description`} className="block text-sm font-medium text-zinc-300">
-            Опис
-          </label>
-          <input type="hidden" name={`${locale}_description`} value={descriptionHtml} />
-          <TipTapEditor value={descriptionHtml} onChange={(html) => setDescriptionHtml(html)} placeholder="Опис послуги..." />
-        </div>
+
         <div>
           <label htmlFor={`${locale}_heroTitle`} className="block text-sm font-medium text-zinc-300">
-            Hero заголовок
+            Заголовок hero-секції
           </label>
           <input
             id={`${locale}_heroTitle`}
@@ -264,9 +323,10 @@ function LocaleTab({
             className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
           />
         </div>
+
         <div>
           <label htmlFor={`${locale}_heroSubtitle`} className="block text-sm font-medium text-zinc-300">
-            Hero підзаголовок
+            Підзаголовок hero-секції
           </label>
           <input
             id={`${locale}_heroSubtitle`}
@@ -275,56 +335,76 @@ function LocaleTab({
             className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
           />
         </div>
+
         <div className="sm:col-span-2">
+          <label className="block text-sm font-medium text-zinc-300 mb-1">Опис послуги</label>
+          <input type="hidden" name={`${locale}_description`} value={descriptionHtml} />
+          <TipTapEditor value={descriptionHtml} onChange={(html) => setDescriptionHtml(html)} placeholder="Детальний опис послуги..." />
+        </div>
+
+        {/* Symptoms — visual list */}
+        <div className="sm:col-span-2">
+          <input type="hidden" name={`${locale}_symptomsJson`} value={symptomsJson} />
           <StructuredListEditor
-            value={tr(locale, 'symptomsJson')}
-            onChange={(v) => {
-              const input = document.getElementById(`${locale}_symptomsJson_hidden`) as HTMLInputElement
-              if (input) input.value = v
-            }}
+            value={symptomsJson}
+            onChange={setSymptomsJson}
             fields={[
               { key: 'icon', label: 'Іконка (emoji)' },
-              { key: 'title', label: 'Назва' },
-              { key: 'desc', label: 'Опис' },
+              { key: 'title', label: 'Симптом' },
+              { key: 'desc', label: 'Пояснення' },
             ]}
             emptyItem={{ icon: '', title: '', desc: '' }}
-            label="Симптоми"
+            label="Симптоми / показання"
           />
-          <input type="hidden" id={`${locale}_symptomsJson_hidden`} name={`${locale}_symptomsJson`}
-            defaultValue={tr(locale, 'symptomsJson')} />
         </div>
+
+        {/* Process — visual list */}
         <div className="sm:col-span-2">
+          <input type="hidden" name={`${locale}_processJson`} value={processJson} />
           <StructuredListEditor
-            value={tr(locale, 'faqJson')}
-            onChange={(v) => {
-              const input = document.getElementById(`${locale}_faqJson_hidden`) as HTMLInputElement
-              if (input) input.value = v
-            }}
+            value={processJson}
+            onChange={setProcessJson}
+            fields={[
+              { key: 'step', label: 'Крок (номер або назва)' },
+              { key: 'title', label: 'Заголовок' },
+              { key: 'desc', label: 'Опис', type: 'textarea' },
+            ]}
+            emptyItem={{ step: '', title: '', desc: '' }}
+            label="Процес роботи"
+          />
+        </div>
+
+        {/* Benefits — visual list */}
+        <div className="sm:col-span-2">
+          <input type="hidden" name={`${locale}_benefitsJson`} value={benefitsJson} />
+          <StructuredListEditor
+            value={benefitsJson}
+            onChange={setBenefitsJson}
+            fields={[
+              { key: 'icon', label: 'Іконка (emoji)' },
+              { key: 'title', label: 'Перевага' },
+              { key: 'desc', label: 'Деталі' },
+            ]}
+            emptyItem={{ icon: '', title: '', desc: '' }}
+            label="Переваги"
+          />
+        </div>
+
+        {/* FAQ — visual list */}
+        <div className="sm:col-span-2">
+          <input type="hidden" name={`${locale}_faqJson`} value={faqJson} />
+          <StructuredListEditor
+            value={faqJson}
+            onChange={setFaqJson}
             fields={[
               { key: 'question', label: 'Питання' },
               { key: 'answer', label: 'Відповідь', type: 'textarea' },
             ]}
             emptyItem={{ question: '', answer: '' }}
-            label="FAQ"
+            label="FAQ послуги"
           />
-          <input type="hidden" id={`${locale}_faqJson_hidden`} name={`${locale}_faqJson`}
-            defaultValue={tr(locale, 'faqJson')} />
-        <details className="sm:col-span-2">
-          <summary className="cursor-pointer text-xs text-zinc-500 hover:text-zinc-300 select-none">Розширені JSON поля (процес, переваги)</summary>
-          <div className="grid grid-cols-1 gap-4 mt-3">
-            <div>
-              <label className="block text-xs font-medium text-zinc-400 mb-1">Процес (JSON)</label>
-              <textarea name={`${locale}_processJson`} rows={3} defaultValue={tr(locale, 'processJson')}
-                className="w-full rounded border border-zinc-700 bg-zinc-900/50 px-2 py-1 text-xs font-mono text-zinc-200" />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-zinc-400 mb-1">Переваги (JSON)</label>
-              <textarea name={`${locale}_benefitsJson`} rows={3} defaultValue={tr(locale, 'benefitsJson')}
-                className="w-full rounded border border-zinc-700 bg-zinc-900/50 px-2 py-1 text-xs font-mono text-zinc-200" />
-            </div>
-          </div>
-        </details>
         </div>
+
       </div>
     </fieldset>
   )

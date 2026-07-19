@@ -93,8 +93,8 @@
 
 | Check | Date | Result |
 |---|---|---|
-| `npm run build` (public) | 2026-07-18 | PASS — compiled, 273 static pages |
-| `cd apps/admin && npm run build` | 2026-07-18 | PASS — all routes compiled |
+| `npm run build` (public) | 2026-07-19 | PASS |
+| `cd apps/admin && npm run build` | 2026-07-19 | PASS |
 | `seo-regression.sh` | | |
 | curl home/uslugi/blog/faq | | |
  | revalidate 401 wrong secret | 2026-07-18 | PASS — public returns 401 on wrong secret |

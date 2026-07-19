@@ -163,12 +163,33 @@ export default async function DashboardPage() {
             </h2>
           </div>
           <div className="space-y-2">
-            {data.drafts.map((draft) => (
-              <div key={draft.id} className="p-3 rounded-lg bg-zinc-900/50 border border-zinc-800/50">
-                <p className="text-sm text-zinc-300 truncate">{draft.titleRu ?? draft.id}</p>
-                <p className="text-xs text-zinc-600">{draft.type}</p>
-              </div>
-            ))}
+            {data.drafts.map((draft) => {
+              const typeLabels: Record<string, string> = {
+                service: 'Послуга',
+                blog: 'Пост',
+                page: 'Сторінка',
+                faq: 'FAQ',
+              }
+              const editHrefs: Record<string, string> = {
+                service: `/admin/services/${draft.id}`,
+                blog: `/admin/blog/posts/${draft.id}`,
+                page: `/admin/pages/${draft.id}`,
+                faq: `/admin/faq/${draft.id}`,
+              }
+              return (
+                <Link
+                  key={draft.id}
+                  href={editHrefs[draft.type] ?? '/admin'}
+                  className="flex items-center justify-between p-3 rounded-lg bg-zinc-900/50 border border-zinc-800/50 hover:bg-zinc-800/50 transition-colors"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-zinc-200 truncate">{draft.titleRu ?? draft.id}</p>
+                    <p className="text-xs text-zinc-500">{typeLabels[draft.type] ?? draft.type}</p>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-zinc-600 flex-shrink-0" />
+                </Link>
+              )
+            })}
           </div>
         </section>
       )}

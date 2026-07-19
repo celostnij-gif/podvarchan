@@ -53,7 +53,7 @@ export default function AdminLoginPage() {
             Podvarchan
           </h1>
           <p className="mt-1 text-sm text-zinc-500">
-            Админ-панель
+            Адмін-панель
           </p>
         </div>
 

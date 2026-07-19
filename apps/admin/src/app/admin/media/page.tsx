@@ -50,6 +50,7 @@ export default function MediaListPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [deleting, setDeleting] = useState(false)
   const [deletingSingle, setDeletingSingle] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   const fetchAssets = useCallback(async (q: string) => {
     setLoading(true)
@@ -103,29 +104,31 @@ export default function MediaListPage() {
 
   const handleDeleteSelected = async () => {
     if (selected.size === 0) return
-    if (!confirm(`Удалить ${selected.size} ${selected.size === 1 ? 'файл' : 'файлов'}?`)) return
+    const label = selected.size === 1 ? '1 файл' : `${selected.size} файли(ів)`
+    if (!confirm(`Видалити ${label}? Цю дію не можна скасувати.`)) return
+    setDeleteError(null)
     setDeleting(true)
     try {
       await deleteMediaBatch(Array.from(selected))
       setSelected(new Set())
       await fetchAssets(searchQuery)
     } catch {
-      alert('Ошибка при удалении')
+      setDeleteError('Помилка при видаленні. Спробуйте ще раз.')
     } finally {
       setDeleting(false)
     }
   }
 
   const handleDeleteSingle = async (id: string) => {
-    if (!confirm('Удалить этот файл?')) return
+    if (!confirm('Видалити цей файл? Цю дію не можна скасувати.')) return
+    setDeleteError(null)
     setDeletingSingle(id)
     try {
-      // Use batch delete (no redirect) instead of `deleteMedia` which redirects
       await deleteMediaBatch([id])
       setSelected((prev) => { const n = new Set(prev); n.delete(id); return n })
       await fetchAssets(searchQuery)
     } catch {
-      alert('Ошибка при удалении')
+      setDeleteError('Помилка при видаленні. Спробуйте ще раз.')
     } finally {
       setDeletingSingle(null)
     }
@@ -135,7 +138,7 @@ export default function MediaListPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-zinc-100">Медиатека</h1>
+        <h1 className="text-2xl font-bold text-zinc-100">Медіатека</h1>
         <div className="flex items-center gap-3">
           {selected.size > 0 && (
             <button
@@ -145,14 +148,21 @@ export default function MediaListPage() {
               className="flex items-center gap-1.5 rounded-lg bg-red-600/20 px-3 py-2 text-xs font-medium text-red-400 border border-red-600/30 hover:bg-red-600/30 disabled:opacity-50 transition-colors"
             >
               <Trash2 className="h-3.5 w-3.5" />
-              {deleting ? '...' : `Удалить ${selected.size}`}
+              {deleting ? 'Видалення...' : `Видалити ${selected.size}`}
             </button>
           )}
           <span className="text-sm text-zinc-500">
-            {assets.length} {assets.length === 1 ? 'файл' : 'файлов'}
+            {assets.length} {assets.length === 1 ? 'файл' : 'файлів'}
           </span>
         </div>
       </div>
+
+      {deleteError && (
+        <div className="rounded-lg border border-red-900/50 bg-red-900/20 p-3 text-sm text-red-400 flex items-center justify-between">
+          <span>{deleteError}</span>
+          <button type="button" onClick={() => setDeleteError(null)} className="ml-3 text-red-400 hover:text-red-300">×</button>
+        </div>
+      )}
 
       {/* Upload zone */}
       <UploadZone />
@@ -163,7 +173,7 @@ export default function MediaListPage() {
         <input
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
-          placeholder="Поиск по названию..."
+          placeholder="Пошук за назвою..."
           className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 pl-10 pr-10 py-2 text-sm text-zinc-200 placeholder-zinc-500
                      focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
         />
@@ -189,8 +199,8 @@ export default function MediaListPage() {
               className="rounded border-zinc-700 bg-zinc-800 text-amber-500 focus:ring-amber-500"
             />
             {selected.size > 0
-              ? `Выбрано ${selected.size}`
-              : 'Выбрать все'}
+              ? `Вибрано ${selected.size}`
+              : 'Вибрати всі'}
           </label>
           {searchQuery && (
             <button
@@ -198,7 +208,7 @@ export default function MediaListPage() {
               onClick={() => { setSearchInput(''); setSearchQuery('') }}
               className="text-xs text-zinc-500 hover:text-zinc-300"
             >
-              × Сбросить поиск
+              × Скинути пошук
             </button>
           )}
         </div>
@@ -207,15 +217,15 @@ export default function MediaListPage() {
       {/* Grid */}
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <span className="text-sm text-zinc-500">Загрузка...</span>
+          <span className="text-sm text-zinc-500">Завантаження...</span>
         </div>
       ) : assets.length === 0 ? (
         <div className="rounded-xl border border-dashed border-zinc-800 bg-zinc-900/30 py-16 text-center">
           <Upload className="mx-auto mb-3 h-10 w-10 text-zinc-600" />
           <p className="text-sm text-zinc-500">
             {searchQuery
-              ? 'Ничего не найдено. Попробуйте другой запрос.'
-              : 'Медиатека пуста. Перетащите файлы в зону загрузки выше.'}
+              ? 'Нічого не знайдено. Спробуйте інший запит.'
+              : 'Медіатека порожня. Перетягніть файли у зону завантаження вище.'}
           </p>
         </div>
       ) : (
@@ -256,7 +266,7 @@ export default function MediaListPage() {
                       type="button"
                       onClick={(e) => { e.preventDefault(); handleDeleteSingle(asset.id) }}
                       className="rounded-md bg-black/50 p-1 text-zinc-400 hover:text-red-400 hover:bg-black/70 transition-colors"
-                      title="Удалить"
+                      title="Видалити"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>

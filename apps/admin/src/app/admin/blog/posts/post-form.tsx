@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { createPost, updatePost } from '@/lib/actions/blog'
 import { TipTapEditor } from '@/components/admin/editor/TipTapEditor'
 import { MediaPickerDialog } from '@/components/admin/media/MediaPickerDialog'
+import { StructuredListEditor } from '@/components/admin/StructuredListEditor'
 import type { PostWithTranslations } from '../types'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
@@ -21,6 +22,8 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
   const [ruContentJson, setRuContentJson] = useState(post?.translations.find(t => t.locale === 'ru')?.contentJson ?? '')
   const [ukContentHtml, setUkContentHtml] = useState(post?.translations.find(t => t.locale === 'uk')?.contentHtml ?? '')
   const [ukContentJson, setUkContentJson] = useState(post?.translations.find(t => t.locale === 'uk')?.contentJson ?? '')
+  const [ruFaqJson, setRuFaqJson] = useState(post?.translations.find(t => t.locale === 'ru')?.faqJson ?? '')
+  const [ukFaqJson, setUkFaqJson] = useState(post?.translations.find(t => t.locale === 'uk')?.faqJson ?? '')
   // Display URL for preview/input
   const [coverImageUrl, setCoverImageUrl] = useState(coverImageResolvedUrl ?? post?.coverImageId ?? '')
   // Actual value to store in DB (UUID from media_assets or URL if typed manually)
@@ -34,6 +37,8 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
       formData.set('ru_contentJson', ruContentJson)
       formData.set('uk_contentHtml', ukContentHtml)
       formData.set('uk_contentJson', ukContentJson)
+      formData.set('ru_faqJson', ruFaqJson)
+      formData.set('uk_faqJson', ukFaqJson)
       formData.set('coverImageId', coverImageIdState)
       try {
         if (isEdit) {
@@ -158,8 +163,8 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
       />
 
       {/* RU locale */}
-      <fieldset className="rounded-lg border border-zinc-700/50 p-4">
-        <legend className="text-sm font-semibold text-amber-400">RU — переклад</legend>
+  <fieldset className="rounded-lg border border-zinc-700/50 p-4">
+    <legend className="text-sm font-semibold text-amber-400">🇷🇺 Російська</legend>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="ru_slug" className="block text-sm font-medium text-zinc-300">Slug *</label>
@@ -187,16 +192,24 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
             <input type="hidden" name="ru_contentJson" value={ruContentJson} />
           </div>
           <div className="sm:col-span-2">
-            <label htmlFor="ru_faqJson" className="block text-sm font-medium text-zinc-300">FAQ (JSON)</label>
-            <textarea id="ru_faqJson" name="ru_faqJson" rows={3} defaultValue={tr('ru', 'faqJson')}
-              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm font-mono text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
+            <input type="hidden" name="ru_faqJson" value={ruFaqJson} />
+            <StructuredListEditor
+              value={ruFaqJson}
+              onChange={setRuFaqJson}
+              fields={[
+                { key: 'question', label: 'Питання' },
+                { key: 'answer', label: 'Відповідь', type: 'textarea' },
+              ]}
+              emptyItem={{ question: '', answer: '' }}
+              label="FAQ до статті (RU)"
+            />
           </div>
         </div>
       </fieldset>
 
       {/* UK locale */}
       <fieldset className="rounded-lg border border-zinc-700/50 p-4">
-        <legend className="text-sm font-semibold text-amber-400">UK — переклад</legend>
+        <legend className="text-sm font-semibold text-amber-400">🇺🇦 Українська</legend>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="uk_slug" className="block text-sm font-medium text-zinc-300">Slug *</label>
@@ -224,9 +237,17 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
             <input type="hidden" name="uk_contentJson" value={ukContentJson} />
           </div>
           <div className="sm:col-span-2">
-            <label htmlFor="uk_faqJson" className="block text-sm font-medium text-zinc-300">FAQ (JSON)</label>
-            <textarea id="uk_faqJson" name="uk_faqJson" rows={3} defaultValue={tr('uk', 'faqJson')}
-              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm font-mono text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
+            <input type="hidden" name="uk_faqJson" value={ukFaqJson} />
+            <StructuredListEditor
+              value={ukFaqJson}
+              onChange={setUkFaqJson}
+              fields={[
+                { key: 'question', label: 'Питання' },
+                { key: 'answer', label: 'Відповідь', type: 'textarea' },
+              ]}
+              emptyItem={{ question: '', answer: '' }}
+              label="FAQ до статті (UK)"
+            />
           </div>
         </div>
       </fieldset>
