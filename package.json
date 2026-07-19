@@ -19,7 +19,9 @@
     "db:migrate:local": "wrangler d1 migrations apply podvarchan --local",
     "db:migrate:prod": "wrangler d1 migrations apply podvarchan",
     "db:seed": "cd apps/admin && tsx src/db/seed.ts",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "db:update-ptsr": "wrangler d1 execute podvarchan --file=scripts/update-ptsr-content.sql --remote",
+    "db:update-ptsr:local": "wrangler d1 execute podvarchan --file=scripts/update-ptsr-content.sql --local"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
