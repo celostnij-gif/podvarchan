@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing token' }, { status: 400 })
   }
 
-  const payload = verifyPreviewToken(token)
+  const payload = await verifyPreviewToken(token)
   if (!payload) {
     return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 })
   }
