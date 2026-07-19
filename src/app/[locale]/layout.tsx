@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 import dynamic from 'next/dynamic'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, getTranslations } from 'next-intl/server'
-import { SITE } from '@/constants'
+import { SITE, MAIN_NAV } from '@/constants'
 import { personSchema, practiceSchema } from '@/lib/schema'
 import { buildCanonical } from '@/lib/seo/metadata'
 import Header from '@/components/layout/Header'
@@ -102,6 +102,16 @@ export default async function LocaleLayout({
     label: n.label,
     children: n.children?.map((c) => ({ href: c.href ?? '#', label: c.label })),
   }))
+
+  // Merge children from MAIN_NAV for items where D1 has no children
+  for (const item of headerNav) {
+    if (!item.children || item.children.length === 0) {
+      const mainItem = MAIN_NAV.find(m => m.href === item.href)
+      if (mainItem?.children?.length) {
+        item.children = mainItem.children
+      }
+    }
+  }
 
   // GA ID із Cloudflare Worker env (Server Component runtime)
   // try/catch для безпеки при статичній генерації (build time)
