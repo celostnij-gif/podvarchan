@@ -65,8 +65,9 @@ export default function BlogCard({
               fill
               sizes={featured ? '(max-width: 768px) 100vw, 50vw' : '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw'}
               className="object-cover group-hover:scale-105 transition-transform duration-700"
+              unoptimized={image.startsWith('/api/')}
             />
-            {/* Shimmer overlay on hover — same as CTA buttons */}
+            {/* Shimmer overlay on hover */}
             <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full
                             transition-transform duration-700 bg-gradient-to-r
                             from-transparent via-white/[0.06] to-transparent" aria-hidden="true" />
