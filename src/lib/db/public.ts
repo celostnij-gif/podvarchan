@@ -422,6 +422,37 @@ export async function getBlogPostsByCategory(
   )
 }
 
+/** Extract first <img src="..."> from HTML content. */
+export function extractFirstImageUrl(html: string): string | null {
+  const match = html.match(/<img[^>]+src="([^"]+)"[^>]*>/i)
+  return match ? match[1] : null
+}
+
+/**
+ * Batch fetch first image URL from contentHtml for multiple posts.
+ * One query instead of N+1 lookups.
+ */
+export async function getBlogFirstImageUrls(ids: string[]): Promise<Map<string, string | null>> {
+  if (ids.length === 0) return new Map()
+  const db = getDB()
+  const rows = await db
+    .select({
+      id: blogPostTranslations.postId,
+      contentHtml: blogPostTranslations.contentHtml,
+    })
+    .from(blogPostTranslations)
+    .where(inArray(blogPostTranslations.postId, ids))
+    .all()
+
+  const result = new Map<string, string | null>()
+  for (const row of rows) {
+    if (row.contentHtml) {
+      result.set(row.id, extractFirstImageUrl(row.contentHtml))
+    }
+  }
+  return result
+}
+
 // ─── Pages ───
 
 export async function getPageByType(

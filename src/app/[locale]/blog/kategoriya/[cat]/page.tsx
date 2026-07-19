@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { BLOG_CATEGORIES } from '@/constants'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
-import { getBlogPostsByCategory, getBlogCategories, getMediaPublicUrl } from '@/lib/db/public'
+import { getBlogPostsByCategory, getBlogCategories, getMediaPublicUrl, getBlogFirstImageUrls } from '@/lib/db/public'
 import { getBlogPost } from '@/lib/content'
 import { ClientBlogCategory } from './client-page'
 import { CATEGORY_SLUG_UK, resolveCategorySlug } from '@/lib/slugMapping'
@@ -112,8 +112,8 @@ export default async function BlogCategoryPage({ params }: Props) {
   try {
     const d1Posts = await getBlogPostsByCategory(rawCat, locale)
 
-    // Resolve cover images: D1 media lookup → static content fallback
-    posts = await Promise.all(d1Posts.map(async (p) => {
+    // Resolve cover images: D1 media lookup → static content fallback → first body image
+    const resolvedPosts = await Promise.all(d1Posts.map(async (p) => {
       let imageUrl: string | undefined
       let imageAlt: string | undefined
 
@@ -134,8 +134,20 @@ export default async function BlogCategoryPage({ params }: Props) {
         }
       }
 
-      return mapPost(p, imageUrl, imageAlt)
+      return { post: p, imageUrl, imageAlt }
     }))
+
+    // 3) For posts still without image, extract first <img> from article body (one batch query)
+    const missing = resolvedPosts.filter(r => !r.imageUrl)
+    if (missing.length > 0) {
+      const firstImages = await getBlogFirstImageUrls(missing.map(r => r.post.id))
+      for (const r of missing) {
+        const url = firstImages.get(r.post.id)
+        if (url) r.imageUrl = url
+      }
+    }
+
+    posts = resolvedPosts.map(r => mapPost(r.post, r.imageUrl, r.imageAlt))
   } catch {
     // D1 unavailable — client shows empty state
   }
