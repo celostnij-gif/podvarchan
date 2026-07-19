@@ -59,7 +59,7 @@ export async function signPreviewToken(
   const json = JSON.stringify(data)
   const jsonBytes = encoder.encode(json)
   const key = await getKey()
-  const sig = await crypto.subtle.sign('HMAC', key, jsonBytes)
+  const sig = await crypto.subtle.sign('HMAC', key, jsonBytes as BufferSource)
   return toBase64Url(jsonBytes) + '.' + toBase64Url(new Uint8Array(sig))
 }
 
@@ -75,8 +75,8 @@ export async function verifyPreviewToken(
     const valid = await crypto.subtle.verify(
       'HMAC',
       key,
-      sigBytes,
-      jsonBytes,
+      sigBytes as BufferSource,
+      jsonBytes as BufferSource,
     )
     if (!valid) return null
     const payload: PreviewPayload = JSON.parse(decoder.decode(jsonBytes))
