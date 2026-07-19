@@ -2,7 +2,8 @@ import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { BLOG_CATEGORIES } from '@/constants'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
-import { getBlogPostsByCategory, getBlogCategories } from '@/lib/db/public'
+import { getBlogPostsByCategory, getBlogCategories, getMediaPublicUrl } from '@/lib/db/public'
+import { getBlogPost } from '@/lib/content'
 import { ClientBlogCategory } from './client-page'
 import { CATEGORY_SLUG_UK, resolveCategorySlug } from '@/lib/slugMapping'
 import type { BlogPostPublic } from '@/lib/db/public'
@@ -83,7 +84,7 @@ export async function generateMetadata({ params }: Props) {
   })
 }
 
-function mapPost(p: BlogPostPublic): Omit<BlogPost, 'body'> {
+function mapPost(p: BlogPostPublic, image?: string, imageAlt?: string): Omit<BlogPost, 'body'> {
   return {
     slug: p.slug,
     title: p.title ?? '',
@@ -96,8 +97,8 @@ function mapPost(p: BlogPostPublic): Omit<BlogPost, 'body'> {
     dateModified: '',
     author: '',
     readingTime: p.readingMinutes ?? 5,
-    image: p.coverImageId ?? undefined,
-    imageAlt: undefined,
+    image: image,
+    imageAlt: imageAlt,
   }
 }
 
@@ -110,7 +111,31 @@ export default async function BlogCategoryPage({ params }: Props) {
 
   try {
     const d1Posts = await getBlogPostsByCategory(rawCat, locale)
-    posts = d1Posts.map(mapPost)
+
+    // Resolve cover images: D1 media lookup → static content fallback
+    posts = await Promise.all(d1Posts.map(async (p) => {
+      let imageUrl: string | undefined
+      let imageAlt: string | undefined
+
+      // 1) Try D1 media resolution (coverImageId → public URL)
+      if (p.coverImageId) {
+        const url = await getMediaPublicUrl(p.coverImageId)
+        if (url) {
+          imageUrl = url
+        }
+      }
+
+      // 2) Fallback to static content image
+      if (!imageUrl) {
+        const staticPost = getBlogPost(p.slug, locale)
+        if (staticPost?.image) {
+          imageUrl = staticPost.image
+          imageAlt = staticPost.imageAlt
+        }
+      }
+
+      return mapPost(p, imageUrl, imageAlt)
+    }))
   } catch {
     // D1 unavailable — client shows empty state
   }

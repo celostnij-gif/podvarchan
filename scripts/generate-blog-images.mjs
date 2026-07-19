@@ -312,6 +312,24 @@ const IMAGES = [
     accent: COLORS.accentTeal,
     uk: { title: 'ПТСР у ветеранів', sub: 'після війни' },
   },
+  {
+    slug: 'ptsr-simptomy-i-pomoshch',
+    title: 'ПТСР',
+    sub: 'симптомы и помощь',
+    gradient: ['#1B1B1B', '#2D1B2D'],
+    symbol: '🛡️',
+    accent: COLORS.accentTeal,
+    uk: { title: 'ПТСР', sub: 'симптоми та допомога' },
+  },
+  {
+    slug: 'postoyannaya-trevoga-posle-vojny',
+    title: 'Тревога',
+    sub: 'после пережитого',
+    gradient: ['#2D1B1B', '#3D2525'],
+    symbol: '💔',
+    accent: COLORS.accentRose,
+    uk: { title: 'Тривога', sub: 'після пережитого' },
+  },
   /* ── Anxiety guide ── */
   {
     slug: 'trevoga-polnyy-putevoditel',

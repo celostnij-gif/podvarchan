@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
-import { getBlogPosts, getBlogCategories } from '@/lib/db/public'
+import { getBlogPosts, getBlogCategories, getMediaPublicUrl } from '@/lib/db/public'
+import { getBlogPost } from '@/lib/content'
 import BlogClient from './page-client'
 import type { BlogPostPublic, BlogCategoryPublic } from '@/lib/db/public'
 import type { BlogPostItem, BlogCategoryItem } from './page-client'
@@ -23,7 +24,7 @@ export async function generateMetadata({
   })
 }
 
-function mapPost(p: BlogPostPublic): BlogPostItem {
+function mapPost(p: BlogPostPublic, image?: string, imageAlt?: string): BlogPostItem {
   return {
     slug: p.slug,
     title: p.title ?? '',
@@ -32,8 +33,8 @@ function mapPost(p: BlogPostPublic): BlogPostItem {
     categoryName: p.categoryName ?? '',
     datePublished: p.publishedAt ?? '',
     readingTime: p.readingMinutes ?? 5,
-    image: p.coverImageId ?? undefined,
-    imageAlt: p.title ?? undefined,
+    image: image,
+    imageAlt: imageAlt ?? p.title ?? undefined,
   }
 }
 
@@ -58,7 +59,31 @@ export default async function BlogPage({
       getBlogPosts(locale),
       getBlogCategories(locale),
     ])
-    posts = d1Posts.map(mapPost)
+
+    // Resolve cover images: D1 media lookup → static content fallback
+    posts = await Promise.all(d1Posts.map(async (p) => {
+      let imageUrl: string | undefined
+      let imageAlt: string | undefined
+
+      // 1) Try D1 media resolution (coverImageId → public URL)
+      if (p.coverImageId) {
+        const url = await getMediaPublicUrl(p.coverImageId)
+        if (url) {
+          imageUrl = url
+        }
+      }
+
+      // 2) Fallback to static content image (articles in both D1 and static)
+      if (!imageUrl) {
+        const staticPost = getBlogPost(p.slug, locale)
+        if (staticPost?.image) {
+          imageUrl = staticPost.image
+          imageAlt = staticPost.imageAlt
+        }
+      }
+
+      return mapPost(p, imageUrl, imageAlt)
+    }))
     categories = d1Categories.map(mapCategory)
   } catch {
     // D1 unavailable — fallback to empty, client shows empty state
