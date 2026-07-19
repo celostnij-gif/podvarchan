@@ -7,7 +7,7 @@ import { HomeEditor } from './home-editor'
 import type { PageTranslationRecord, PageSectionRecord, PageSectionTranslationRecord } from '@/app/admin/pages/types'
 
 export const metadata: Metadata = {
-  title: 'Главная',
+  title: 'Головна',
 }
 
 export default async function HomePage() {
@@ -71,8 +71,8 @@ export default async function HomePage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-zinc-100">Редактор главной</h1>
-        <p className="text-sm text-zinc-500 mt-1">Управление содержимым главной страницы</p>
+        <h1 className="text-2xl font-bold text-zinc-100">Редактор головної</h1>
+        <p className="text-sm text-zinc-500 mt-1">Керування вмістом головної сторінки</p>
       </div>
 
       <HomeEditor

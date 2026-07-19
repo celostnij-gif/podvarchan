@@ -18,12 +18,12 @@ interface KnownKeyDef {
 }
 
 const KNOWN_KEYS: KnownKeyDef[] = [
-  { key: 'site_name', label: 'Название сайта', description: 'Используется в SEO и соцсетях', type: 'text', placeholder: 'Podvarchan.com' },
-  { key: 'site_description', label: 'Описание сайта', description: 'Краткое описание для SEO', type: 'textarea', placeholder: 'Гипнотерапия онлайн' },
-  { key: 'contact_email', label: 'Email для связи', description: 'Основной email контактов', type: 'email', placeholder: 'info@podvarchan.com' },
-  { key: 'social_links', label: 'Ссылки на соцсети', description: 'JSON-массив {platform, url}', type: 'json', placeholder: '[{"platform":"telegram","url":"https://t.me/..."}]' },
-  { key: 'working_hours', label: 'Часы работы', description: 'График работы в читаемом формате', type: 'text', placeholder: 'Пн-Пт 10:00–20:00' },
-  { key: 'analytics_id', label: 'ID аналитики', description: 'Google Analytics / GTM ID', type: 'text', placeholder: 'G-XXXXXXXXXX' },
+  { key: 'site_name', label: 'Назва сайту', description: 'Використовується в SEO та соцмережах', type: 'text', placeholder: 'Podvarchan.com' },
+  { key: 'site_description', label: 'Опис сайту', description: 'Короткий опис для SEO', type: 'textarea', placeholder: 'Гіпнотерапія онлайн' },
+  { key: 'contact_email', label: 'Email для зв\'язку', description: 'Основний email контактів', type: 'email', placeholder: 'info@podvarchan.com' },
+  { key: 'social_links', label: 'Посилання на соцмережі', description: 'JSON-масив {platform, url}', type: 'json', placeholder: '[{"platform":"telegram","url":"https://t.me/..."}]' },
+  { key: 'working_hours', label: 'Години роботи', description: 'Графік роботи у зрозумілому форматі', type: 'text', placeholder: 'Пн-Пт 10:00–20:00' },
+  { key: 'analytics_id', label: 'ID аналітики', description: 'Google Analytics / GTM ID', type: 'text', placeholder: 'G-XXXXXXXXXX' },
   { key: 'turnstile_site_key', label: 'Turnstile Site Key', description: 'Cloudflare Turnstile widget key', type: 'text', placeholder: '0x4AAAA...' },
 ]
 
@@ -78,7 +78,7 @@ function SettingInlineEditor({
               onChange={(e) => setLocalKey(e.target.value)}
               list="known-keys-suggest"
               className="w-full rounded-lg border border-zinc-700 bg-zinc-900/60 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
-              placeholder="Введите или выберите ключ"
+              placeholder="Введіть або оберіть ключ"
               required
             />
           ) : (
@@ -100,7 +100,7 @@ function SettingInlineEditor({
       {/* Value field */}
       <div>
         <label className="mb-1 block text-xs font-medium text-zinc-500">
-          {known ? (known.type === 'json' ? 'Значение (JSON)' : 'Значение') : 'Значение (JSON или текст)'}
+          {known ? (known.type === 'json' ? 'Значення (JSON)' : 'Значення') : 'Значення (JSON або текст)'}
         </label>
         {known && (known.type === 'text' || known.type === 'email') ? (
           <input
@@ -121,7 +121,7 @@ function SettingInlineEditor({
         )}
         {known?.type === 'json' && (
           <p className="mt-1 text-xs text-zinc-600">
-            JSON должен быть валидным — используйте двойные кавычки
+            JSON має бути валідним — використовуйте подвійні лапки
           </p>
         )}
       </div>
@@ -190,7 +190,7 @@ export function SiteSettingsList({ settings }: Props) {
                 : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50'
             }`}
           >
-            {tab === 'all' ? 'Все' : tab === 'known' ? 'Известные' : 'Пользовательские'}
+            {tab === 'all' ? 'Всі' : tab === 'known' ? 'Відомі' : 'Власні'}
             <span className="ml-1.5 rounded-full bg-zinc-800 px-1.5 py-0.5 text-[10px]">
               {tab === 'all' ? settings.length : tab === 'known' ? knownKeys.length : customKeys.length}
             </span>
@@ -272,10 +272,10 @@ export function SiteSettingsList({ settings }: Props) {
       {/* Empty state */}
       {displayed.length === 0 && (
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-zinc-800 py-8 text-zinc-600">
-          <p className="text-sm">Нет параметров</p>
+          <p className="text-sm">Параметрів немає</p>
           {filter !== 'all' && (
             <button onClick={() => setFilter('all')} className="mt-2 text-xs text-amber-500 hover:text-amber-400">
-              Показать все
+              Показати всі
             </button>
           )}
         </div>

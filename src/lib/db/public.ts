@@ -7,7 +7,7 @@
  * Free plan: keep each cache-miss path to 1–3 cheap queries (see AGENT.md §2).
  */
 import { eq, and, desc, inArray } from 'drizzle-orm'
-import { canPreview } from '@/lib/preview'
+import { canPreview, canPreviewList } from '@/lib/preview'
 import { getDB } from '@/db'
 import { services, serviceTranslations } from '@/db/schema/services'
 import { faqItems, faqItemTranslations } from '@/db/schema/faq'
@@ -506,9 +506,18 @@ export interface FAQPublic {
   answer: string | null
 }
 
-export async function getFAQs(locale: string, group?: string): Promise<FAQPublic[]> {
+export async function getFAQs(
+  locale: string,
+  group?: string,
+  previewCookie?: string | null,
+): Promise<FAQPublic[]> {
   const db = getDB()
   const loc = locale as 'ru' | 'uk'
+  // Preview: cookie with entityType 'faq_item' (no slug match needed for lists)
+  const preview = previewCookie
+    ? await canPreviewList(previewCookie, 'faq_item').catch(() => false)
+    : false
+
   const rows = await db
     .select()
     .from(faqItems)
@@ -518,7 +527,7 @@ export async function getFAQs(locale: string, group?: string): Promise<FAQPublic
     )
     .where(
       and(
-        eq(faqItems.status, 'PUBLISHED'),
+        preview ? undefined : eq(faqItems.status, 'PUBLISHED'),
         eq(faqItemTranslations.locale, loc),
         ...(group
           ? [eq(faqItems.group, group as 'HOME' | 'GENERAL' | 'SERVICE' | 'CONTACTS')]
@@ -627,9 +636,17 @@ export async function getMediaWithVariants(idOrUrl: string): Promise<MediaWithVa
  * Published testimonials with consent, ordered by sortOrder.
  * Returns max 20 items with locale-specific text.
  */
-export async function getTestimonials(locale: string): Promise<TestimonialPublic[]> {
+export async function getTestimonials(
+  locale: string,
+  previewCookie?: string | null,
+): Promise<TestimonialPublic[]> {
   const db = getDB()
   const loc = locale as 'ru' | 'uk'
+  // Preview: cookie with entityType 'testimonial' (no slug match needed for lists)
+  const preview = previewCookie
+    ? await canPreviewList(previewCookie, 'testimonial').catch(() => false)
+    : false
+
   const rows = await db
     .select({
       id: testimonials.id,
@@ -649,8 +666,8 @@ export async function getTestimonials(locale: string): Promise<TestimonialPublic
     )
     .where(
       and(
-        eq(testimonials.status, 'PUBLISHED'),
-        eq(testimonials.consentConfirmed, true),
+        preview ? undefined : eq(testimonials.status, 'PUBLISHED'),
+        preview ? undefined : eq(testimonials.consentConfirmed, true),
       ),
     )
     .orderBy(testimonials.sortOrder)

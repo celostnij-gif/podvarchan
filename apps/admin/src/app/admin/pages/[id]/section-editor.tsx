@@ -78,7 +78,7 @@ function SectionEditorItem({ section, pageId, onRefresh }: {
   }
 
   const handleDelete = () => {
-    if (!confirm('Удалить секцию?')) return
+    if (!confirm('Видалити секцію?')) return
     startTransition(async () => {
       try {
         await deleteSection(section.section.id)
@@ -136,7 +136,7 @@ function SectionEditorItem({ section, pageId, onRefresh }: {
                 : 'bg-zinc-800 text-zinc-500'
             }`}
           >
-            {section.section.enabled ? 'Вкл' : 'Выкл'}
+            {section.section.enabled ? 'Увімк' : 'Вимк'}
           </button>
           <span className="text-sm font-medium text-zinc-200">
             {def?.icon ?? '🧩'} {def?.label ?? section.section.type}
@@ -149,7 +149,7 @@ function SectionEditorItem({ section, pageId, onRefresh }: {
           disabled={isPending}
           className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50"
         >
-          Удалить
+          Видалити
         </button>
       </div>
 
@@ -221,7 +221,7 @@ export function SectionEditor({ pageId, sections }: SectionEditorProps) {
         await addSection(pageId, formData)
         refresh()
       } catch (err) {
-        setAddError(err instanceof Error ? err.message : 'Неизвестная ошибка')
+        setAddError(err instanceof Error ? err.message : 'Невідома помилка')
       }
     })
   }
@@ -240,17 +240,17 @@ export function SectionEditor({ pageId, sections }: SectionEditorProps) {
   return (
     <div className={`space-y-4 ${savingOrder ? 'pointer-events-none opacity-60' : ''}`}>
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-zinc-100">Секции страницы</h2>
+        <h2 className="text-lg font-semibold text-zinc-100">Секції сторінки</h2>
         {sections.length > 0 && (
           <span className="text-xs text-zinc-600">
-            {sections.length} {sections.length === 1 ? 'секция' : 'секций'}
-            {savingOrder && ' · сохраняем...'}
+            {sections.length} {sections.length === 1 ? 'секція' : 'секцій'}
+            {savingOrder && ' · зберігаємо…'}
           </span>
         )}
       </div>
 
       {sections.length === 0 && (
-        <p className="text-sm text-zinc-500">Секции не добавлены</p>
+        <p className="text-sm text-zinc-500">Секцій ще немає</p>
       )}
 
       {sections.length > 0 && (
@@ -274,7 +274,7 @@ export function SectionEditor({ pageId, sections }: SectionEditorProps) {
       <div className="rounded-lg border border-dashed border-zinc-700/50 bg-zinc-900/20 p-4">
         <form action={handleAddSection} className="flex items-end gap-3 mb-3">
           <div>
-            <label className="block text-xs font-medium text-zinc-400 mb-1">Тип секции</label>
+            <label className="block text-xs font-medium text-zinc-400 mb-1">Тип секції</label>
             <select
               name="type"
               required
@@ -288,7 +288,7 @@ export function SectionEditor({ pageId, sections }: SectionEditorProps) {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-zinc-400 mb-1">Ключ (уникальный)</label>
+            <label className="block text-xs font-medium text-zinc-400 mb-1">Ключ (унікальний)</label>
             <input
               name="key"
               required
@@ -302,7 +302,7 @@ export function SectionEditor({ pageId, sections }: SectionEditorProps) {
             disabled={isPending}
             className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-500 disabled:opacity-50"
           >
-            + Добавить
+            + Додати
           </button>
         </form>
         {addError && <p className="text-sm text-red-400 mt-2">{addError}</p>}
@@ -313,7 +313,7 @@ export function SectionEditor({ pageId, sections }: SectionEditorProps) {
             <div className="w-full border-t border-zinc-800" />
           </div>
           <div className="relative flex justify-center">
-            <span className="bg-zinc-900/20 px-2 text-xs text-zinc-600">или</span>
+            <span className="bg-zinc-900/20 px-2 text-xs text-zinc-600">або</span>
           </div>
         </div>
 
@@ -323,7 +323,7 @@ export function SectionEditor({ pageId, sections }: SectionEditorProps) {
           onClick={() => setShowLibrary(true)}
           className="w-full rounded-lg border border-dashed border-zinc-700/30 py-2.5 text-sm text-zinc-500 hover:border-zinc-600 hover:text-zinc-400 transition-colors flex items-center justify-center gap-2"
         >
-          📚 Из шаблона
+          📚 З шаблону
         </button>
       </div>
 

@@ -28,19 +28,19 @@ export function EditPageForm({ page, translations, sections }: EditFormProps) {
       try {
         await updatePageMeta(page.id, formData)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Неизвестная ошибка')
+        setError(err instanceof Error ? err.message : 'Невідома помилка')
       }
     })
   }
 
   async function handleDelete() {
-    if (!confirm('Удалить страницу навсегда?')) return
+    if (!confirm('Видалити сторінку назавжди?')) return
     startTransition(async () => {
       setError(null)
       try {
         await deletePage(page.id)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Неизвестная ошибка')
+        setError(err instanceof Error ? err.message : 'Невідома помилка')
       }
     })
   }
@@ -50,7 +50,7 @@ export function EditPageForm({ page, translations, sections }: EditFormProps) {
       {/* Meta form */}
       <form action={handleSave} className="max-w-2xl space-y-6">
         <div className="rounded-lg border border-zinc-700/50 bg-zinc-900/40 p-6">
-          <h2 className="mb-4 text-lg font-semibold text-zinc-100">Основное</h2>
+          <h2 className="mb-4 text-lg font-semibold text-zinc-100">Основне</h2>
 
           <div className="mb-4">
             <label className="block text-sm font-medium text-zinc-300 mb-1">Статус</label>
@@ -59,16 +59,16 @@ export function EditPageForm({ page, translations, sections }: EditFormProps) {
               defaultValue={page.status}
               className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
             >
-              <option value="DRAFT">Черновик</option>
-              <option value="PUBLISHED">Опубликовано</option>
-              <option value="ARCHIVED">Архив</option>
+              <option value="DRAFT">Чернетка</option>
+              <option value="PUBLISHED">Опубліковано</option>
+              <option value="ARCHIVED">Архів</option>
             </select>
           </div>
         </div>
 
         {/* Russian */}
         <div className="rounded-lg border border-zinc-700/50 bg-zinc-900/40 p-6">
-          <h2 className="mb-4 text-lg font-semibold text-amber-400">Русский</h2>
+          <h2 className="mb-4 text-lg font-semibold text-amber-400">🇷🇺 Російська</h2>
           <div className="mb-4">
             <label className="block text-sm font-medium text-zinc-300 mb-1">URL (slug)</label>
             <div className="flex items-center gap-1 text-sm text-zinc-500">
@@ -82,7 +82,7 @@ export function EditPageForm({ page, translations, sections }: EditFormProps) {
             </div>
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-zinc-300 mb-1">Заголовок</label>
+            <label className="block text-sm font-medium text-zinc-300 mb-1">Назва</label>
             <input
               name="ru_title"
               defaultValue={ru?.title ?? ''}
@@ -90,7 +90,7 @@ export function EditPageForm({ page, translations, sections }: EditFormProps) {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-zinc-300 mb-1">Краткое описание</label>
+            <label className="block text-sm font-medium text-zinc-300 mb-1">Короткий опис</label>
             <textarea
               name="ru_excerpt"
               defaultValue={ru?.excerpt ?? ''}
@@ -102,7 +102,7 @@ export function EditPageForm({ page, translations, sections }: EditFormProps) {
 
         {/* Ukrainian */}
         <div className="rounded-lg border border-zinc-700/50 bg-zinc-900/40 p-6">
-          <h2 className="mb-4 text-lg font-semibold text-amber-400">Украинский</h2>
+          <h2 className="mb-4 text-lg font-semibold text-blue-400">🇺🇦 Українська</h2>
           <div className="mb-4">
             <label className="block text-sm font-medium text-zinc-300 mb-1">URL (slug)</label>
             <div className="flex items-center gap-1 text-sm text-zinc-500">
@@ -142,7 +142,7 @@ export function EditPageForm({ page, translations, sections }: EditFormProps) {
               disabled={isPending}
               className="rounded-lg bg-amber-600 px-6 py-2 text-sm font-medium text-white hover:bg-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 disabled:opacity-50"
             >
-              {isPending ? 'Сохранение...' : 'Сохранить'}
+              {isPending ? 'Збереження…' : 'Зберегти'}
             </button>
         <Link
           href="/admin/pages"
@@ -157,7 +157,7 @@ export function EditPageForm({ page, translations, sections }: EditFormProps) {
             disabled={isPending}
             className="rounded-lg px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-900/30 disabled:opacity-50"
           >
-            Удалить
+            Видалити
           </button>
         </div>
       </form>

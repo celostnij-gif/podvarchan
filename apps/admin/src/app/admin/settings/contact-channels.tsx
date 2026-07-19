@@ -48,10 +48,10 @@ export function ContactChannelList({ channels }: Props) {
         <input name="url" defaultValue={channel?.url ?? ''} className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-2 py-1.5 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" placeholder="URL" />
         <div className="flex gap-2 items-center">
           <label className="text-xs text-zinc-400">
-            <input type="checkbox" name="isPrimary" defaultChecked={channel?.isPrimary ?? false} className="rounded border-zinc-700 bg-zinc-800 text-amber-500 focus:ring-amber-500" /> Основной
+            <input type="checkbox" name="isPrimary" defaultChecked={channel?.isPrimary ?? false} className="rounded border-zinc-700 bg-zinc-800 text-amber-500 focus:ring-amber-500" /> Основний
           </label>
           <label className="text-xs text-zinc-400">
-            <input type="checkbox" name="isEnabled" defaultChecked={channel?.isEnabled ?? true} className="rounded border-zinc-700 bg-zinc-800 text-amber-500 focus:ring-amber-500" /> Вкл
+            <input type="checkbox" name="isEnabled" defaultChecked={channel?.isEnabled ?? true} className="rounded border-zinc-700 bg-zinc-800 text-amber-500 focus:ring-amber-500" /> Увімк
           </label>
         </div>
         <div className="flex gap-1">

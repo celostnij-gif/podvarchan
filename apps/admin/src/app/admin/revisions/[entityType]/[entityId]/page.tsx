@@ -13,14 +13,18 @@ export default async function RevisionsPage(props: Props) {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Ревізії</h1>
-      <p className="text-sm text-gray-500">
-        Тип: <code className="bg-gray-100 px-1 rounded">{entityType}</code>
-        {' / '}
-        ID: <code className="bg-gray-100 px-1 rounded">{entityId}</code>
-      </p>
+      <div>
+        <h1 className="text-2xl font-bold text-zinc-100">Ревізії</h1>
+        <p className="mt-1 text-sm text-zinc-500">
+          Тип: <code className="rounded bg-zinc-800 px-1.5 py-0.5 text-xs text-zinc-400">{entityType}</code>
+          {' / '}
+          ID: <code className="rounded bg-zinc-800 px-1.5 py-0.5 text-xs text-zinc-400">{entityId.slice(0, 12)}…</code>
+        </p>
+      </div>
       {revisions.length === 0 ? (
-        <p className="text-sm text-gray-400">Немає ревізій для цієї сутності</p>
+        <p className="rounded-lg border border-dashed border-zinc-800 py-8 text-center text-sm text-zinc-500">
+          Ревізій ще немає для цієї сутності
+        </p>
       ) : (
         <RevisionsList revisions={revisions} />
       )}

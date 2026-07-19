@@ -24,7 +24,7 @@ export function HomeEditor({ pageId, status, tr, hero, sections }: HomeEditorPro
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
-  // State for hero editor — синхронизирован с hero пропами при первом рендере
+  // State for hero editor — синхронізований з hero пропами при першому рендері
   const [ruHero, setRuHero] = useState({ title: hero.ru.title, subtitle: hero.ru.subtitle, cta: hero.ru.cta })
   const [ukHero, setUkHero] = useState({ title: hero.uk.title, subtitle: hero.uk.subtitle, cta: hero.uk.cta })
 
@@ -43,7 +43,7 @@ export function HomeEditor({ pageId, status, tr, hero, sections }: HomeEditorPro
       try {
         await updateHomeContent(formData)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Неизвестная ошибка')
+        setError(err instanceof Error ? err.message : 'Невідома помилка')
       }
     })
   }
@@ -52,7 +52,7 @@ export function HomeEditor({ pageId, status, tr, hero, sections }: HomeEditorPro
     <form action={handleSave} className="max-w-3xl space-y-6">
       {/* Status */}
       <div className="rounded-lg border border-zinc-700/50 bg-zinc-900/40 p-6">
-        <h2 className="mb-4 text-lg font-semibold text-zinc-100">Параметры</h2>
+        <h2 className="mb-4 text-lg font-semibold text-zinc-100">Параметри</h2>
         <div>
           <label className="block text-sm font-medium text-zinc-300 mb-1">Статус</label>
           <select
@@ -60,16 +60,16 @@ export function HomeEditor({ pageId, status, tr, hero, sections }: HomeEditorPro
             defaultValue={status}
             className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
           >
-            <option value="DRAFT">Черновик</option>
-            <option value="PUBLISHED">Опубликовано</option>
-            <option value="ARCHIVED">Архив</option>
+            <option value="DRAFT">Чернетка</option>
+            <option value="PUBLISHED">Опубліковано</option>
+            <option value="ARCHIVED">Архів</option>
           </select>
         </div>
       </div>
 
       {/* Russian */}
       <div className="rounded-lg border border-zinc-700/50 bg-zinc-900/40 p-6">
-        <h2 className="mb-4 text-lg font-semibold text-amber-400">🇷🇺 Русский</h2>
+        <h2 className="mb-4 text-lg font-semibold text-amber-400">🇷🇺 Російська</h2>
 
         <div className="mb-4">
           <label className="block text-sm font-medium text-zinc-300 mb-1">URL (slug)</label>
@@ -84,7 +84,7 @@ export function HomeEditor({ pageId, status, tr, hero, sections }: HomeEditorPro
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-zinc-300 mb-1">Заголовок (title)</label>
+          <label className="block text-sm font-medium text-zinc-300 mb-1">Назва (title)</label>
           <input
             name="ru_title"
             defaultValue={tr.ru?.title ?? ''}
@@ -93,7 +93,7 @@ export function HomeEditor({ pageId, status, tr, hero, sections }: HomeEditorPro
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-zinc-300 mb-1">Краткое описание (excerpt)</label>
+          <label className="block text-sm font-medium text-zinc-300 mb-1">Короткий опис (excerpt)</label>
           <textarea
             name="ru_excerpt"
             defaultValue={tr.ru?.excerpt ?? ''}
@@ -157,7 +157,7 @@ export function HomeEditor({ pageId, status, tr, hero, sections }: HomeEditorPro
         </div>
       </div>
 
-      {/* Save — скрытые поля для переноса state в formData */}
+      {/* Save — приховані поля для передачі state у formData */}
       <input type="hidden" name="ru_heroTitle" value={ruHero.title} />
       <input type="hidden" name="ru_heroSubtitle" value={ruHero.subtitle} />
       <input type="hidden" name="ru_heroCta" value={ruHero.cta} />
@@ -172,7 +172,7 @@ export function HomeEditor({ pageId, status, tr, hero, sections }: HomeEditorPro
           disabled={isPending}
           className="rounded-lg bg-amber-600 px-6 py-2 text-sm font-medium text-white hover:bg-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 disabled:opacity-50"
         >
-          {isPending ? 'Сохранение...' : 'Сохранить'}
+          {isPending ? 'Збереження…' : 'Зберегти'}
         </button>
       </div>
 

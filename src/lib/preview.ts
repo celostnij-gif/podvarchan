@@ -97,7 +97,7 @@ export function readPreviewCookie(req: {
 }
 
 /**
- * Check if the preview cookie grants access to a specific entity.
+ * Check if the preview cookie grants access to a specific entity (slug-based).
  */
 export async function canPreview(
   cookie: string | null,
@@ -108,4 +108,18 @@ export async function canPreview(
   const payload = await verifyPreviewToken(cookie)
   if (!payload) return false
   return payload.entityType === entityType && payload.slug === slug
+}
+
+/**
+ * Check if the preview cookie grants access to a list entity type
+ * (FAQ, Testimonials — no slug-based matching).
+ */
+export async function canPreviewList(
+  cookie: string | null,
+  entityType: string,
+): Promise<boolean> {
+  if (!cookie) return false
+  const payload = await verifyPreviewToken(cookie)
+  if (!payload) return false
+  return payload.entityType === entityType
 }
