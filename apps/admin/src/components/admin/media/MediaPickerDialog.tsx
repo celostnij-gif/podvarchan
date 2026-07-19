@@ -85,20 +85,26 @@ export function MediaPickerDialog({ open, onClose, onSelect }: Props) {
   const [externalUrl, setExternalUrl] = useState('')
   const [urlError, setUrlError] = useState<string | null>(null)
 
+  // Fetch assets when dialog opens
   useEffect(() => {
-    if (!open) {
-      // Reset tab state on close
-      setTab('library')
-      return
-    }
-    setQuery('')
+    if (!open) return
     const key = ++fetchKey.current
-    const url = query ? `/api/admin/media/list?q=${encodeURIComponent(query)}` : '/api/admin/media/list'
+    const url = '/api/admin/media/list'
     fetch(url)
       .then(r => r.json())
       .then(data => { if (key === fetchKey.current) setAssets(data.assets ?? []) })
       .catch(() => { if (key === fetchKey.current) setAssets([]) })
-  }, [open, query])
+  }, [open])
+
+  useEffect(() => {
+    if (!open || !query) return
+    const key = ++fetchKey.current
+    const url = `/api/admin/media/list?q=${encodeURIComponent(query)}`
+    fetch(url)
+      .then(r => r.json())
+      .then(data => { if (key === fetchKey.current) setAssets(data.assets ?? []) })
+      .catch(() => { if (key === fetchKey.current) setAssets([]) })
+  }, [query, open])
 
   // Cleanup preview URL on unmount
   useEffect(() => {
