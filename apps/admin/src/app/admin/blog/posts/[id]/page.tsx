@@ -5,6 +5,7 @@ import { mediaAssets } from '@/db/schema/media'
 import { eq } from 'drizzle-orm'
 import { notFound } from 'next/navigation'
 import { PostForm } from '../post-form'
+import PreviewButton from '@/components/admin/PreviewButton'
 import type { PostWithTranslations } from '../../types'
 
 const PUBLIC_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://podvarchan.com'
@@ -106,12 +107,21 @@ export default async function EditPostPage(props: Props) {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Редагувати пост</h1>
-        <a
-          href={`/admin/seo/blog_post/${post.id}`}
-          className="inline-flex items-center gap-1 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-700 transition-colors"
-        >
-          SEO
-        </a>
+        <div className="flex items-center gap-2">
+          {ruSlug && (
+            <PreviewButton
+              entityType="blog_post"
+              slug={ruSlug}
+              publicPath={`/ru/blog/${ruSlug}`}
+            />
+          )}
+          <a
+            href={`/admin/seo/blog_post/${post.id}`}
+            className="inline-flex items-center gap-1 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-700 transition-colors"
+          >
+            SEO
+          </a>
+        </div>
       </div>
       <PostForm
         post={post}

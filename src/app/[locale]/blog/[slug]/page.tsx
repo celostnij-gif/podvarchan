@@ -5,6 +5,7 @@ import { getBlogPostBySlug, getBlogPostsByCategory, getMediaPublicUrl, getMediaW
 import { articleSchema, faqSchema } from '@/lib/schema'
 import { ClientBlogPost } from './client-page'
 import { BLOG_SLUG_UK, resolveBlogSlug } from '@/lib/slugMapping'
+import { cookies } from 'next/headers'
 
 /**
  * Определяет, является ли статья клинической (YMYL) для добавления reviewedBy.
@@ -35,7 +36,8 @@ export async function generateMetadata({ params }: Props) {
   const slug = resolveBlogSlug(rawSlug)
 
   try {
-    const post = await getBlogPostBySlug(slug, locale)
+    const previewCookie = (await cookies()).get('__preview')?.value
+    const post = await getBlogPostBySlug(slug, locale, previewCookie)
     if (post) {
       const ukSlug = BLOG_SLUG_UK[slug]
       const ukPath = ukSlug ? `/blog/${ukSlug}` : undefined
@@ -91,9 +93,9 @@ type BlogPageData =
   | { type: 'fallback'; post: import('@/types').BlogPost; locale: string; relatedPosts: { slug: string; title: string }[]; jsonLd: Record<string, unknown> }
 async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData | null> {
   try {
-    const post = await getBlogPostBySlug(slug, locale)
+    const previewCookie = (await cookies()).get('__preview')?.value
+    const post = await getBlogPostBySlug(slug, locale, previewCookie)
     if (post) {
-      // Related: only same category (SQL), not full blog load with HTML
       let relatedPosts: { slug: string; title: string }[] = []
       if (post.categorySlug) {
         const inCategory = await getBlogPostsByCategory(post.categorySlug, locale)

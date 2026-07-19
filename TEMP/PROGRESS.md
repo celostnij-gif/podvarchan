@@ -79,10 +79,13 @@
 
 ## Етап 8 — Preview
 
-- [ ] 8.1 preview token/cookie
-- [ ] 8.2 public DRAFT gate
-- [ ] 8.3 UI button Переглянути
-- [ ] 8.4 noindex preview
+- [x] 8.1 preview token/cookie — `src/lib/preview.ts` (HMAC-SHA256, Web Crypto), `src/app/api/preview/route.ts` (verify + set cookie), `apps/admin/src/app/api/preview/sign/route.ts` (sign + redirect)
+- [x] 8.2 public DRAFT gate — `isPreviewAllowed` → `canPreview` in all detail helpers (`getServiceBySlug`, `getBlogPostBySlug`, `getPageByType`). List helpers (`getFAQs`, `getTestimonials`) do NOT yet support preview — PreviewButton in FAQ/testimonial forms would be a dead control
+- [x] 8.3 UI button Переглянути — `PreviewButton` component in blog post, service, pages edit forms (not wired in FAQ/testimonials — blocked by 8.2 list helpers gap)
+- [x] 8.4 noindex preview — layout.tsx sets `{ index: false, follow: false }` when `__preview` cookie present
+- [x] Auth on `/api/preview/sign` — added `getCurrentUser()` + `canEditContent()` check (2026-07-19)
+- [ ] FAQ/testimonials PreviewButton — blocked: list helpers need `previewCookie` param first
+- [ ] FAQ/testimonials list helper preview support — `getFAQs`, `getTestimonials` need `previewCookie` param + `isPreviewAllowed` call
 
 ---
 

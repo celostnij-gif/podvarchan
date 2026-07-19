@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getPageByType } from '@/lib/db/public'
+import { cookies } from 'next/headers'
 import MetodClient from './client-page'
 
 type Props = {
@@ -25,8 +26,9 @@ export default async function MetodPage({
   const { locale } = await params
 
   let d1Page: Awaited<ReturnType<typeof getPageByType>> | null = null
+  const previewCookie = (await cookies()).get('__preview')?.value
   try {
-    d1Page = await getPageByType('METHOD', locale)
+    d1Page = await getPageByType('METHOD', locale, previewCookie)
   } catch { /* D1 unavailable */ }
 
   return <MetodClient d1Sections={d1Page?.sections ?? []} />

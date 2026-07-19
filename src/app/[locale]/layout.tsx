@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { cookies } from 'next/headers'
 import dynamic from 'next/dynamic'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, getTranslations } from 'next-intl/server'
@@ -38,6 +39,14 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'common' })
+  // Preview mode: add noindex so Google doesn't index DRAFT content
+  let robots: Metadata['robots'] = undefined
+  try {
+    const jar = await cookies()
+    if (jar.get('__preview')) {
+      robots = { index: false, follow: false }
+    }
+  } catch { /* cookies() unavailable at build time */ }
 
   return {
     title: {
@@ -46,6 +55,7 @@ export async function generateMetadata({
     },
     description: t('siteDescription'),
     metadataBase: new URL(SITE.url),
+    robots,
     alternates: {
       canonical: buildCanonical('/', locale),
       languages: {

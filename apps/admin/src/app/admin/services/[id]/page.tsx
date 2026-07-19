@@ -3,6 +3,7 @@ import { services, serviceTranslations } from '@/db/schema/services'
 import { eq } from 'drizzle-orm'
 import { notFound } from 'next/navigation'
 import { ServiceForm } from '../service-form'
+import PreviewButton from '@/components/admin/PreviewButton'
 import type { ServiceWithTranslations } from '../types'
 
 interface Props {
@@ -35,12 +36,21 @@ export default async function EditServicePage(props: Props) {
         <h1 className="text-2xl font-bold text-gray-900">
           Редагувати: {svc.slugBase}
         </h1>
-        <a
-          href={`/admin/seo/service/${svc.id}`}
-          className="inline-flex items-center gap-1 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-700 transition-colors"
-        >
-          SEO
-        </a>
+        <div className="flex items-center gap-2">
+          {svc.translations.find((t) => t.locale === 'ru')?.slug && (
+            <PreviewButton
+              entityType="service"
+              slug={svc.translations.find((t) => t.locale === 'ru')!.slug}
+              publicPath={`/ru/uslugi/${svc.translations.find((t) => t.locale === 'ru')!.slug}`}
+            />
+          )}
+          <a
+            href={`/admin/seo/service/${svc.id}`}
+            className="inline-flex items-center gap-1 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-700 transition-colors"
+          >
+            SEO
+          </a>
+        </div>
       </div>
       <ServiceForm service={svc} />
     </div>

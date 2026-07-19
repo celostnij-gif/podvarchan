@@ -3,6 +3,7 @@ import { pages, pageTranslations, pageSections, pageSectionTranslations } from '
 import { eq } from 'drizzle-orm'
 import { notFound } from 'next/navigation'
 import { EditPageForm } from './edit-form'
+import PreviewButton from '@/components/admin/PreviewButton'
 import type { PageTranslationRecord, PageSectionRecord, PageSectionTranslationRecord } from '../types'
 
 interface Props {
@@ -49,17 +50,24 @@ export default async function EditPagePage(props: Props) {
   const sections = Array.from(sectionsMap.values())
 
   return (
-    <div className="space-y-8">
+    <div>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-zinc-100">
           Редагувати сторінку
         </h1>
-        <a
-          href={`/admin/seo/page/${page.id}`}
-          className="inline-flex items-center gap-1 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-700 transition-colors"
-        >
-          SEO
-        </a>
+        <div className="flex items-center gap-2">
+          <PreviewButton
+            entityType="page"
+            slug={page.type}
+            publicPath={page.type === 'HOME' ? '/ru/' : `/ru/${translations.find((t) => t.locale === 'ru')?.slug || page.type.toLowerCase()}`}
+          />
+          <a
+            href={`/admin/seo/page/${page.id}`}
+            className="inline-flex items-center gap-1 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-700 transition-colors"
+          >
+            SEO
+          </a>
+        </div>
       </div>
 
       <EditPageForm page={page} translations={translations} sections={sections} />

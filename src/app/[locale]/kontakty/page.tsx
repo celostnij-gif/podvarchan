@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getPageByType, getContactChannels } from '@/lib/db/public'
+import { cookies } from 'next/headers'
 import KontaktyClient from './client-page'
 
 type Props = {
@@ -23,12 +24,13 @@ export default async function KontaktyPage({
   params,
 }: Props) {
   const { locale } = await params
+  const previewCookie = (await cookies()).get('__preview')?.value
 
   let d1Channels: Awaited<ReturnType<typeof getContactChannels>> = []
   let d1Page: Awaited<ReturnType<typeof getPageByType>> | null = null
   try {
     ;[d1Page, d1Channels] = await Promise.all([
-      getPageByType('CONTACTS', locale),
+      getPageByType('CONTACTS', locale, previewCookie),
       getContactChannels(),
     ])
   } catch { /* D1 unavailable */ }

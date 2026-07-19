@@ -6,7 +6,8 @@
  *
  * Free plan: keep each cache-miss path to 1–3 cheap queries (see AGENT.md §2).
  */
-import { eq, and, desc } from 'drizzle-orm'
+import { eq, and, desc, inArray } from 'drizzle-orm'
+import { canPreview } from '@/lib/preview'
 import { getDB } from '@/db'
 import { services, serviceTranslations } from '@/db/schema/services'
 import { faqItems, faqItemTranslations } from '@/db/schema/faq'
@@ -33,6 +34,21 @@ const LIMIT_BLOG_POSTS = 100
 const LIMIT_BLOG_CATEGORIES = 50
 const LIMIT_FAQ = 50
 const LIMIT_PAGE_SECTIONS = 40
+
+// ─── Preview (DRAFT access via __preview cookie) ───
+
+/**
+ * Check if a preview cookie grants access to a specific entity type + slug.
+ * Callers read the cookie themselves (avoids importing next/headers in this module).
+ * Returns false if no cookie / invalid token.
+ */
+async function isPreviewAllowed(
+  previewCookie: string | undefined | null,
+  entityType: string,
+  slug: string,
+): Promise<boolean> {
+  return canPreview(previewCookie ?? null, entityType, slug)
+}
 
 // ─── Types ───
 
@@ -176,16 +192,20 @@ export async function getServices(locale: string): Promise<ServicePublic[]> {
 export async function getServiceBySlug(
   slug: string,
   locale: string,
+  previewCookie?: string,
 ): Promise<ServicePublic | null> {
   const db = getDB()
   const loc = locale as 'ru' | 'uk'
+  const preview = await isPreviewAllowed(previewCookie, 'service', slug)
   const row = await db
     .select()
     .from(services)
     .innerJoin(serviceTranslations, eq(services.id, serviceTranslations.serviceId))
     .where(
       and(
-        eq(services.status, 'PUBLISHED'),
+        preview
+          ? inArray(services.status, ['PUBLISHED', 'DRAFT'])
+          : eq(services.status, 'PUBLISHED'),
         eq(serviceTranslations.locale, loc),
         eq(serviceTranslations.slug, slug),
       ),
@@ -309,9 +329,11 @@ export async function getBlogPosts(locale: string): Promise<BlogPostPublic[]> {
 export async function getBlogPostBySlug(
   slug: string,
   locale: string,
+  previewCookie?: string,
 ): Promise<BlogPostPublic | null> {
   const db = getDB()
   const loc = locale as 'ru' | 'uk'
+  const preview = await isPreviewAllowed(previewCookie, 'blog_post', slug)
   const row = await db
     .select({
       blog_posts: blogPosts,
@@ -334,7 +356,9 @@ export async function getBlogPostBySlug(
     )
     .where(
       and(
-        eq(blogPosts.status, 'PUBLISHED'),
+        preview
+          ? inArray(blogPosts.status, ['PUBLISHED', 'DRAFT'])
+          : eq(blogPosts.status, 'PUBLISHED'),
         eq(blogPostTranslations.locale, loc),
         eq(blogPostTranslations.slug, slug),
       ),
@@ -412,9 +436,11 @@ export async function getPageByType(
     | 'PRICING'
     | 'CUSTOM',
   locale: string,
+  previewCookie?: string,
 ): Promise<PagePublic | null> {
   const db = getDB()
   const loc = locale as 'ru' | 'uk'
+  const preview = await isPreviewAllowed(previewCookie, 'page', type)
   const row = await db
     .select()
     .from(pages)
@@ -422,7 +448,9 @@ export async function getPageByType(
     .where(
       and(
         eq(pages.type, type),
-        eq(pages.status, 'PUBLISHED'),
+        preview
+          ? inArray(pages.status, ['PUBLISHED', 'DRAFT'])
+          : eq(pages.status, 'PUBLISHED'),
         eq(pageTranslations.locale, loc),
       ),
     )

@@ -7,6 +7,7 @@ import type { Testimonial } from '@/types'
 import HomeClient from './home-client'
 import Hero from '@/components/sections/Hero'
 import { getPageByType, getTestimonials, getFAQs } from '@/lib/db/public'
+import { cookies } from 'next/headers'
 
 /* ── Metadata ── */
 
@@ -70,9 +71,10 @@ export default async function HomePage({
   let d1Faqs: Awaited<ReturnType<typeof getFAQs>> = []
   let d1Home: Awaited<ReturnType<typeof getPageByType>> | null = null
 
+  const previewCookie = (await cookies()).get('__preview')?.value
   try {
     ;[d1Home, d1Testimonials, d1Faqs] = await Promise.all([
-      getPageByType('HOME', locale),
+      getPageByType('HOME', locale, previewCookie),
       getTestimonials(locale),
       getFAQs(locale, 'HOME'),
     ])

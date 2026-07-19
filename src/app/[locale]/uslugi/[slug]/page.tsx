@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { getMessages } from 'next-intl/server'
+import { cookies } from 'next/headers'
 import { SERVICES } from '@/constants'
 import { SERVICE_SLUG_UK, resolveServiceSlug } from '@/lib/slugMapping'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
@@ -48,10 +49,11 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props) {
   const { slug: rawSlug, locale } = await params
   const slug = resolveServiceSlug(rawSlug)
+  const previewCookie = (await cookies()).get('__preview')?.value
 
   // Try D1 first
   try {
-    const svc = await getServiceBySlug(slug, locale)
+    const svc = await getServiceBySlug(slug, locale, previewCookie)
     if (svc) {
       const seo = svc.id ? await getSEOMeta('service', svc.id, locale) : null
       const title = seo?.title ?? svc.title
@@ -126,9 +128,11 @@ type ServicePageData =
 // ─── Loader ───
 
 async function loadService(slug: string, locale: string): Promise<ServicePageData | null> {
+  const previewCookie = (await cookies()).get('__preview')?.value
+
   // Try D1 first
   try {
-    const svc = await getServiceBySlug(slug, locale)
+    const svc = await getServiceBySlug(slug, locale, previewCookie)
     if (svc) {
       const seo = svc.id ? await getSEOMeta('service', svc.id, locale) : null
 
