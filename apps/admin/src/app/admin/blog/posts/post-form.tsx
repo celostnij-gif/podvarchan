@@ -187,6 +187,10 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
               value={ruContentHtml}
               onChange={(html, json) => { setRuContentHtml(html); setRuContentJson(json) }}
               placeholder="Введіть текст статті..."
+              onImageSelected={(asset) => {
+                if (asset.publicUrl) setCoverImageUrl(asset.publicUrl)
+                if (asset.id) setCoverImageIdState(asset.id)
+              }}
             />
             <input type="hidden" name="ru_contentHtml" value={ruContentHtml} />
             <input type="hidden" name="ru_contentJson" value={ruContentJson} />
@@ -232,6 +236,10 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
               value={ukContentHtml}
               onChange={(html, json) => { setUkContentHtml(html); setUkContentJson(json) }}
               placeholder="Введіть текст статті..."
+              onImageSelected={(asset) => {
+                if (asset.publicUrl) setCoverImageUrl(asset.publicUrl)
+                if (asset.id) setCoverImageIdState(asset.id)
+              }}
             />
             <input type="hidden" name="uk_contentHtml" value={ukContentHtml} />
             <input type="hidden" name="uk_contentJson" value={ukContentJson} />

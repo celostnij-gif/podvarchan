@@ -20,13 +20,20 @@ const ToolBtn = ({ action, label, isActive }: { action: () => void; label: strin
   </button>
 )
 
+interface MediaAsset {
+  id: string
+  publicUrl: string | null
+}
+
 interface TipTapEditorProps {
   value: string
   onChange: (html: string, json: string) => void
   placeholder?: string
+  /** Called when an image is uploaded from local or selected, to also set as blog cover. */
+  onImageSelected?: (asset: MediaAsset) => void
 }
 
-export function TipTapEditor({ value, onChange, placeholder }: TipTapEditorProps) {
+export function TipTapEditor({ value, onChange, placeholder, onImageSelected }: TipTapEditorProps) {
   const [showMediaPicker, setShowMediaPicker] = useState(false)
 
   const editor = useEditor({
@@ -85,6 +92,8 @@ export function TipTapEditor({ value, onChange, placeholder }: TipTapEditorProps
         onClose={() => setShowMediaPicker(false)}
         onSelect={(asset) => {
           if (asset.publicUrl) insertImage(asset.publicUrl)
+          // Notify parent so it can also set as cover image
+          onImageSelected?.(asset)
           setShowMediaPicker(false)
         }}
       />
