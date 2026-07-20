@@ -17,6 +17,8 @@ export function SeoAuditClient({ rows, avgScore, green, yellow, red }: Props) {
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState('all')
   const [scoreFilter, setScoreFilter] = useState<'all' | 'green' | 'yellow' | 'red'>('all')
+  const [page, setPage] = useState(0)
+  const PAGE_SIZE = 50
 
   const entityTypes = useMemo(() => ['all', ...Array.from(new Set(rows.map((r) => r.entityType)))], [rows])
 
@@ -31,6 +33,9 @@ export function SeoAuditClient({ rows, avgScore, green, yellow, red }: Props) {
       return true
     })
   }, [rows, search, typeFilter, scoreFilter])
+
+  const paged = useMemo(() => filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE), [filtered, page])
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
 
   const total = rows.length
 
@@ -77,12 +82,12 @@ export function SeoAuditClient({ rows, avgScore, green, yellow, red }: Props) {
           type="search"
           placeholder="Пошук за URL або заголовком…"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => { setSearch(e.target.value); setPage(0) }}
           className="flex-1 min-w-[200px] rounded-lg border border-zinc-700 bg-zinc-900/60 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
         />
         <select
           value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
+          onChange={(e) => { setTypeFilter(e.target.value); setPage(0) }}
           className="rounded-lg border border-zinc-700 bg-zinc-900/60 px-3 py-2 text-sm text-zinc-200 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
         >
           {entityTypes.map((t) => (
@@ -91,7 +96,7 @@ export function SeoAuditClient({ rows, avgScore, green, yellow, red }: Props) {
         </select>
         {(search || typeFilter !== 'all' || scoreFilter !== 'all') && (
           <button
-            onClick={() => { setSearch(''); setTypeFilter('all'); setScoreFilter('all') }}
+            onClick={() => { setSearch(''); setTypeFilter('all'); setScoreFilter('all'); setPage(0) }}
             className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
           >
             Скинути фільтри
@@ -114,13 +119,13 @@ export function SeoAuditClient({ rows, avgScore, green, yellow, red }: Props) {
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-800">
-            {filtered.length === 0 ? (
+            {paged.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-4 py-8 text-center text-sm text-zinc-500">
                   За вашим запитом нічого не знайдено
                 </td>
               </tr>
-            ) : filtered.map((row) => (
+            ) : paged.map((row) => (
               <tr key={row.url} className="hover:bg-zinc-800/30">
                 <td className="px-4 py-3">
                   <a
@@ -163,6 +168,31 @@ export function SeoAuditClient({ rows, avgScore, green, yellow, red }: Props) {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="mt-4 flex items-center justify-between">
+          <span className="text-xs text-zinc-500">
+            Сторінка {page + 1} з {totalPages}
+          </span>
+          <div className="flex gap-2">
+            <button
+              disabled={page === 0}
+              onClick={() => setPage(page - 1)}
+              className="px-3 py-1 rounded text-sm border border-zinc-700 disabled:text-zinc-600 disabled:pointer-events-none text-zinc-300 hover:bg-zinc-800"
+            >
+              ← Попередня
+            </button>
+            <button
+              disabled={page >= totalPages - 1}
+              onClick={() => setPage(page + 1)}
+              className="px-3 py-1 rounded text-sm border border-zinc-700 disabled:text-zinc-600 disabled:pointer-events-none text-zinc-300 hover:bg-zinc-800"
+            >
+              Наступна →
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

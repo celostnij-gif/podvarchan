@@ -1,10 +1,11 @@
 'use client'
 
 import { updatePageMeta, deletePage } from '@/lib/actions/pages'
-import { useState } from 'react'
+import { useActionState } from 'react'
 import Link from 'next/link'
 import { SectionEditor } from './section-editor'
 import type { PageTranslationRecord, PageSectionWithTranslations } from '../types'
+import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
 interface EditFormProps {
   page: {
@@ -16,56 +17,48 @@ interface EditFormProps {
 }
 
 export function EditPageForm({ page, translations, sections }: EditFormProps) {
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [saved, setSaved] = useState(false)
-
   const ru = translations.find((t) => t.locale === 'ru')
   const uk = translations.find((t) => t.locale === 'uk')
 
-  async function handleSave(formData: FormData) {
-    setSaving(true)
-    setError(null)
-    setSaved(false)
-    try {
-      await updatePageMeta(page.id, formData)
-      setSaved(true)
-      setTimeout(() => setSaved(false), 3000)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Невідома помилка')
-    } finally {
-      setSaving(false)
-    }
-  }
+  const [state, formAction, pending] = useActionState(
+    async (_prev: { error?: string; saved?: boolean } | null, formData: FormData) => {
+      try {
+        await updatePageMeta(page.id, formData)
+        return { saved: true }
+      } catch (err) {
+        if (isRedirectError(err)) throw err
+        return { error: err instanceof Error ? err.message : 'Невідома помилка' }
+      }
+    },
+    null,
+  )
 
   async function handleDelete() {
     if (!confirm('Видалити сторінку назавжди?')) return
-    setSaving(true)
     try {
       await deletePage(page.id)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Невідома помилка')
-      setSaving(false)
+      // error handled by page redirect
     }
   }
 
   return (
     <div className="space-y-6">
       {/* Meta form */}
-      <form action={handleSave} className="max-w-2xl space-y-6">
+      <form action={formAction} className="max-w-2xl space-y-6">
         <div className="flex items-center gap-3">
-          {error && <p className="text-sm text-red-400">{error}</p>}
-          {saved && !error && (
+          {state?.error && <p className="text-sm text-red-400">{state.error}</p>}
+          {state?.saved && !state?.error && (
             <span className="rounded-lg bg-green-900/30 text-green-400 px-3 py-1.5 text-sm border border-green-700/30 inline-flex items-center gap-1">
               ✓ Збережено
             </span>
           )}
           <button
             type="submit"
-            disabled={saving}
+            disabled={pending}
             className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-500 disabled:opacity-50"
           >
-            {saving ? 'Збереження…' : 'Зберегти'}
+            {pending ? 'Збереження…' : 'Зберегти'}
           </button>
           <Link
             href="/admin/pages"
@@ -77,7 +70,7 @@ export function EditPageForm({ page, translations, sections }: EditFormProps) {
           <button
             type="button"
             onClick={handleDelete}
-            disabled={saving}
+            disabled={pending}
             className="rounded-lg bg-red-900/30 px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-900/50 disabled:opacity-50"
           >
             Видалити

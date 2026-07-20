@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { useActionState } from 'react'
 import { updateHomeContent } from '@/lib/actions/pages'
 import { SectionEditor } from '@/app/admin/pages/[id]/section-editor'
 import { HeroEditor } from '@/lib/blocks/editors/HeroEditor'
 import type { PageTranslationRecord, PageSectionWithTranslations } from '@/app/admin/pages/types'
+import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
 interface HomeEditorProps {
   pageId: string
@@ -21,44 +23,31 @@ interface HomeEditorProps {
 }
 
 export function HomeEditor({ pageId, status, tr, hero, sections }: HomeEditorProps) {
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [saved, setSaved] = useState(false)
-
-  // State for hero editor
   const [ruHero, setRuHero] = useState({ title: hero.ru.title, subtitle: hero.ru.subtitle, cta: hero.ru.cta })
   const [ukHero, setUkHero] = useState({ title: hero.uk.title, subtitle: hero.uk.subtitle, cta: hero.uk.cta })
 
-  async function handleSave(formData: FormData) {
-    formData.set('ru_heroTitle', ruHero.title)
-    formData.set('ru_heroSubtitle', ruHero.subtitle)
-    formData.set('ru_heroCta', ruHero.cta)
-    formData.set('uk_heroTitle', ukHero.title)
-    formData.set('uk_heroSubtitle', ukHero.subtitle)
-    formData.set('uk_heroCta', ukHero.cta)
+  const [state, formAction, pending] = useActionState(
+    async (_prev: { error?: string; saved?: boolean } | null, formData: FormData) => {
+      formData.set('ru_heroTitle', ruHero.title)
+      formData.set('ru_heroSubtitle', ruHero.subtitle)
+      formData.set('ru_heroCta', ruHero.cta)
+      formData.set('uk_heroTitle', ukHero.title)
+      formData.set('uk_heroSubtitle', ukHero.subtitle)
+      formData.set('uk_heroCta', ukHero.cta)
 
-    setSaving(true)
-    setError(null)
-    setSaved(false)
-    try {
-      await updateHomeContent(formData)
-      setSaved(true)
-      setTimeout(() => setSaved(false), 3000)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Невідома помилка')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    const fd = new FormData(e.currentTarget)
-    await handleSave(fd)
-  }
+      try {
+        await updateHomeContent(formData)
+        return { saved: true }
+      } catch (err) {
+        if (isRedirectError(err)) throw err
+        return { error: err instanceof Error ? err.message : 'Невідома помилка' }
+      }
+    },
+    null,
+  )
 
   return (
-    <form onSubmit={onSubmit} className="max-w-3xl space-y-6">
+    <form action={formAction} className="max-w-3xl space-y-6">
       {/* Status */}
       <div className="rounded-lg border border-zinc-700/50 bg-zinc-900/40 p-6">
         <h2 className="mb-4 text-lg font-semibold text-zinc-100">Параметри</h2>
@@ -167,18 +156,18 @@ export function HomeEditor({ pageId, status, tr, hero, sections }: HomeEditorPro
       </div>
 
       <div className="flex items-center gap-3">
-        {error && <p className="text-sm text-red-400">{error}</p>}
-        {saved && !error && (
+        {state?.error && <p className="text-sm text-red-400">{state.error}</p>}
+        {state?.saved && !state?.error && (
           <span className="rounded-lg bg-green-900/30 text-green-400 px-3 py-1.5 text-sm border border-green-700/30 inline-flex items-center gap-1">
             ✓ Збережено
           </span>
         )}
         <button
           type="submit"
-          disabled={saving}
+          disabled={pending}
           className="rounded-lg bg-amber-600 px-6 py-2 text-sm font-medium text-white hover:bg-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 disabled:opacity-50"
         >
-          {saving ? 'Збереження…' : 'Зберегти'}
+          {pending ? 'Збереження…' : 'Зберегти'}
         </button>
       </div>
 
