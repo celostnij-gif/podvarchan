@@ -106,7 +106,7 @@ export default async function EditPostPage(props: Props) {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Редагувати пост</h1>
+        <h1 className="text-2xl font-bold text-zinc-200">Редагувати пост</h1>
         <div className="flex items-center gap-2">
           {ruSlug && (
             <PreviewButton

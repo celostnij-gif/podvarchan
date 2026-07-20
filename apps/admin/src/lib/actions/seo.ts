@@ -13,7 +13,7 @@ import type { SeoUrlRow } from '@/lib/seo/audit'
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
-  if (!user || !canEditContent(user.role)) throw new Error('Forbidden')
+  if (!user || !canEditContent(user.role)) throw new Error('Заборонено')
   return user.id
 }
 
@@ -30,7 +30,7 @@ export async function bulkUpdateSeo(formData: FormData) {
   const userId = await requireEdit()
   const db = await getActionDb()
   const idsJson = formData.get('ids') as string | null
-  if (!idsJson) throw new Error('No IDs provided')
+  if (!idsJson) throw new Error('Не надано ID')
   const ids: { entityType: string; entityId: string; locale: string }[] = JSON.parse(idsJson)
   const title = formData.get('title') as string | null
   const description = formData.get('description') as string | null

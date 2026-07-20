@@ -13,7 +13,7 @@ import { revalidatePublic, revalidateAdmin, getFaqRevalidatePaths } from '@/lib/
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
-  if (!user || !canEditContent(user.role)) throw new Error('Forbidden')
+  if (!user || !canEditContent(user.role)) throw new Error('Заборонено')
   return user.id
 }
 
@@ -41,7 +41,7 @@ export async function createFaqItem(formData: FormData) {
     group: formData.get('group'), sortOrder: formData.get('sortOrder'),
     status: formData.get('status'), translations,
   })
-  if (!parsed.success) throw new Error(`Validation error: ${parsed.error.message}`)
+  if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
   const data = parsed.data
   const id = crypto.randomUUID()
   await db.insert(faqItems).values({ id, group: data.group, sortOrder: data.sortOrder, status: data.status })
@@ -61,7 +61,7 @@ export async function updateFaqItem(id: string, formData: FormData) {
   const userId = await requireEdit()
   const db = await getActionDb()
   const existing = await db.select().from(faqItems).where(eq(faqItems.id, id)).get()
-  if (!existing) throw new Error('FAQ not found')
+  if (!existing) throw new Error('FAQ не знайдено')
   const translations = [
     { locale: 'ru', question: formData.get('ru_question'), answer: formData.get('ru_answer') },
     { locale: 'uk', question: formData.get('uk_question'), answer: formData.get('uk_answer') },
@@ -70,7 +70,7 @@ export async function updateFaqItem(id: string, formData: FormData) {
     group: formData.get('group'), sortOrder: formData.get('sortOrder'),
     status: formData.get('status'), translations,
   })
-  if (!parsed.success) throw new Error(`Validation error: ${parsed.error.message}`)
+  if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
   const data = parsed.data
   await db.update(faqItems).set({ group: data.group, sortOrder: data.sortOrder, status: data.status }).where(eq(faqItems.id, id))
   for (const t of data.translations) {
@@ -91,7 +91,7 @@ export async function deleteFaqItem(id: string) {
   const userId = await requireEdit()
   const db = await getActionDb()
   const existing = await db.select().from(faqItems).where(eq(faqItems.id, id)).get()
-  if (!existing) throw new Error('FAQ not found')
+  if (!existing) throw new Error('FAQ не знайдено')
   await db.delete(faqItems).where(eq(faqItems.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'FAQ', entityId: id, before: existing })
   revalidateAdmin('/admin/faq')

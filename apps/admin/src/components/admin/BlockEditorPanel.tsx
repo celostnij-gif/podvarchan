@@ -93,7 +93,7 @@ export function BlockEditorPanel({ sectionType, sectionKey, content, onSave, isP
             }`}
           >
             <span className="text-xs">👁</span>
-            {showPreview ? 'Скрыть превью' : 'Превью'}
+            {showPreview ? 'Сховати попередній перегляд' : 'Попередній перегляд'}
           </button>
         </div>
       </div>
@@ -114,7 +114,7 @@ export function BlockEditorPanel({ sectionType, sectionKey, content, onSave, isP
                     previewLocale === 'ru' ? 'bg-amber-600/20 text-amber-400' : 'text-zinc-600'
                   }`}
                 >
-                  превью
+                  попередній перегляд
                 </button>
               )}
             </div>
@@ -139,7 +139,7 @@ export function BlockEditorPanel({ sectionType, sectionKey, content, onSave, isP
                     previewLocale === 'uk' ? 'bg-blue-600/20 text-blue-400' : 'text-zinc-600'
                   }`}
                 >
-                  превью
+                  попередній перегляд
                 </button>
               )}
             </div>
@@ -157,7 +157,7 @@ export function BlockEditorPanel({ sectionType, sectionKey, content, onSave, isP
         {showPreview && (
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold uppercase text-indigo-400">👁 Предпросмотр</span>
+              <span className="text-xs font-semibold uppercase text-indigo-400">👁 Попередній перегляд</span>
               <span className="text-[10px] text-zinc-500">
                 {previewLocale === 'ru' ? '🇷🇺 RU' : '🇺🇦 UK'}
               </span>
@@ -191,7 +191,7 @@ export function BlockEditorPanel({ sectionType, sectionKey, content, onSave, isP
                 </button>
                 <div className="flex-1" />
                 <span className="text-[10px] text-zinc-600">
-                  авто-обновление
+                  автооновлення
                 </span>
               </div>
             </div>
@@ -269,14 +269,14 @@ function SaveAsTemplateButton({
     return (
       <div className="flex items-center gap-1.5">
         {done ? (
-          <span className="text-xs text-green-400">✅ Сохранено</span>
+          <span className="text-xs text-green-400">✅ Збережено</span>
         ) : (
           <>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') handleSave(); if (e.key === 'Escape') setShowPrompt(false) }}
-              placeholder={def?.label ?? 'Название шаблона'}
+              placeholder={def?.label ?? 'Назва шаблону'}
               autoFocus
               className="w-36 rounded border border-zinc-700 bg-zinc-800/60 px-2 py-1.5 text-xs text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none"
             />
@@ -286,7 +286,7 @@ function SaveAsTemplateButton({
               disabled={saving || !name.trim()}
               className="rounded px-2 py-1.5 text-xs text-amber-400 hover:bg-zinc-800 disabled:opacity-50"
             >
-              {saving ? '…' : 'Save'}
+              {saving ? '…' : 'Зберегти'}
             </button>
             <button
               type="button"
@@ -306,7 +306,7 @@ function SaveAsTemplateButton({
       type="button"
       onClick={() => setShowPrompt(true)}
       className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50 transition-all"
-      title="Сохранить как шаблон"
+      title="Зберегти як шаблон"
     >
       📚 Шаблон
     </button>
@@ -324,7 +324,7 @@ function RawJsonEditor({ content, onSave, sectionKey, isPending }: {
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2 mb-2">
-        <span className="text-sm font-medium text-zinc-200">⚠️ Неизвестный тип блока</span>
+        <span className="text-sm font-medium text-zinc-200">⚠️ Невідомий тип блоку</span>
         <span className="text-xs text-zinc-500">key: {sectionKey}</span>
       </div>
       <div>

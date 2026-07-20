@@ -23,7 +23,7 @@ export function CsvExportButton() {
     <button
       onClick={handleExport}
       disabled={isPending}
-      className="rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50"
+      className="rounded-md bg-zinc-800 px-4 py-2 text-sm font-medium text-zinc-300 hover:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:ring-offset-2 disabled:opacity-50"
     >
       {isPending ? 'Exporting...' : 'Export CSV'}
     </button>

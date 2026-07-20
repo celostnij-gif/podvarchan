@@ -13,7 +13,7 @@ import { revalidatePublic, getHomeRevalidatePaths } from '@/lib/revalidate'
 
 async function requireSettings(): Promise<string> {
   const user = await getCurrentUser()
-  if (!user || !canManageSettings(user.role)) throw new Error('Forbidden')
+  if (!user || !canManageSettings(user.role)) throw new Error('Заборонено')
   return user.id
 }
 
@@ -46,7 +46,7 @@ export async function deleteSiteSetting(key: string) {
   const userId = await requireSettings()
   const db = await getActionDb()
   const existing = await db.select().from(siteSettings).where(eq(siteSettings.key, key)).get()
-  if (!existing) throw new Error('Setting not found')
+  if (!existing) throw new Error('Налаштування не знайдено')
   await db.delete(siteSettings).where(eq(siteSettings.key, key))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'SETTING', entityId: key, before: existing })
   revalidatePath('/admin/settings')
@@ -79,11 +79,11 @@ export async function saveContactChannel(data: FormData) {
     type: data.get('type'), label: data.get('label'), value: data.get('value'),
     url: data.get('url'), sortOrder: data.get('sortOrder'), isEnabled: data.get('isEnabled') === 'on' || data.get('isEnabled') === 'true', isPrimary: data.get('isPrimary') === 'on' || data.get('isPrimary') === 'true',
   })
-  if (!parsed.success) throw new Error(`Validation error: ${parsed.error.message}`)
+  if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
   const ch = parsed.data
   if (id) {
     const existing = await db.select().from(contactChannels).where(eq(contactChannels.id, id)).get()
-    if (!existing) throw new Error('Channel not found')
+    if (!existing) throw new Error('Канал не знайдено')
     await db.update(contactChannels).set({
       type: ch.type as 'TELEGRAM' | 'WHATSAPP' | 'EMAIL' | 'PHONE' | 'CUSTOM', label: ch.label, value: ch.value, url: ch.url || null,
       sortOrder: ch.sortOrder, isEnabled: ch.isEnabled, isPrimary: ch.isPrimary,
@@ -108,7 +108,7 @@ export async function deleteContactChannel(id: string) {
   const userId = await requireSettings()
   const db = await getActionDb()
   const existing = await db.select().from(contactChannels).where(eq(contactChannels.id, id)).get()
-  if (!existing) throw new Error('Channel not found')
+  if (!existing) throw new Error('Канал не знайдено')
   await db.delete(contactChannels).where(eq(contactChannels.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'CONTACT_CHANNEL', entityId: id, before: existing })
   revalidatePath('/admin/settings')

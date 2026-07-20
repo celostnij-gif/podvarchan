@@ -30,25 +30,25 @@ export function AuditFilters({ entityTypes, actions }: Props) {
   return (
     <div className="flex flex-wrap gap-3 items-end">
       <div>
-        <label htmlFor="entityType" className="block text-xs text-gray-500 mb-1">Тип сутності</label>
-        <select id="entityType" value={entityType} onChange={(e) => setEntityType(e.target.value)} className="border rounded px-2 py-1 text-sm">
+        <label htmlFor="entityType" className="block text-xs text-zinc-500 mb-1">Тип сутності</label>
+        <select id="entityType" value={entityType} onChange={(e) => setEntityType(e.target.value)} className="rounded border border-zinc-700 bg-zinc-800 px-2 py-1.5 text-sm text-zinc-200">
           <option value="">Всі</option>
           {entityTypes.map((t) => <option key={t} value={t}>{t}</option>)}
         </select>
       </div>
 
       <div>
-        <label htmlFor="action" className="block text-xs text-gray-500 mb-1">Дія</label>
-        <select id="action" value={action} onChange={(e) => setAction(e.target.value)} className="border rounded px-2 py-1 text-sm">
+        <label htmlFor="action" className="block text-xs text-zinc-500 mb-1">Дія</label>
+        <select id="action" value={action} onChange={(e) => setAction(e.target.value)} className="rounded border border-zinc-700 bg-zinc-800 px-2 py-1.5 text-sm text-zinc-200">
           <option value="">Всі</option>
           {actions.map((a) => <option key={a} value={a}>{a}</option>)}
         </select>
       </div>
 
-      <button onClick={apply} className="bg-blue-600 text-white px-4 py-1.5 rounded text-sm hover:bg-blue-700">
+      <button onClick={apply} className="bg-amber-600 text-white px-4 py-1.5 rounded text-sm hover:bg-amber-500">
         Застосувати
       </button>
-      <button onClick={reset} className="px-4 py-1.5 rounded text-sm border hover:bg-gray-100">
+      <button onClick={reset} className="px-4 py-1.5 rounded text-sm border border-zinc-700 text-zinc-400 hover:bg-zinc-800">
         Скинути
       </button>
     </div>

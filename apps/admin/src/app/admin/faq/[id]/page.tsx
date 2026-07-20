@@ -28,7 +28,7 @@ export default async function EditFaqPage(props: Props) {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Редагувати FAQ</h1>
+      <h1 className="mb-6 text-2xl font-bold text-zinc-200">Редагувати FAQ</h1>
       <FaqForm faq={faq} />
     </div>
   )

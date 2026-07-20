@@ -12,12 +12,12 @@ interface Props {
 }
 
 const statusConfig: Record<string, { label: string; color: string }> = {
-  NEW: { label: 'Нова', color: 'bg-blue-100 text-blue-800' },
-  IN_PROGRESS: { label: 'В роботі', color: 'bg-yellow-100 text-yellow-800' },
-  CONTACTED: { label: "Зв'язались", color: 'bg-purple-100 text-purple-800' },
-  BOOKED: { label: 'Записані', color: 'bg-green-100 text-green-800' },
-  CLOSED: { label: 'Закрита', color: 'bg-gray-100 text-gray-800' },
-  SPAM: { label: 'Спам', color: 'bg-red-100 text-red-800' },
+  NEW: { label: 'Нова', color: 'bg-blue-900/30 text-blue-400 border border-blue-700/30' },
+  IN_PROGRESS: { label: 'В роботі', color: 'bg-yellow-900/30 text-yellow-400 border border-yellow-700/30' },
+  CONTACTED: { label: "Зв'язались", color: 'bg-purple-900/30 text-purple-400 border border-purple-700/30' },
+  BOOKED: { label: 'Записані', color: 'bg-green-900/30 text-green-400 border border-green-700/30' },
+  CLOSED: { label: 'Закрита', color: 'bg-gray-900/30 text-gray-400 border border-gray-700/30' },
+  SPAM: { label: 'Спам', color: 'bg-red-900/30 text-red-400 border border-red-700/30' },
 }
 
 export default async function LeadDetailPage(props: Props) {
@@ -35,7 +35,7 @@ export default async function LeadDetailPage(props: Props) {
     .all()
 
   const statusBadge = (s: string) => {
-    const cfg = statusConfig[s] ?? { label: s, color: 'bg-gray-100 text-gray-800' }
+    const cfg = statusConfig[s] ?? { label: s, color: 'bg-gray-900/30 text-gray-400 border border-gray-700/30' }
     return (
       <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${cfg.color}`}>
         {cfg.label}
@@ -46,7 +46,7 @@ export default async function LeadDetailPage(props: Props) {
   return (
     <div>
       <div className="mb-6">
-        <Link href="/admin/leads" className="text-sm text-blue-600 hover:text-blue-800">
+        <Link href="/admin/leads" className="text-sm text-amber-500 hover:text-amber-400">
           &larr; До списку заявок
         </Link>
       </div>
@@ -55,9 +55,9 @@ export default async function LeadDetailPage(props: Props) {
         {/* Main info */}
         <div className="lg:col-span-2 space-y-6">
           {/* Lead info card */}
-          <div className="rounded-lg border bg-white p-6">
+          <div className="rounded-lg border bg-zinc-800/50 p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h1 className="text-xl font-bold text-gray-900">
+              <h1 className="text-xl font-bold text-zinc-200">
                 {lead.name || 'Без імені'}
               </h1>
               {statusBadge(lead.status)}
@@ -65,38 +65,38 @@ export default async function LeadDetailPage(props: Props) {
 
             <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <dt className="text-xs font-medium text-gray-500">Email</dt>
-                <dd className="mt-1 text-sm text-gray-900">
+                <dt className="text-xs font-medium text-zinc-500">Email</dt>
+                <dd className="mt-1 text-sm text-zinc-200">
                   {lead.email ? (
-                    <a href={`mailto:${lead.email}`} className="text-blue-600 hover:underline">
+                    <a href={`mailto:${lead.email}`} className="text-amber-500 hover:underline">
                       {lead.email}
                     </a>
                   ) : '—'}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs font-medium text-gray-500">Телефон</dt>
-                <dd className="mt-1 text-sm text-gray-900">
+                <dt className="text-xs font-medium text-zinc-500">Телефон</dt>
+                <dd className="mt-1 text-sm text-zinc-200">
                   {lead.phone ? (
-                    <a href={`tel:${lead.phone}`} className="text-blue-600 hover:underline">
+                    <a href={`tel:${lead.phone}`} className="text-amber-500 hover:underline">
                       {lead.phone}
                     </a>
                   ) : '—'}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs font-medium text-gray-500">Мова</dt>
-                <dd className="mt-1 text-sm text-gray-900">
+                <dt className="text-xs font-medium text-zinc-500">Мова</dt>
+                <dd className="mt-1 text-sm text-zinc-200">
                   {lead.locale === 'uk' ? 'Українська' : lead.locale === 'ru' ? 'Русский' : '—'}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs font-medium text-gray-500">Джерело</dt>
-                <dd className="mt-1 text-sm text-gray-900">{lead.sourcePage || '—'}</dd>
+                <dt className="text-xs font-medium text-zinc-500">Джерело</dt>
+                <dd className="mt-1 text-sm text-zinc-200">{lead.sourcePage || '—'}</dd>
               </div>
               <div className="sm:col-span-2">
-                <dt className="text-xs font-medium text-gray-500">Дата створення</dt>
-                <dd className="mt-1 text-sm text-gray-900">
+                <dt className="text-xs font-medium text-zinc-500">Дата створення</dt>
+                <dd className="mt-1 text-sm text-zinc-200">
                   {lead.createdAt
                     ? new Date(lead.createdAt).toLocaleString('uk-UA')
                     : '—'}
@@ -106,8 +106,8 @@ export default async function LeadDetailPage(props: Props) {
 
             {lead.message && (
               <div className="mt-4">
-                <dt className="text-xs font-medium text-gray-500">Повідомлення</dt>
-                <dd className="mt-2 whitespace-pre-wrap rounded-md bg-gray-50 p-3 text-sm text-gray-900">
+                <dt className="text-xs font-medium text-zinc-500">Повідомлення</dt>
+                <dd className="mt-2 whitespace-pre-wrap rounded-md bg-zinc-800/50 p-3 text-sm text-zinc-200">
                   {lead.message}
                 </dd>
               </div>
@@ -115,17 +115,17 @@ export default async function LeadDetailPage(props: Props) {
           </div>
 
           {/* Internal note */}
-          <div className="rounded-lg border bg-white p-6">
-            <h2 className="mb-3 text-lg font-semibold text-gray-900">Внутрішня нотатка</h2>
+          <div className="rounded-lg border bg-zinc-800/50 p-6">
+            <h2 className="mb-3 text-lg font-semibold text-zinc-200">Внутрішня нотатка</h2>
             <InternalNoteForm leadId={lead.id} currentNote={lead.internalNote ?? ''} />
           </div>
 
           {/* Event history */}
-          <div className="rounded-lg border bg-white p-6">
-            <h2 className="mb-4 text-lg font-semibold text-gray-900">Історія подій</h2>
+          <div className="rounded-lg border bg-zinc-800/50 p-6">
+            <h2 className="mb-4 text-lg font-semibold text-zinc-200">Історія подій</h2>
 
             {events.length === 0 ? (
-              <p className="text-sm text-gray-500">Подій ще немає.</p>
+              <p className="text-sm text-zinc-500">Подій ще немає.</p>
             ) : (
               <div className="flow-root">
                 <ul className="-mb-8">
@@ -134,22 +134,22 @@ export default async function LeadDetailPage(props: Props) {
                       <div className="relative pb-8">
                         {idx < events.length - 1 && (
                           <span
-                            className="absolute left-4 top-4 -ml-px h-full w-0.5 bg-gray-200"
+                            className="absolute left-4 top-4 -ml-px h-full w-0.5 bg-zinc-700"
                             aria-hidden="true"
                           />
                         )}
                         <div className="relative flex gap-3">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 ring-8 ring-white text-xs font-bold text-gray-600">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-800 ring-8 ring-zinc-800 text-xs font-bold text-zinc-400">
                             {(event.type ?? '?').charAt(0)}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-medium text-zinc-200">
                               {event.type || '—'}
                             </div>
                             {event.note && (
-                              <p className="mt-0.5 text-sm text-gray-600">{event.note}</p>
+                              <p className="mt-0.5 text-sm text-zinc-400">{event.note}</p>
                             )}
-                            <p className="mt-0.5 text-xs text-gray-400">
+                            <p className="mt-0.5 text-xs text-zinc-500">
                               {event.createdAt
                                 ? new Date(event.createdAt).toLocaleString('uk-UA')
                                 : ''}
@@ -164,7 +164,7 @@ export default async function LeadDetailPage(props: Props) {
             )}
 
             <div className="mt-4 border-t pt-4">
-              <h3 className="mb-2 text-sm font-medium text-gray-700">Додати подію</h3>
+              <h3 className="mb-2 text-sm font-medium text-zinc-200">Додати подію</h3>
               <AddEventForm leadId={lead.id} />
             </div>
           </div>
@@ -173,34 +173,34 @@ export default async function LeadDetailPage(props: Props) {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Status change */}
-          <div className="rounded-lg border bg-white p-6">
-            <h2 className="mb-3 text-lg font-semibold text-gray-900">Статус</h2>
+          <div className="rounded-lg border bg-zinc-800/50 p-6">
+            <h2 className="mb-3 text-lg font-semibold text-zinc-200">Статус</h2>
             <StatusChangeForm leadId={lead.id} currentStatus={lead.status} />
           </div>
 
           {/* Meta info */}
-          <div className="rounded-lg border bg-white p-6">
-            <h2 className="mb-3 text-lg font-semibold text-gray-900">Технічна інформація</h2>
+          <div className="rounded-lg border bg-zinc-800/50 p-6">
+            <h2 className="mb-3 text-lg font-semibold text-zinc-200">Технічна інформація</h2>
             <dl className="space-y-3">
               <div>
-                <dt className="text-xs font-medium text-gray-500">ID</dt>
-                <dd className="mt-0.5 text-xs font-mono text-gray-700 break-all">{lead.id}</dd>
+                <dt className="text-xs font-medium text-zinc-500">ID</dt>
+                <dd className="mt-0.5 text-xs font-mono text-zinc-200 break-all">{lead.id}</dd>
               </div>
               {lead.ipHash && (
                 <div>
-                  <dt className="text-xs font-medium text-gray-500">IP Hash</dt>
-                  <dd className="mt-0.5 text-xs font-mono text-gray-700">{lead.ipHash}</dd>
+                  <dt className="text-xs font-medium text-zinc-500">IP Hash</dt>
+                  <dd className="mt-0.5 text-xs font-mono text-zinc-200">{lead.ipHash}</dd>
                 </div>
               )}
               {lead.userAgent && (
                 <div>
-                  <dt className="text-xs font-medium text-gray-500">User Agent</dt>
-                  <dd className="mt-0.5 text-xs text-gray-700 break-all">{lead.userAgent}</dd>
+                  <dt className="text-xs font-medium text-zinc-500">User Agent</dt>
+                  <dd className="mt-0.5 text-xs text-zinc-200 break-all">{lead.userAgent}</dd>
                 </div>
               )}
               <div>
-                <dt className="text-xs font-medium text-gray-500">Оновлено</dt>
-                <dd className="mt-0.5 text-xs text-gray-700">
+                <dt className="text-xs font-medium text-zinc-500">Оновлено</dt>
+                <dd className="mt-0.5 text-xs text-zinc-200">
                   {lead.updatedAt
                     ? new Date(lead.updatedAt).toLocaleString('uk-UA')
                     : '—'}

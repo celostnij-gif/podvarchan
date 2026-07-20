@@ -53,10 +53,10 @@ export default async function MediaEditPage(props: Props) {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-zinc-200">
           {asset.originalName || 'Медіа'}
         </h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-zinc-500">
           {asset.mimeType && (mimeIcons[asset.mimeType] || '📁')} {asset.mimeType} · {formatSize(asset.size)}
           {asset.width && asset.height && ` · ${asset.width}×${asset.height}`}
         </p>
@@ -65,7 +65,7 @@ export default async function MediaEditPage(props: Props) {
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Preview */}
         <div>
-          <div className="overflow-hidden rounded-lg border bg-white">
+          <div className="overflow-hidden rounded-lg border border-zinc-700 bg-zinc-900">
             {isImage ? (
               <img
                 src={mediaUrl(asset.publicUrl)}
@@ -74,7 +74,7 @@ export default async function MediaEditPage(props: Props) {
                 style={{ maxHeight: '60vh' }}
               />
             ) : (
-              <div className="flex items-center justify-center py-20 text-6xl text-gray-300">
+              <div className="flex items-center justify-center py-20 text-6xl text-zinc-600">
                 {asset.mimeType ? (mimeIcons[asset.mimeType] || '📁') : '📁'}
               </div>
             )}

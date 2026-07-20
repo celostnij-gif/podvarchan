@@ -141,7 +141,7 @@ function PublishBadge({ status }: { status: string }) {
   const labels: Record<string, string> = {
     PUBLISHED: 'Опубліковано',
     DRAFT: 'Чернетка',
-    REVIEW: 'На ревю',
+    REVIEW: 'На перевірці',
     ARCHIVED: 'Архів',
   } as const
   return (

@@ -33,7 +33,7 @@ export interface DashboardData {
 
 export async function getDashboardData(): Promise<DashboardData> {
   const user = await getCurrentUser()
-  if (!user || !canEditContent(user.role)) throw new Error('Forbidden')
+  if (!user || !canEditContent(user.role)) throw new Error('Заборонено')
   const db = await getActionDb()
 
   try {
@@ -145,7 +145,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     console.error('[dashboard]', e)
     return {
       dbAvailable: false,
-      dbError: e instanceof Error ? e.message : 'Unknown error',
+      dbError: e instanceof Error ? e.message : 'Невідома помилка',
       stats: { services: { total: 0, published: 0 }, blog: { total: 0, published: 0 }, leads: { total: 0, new: 0 }, testimonials: { total: 0, published: 0 }, faq: { total: 0, published: 0 }, media: { total: 0 }, users: { total: 0, active: 0 }, redirects: { total: 0 }, revisions: { total: 0 } },
       recentLeads: [],
       drafts: [],

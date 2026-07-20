@@ -115,6 +115,14 @@
 | `npm run build` (public) | 2026-07-19 | PASS |
 | `cd apps/admin && npm run build` | 2026-07-19 | PASS |
 | `seo-regression.sh` | | |
+| `npm run lint` (public) | 2026-07-20 | PASS (0 err, 34 warn) |
+| `npx opennextjs-cloudflare build` (public) | 2026-07-20 | PASS (CI #305 ✅) |
+### 2026-07-20
+
+- **Phase D — Pages/Home polish (3d68e10):** SectionEditor local state, no router.refresh(); HomeEditor/EditPageForm no useTransition, inline save; add-section UK labels, auto-key type-{ts}, sortOrder sent, both locales present; ViewOnSiteLink on page edit
+- **CI fix (46dff98, owner):** Broken `"use client'` quote in `tseny/client-page.tsx` (CheckTsenyPage task regression) fixed by site owner. Root eslint.config.mje extended ignores (`apps/admin/**`, `**/cloudflare-env.d.ts`, `**/postcss.config.mjs`). 3 admin forms converted to useActionState. CI #305 ✅ both jobs.
+- **Settings typed form + blog category nav + tseny D1 (0172986):** Pushed earlier; confirmed deployed.
+
 | curl home/uslugi/blog/faq | | |
  | revalidate 401 wrong secret | 2026-07-18 | PASS — public returns 401 on wrong secret |
 | admin login + /admin 200 | | |

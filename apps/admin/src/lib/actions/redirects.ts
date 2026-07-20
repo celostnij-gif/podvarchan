@@ -12,7 +12,7 @@ import { getCloudflareContext } from '@opennextjs/cloudflare'
 
 async function requireSettings(): Promise<string> {
   const user = await getCurrentUser()
-  if (!user || !canManageSettings(user.role)) throw new Error('Forbidden')
+  if (!user || !canManageSettings(user.role)) throw new Error('Заборонено')
   return user.id
 }
 
@@ -39,11 +39,11 @@ export async function saveRedirectRule(data: FormData) {
     fromPath: data.get('fromPath'), toPath: data.get('toPath'),
     statusCode: data.get('statusCode'), isEnabled: data.get('isEnabled') === 'on' || data.get('isEnabled') === 'true',
   })
-  if (!parsed.success) throw new Error(`Validation error: ${parsed.error.message}`)
+  if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
   const rule = parsed.data
   if (id) {
     const existing = await db.select().from(redirectRules).where(eq(redirectRules.id, id)).get()
-    if (!existing) throw new Error('Redirect rule not found')
+    if (!existing) throw new Error('Правило перенаправлення не знайдено')
     await db.update(redirectRules).set({
       fromPath: rule.fromPath, toPath: rule.toPath,
       statusCode: rule.statusCode, isEnabled: rule.isEnabled,
@@ -66,7 +66,7 @@ export async function deleteRedirectRule(id: string) {
   const userId = await requireSettings()
   const db = await getActionDb()
   const existing = await db.select().from(redirectRules).where(eq(redirectRules.id, id)).get()
-  if (!existing) throw new Error('Redirect rule not found')
+  if (!existing) throw new Error('Правило перенаправлення не знайдено')
   await db.delete(redirectRules).where(eq(redirectRules.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'REDIRECT', entityId: id, before: existing })
   revalidatePath('/admin/redirects')
@@ -78,7 +78,7 @@ export async function toggleRedirectRule(id: string) {
   const userId = await requireSettings()
   const db = await getActionDb()
   const existing = await db.select().from(redirectRules).where(eq(redirectRules.id, id)).get()
-  if (!existing) throw new Error('Redirect rule not found')
+  if (!existing) throw new Error('Правило перенаправлення не знайдено')
   await db.update(redirectRules).set({ isEnabled: !existing.isEnabled }).where(eq(redirectRules.id, id))
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'REDIRECT', entityId: id, before: existing, after: { isEnabled: !existing.isEnabled } })
   revalidatePath('/admin/redirects')
@@ -88,7 +88,7 @@ export async function toggleRedirectRule(id: string) {
 export async function updateRedirectHitCount(id: string) {
   const db = await getActionDb()
   const existing = await db.select().from(redirectRules).where(eq(redirectRules.id, id)).get()
-  if (!existing) throw new Error('Redirect rule not found')
+  if (!existing) throw new Error('Правило перенаправлення не знайдено')
   await db.update(redirectRules).set({ hitCount: (existing.hitCount ?? 0) + 1 }).where(eq(redirectRules.id, id))
 }
 

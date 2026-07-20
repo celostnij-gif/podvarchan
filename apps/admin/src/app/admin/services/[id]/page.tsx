@@ -33,7 +33,7 @@ export default async function EditServicePage(props: Props) {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-zinc-200">
           Редагувати: {svc.slugBase}
         </h1>
         <div className="flex items-center gap-2">

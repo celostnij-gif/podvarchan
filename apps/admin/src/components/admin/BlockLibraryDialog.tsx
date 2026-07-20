@@ -73,7 +73,7 @@ export function BlockLibraryDialog({ open, onClose, onSelectTemplate }: BlockLib
       <div className="relative w-full max-w-4xl max-h-[85vh] rounded-xl border border-zinc-700 bg-zinc-900 shadow-2xl flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-zinc-800 px-5 py-3">
-          <h2 className="text-base font-semibold text-zinc-100">📚 Библиотека шаблонов</h2>
+          <h2 className="text-base font-semibold text-zinc-100">📚 Бібліотека шаблонів</h2>
           <button
             type="button"
             onClick={onClose}
@@ -90,7 +90,7 @@ export function BlockLibraryDialog({ open, onClose, onSelectTemplate }: BlockLib
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Поиск шаблонов по имени или типу..."
+              placeholder="Пошук шаблонів за назвою або типом..."
               className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 pl-9 pr-3 py-2 text-sm text-zinc-200 placeholder-zinc-500
                          focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
             />
@@ -103,17 +103,17 @@ export function BlockLibraryDialog({ open, onClose, onSelectTemplate }: BlockLib
           <div className="w-2/5 border-r border-zinc-800 overflow-y-auto">
             {loading ? (
               <div className="flex items-center justify-center py-12">
-                <span className="text-sm text-zinc-500">Загрузка...</span>
+                <span className="text-sm text-zinc-500">Завантаження...</span>
               </div>
             ) : filtered.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-zinc-600">
                 <FileJson className="h-8 w-8 mb-2 opacity-50" />
                 <p className="text-sm">
-                  {search ? 'Ничего не найдено' : 'Шаблонов пока нет'}
+                  {search ? 'Нічого не знайдено' : 'Шаблонів поки немає'}
                 </p>
                 {!search && (
                   <p className="text-xs mt-1">
-                    Сохраните блок как шаблон из редактора
+                    Збережіть блок як шаблон з редактора
                   </p>
                 )}
               </div>
@@ -170,7 +170,7 @@ export function BlockLibraryDialog({ open, onClose, onSelectTemplate }: BlockLib
                       className="flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-500 transition-colors"
                     >
                       <Plus className="h-3 w-3" />
-                      Вставить
+                      Вставити
                     </button>
                     <button
                       type="button"
@@ -178,7 +178,7 @@ export function BlockLibraryDialog({ open, onClose, onSelectTemplate }: BlockLib
                       className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs text-red-400 hover:bg-red-900/30 transition-colors"
                     >
                       <Trash2 className="h-3 w-3" />
-                      Удалить
+                      Видалити
                     </button>
                   </div>
                 </div>
@@ -215,10 +215,10 @@ export function BlockLibraryDialog({ open, onClose, onSelectTemplate }: BlockLib
               <div className="flex flex-col items-center justify-center h-full text-zinc-600 py-12">
                 <FileJson className="h-10 w-10 mb-3 opacity-30" />
                 <p className="text-sm">
-                  {'Выберите шаблон для просмотра'}
+                  {'Оберіть шаблон для перегляду'}
                 </p>
                 <p className="text-xs mt-1 text-zinc-700">
-                  {'или дважды кликните, чтобы вставить'}
+                  {'або двічі клацніть, щоб вставити'}
                 </p>
               </div>
             )}
@@ -228,15 +228,15 @@ export function BlockLibraryDialog({ open, onClose, onSelectTemplate }: BlockLib
         {/* Footer */}
         <div className="border-t border-zinc-800 px-5 py-2.5 flex items-center justify-between">
           <span className="text-xs text-zinc-600">
-            {templates.length} {templates.length === 1 ? 'шаблон' : 'шаблонов'}
-            {search && filtered.length !== templates.length && ` · найдено ${filtered.length}`}
+            {templates.length} {templates.length === 1 ? 'шаблон' : 'шаблонів'}
+            {search && filtered.length !== templates.length && ` · знайдено ${filtered.length}`}
           </span>
           <button
             type="button"
             onClick={onClose}
             className="rounded-lg px-3 py-1.5 text-xs text-zinc-400 hover:bg-zinc-800 transition-colors"
           >
-            Закрыть
+            Закрити
           </button>
         </div>
       </div>

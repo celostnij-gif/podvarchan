@@ -15,7 +15,7 @@ function SubmitButton({ dirty }: { dirty: boolean }) {
     <button
       type="submit"
       disabled={pending || !dirty}
-      className="mt-2 rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+      className="mt-2 rounded-md bg-amber-600 px-3 py-2 text-sm font-medium text-white hover:bg-amber-500 disabled:opacity-50"
     >
       {pending ? 'Збереження...' : 'Зберегти нотатку'}
     </button>
@@ -33,7 +33,7 @@ export function InternalNoteForm({ leadId, currentNote }: Props) {
         value={note}
         onChange={(e) => setNote(e.target.value)}
         rows={4}
-        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        className="w-full rounded-md border border-zinc-700 px-3 py-2 text-sm shadow-sm focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
         placeholder="Внутрішня нотатка (видно тільки адмінам)..."
       />
       <SubmitButton dirty={dirty} />

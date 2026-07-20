@@ -13,13 +13,13 @@ const leadStatuses = ['NEW', 'IN_PROGRESS', 'CONTACTED', 'BOOKED', 'CLOSED', 'SP
 
 async function requireView() {
   const user = await getCurrentUser()
-  if (!user) throw new Error('Unauthorized')
+  if (!user) throw new Error('Не авторизовано')
   return user
 }
 
 async function requireEdit() {
   const user = await requireView()
-  if (!canEditContent(user.role)) throw new Error('Forbidden')
+  if (!canEditContent(user.role)) throw new Error('Заборонено')
   return user
 }
 
@@ -35,7 +35,7 @@ export async function markLeadRead(id: string) {
   const user = await requireEdit()
   const db = await getActionDb()
   const existing = await db.select().from(contactLeads).where(eq(contactLeads.id, id)).get()
-  if (!existing) throw new Error('Lead not found')
+  if (!existing) throw new Error('Заявку не знайдено')
   await db.update(contactLeads).set({ status: 'CONTACTED' }).where(eq(contactLeads.id, id))
   await writeAuditLog({ userId: user.id, action: 'UPDATE', entityType: 'LEAD', entityId: id, before: existing, after: { status: 'CONTACTED' } })
   revalidatePath('/admin/leads')
@@ -43,7 +43,7 @@ export async function markLeadRead(id: string) {
 
 export async function deleteLead(id: string) {
   const user = await requireView()
-  if (!canDelete(user.role)) throw new Error('Forbidden')
+  if (!canDelete(user.role)) throw new Error('Заборонено')
   const db = await getActionDb()
   await db.delete(leadEvents).where(eq(leadEvents.leadId, id))
   await db.delete(contactLeads).where(eq(contactLeads.id, id))
@@ -77,7 +77,7 @@ export async function updateLeadStatus(id: string, formData: FormData) {
   const db = await getActionDb()
 
   const parsed = statusSchema.safeParse({ status: formData.get('status') })
-  if (!parsed.success) throw new Error(`Validation error: ${parsed.error.message}`)
+  if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
 
   const lead = await db.select().from(contactLeads).where(eq(contactLeads.id, id)).get()
   if (!lead) throw new Error('Lead not found')
@@ -103,7 +103,7 @@ export async function addLeadEvent(leadId: string, formData: FormData) {
   const db = await getActionDb()
 
   const parsed = eventSchema.safeParse({ type: formData.get('type'), note: formData.get('note') ?? '' })
-  if (!parsed.success) throw new Error(`Validation error: ${parsed.error.message}`)
+  if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
 
   await db.insert(leadEvents).values({
     id: crypto.randomUUID(), leadId, userId: user.id,
@@ -120,7 +120,7 @@ export async function updateInternalNote(leadId: string, formData: FormData) {
   const db = await getActionDb()
 
   const parsed = noteSchema.safeParse({ note: formData.get('note') ?? '' })
-  if (!parsed.success) throw new Error(`Validation error: ${parsed.error.message}`)
+  if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
 
   await db.update(contactLeads).set({ internalNote: parsed.data.note, updatedAt: await now() }).where(eq(contactLeads.id, leadId))
   await writeAuditLog({ userId: user.id, action: 'UPDATE', entityType: 'LEAD', entityId: leadId })

@@ -44,7 +44,7 @@ export default async function EditCategoryPage(props: Props) {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Редагувати: {category.slugBase}</h1>
+      <h1 className="mb-6 text-2xl font-bold text-zinc-200">Редагувати: {category.slugBase}</h1>
       <CategoryForm category={category} services={Array.from(grouped.values())} />
     </div>
   )

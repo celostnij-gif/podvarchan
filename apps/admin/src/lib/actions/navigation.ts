@@ -13,7 +13,7 @@ import { revalidatePublic, revalidateAdmin, getHomeRevalidatePaths } from '@/lib
 
 async function requireSettings(): Promise<string> {
   const user = await getCurrentUser()
-  if (!user || !canManageSettings(user.role)) throw new Error('Forbidden')
+  if (!user || !canManageSettings(user.role)) throw new Error('Заборонено')
   return user.id
 }
 
@@ -44,11 +44,11 @@ export async function saveNavigationItem(data: FormData) {
     href: data.get('href'), labelRu: data.get('labelRu'), labelUk: data.get('labelUk'),
     sortOrder: data.get('sortOrder'), isEnabled: data.get('isEnabled') === 'on' || data.get('isEnabled') === 'true',
   })
-  if (!parsed.success) throw new Error(`Validation error: ${parsed.error.message}`)
+  if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
   const item = parsed.data
   if (id) {
     const existing = await db.select().from(navigationItems).where(eq(navigationItems.id, id)).get()
-    if (!existing) throw new Error('Nav item not found')
+    if (!existing) throw new Error('Пункт навігації не знайдено')
     await db.update(navigationItems).set({
       location: item.location, href: item.href || null,
       parentId: item.parentId || null, labelRu: item.labelRu || null, labelUk: item.labelUk || null,
@@ -73,7 +73,7 @@ export async function deleteNavigationItem(id: string) {
   const userId = await requireSettings()
   const db = await getActionDb()
   const existing = await db.select().from(navigationItems).where(eq(navigationItems.id, id)).get()
-  if (!existing) throw new Error('Nav item not found')
+  if (!existing) throw new Error('Пункт навігації не знайдено')
   await db.delete(navigationItems).where(eq(navigationItems.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'NAVIGATION', entityId: id, before: existing })
   revalidateAdmin('/admin/navigation', '/admin/settings')
@@ -85,7 +85,7 @@ export async function toggleNavigationItem(id: string) {
   const userId = await requireSettings()
   const db = await getActionDb()
   const existing = await db.select().from(navigationItems).where(eq(navigationItems.id, id)).get()
-  if (!existing) throw new Error('Nav item not found')
+  if (!existing) throw new Error('Пункт навігації не знайдено')
   await db.update(navigationItems).set({ isEnabled: !existing.isEnabled }).where(eq(navigationItems.id, id))
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'NAVIGATION', entityId: id, before: existing, after: { isEnabled: !existing.isEnabled } })
   revalidateAdmin('/admin/navigation', '/admin/settings')

@@ -16,7 +16,7 @@ export interface YmylTranslation {
 export async function requirePublish(): Promise<void> {
   const user = await getCurrentUser()
   if (!user || !canPublish(user.role)) {
-    throw new Error('Only OWNER or ADMIN can publish')
+    throw new Error('Лише ВЛАСНИК або АДМІН можуть публікувати')
   }
 }
 
@@ -27,10 +27,10 @@ export function assertBilingual(
   label: string,
 ): void {
   if (!ru?.title || !ru?.slug) {
-    throw new Error(`${label}: RU translation must have a non-empty title and slug`)
+    throw new Error(`${label}: RU переклад повинен мати непорожній заголовок та slug`)
   }
   if (!uk?.title || !uk?.slug) {
-    throw new Error(`${label}: UK translation must have a non-empty title and slug`)
+    throw new Error(`${label}: UK переклад повинен мати непорожній заголовок та slug`)
   }
 }
 
@@ -57,7 +57,7 @@ export async function assertMetaPresent(
   const hasLongMeta = metaText.length >= 50
   if (!metaDesc && !hasLongMeta) {
     throw new Error(
-      `${label}: must have a meta description (seo_meta.description or excerpt/description ≥ 50 chars)`,
+      `${label}: повинен мати мета-опис (seo_meta.description або excerpt/description ≥ 50 символів)`,
     )
   }
 }

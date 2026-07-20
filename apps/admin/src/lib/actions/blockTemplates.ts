@@ -21,7 +21,7 @@ export interface BlockTemplate {
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
-  if (!user || !canEditContent(user.role)) throw new Error('Forbidden')
+  if (!user || !canEditContent(user.role)) throw new Error('Заборонено')
   return user.id
 }
 

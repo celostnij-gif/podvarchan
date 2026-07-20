@@ -18,7 +18,7 @@ import { requirePublish, assertBilingual, assertMetaPresent } from './ymyl'
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
-  if (!user || !canEditContent(user.role)) throw new Error('Forbidden')
+  if (!user || !canEditContent(user.role)) throw new Error('Заборонено')
   return user.id
 }
 
@@ -77,7 +77,7 @@ export async function createCategory(formData: FormData) {
     slugBase: formData.get('slugBase'), serviceId: formData.get('serviceId'),
     sortOrder: formData.get('sortOrder'), translations,
   })
-  if (!parsed.success) throw new Error(`Validation error: ${parsed.error.message}`)
+  if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
   const data = parsed.data
   const id = crypto.randomUUID()
   const ts = await now()
@@ -102,7 +102,7 @@ export async function updateCategory(id: string, formData: FormData) {
   const userId = await requireEdit()
   const db = await getActionDb()
   const existing = await db.select().from(blogCategories).where(eq(blogCategories.id, id)).get()
-  if (!existing) throw new Error('Category not found')
+  if (!existing) throw new Error('Категорію не знайдено')
   const translations = [
     { locale: 'ru', slug: formData.get('ru_slug'), name: formData.get('ru_name'), description: formData.get('ru_description') },
     { locale: 'uk', slug: formData.get('uk_slug'), name: formData.get('uk_name'), description: formData.get('uk_description') },
@@ -111,7 +111,7 @@ export async function updateCategory(id: string, formData: FormData) {
     slugBase: formData.get('slugBase'), serviceId: formData.get('serviceId'),
     sortOrder: formData.get('sortOrder'), translations,
   })
-  if (!parsed.success) throw new Error(`Validation error: ${parsed.error.message}`)
+  if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
   const data = parsed.data
   await db.update(blogCategories).set({ slugBase: data.slugBase, serviceId: data.serviceId || null, sortOrder: data.sortOrder }).where(eq(blogCategories.id, id))
   for (const t of data.translations) {
@@ -138,7 +138,7 @@ export async function deleteCategory(id: string) {
   const userId = await requireEdit()
   const db = await getActionDb()
   const existing = await db.select().from(blogCategories).where(eq(blogCategories.id, id)).get()
-  if (!existing) throw new Error('Category not found')
+  if (!existing) throw new Error('Категорію не знайдено')
   await db.delete(blogCategories).where(eq(blogCategories.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'BLOG_CATEGORY', entityId: id, before: existing })
   revalidateAdmin('/admin/blog/categories')
@@ -162,7 +162,7 @@ export async function createPost(formData: FormData) {
     publishedAt: formData.get('publishedAt'), scheduledAt: formData.get('scheduledAt'),
     status: formData.get('status'), translations,
   })
-  if (!parsed.success) throw new Error(`Validation error: ${parsed.error.message}`)
+  if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
   const data = parsed.data
   if (data.status === 'PUBLISHED') {
     await requirePublish()
@@ -199,7 +199,7 @@ export async function updatePost(id: string, formData: FormData) {
   const userId = await requireEdit()
   const db = await getActionDb()
   const existing = await db.select().from(blogPosts).where(eq(blogPosts.id, id)).get()
-  if (!existing) throw new Error('Post not found')
+  if (!existing) throw new Error('Публікацію не знайдено')
   const translations = [
     { locale: 'ru', slug: formData.get('ru_slug'), title: formData.get('ru_title'), excerpt: formData.get('ru_excerpt'), contentJson: formData.get('ru_contentJson'), contentHtml: formData.get('ru_contentHtml'), tableOfContentsJson: formData.get('ru_tableOfContentsJson'), faqJson: formData.get('ru_faqJson') },
     { locale: 'uk', slug: formData.get('uk_slug'), title: formData.get('uk_title'), excerpt: formData.get('uk_excerpt'), contentJson: formData.get('uk_contentJson'), contentHtml: formData.get('uk_contentHtml'), tableOfContentsJson: formData.get('uk_tableOfContentsJson'), faqJson: formData.get('uk_faqJson') },
@@ -210,7 +210,7 @@ export async function updatePost(id: string, formData: FormData) {
     publishedAt: formData.get('publishedAt'), scheduledAt: formData.get('scheduledAt'),
     status: formData.get('status'), translations,
   })
-  if (!parsed.success) throw new Error(`Validation error: ${parsed.error.message}`)
+  if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
   const data = parsed.data
   if (data.status === 'PUBLISHED') {
     await requirePublish()
@@ -296,7 +296,7 @@ export async function deletePost(id: string) {
   const userId = await requireEdit()
   const db = await getActionDb()
   const existing = await db.select().from(blogPosts).where(eq(blogPosts.id, id)).get()
-  if (!existing) throw new Error('Post not found')
+  if (!existing) throw new Error('Публікацію не знайдено')
   await db.delete(blogPosts).where(eq(blogPosts.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'BLOG_POST', entityId: id, before: existing })
   revalidateAdmin('/admin/blog/posts')
@@ -308,14 +308,14 @@ export async function publishPost(id: string) {
   const userId = await requireEdit()
   const db = await getActionDb()
   const existing = await db.select().from(blogPosts).where(eq(blogPosts.id, id)).get()
-  if (!existing) throw new Error('Post not found')
+  if (!existing) throw new Error('Публікацію не знайдено')
 
   const newStatus = existing.status === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED'
 
   // YMYL: only OWNER/ADMIN can publish
   if (newStatus === 'PUBLISHED') {
     const user = await getCurrentUser()
-    if (!user || !canPublish(user.role)) throw new Error('Only OWNER or ADMIN can publish')
+    if (!user || !canPublish(user.role)) throw new Error('Лише ВЛАСНИК або АДМІН можуть публікувати')
 
     // Load ru + uk translations
     const translations = await db
@@ -328,8 +328,8 @@ export async function publishPost(id: string) {
     const ukTr = translations.find(t => t.locale === 'uk')
 
     // Require non-empty: ru.title, ru.slug, uk.title, uk.slug
-    if (!ruTr?.title || !ruTr?.slug) throw new Error('RU translation must have non-empty title and slug')
-    if (!ukTr?.title || !ukTr?.slug) throw new Error('UK translation must have non-empty title and slug')
+    if (!ruTr?.title || !ruTr?.slug) throw new Error('RU переклад повинен мати непорожній заголовок та slug')
+    if (!ukTr?.title || !ukTr?.slug) throw new Error('UK переклад повинен мати непорожній заголовок та slug')
 
     // Require meta description (seo_meta.description OR excerpt >= 50 chars)
     const meta = ruTr.seoMetaId
@@ -337,7 +337,7 @@ export async function publishPost(id: string) {
       : null
     const hasMetaDesc = meta?.description && meta.description.length > 0
     const hasExcerpt = ruTr.excerpt && ruTr.excerpt.length >= 50
-    if (!hasMetaDesc && !hasExcerpt) throw new Error('Post must have a meta description (seo_meta.description or excerpt >= 50 chars)')
+    if (!hasMetaDesc && !hasExcerpt) throw new Error('Публікація повинна мати мета-опис (seo_meta.description або excerpt >= 50 символів)')
   }
 
   await db.update(blogPosts).set({ status: newStatus, updatedAt: await now() }).where(eq(blogPosts.id, id))

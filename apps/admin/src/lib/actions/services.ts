@@ -15,13 +15,13 @@ import { requirePublish, assertBilingual, assertMetaPresent } from './ymyl'
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
-  if (!user || !canEditContent(user.role)) throw new Error('Forbidden')
+  if (!user || !canEditContent(user.role)) throw new Error('Заборонено')
   return user.id
 }
 
 async function requireDelete(): Promise<string> {
   const user = await getCurrentUser()
-  if (!user || !canDelete(user.role)) throw new Error('Forbidden — only OWNER can delete')
+  if (!user || !canDelete(user.role)) throw new Error('Заборонено — лише ВЛАСНИК може видаляти')
   return user.id
 }
 
@@ -98,7 +98,7 @@ export async function createService(formData: FormData) {
 
   const parsed = serviceSchema.safeParse(raw)
   if (!parsed.success) {
-    throw new Error(`Validation error: ${parsed.error.message}`)
+    throw new Error(`Помилка валідації: ${parsed.error.message}`)
   }
 
   const data = parsed.data
@@ -115,7 +115,7 @@ export async function createService(formData: FormData) {
   // Slug uniqueness
   const existing = await db.select().from(services).where(eq(services.slugBase, data.slugBase)).get()
   if (existing) {
-    throw new Error(`Service with slugBase "${data.slugBase}" already exists`)
+    throw new Error(`Послуга з slugBase "${data.slugBase}" вже існує`)
   }
 
   await db.insert(services).values({
@@ -149,7 +149,7 @@ export async function updateService(id: string, formData: FormData) {
   const db = await getActionDb()
 
   const existing = await db.select().from(services).where(eq(services.id, id)).get()
-  if (!existing) throw new Error('Service not found')
+  if (!existing) throw new Error('Послугу не знайдено')
 
   const raw: Record<string, unknown> = {
     slugBase: formData.get('slugBase'), icon: formData.get('icon'),
@@ -161,7 +161,7 @@ export async function updateService(id: string, formData: FormData) {
 
   const parsed = serviceSchema.safeParse(raw)
   if (!parsed.success) {
-    throw new Error(`Validation error: ${parsed.error.message}`)
+    throw new Error(`Помилка валідації: ${parsed.error.message}`)
   }
 
   const data = parsed.data
@@ -265,7 +265,7 @@ export async function deleteService(id: string) {
   const db = await getActionDb()
 
   const existing = await db.select().from(services).where(eq(services.id, id)).get()
-  if (!existing) throw new Error('Service not found')
+  if (!existing) throw new Error('Послугу не знайдено')
 
   await db.delete(services).where(eq(services.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'SERVICE', entityId: id, before: existing })
@@ -279,14 +279,14 @@ export async function publishService(id: string) {
   const db = await getActionDb()
 
   const existing = await db.select().from(services).where(eq(services.id, id)).get()
-  if (!existing) throw new Error('Service not found')
+  if (!existing) throw new Error('Послугу не знайдено')
 
   const newStatus = existing.status === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED'
 
   // YMYL: only OWNER/ADMIN can publish
   if (newStatus === 'PUBLISHED') {
     const user = await getCurrentUser()
-    if (!user || !canPublish(user.role)) throw new Error('Only OWNER or ADMIN can publish')
+    if (!user || !canPublish(user.role)) throw new Error('Лише ВЛАСНИК або АДМІН можуть публікувати')
 
     const translations = await db
       .select()
@@ -297,8 +297,8 @@ export async function publishService(id: string) {
     const ruTr = translations.find(t => t.locale === 'ru')
     const ukTr = translations.find(t => t.locale === 'uk')
 
-    if (!ruTr?.title || !ruTr?.slug) throw new Error('RU translation must have non-empty title and slug')
-    if (!ukTr?.title || !ukTr?.slug) throw new Error('UK translation must have non-empty title and slug')
+    if (!ruTr?.title || !ruTr?.slug) throw new Error('RU переклад повинен мати непорожній заголовок та slug')
+    if (!ukTr?.title || !ukTr?.slug) throw new Error('UK переклад повинен мати непорожній заголовок та slug')
 
     // Require meta description
     const meta = ruTr.seoMetaId
@@ -306,7 +306,7 @@ export async function publishService(id: string) {
       : null
     const hasMetaDesc = meta?.description && meta.description.length > 0
     const hasDesc = ruTr.description && ruTr.description.length >= 50
-    if (!hasMetaDesc && !hasDesc) throw new Error('Service must have a meta description (seo_meta.description or description >= 50 chars)')
+    if (!hasMetaDesc && !hasDesc) throw new Error('Послуга повинна мати мета-опис (seo_meta.description або description >= 50 символів)')
   }
 
   await db.update(services).set({ status: newStatus, updatedAt: await now() }).where(eq(services.id, id))

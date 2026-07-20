@@ -31,7 +31,7 @@ export function RedirectRulesList({ rules }: Props) {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Удалить правило редиректа?')) return
+    if (!confirm('Видалити правило редиректу?')) return
     await deleteRedirectRule(id)
   }
 
@@ -40,7 +40,7 @@ export function RedirectRulesList({ rules }: Props) {
       <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3">
         {rule && <input type="hidden" name="id" value={rule.id} />}
         <div>
-          <label className="block text-xs font-medium text-zinc-500 mb-1">Откуда</label>
+          <label className="block text-xs font-medium text-zinc-500 mb-1">Звідки</label>
           <input
             name="fromPath"
             defaultValue={rule?.fromPath ?? ''}
@@ -51,7 +51,7 @@ export function RedirectRulesList({ rules }: Props) {
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-zinc-500 mb-1">Куда</label>
+          <label className="block text-xs font-medium text-zinc-500 mb-1">Куди</label>
           <input
             name="toPath"
             defaultValue={rule?.toPath ?? ''}
@@ -69,8 +69,8 @@ export function RedirectRulesList({ rules }: Props) {
             className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200
                        focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
           >
-            <option value={301}>301 (постоянный)</option>
-            <option value={302}>302 (временный)</option>
+            <option value={301}>301 (постійний)</option>
+            <option value={302}>302 (тимчасовий)</option>
           </select>
         </div>
         <div className="flex items-center gap-3 pb-0.5">
@@ -88,14 +88,14 @@ export function RedirectRulesList({ rules }: Props) {
             disabled={loading}
             className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-500 disabled:opacity-50 transition-colors"
           >
-            {loading ? '…' : 'Сохранить'}
+            {loading ? '…' : 'Зберегти'}
           </button>
           <button
             type="button"
             onClick={() => setEditing(null)}
             className="rounded-lg px-4 py-2 text-sm text-zinc-400 hover:bg-zinc-800 transition-colors"
           >
-            Отмена
+            Скасувати
           </button>
         </div>
       </form>
@@ -109,15 +109,15 @@ export function RedirectRulesList({ rules }: Props) {
       {/* Stats bar */}
       <div className="flex items-center justify-between text-xs text-zinc-500 border-b border-zinc-800 pb-2">
         <span>
-          Всего правил: <strong className="text-zinc-300">{rules.length}</strong>
+          Всього правил: <strong className="text-zinc-300">{rules.length}</strong>
           {' · '}
           Активно: <strong className="text-green-400">{totalEnabled}</strong>
           {' · '}
-          Отключено: <strong className="text-zinc-500">{rules.length - totalEnabled}</strong>
+          Вимкнено: <strong className="text-zinc-500">{rules.length - totalEnabled}</strong>
         </span>
         {rules.length > 0 && (
           <span className="text-zinc-600">
-            Всего переходов: {rules.reduce((sum, r) => sum + (r.hitCount ?? 0), 0)}
+            Всього переходів: {rules.reduce((sum, r) => sum + (r.hitCount ?? 0), 0)}
           </span>
         )}
       </div>
@@ -126,8 +126,8 @@ export function RedirectRulesList({ rules }: Props) {
       {rules.length === 0 && !editing && (
         <div className="flex flex-col items-center justify-center py-12 text-zinc-600 border border-dashed border-zinc-800 rounded-lg">
           <ExternalLink className="h-8 w-8 mb-2 opacity-50" />
-          <p className="text-sm">Нет правил редиректа</p>
-          <p className="text-xs mt-1">Добавьте правило, чтобы настроить перенаправление URL</p>
+          <p className="text-sm">Немає правил редиректу</p>
+          <p className="text-xs mt-1">Додайте правило, щоб налаштувати перенаправлення URL</p>
         </div>
       )}
 
@@ -169,7 +169,7 @@ export function RedirectRulesList({ rules }: Props) {
 
               {/* Disabled badge */}
               {!r.isEnabled && (
-                <span className="shrink-0 text-xs text-red-500 font-medium">отключено</span>
+                <span className="shrink-0 text-xs text-red-500 font-medium">вимкнено</span>
               )}
 
               <div className="flex-1" />
@@ -179,21 +179,21 @@ export function RedirectRulesList({ rules }: Props) {
                 <button
                   onClick={() => toggleRedirectRule(r.id)}
                   className="rounded p-1.5 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300 transition-colors"
-                  title={r.isEnabled ? 'Отключить' : 'Включить'}
+                  title={r.isEnabled ? 'Вимкнути' : 'Увімкнути'}
                 >
                   {r.isEnabled ? <Power className="h-3.5 w-3.5" /> : <PowerOff className="h-3.5 w-3.5" />}
                 </button>
                 <button
                   onClick={() => setEditing(r.id)}
                   className="rounded p-1.5 text-zinc-500 hover:bg-zinc-800 hover:text-amber-400 transition-colors"
-                  title="Редактировать"
+                  title="Редагувати"
                 >
                   <Pencil className="h-3.5 w-3.5" />
                 </button>
                 <button
                   onClick={() => handleDelete(r.id)}
                   className="rounded p-1.5 text-zinc-500 hover:bg-zinc-800 hover:text-red-400 transition-colors"
-                  title="Удалить"
+                  title="Видалити"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
@@ -210,13 +210,13 @@ export function RedirectRulesList({ rules }: Props) {
           className="flex items-center gap-2 rounded-lg border border-dashed border-zinc-700/50 py-3 px-4 w-full text-sm text-zinc-500 hover:border-zinc-600 hover:text-zinc-400 transition-colors"
         >
           <Plus className="h-4 w-4" />
-          Добавить правило
+          Додати правило
         </button>
       )}
 
       {editing === '__new__' && (
         <div className="rounded-lg border border-zinc-700/50 bg-zinc-800/40 p-4">
-          <p className="text-xs font-medium text-zinc-400 mb-3">Новое правило редиректа</p>
+          <p className="text-xs font-medium text-zinc-400 mb-3">Нове правило редиректу</p>
           {renderForm()}
         </div>
       )}

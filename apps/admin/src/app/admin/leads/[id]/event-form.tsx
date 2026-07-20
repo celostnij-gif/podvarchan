@@ -13,7 +13,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="mt-2 rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 disabled:opacity-50"
+      className="mt-2 rounded-md hover:bg-zinc-800 bg-zinc-800 text-zinc-200 px-3 py-2 text-sm font-medium disabled:opacity-50"
     >
       {pending ? 'Додавання...' : 'Додати подію'}
     </button>
@@ -28,13 +28,13 @@ export function AddEventForm({ leadId }: Props) {
         type="text"
         required
         placeholder="Тип події (напр. PHONE_CALL, EMAIL, NOTE...)"
-        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        className="w-full rounded-md border border-zinc-700 px-3 py-2 text-sm shadow-sm focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
       />
       <textarea
         name="note"
         rows={2}
         placeholder="Примітка до події..."
-        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        className="w-full rounded-md border border-zinc-700 px-3 py-2 text-sm shadow-sm focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
       />
       <SubmitButton />
     </form>

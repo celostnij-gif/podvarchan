@@ -8,7 +8,7 @@ import { getActionDb } from './db'
 
 async function requireAuditView(): Promise<void> {
   const user = await getCurrentUser()
-  if (!user || !canManageSettings(user.role)) throw new Error('Forbidden')
+  if (!user || !canManageSettings(user.role)) throw new Error('Заборонено')
 }
 
 export interface AuditLogFilters {

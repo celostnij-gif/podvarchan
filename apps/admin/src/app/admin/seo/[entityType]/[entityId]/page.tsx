@@ -121,33 +121,33 @@ export default async function SeoDetailPage(props: Props) {
     <div className="max-w-4xl">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-zinc-200">
           SEO: {entityType} / {entityId.slice(0, 8)}...
         </h1>
-        <p className="mt-1 text-sm text-gray-500">
-          <a href={entityUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+        <p className="mt-1 text-sm text-zinc-500">
+          <a href={entityUrl} target="_blank" rel="noopener noreferrer" className="text-amber-500 hover:underline">
             {entityUrl}
           </a>
         </p>
       </div>
 
       {/* Google Snippet Preview */}
-      <div className="mb-8 rounded-lg border border-gray-200 bg-white p-4">
-        <h2 className="mb-3 text-sm font-semibold text-gray-700">Google Snippet Preview</h2>
-        <div className="rounded border border-gray-300 bg-white p-3" style={{ maxWidth: 600 }}>
-          <div className="text-xs text-green-700">{entityUrl.replace(/^\/(ru|uk)\//, 'Podvarchan.com › ').replace(/\/$/, '')}</div>
-          <div className="text-[18px] font-medium leading-6 text-blue-800 hover:underline">
-            {ruSeoOverride?.title ?? ruEntry.title ?? 'No title'}
+      <div className="mb-8 rounded-lg border border-zinc-700 bg-zinc-800/50 p-4">
+        <h2 className="mb-3 text-sm font-semibold text-zinc-300">Попередній перегляд сниппета Google</h2>
+        <div className="rounded border border-zinc-700 bg-zinc-800/80 p-3" style={{ maxWidth: 600 }}>
+          <div className="text-xs text-green-400">{entityUrl.replace(/^\/(ru|uk)\//, 'Podvarchan.com › ').replace(/\/$/, '')}</div>
+          <div className="text-[18px] font-medium leading-6 text-blue-300 hover:underline">
+            {ruSeoOverride?.title ?? ruEntry.title ?? 'Без заголовка'}
           </div>
-          <div className="mt-1 text-sm leading-5 text-gray-600">
-            {ruSeoOverride?.description ?? ruEntry.description ?? 'No description'}
+          <div className="mt-1 text-sm leading-5 text-zinc-400">
+            {ruSeoOverride?.description ?? ruEntry.description ?? 'Без опису'}
           </div>
         </div>
       </div>
 
       {/* SEO Edit Form */}
-      <div className="mb-8 rounded-lg border border-gray-200 bg-white p-6">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">SEO Override — RU</h2>
+      <div className="mb-8 rounded-lg border border-zinc-700 bg-zinc-800/50 p-6">
+        <h2 className="mb-4 text-lg font-semibold text-zinc-200">SEO-перевизначення — RU</h2>
         <SeoEditForm
           entityType={entityType}
           entityId={entityId}
@@ -164,8 +164,8 @@ export default async function SeoDetailPage(props: Props) {
       </div>
 
       {ukEntry && (
-        <div className="mb-8 rounded-lg border border-gray-200 bg-white p-6">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">SEO Override — UK</h2>
+        <div className="mb-8 rounded-lg border border-zinc-700 bg-zinc-800/50 p-6">
+          <h2 className="mb-4 text-lg font-semibold text-zinc-200">SEO-перевизначення — UK</h2>
           <SeoEditForm
             entityType={entityType}
             entityId={entityId}
@@ -183,17 +183,17 @@ export default async function SeoDetailPage(props: Props) {
       )}
 
       {/* YMYL Check */}
-      <div className="mb-8 rounded-lg border border-gray-200 bg-white p-6">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">
+      <div className="mb-8 rounded-lg border border-zinc-700 bg-zinc-800/50 p-6">
+        <h2 className="mb-4 text-lg font-semibold text-zinc-200">
           YMYL Assessment
-          {ymylResult.isYmyl && <span className="ml-2 rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">Medical</span>}
+          {ymylResult.isYmyl && <span className="ml-2 rounded bg-amber-900/30 px-2 py-0.5 text-xs font-medium text-amber-400 border border-amber-700/30">Medical</span>}
         </h2>
         {ymylResult.isYmyl ? (
           <div>
             {ymylResult.signals.length > 0 && (
               <div className="mb-3">
-                <h3 className="mb-1 text-sm font-medium text-green-700">✓ E-E-A-T Signals Present</h3>
-                <ul className="list-inside list-disc text-sm text-green-600">
+                <h3 className="mb-1 text-sm font-medium text-green-400">✓ E-E-A-T Signals Present</h3>
+                <ul className="list-inside list-disc text-sm text-green-400">
                   {ymylResult.signals.map((s, i) => (
                     <li key={i}>{s}</li>
                   ))}
@@ -202,8 +202,8 @@ export default async function SeoDetailPage(props: Props) {
             )}
             {ymylResult.missing.length > 0 && (
               <div>
-                <h3 className="mb-1 text-sm font-medium text-red-700">✗ Missing Signals</h3>
-                <ul className="list-inside list-disc text-sm text-red-600">
+                <h3 className="mb-1 text-sm font-medium text-red-400">✗ Missing Signals</h3>
+                <ul className="list-inside list-disc text-sm text-red-400">
                   {ymylResult.missing.map((m, i) => (
                     <li key={i}>{m}</li>
                   ))}
@@ -212,7 +212,7 @@ export default async function SeoDetailPage(props: Props) {
             )}
           </div>
         ) : (
-          <p className="text-sm text-gray-500">This content type does not require YMYL assessment.</p>
+          <p className="text-sm text-zinc-500">This content type does not require YMYL assessment.</p>
         )}
       </div>
     </div>

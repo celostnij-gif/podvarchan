@@ -24,7 +24,7 @@ export default async function AuditPage(props: Props) {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Аудит</h1>
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-zinc-500">
         Журнал дій адміністраторів та редакторів.
       </p>
       <AuditFilters entityTypes={entityTypes} actions={actions} />

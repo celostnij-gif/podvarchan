@@ -13,7 +13,7 @@ import { revalidatePublic, revalidateAdmin, getHomeRevalidatePaths } from '@/lib
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
-  if (!user || !canEditContent(user.role)) throw new Error('Forbidden')
+  if (!user || !canEditContent(user.role)) throw new Error('Заборонено')
   return user.id
 }
 
@@ -44,7 +44,7 @@ export async function createTestimonial(formData: FormData) {
     rating: formData.get('rating'), source: formData.get('source'),
     sortOrder: formData.get('sortOrder'), status: formData.get('status'), translations,
   })
-  if (!parsed.success) throw new Error(`Validation error: ${parsed.error.message}`)
+  if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
   const data = parsed.data
   const id = crypto.randomUUID()
   const ts = new Date().toISOString()
@@ -70,7 +70,7 @@ export async function updateTestimonial(id: string, formData: FormData) {
   const userId = await requireEdit()
   const db = await getActionDb()
   const existing = await db.select().from(testimonials).where(eq(testimonials.id, id)).get()
-  if (!existing) throw new Error('Testimonial not found')
+  if (!existing) throw new Error('Відгук не знайдено')
   const translations = [
     { locale: 'ru' as const, text: formData.get('ru_text'), problem: formData.get('ru_problem'), result: formData.get('ru_result') },
     { locale: 'uk' as const, text: formData.get('uk_text'), problem: formData.get('uk_problem'), result: formData.get('uk_result') },
@@ -80,7 +80,7 @@ export async function updateTestimonial(id: string, formData: FormData) {
     rating: formData.get('rating'), source: formData.get('source'),
     sortOrder: formData.get('sortOrder'), status: formData.get('status'), translations,
   })
-  if (!parsed.success) throw new Error(`Validation error: ${parsed.error.message}`)
+  if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
   const data = parsed.data
   await db.update(testimonials).set({
     clientName: data.clientName || null, clientAge: data.clientAge,
@@ -109,7 +109,7 @@ export async function deleteTestimonial(id: string) {
   const userId = await requireEdit()
   const db = await getActionDb()
   const existing = await db.select().from(testimonials).where(eq(testimonials.id, id)).get()
-  if (!existing) throw new Error('Testimonial not found')
+  if (!existing) throw new Error('Відгук не знайдено')
   await db.delete(testimonials).where(eq(testimonials.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'TESTIMONIAL', entityId: id, before: existing })
   revalidateAdmin('/admin/testimonials')
@@ -121,15 +121,15 @@ export async function publishTestimonial(id: string) {
   const userId = await requireEdit()
   const db = await getActionDb()
   const existing = await db.select().from(testimonials).where(eq(testimonials.id, id)).get()
-  if (!existing) throw new Error('Testimonial not found')
+  if (!existing) throw new Error('Відгук не знайдено')
   const newStatus = existing.status === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED'
 
   // YMYL: only OWNER/ADMIN can publish, requires consent
   if (newStatus === 'PUBLISHED') {
     const user = await getCurrentUser()
-    if (!user || !canPublish(user.role)) throw new Error('Only OWNER or ADMIN can publish testimonials')
+    if (!user || !canPublish(user.role)) throw new Error('Лише ВЛАСНИК або АДМІН можуть публікувати відгуки')
 
-    if (!existing.consentConfirmed) throw new Error('Cannot publish testimonial without confirmed consent')
+    if (!existing.consentConfirmed) throw new Error('Неможливо опублікувати відгук без підтвердженої згоди')
 
     const translations = await db
       .select()
@@ -140,8 +140,8 @@ export async function publishTestimonial(id: string) {
     const ruTr = translations.find(t => t.locale === 'ru')
     const ukTr = translations.find(t => t.locale === 'uk')
 
-    if (!ruTr?.text) throw new Error('RU testimonial text is required for publishing')
-    if (!ukTr?.text) throw new Error('UK testimonial text is required for publishing')
+    if (!ruTr?.text) throw new Error('RU текст відгуку обов\'язковий для публікації')
+    if (!ukTr?.text) throw new Error('UK текст відгуку обов\'язковий для публікації')
   }
 
   await db.update(testimonials).set({ status: newStatus }).where(eq(testimonials.id, id))

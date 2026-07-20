@@ -12,7 +12,7 @@ export function DeleteButton({ pageId, pageTitle }: DeleteButtonProps) {
     <form
       action={deletePage.bind(null, pageId)}
       onSubmit={(e) => {
-        if (!confirm(`Удалить страницу «${pageTitle}»?`)) {
+        if (!confirm(`Видалити сторінку «${pageTitle}»?`)) {
           e.preventDefault()
         }
       }}
@@ -21,7 +21,7 @@ export function DeleteButton({ pageId, pageTitle }: DeleteButtonProps) {
         type="submit"
         className="rounded px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
       >
-        Удалить
+        Видалити
       </button>
     </form>
   )

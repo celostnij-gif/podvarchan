@@ -11,7 +11,7 @@ import { writeAuditLog } from '@/lib/audit/log'
 
 async function requireManageUsers(): Promise<string> {
   const user = await getCurrentUser()
-  if (!user || !canManageUsers(user.role)) throw new Error('Forbidden')
+  if (!user || !canManageUsers(user.role)) throw new Error('Заборонено')
   return user.id
 }
 
@@ -33,11 +33,11 @@ export async function updateUser(id: string, formData: FormData) {
   const userId = await requireManageUsers()
   const db = await getActionDb()
   const existing = await db.select().from(users).where(eq(users.id, id)).get()
-  if (!existing) throw new Error('User not found')
+  if (!existing) throw new Error('Користувача не знайдено')
   const parsed = updateUserSchema.safeParse({
     name: formData.get('name'), role: formData.get('role'), isActive: formData.get('isActive'),
   })
-  if (!parsed.success) throw new Error(`Validation error: ${parsed.error.message}`)
+  if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
   const data = parsed.data
   const updateData: Record<string, unknown> = { updatedAt: await now() }
   if (data.name !== undefined) updateData.name = data.name
@@ -52,7 +52,7 @@ export async function deleteUser(id: string) {
   const userId = await requireManageUsers()
   const db = await getActionDb()
   const existing = await db.select().from(users).where(eq(users.id, id)).get()
-  if (!existing) throw new Error('User not found')
+  if (!existing) throw new Error('Користувача не знайдено')
   await db.delete(users).where(eq(users.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'USER', entityId: id, before: existing })
   revalidatePath('/admin/users')

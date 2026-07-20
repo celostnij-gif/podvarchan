@@ -12,7 +12,7 @@ import { writeAuditLog } from '@/lib/audit/log'
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
-  if (!user || !canEditContent(user.role)) throw new Error('Forbidden')
+  if (!user || !canEditContent(user.role)) throw new Error('Заборонено')
   return user.id
 }
 
@@ -35,12 +35,12 @@ export async function updateMediaMeta(id: string, formData: FormData) {
   const userId = await requireEdit()
   const db = await getActionDb()
   const existing = await db.select().from(mediaAssets).where(eq(mediaAssets.id, id)).get()
-  if (!existing) throw new Error('Media not found')
+  if (!existing) throw new Error('Медіа не знайдено')
   const parsed = mediaSchema.safeParse({
     altRu: formData.get('altRu'), altUk: formData.get('altUk'),
     captionRu: formData.get('captionRu'), captionUk: formData.get('captionUk'),
   })
-  if (!parsed.success) throw new Error(`Validation error: ${parsed.error.message}`)
+  if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
   const data = parsed.data
   await db.update(mediaAssets).set({
     altRu: data.altRu || null, altUk: data.altUk || null,
@@ -55,7 +55,7 @@ export async function deleteMedia(id: string) {
   const userId = await requireEdit()
   const db = await getActionDb()
   const existing = await db.select().from(mediaAssets).where(eq(mediaAssets.id, id)).get()
-  if (!existing) throw new Error('Media not found')
+  if (!existing) throw new Error('Медіа не знайдено')
   await db.delete(mediaAssets).where(eq(mediaAssets.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'MEDIA', entityId: id, before: existing })
   revalidatePath('/admin/media')

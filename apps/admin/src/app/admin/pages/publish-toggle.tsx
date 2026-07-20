@@ -29,7 +29,7 @@ export function PublishToggle({ pageId, currentStatus }: PublishToggleProps) {
             : 'bg-yellow-100 text-yellow-800'
         }`}
       >
-        {isPublished ? 'Опубликовано' : 'Черновик'}
+        {isPublished ? 'Опубліковано' : 'Чернетка'}
       </button>
     </form>
   )

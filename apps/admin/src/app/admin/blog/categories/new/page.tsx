@@ -24,7 +24,7 @@ export default async function NewCategoryPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Нова категорія</h1>
+      <h1 className="mb-6 text-2xl font-bold text-zinc-200">Нова категорія</h1>
       <CategoryForm services={Array.from(grouped.values())} />
     </div>
   )

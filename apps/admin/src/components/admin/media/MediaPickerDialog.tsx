@@ -238,8 +238,8 @@ export function MediaPickerDialog({ open, onClose, onSelect }: Props) {
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-zinc-700 px-5 py-4">
-          <h2 className="text-lg font-semibold text-gray-100">Зображення</h2>
-          <button onClick={onClose} className="rounded-md p-1 text-gray-400 hover:bg-zinc-700 hover:text-gray-200">
+          <h2 className="text-lg font-semibold text-zinc-200">Зображення</h2>
+          <button onClick={onClose} className="rounded-md p-1 text-zinc-500 hover:bg-zinc-700 hover:text-zinc-300">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -252,13 +252,13 @@ export function MediaPickerDialog({ open, onClose, onSelect }: Props) {
             {/* Search */}
             <div className="px-5 py-3">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
                 <input
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Пошук..."
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800 py-2 pl-10 pr-3 text-sm text-gray-200 placeholder-gray-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
+                  className="w-full rounded-lg border border-zinc-700 bg-zinc-800 py-2 pl-10 pr-3 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
                 />
               </div>
             </div>
@@ -266,8 +266,8 @@ export function MediaPickerDialog({ open, onClose, onSelect }: Props) {
             {/* Grid */}
             <div className="max-h-80 overflow-y-auto px-5 pb-5">
               {images.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-sm text-gray-500">
-                  <ImageIcon className="mb-3 h-10 w-10 text-gray-600" />
+                <div className="flex flex-col items-center justify-center py-12 text-sm text-zinc-500">
+                  <ImageIcon className="mb-3 h-10 w-10 text-zinc-600" />
                   {query ? 'Нічого не знайдено.' : 'Медіатека порожня. Завантажте файли на вкладці «Завантажити».'}
                 </div>
               ) : (
@@ -288,16 +288,16 @@ export function MediaPickerDialog({ open, onClose, onSelect }: Props) {
                             loading="lazy"
                           />
                         ) : (
-                          <div className="flex h-full items-center justify-center text-gray-500">
+                          <div className="flex h-full items-center justify-center text-zinc-500">
                             <ImageIcon className="h-8 w-8" />
                           </div>
                         )}
                       </div>
-                      <div className="truncate px-1.5 py-1 text-xs text-gray-400" title={asset.originalName || ''}>
+                      <div className="truncate px-1.5 py-1 text-xs text-zinc-400" title={asset.originalName || ''}>
                         {asset.originalName || asset.fileName || '—'}
                       </div>
                       {asset.width && asset.height && (
-                        <div className="px-1.5 pb-1 text-[10px] text-gray-500">
+                        <div className="px-1.5 pb-1 text-[10px] text-zinc-500">
                           {asset.width}×{asset.height} {asset.size ? `· ${formatSize(asset.size)}` : ''}
                         </div>
                       )}
@@ -412,7 +412,7 @@ export function MediaPickerDialog({ open, onClose, onSelect }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md px-4 py-2 text-sm text-gray-300 hover:bg-zinc-700"
+            className="rounded-md px-4 py-2 text-sm text-zinc-400 hover:bg-zinc-700"
           >
             Скасувати
           </button>

@@ -26,7 +26,7 @@ export default async function NewPostPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Новий пост</h1>
+      <h1 className="mb-6 text-2xl font-bold text-zinc-200">Новий пост</h1>
       <PostForm categories={Array.from(grouped.values())} />
     </div>
   )

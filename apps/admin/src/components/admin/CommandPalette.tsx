@@ -28,9 +28,9 @@ interface QuickAction {
 }
 
 const QUICK_ACTIONS: QuickAction[] = [
-  { label: 'Новая статья', icon: FileText, href: '/admin/blog/new', shortcut: 'B' },
-  { label: 'Новая услуга', icon: Puzzle, href: '/admin/services/new', shortcut: 'S' },
-  { label: 'Загрузить медиа', icon: Upload, href: '/admin/media', shortcut: 'M' },
+  { label: 'Нова стаття', icon: FileText, href: '/admin/blog/new', shortcut: 'B' },
+  { label: 'Нова послуга', icon: Puzzle, href: '/admin/services/new', shortcut: 'S' },
+  { label: 'Завантажити медіа', icon: Upload, href: '/admin/media', shortcut: 'M' },
 ]
 
 const TYPE_ICONS: Record<string, LucideIcon> = {
@@ -140,7 +140,7 @@ export default function CommandPalette({ newLeadsCount: _newLeadsCount }: Comman
                 <input
                   ref={inputRef}
                   type="text"
-                  placeholder="Поиск..."
+                  placeholder="Пошук..."
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
@@ -195,11 +195,11 @@ export default function CommandPalette({ newLeadsCount: _newLeadsCount }: Comman
                 })}
 
                 {!query && filteredActions.length === 0 && (
-                  <p className="px-3 py-4 text-xs text-zinc-600 text-center">Быстрые действия</p>
+                  <p className="px-3 py-4 text-xs text-zinc-600 text-center">Швидкі дії</p>
                 )}
 
                 {query && !loading && allItems.length === 0 && (
-                  <p className="px-3 py-4 text-xs text-zinc-600 text-center">Ничего не найдено</p>
+                  <p className="px-3 py-4 text-xs text-zinc-600 text-center">Нічого не знайдено</p>
                 )}
               </div>
             </motion.div>

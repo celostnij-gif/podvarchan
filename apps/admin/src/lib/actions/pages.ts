@@ -15,13 +15,13 @@ import { requirePublish, assertBilingual, assertMetaPresent } from './ymyl'
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
-  if (!user || !canEditContent(user.role)) throw new Error('Forbidden')
+  if (!user || !canEditContent(user.role)) throw new Error('Заборонено')
   return user.id
 }
 
 async function requireDelete(): Promise<string> {
   const user = await getCurrentUser()
-  if (!user || !canDelete(user.role)) throw new Error('Forbidden')
+  if (!user || !canDelete(user.role)) throw new Error('Заборонено')
   return user.id
 }
 
@@ -253,7 +253,7 @@ export async function publishPage(id: string) {
   // YMYL: only OWNER/ADMIN can publish
   if (newStatus === 'PUBLISHED') {
     const user = await getCurrentUser()
-    if (!user || !canPublish(user.role)) throw new Error('Only OWNER or ADMIN can publish')
+    if (!user || !canPublish(user.role)) throw new Error('Лише ВЛАСНИК або АДМІН можуть публікувати')
 
     const translations = await db
       .select()
@@ -264,8 +264,8 @@ export async function publishPage(id: string) {
     const ruTr = translations.find(t => t.locale === 'ru')
     const ukTr = translations.find(t => t.locale === 'uk')
 
-    if (!ruTr?.title || !ruTr?.slug) throw new Error('RU translation must have non-empty title and slug')
-    if (!ukTr?.title || !ukTr?.slug) throw new Error('UK translation must have non-empty title and slug')
+    if (!ruTr?.title || !ruTr?.slug) throw new Error('RU переклад повинен мати непорожній заголовок та slug')
+    if (!ukTr?.title || !ukTr?.slug) throw new Error('UK переклад повинен мати непорожній заголовок та slug')
 
     // Require meta description
     const meta = ruTr.seoMetaId
@@ -273,7 +273,7 @@ export async function publishPage(id: string) {
       : null
     const hasMetaDesc = meta?.description && meta.description.length > 0
     const hasExcerpt = ruTr.excerpt && ruTr.excerpt.length >= 50
-    if (!hasMetaDesc && !hasExcerpt) throw new Error('Page must have a meta description (seo_meta.description or excerpt >= 50 chars)')
+    if (!hasMetaDesc && !hasExcerpt) throw new Error('Сторінка повинна мати мета-опис (seo_meta.description або excerpt >= 50 символів)')
   }
 
   const ts = now()

@@ -160,11 +160,11 @@ export function UploadZone() {
             : 'border-zinc-700 bg-zinc-800/40 hover:border-zinc-600 hover:bg-zinc-800/60'
           }`}
       >
-        <Upload className="mb-3 h-8 w-8 text-gray-400" />
-        <p className="text-sm font-medium text-gray-300">
+        <Upload className="mb-3 h-8 w-8 text-zinc-500" />
+        <p className="text-sm font-medium text-zinc-300">
           {isDragOver ? 'Відпустіть файли для завантаження' : 'Перетягніть файли сюди або натисніть для вибору'}
         </p>
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs text-zinc-500">
           Зображення автоматично конвертуються в WebP. Максимальний розмір — 10 MB
         </p>
         <input
@@ -180,7 +180,7 @@ export function UploadZone() {
       {/* Upload queue */}
       {hasItems && (
         <div className="space-y-2">
-          <div className="flex items-center justify-between text-xs text-gray-400">
+          <div className="flex items-center justify-between text-xs text-zinc-500">
             <span>
               {doneCount}/{items.length} завантажено
               {errorCount > 0 && `, ${errorCount} помилок`}
@@ -203,13 +203,13 @@ export function UploadZone() {
                   {item.preview ? (
                     <img src={item.preview} alt="" className="h-full w-full object-cover" />
                   ) : (
-                    <Upload className="h-4 w-4 text-gray-500" />
+                    <Upload className="h-4 w-4 text-zinc-500" />
                   )}
                 </div>
 
                 {/* Info */}
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm text-gray-200">{item.name}</p>
+                  <p className="truncate text-sm text-zinc-200">{item.name}</p>
 
                   {/* Progress bar */}
                   {item.status !== 'done' && item.status !== 'error' && (
@@ -234,7 +234,7 @@ export function UploadZone() {
                     </p>
                   )}
                   {item.status === 'uploading' && (
-                    <p className="mt-0.5 text-xs text-gray-400">Завантаження...</p>
+                    <p className="mt-0.5 text-xs text-zinc-400">Завантаження...</p>
                   )}
                   {item.status === 'error' && (
                     <p className="mt-0.5 flex items-center gap-1 text-xs text-red-400">
@@ -252,7 +252,7 @@ export function UploadZone() {
                 {item.status === 'done' ? (
                   <button
                     onClick={() => removeItem(item.id)}
-                    className="shrink-0 rounded-md p-1 text-gray-500 hover:bg-zinc-700 hover:text-gray-300"
+                    className="shrink-0 rounded-md p-1 text-zinc-500 hover:bg-zinc-700 hover:text-zinc-300"
                     title="Прибрати"
                   >
                     <X className="h-4 w-4" />
@@ -260,7 +260,7 @@ export function UploadZone() {
                 ) : (
                   <button
                     onClick={() => removeItem(item.id)}
-                    className="shrink-0 rounded-md p-1 text-gray-500 hover:bg-zinc-700 hover:text-gray-300"
+                    className="shrink-0 rounded-md p-1 text-zinc-500 hover:bg-zinc-700 hover:text-zinc-300"
                     title="Скасувати"
                   >
                     <X className="h-4 w-4" />
