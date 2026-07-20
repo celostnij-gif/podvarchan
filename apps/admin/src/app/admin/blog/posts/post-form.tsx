@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useState, useCallback } from 'react'
+import { useActionState, useState, useCallback, useRef, type FormEvent } from 'react'
 import Link from 'next/link'
 import { createPost, updatePost } from '@/lib/actions/blog'
 import { TipTapEditor } from '@/components/admin/editor/TipTapEditor'
@@ -29,6 +29,14 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
   // Actual value to store in DB (UUID from media_assets or URL if typed manually)
   const [coverImageIdState, setCoverImageIdState] = useState(post?.coverImageId ?? '')
   const [showCoverPicker, setShowCoverPicker] = useState(false)
+  const statusRef = useRef<HTMLSelectElement>(null)
+  const formRef = useRef<HTMLFormElement>(null)
+
+  function handlePublish(e: FormEvent, status: string) {
+    e.preventDefault()
+    if (statusRef.current) statusRef.current.value = status
+    formRef.current?.requestSubmit()
+  }
 
   const [state, formAction, pending] = useActionState(
     async (_prev: { error?: string } | null, formData: FormData) => {
@@ -63,10 +71,18 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
   }, [post])
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form ref={formRef} action={formAction} className="space-y-6">
       {state?.error && (
         <div className="rounded-lg border border-red-900/50 bg-red-900/20 p-3 text-sm text-red-400">{state.error}</div>
       )}
+
+      {/* Hidden status — controlled by CTA buttons */}
+      <select ref={statusRef} name="status" defaultValue={post?.status ?? 'DRAFT'} className="hidden">
+        <option value="DRAFT">Чернетка</option>
+        <option value="REVIEW">На рев&apos;ю</option>
+        <option value="PUBLISHED">Опубліковано</option>
+        <option value="ARCHIVED">Архів</option>
+      </select>
 
       <fieldset className="rounded-lg border border-zinc-700/50 p-4">
         <legend className="text-sm font-semibold text-zinc-300">Загальні поля</legend>
@@ -79,16 +95,6 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>{c.ruName ?? c.slugBase}</option>
               ))}
-            </select>
-          </div>
-          <div>
-            <label htmlFor="status" className="block text-sm font-medium text-zinc-300">Статус</label>
-            <select id="status" name="status" defaultValue={post?.status ?? 'DRAFT'}
-              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30">
-              <option value="DRAFT">Чернетка</option>
-              <option value="REVIEW">На рев&apos;ю</option>
-              <option value="PUBLISHED">Опубліковано</option>
-              <option value="ARCHIVED">Архів</option>
             </select>
           </div>
           <div>
@@ -261,15 +267,42 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
       </fieldset>
 
       <div className="flex items-center gap-3 border-t pt-4">
-        <button type="submit" disabled={pending}
+        <button type="button" disabled={pending} onClick={(e) => handlePublish(e, 'DRAFT')}
+          className="rounded-lg bg-zinc-700 px-4 py-2 text-sm font-medium text-zinc-200 hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+          {pending ? 'Збереження...' : 'Зберегти чернетку'}
+        </button>
+        <button type="button" disabled={pending} onClick={(e) => handlePublish(e, 'PUBLISHED')}
           className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-          {pending ? 'Збереження...' : isEdit ? 'Зберегти зміни' : 'Створити пост'}
+          {pending ? 'Публікація...' : 'Опублікувати'}
         </button>
         <Link href="/admin/blog/posts"
           className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-400 hover:bg-zinc-800">
           Скасувати
         </Link>
       </div>
+
+      {/* Advanced: manual status override */}
+      {isEdit && (
+        <details className="text-xs text-zinc-500">
+          <summary className="cursor-pointer select-none hover:text-zinc-300">
+            Ручне налаштування статусу
+          </summary>
+          <div className="mt-2">
+            <label htmlFor="status-override" className="block text-xs font-medium text-zinc-400 mb-1">Статус</label>
+            <select
+              id="status-override"
+              onChange={(e) => { if (statusRef.current) statusRef.current.value = e.target.value }}
+              defaultValue={post?.status ?? 'DRAFT'}
+              className="block w-48 rounded border border-zinc-700 bg-zinc-900/50 px-2 py-1.5 text-xs text-zinc-200 focus:border-amber-500/50 focus:outline-none"
+            >
+              <option value="DRAFT">Чернетка</option>
+              <option value="REVIEW">На рев&apos;ю</option>
+              <option value="PUBLISHED">Опубліковано</option>
+              <option value="ARCHIVED">Архів</option>
+            </select>
+          </div>
+        </details>
+      )}
     </form>
   )
 }
