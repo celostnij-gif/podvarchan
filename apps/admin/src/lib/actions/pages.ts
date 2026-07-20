@@ -437,7 +437,7 @@ const SECTION_TYPES = [
 
 /* ── Section CRUD ── */
 
-export async function addSection(pageId: string, formData: FormData) {
+export async function addSection(pageId: string, formData: FormData): Promise<{ sectionId: string }> {
   const userId = await requireEdit()
   const db = await getActionDb()
   const type = String(formData.get('type') ?? 'text-block')
@@ -445,8 +445,9 @@ export async function addSection(pageId: string, formData: FormData) {
   if (!SECTION_TYPES.includes(type as (typeof SECTION_TYPES)[number])) {
     throw new Error(`Невідомий тип секції: ${type}`)
   }
-  const sortOrder = Number(formData.get('sortOrder') ?? 0) || 0
   const sectionId = crypto.randomUUID()
+
+  const sortOrder = Number(formData.get('sortOrder') ?? 0) || 0
 
   await db.insert(pageSections).values({
     id: sectionId,
@@ -479,6 +480,8 @@ export async function addSection(pageId: string, formData: FormData) {
   })
   revalidateAdmin(`/admin/pages/${pageId}`, '/admin/home')
   void revalidatePublic({ paths: getHomeRevalidatePaths() })
+
+  return { sectionId }
 }
 
 export async function updateSectionContent(sectionId: string, formData: FormData) {

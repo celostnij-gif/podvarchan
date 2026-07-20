@@ -1,6 +1,6 @@
 'use client'
 
-import { useTransition, useMemo, useState, useCallback } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import { addSection, deleteSection, toggleSection, updateSectionContent, reorderSections } from '@/lib/actions/pages'
 import type { PageSectionWithTranslations } from '../types'
 import { BlockEditorPanel } from '@/components/admin/BlockEditorPanel'
@@ -23,20 +23,28 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { GripVertical } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { GripVertical, Trash2, EyeOff, Eye, Loader2 } from 'lucide-react'
 
 interface SectionEditorProps {
   pageId: string
   sections: PageSectionWithTranslations[]
 }
 
-function SectionEditorItem({ section, pageId, onRefresh }: {
+function SectionEditorItem({
+  section,
+  pageId,
+  onUpdate,
+  onDelete,
+  onToggle,
+}: {
   section: PageSectionWithTranslations
   pageId: string
-  onRefresh: () => void
+  onUpdate: (id: string, locale: 'ru' | 'uk', contentJson: string) => void
+  onDelete: (id: string) => void
+  onToggle: (id: string, enabled: boolean) => void
 }) {
-  const [isPending, startTransition] = useTransition()
+  const [saving, setSaving] = useState(false)
+
   const {
     attributes,
     listeners,
@@ -49,9 +57,8 @@ function SectionEditorItem({ section, pageId, onRefresh }: {
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.4 : 1,
+    opacity: isDragging ? 0.5 : 1,
     position: 'relative',
-    ...(isDragging ? { zIndex: 10 } : {}),
   }
 
   const ru = section.translations.find((t) => t.locale === 'ru')
@@ -59,46 +66,44 @@ function SectionEditorItem({ section, pageId, onRefresh }: {
 
   // Parse contentJson once, using registry's parseBlockContent with defaults
   const blockContent = useMemo(() => ({
-    ru: parseBlockContent(section.section.type, ru?.contentJson),
-    uk: parseBlockContent(section.section.type, uk?.contentJson),
+    ru: parseBlockContent(section.section.type, ru?.contentJson ?? null),
+    uk: parseBlockContent(section.section.type, uk?.contentJson ?? null),
   }), [section.section.type, ru?.contentJson, uk?.contentJson])
 
-  const handleContentSave = (locale: 'ru' | 'uk', contentJson: string) => {
-    startTransition(async () => {
+  const handleContentSave = useCallback(async (locale: 'ru' | 'uk', contentJson: string) => {
+    setSaving(true)
+    try {
       const fd = new FormData()
       fd.set('locale', locale)
       fd.set('content_json', contentJson)
-      fd.set('page_id', pageId)
-      try {
-        await updateSectionContent(section.section.id, fd)
-      } catch {
-        // ignore
-      }
-    })
-  }
+      await updateSectionContent(section.section.id, fd)
+      onUpdate(section.section.id, locale, contentJson)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setSaving(false)
+    }
+  }, [section.section.id, onUpdate])
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(async () => {
     if (!confirm('Видалити секцію?')) return
-    startTransition(async () => {
-      try {
-        await deleteSection(section.section.id)
-        onRefresh()
-      } catch {
-        // ignore
-      }
-    })
-  }
+    try {
+      await deleteSection(section.section.id)
+      onDelete(section.section.id)
+    } catch (err) {
+      console.error(err)
+    }
+  }, [section.section.id, onDelete])
 
-  const handleToggle = () => {
-    startTransition(async () => {
-      try {
-        await toggleSection(section.section.id, !section.section.enabled)
-        onRefresh()
-      } catch {
-        // ignore
-      }
-    })
-  }
+  const handleToggle = useCallback(async () => {
+    const next = !section.section.enabled
+    try {
+      await toggleSection(section.section.id, next)
+      onToggle(section.section.id, next)
+    } catch (err) {
+      console.error(err)
+    }
+  }, [section.section.id, section.section.enabled, onToggle])
 
   const def = getBlockDefinition(section.section.type)
 
@@ -106,77 +111,72 @@ function SectionEditorItem({ section, pageId, onRefresh }: {
     <div
       ref={setNodeRef}
       style={style}
-      className={`group rounded-lg border p-4 transition-all ${
-        isDragging
-          ? 'border-amber-500/40 bg-zinc-800 shadow-lg ring-1 ring-amber-500/20'
-          : section.section.enabled
-            ? 'border-zinc-700/50 bg-zinc-900/40'
-            : 'border-dashed border-zinc-700/30 bg-zinc-900/20'
+      className={`rounded-lg border transition-colors ${
+        section.section.enabled ? 'border-zinc-700/50 bg-zinc-900/30' : 'border-zinc-800/30 bg-zinc-900/10 opacity-60'
       }`}
     >
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {/* Drag handle */}
-          <button
-            {...attributes}
-            {...listeners}
-            className="flex cursor-grab touch-none items-center justify-center rounded-md p-1 text-zinc-600 opacity-0 transition-opacity hover:bg-zinc-800 group-hover:opacity-100 active:cursor-grabbing"
-            aria-label="Перетягнути"
-          >
-            <GripVertical className="h-4 w-4" />
-          </button>
-
-          <button
-            type="button"
-            onClick={handleToggle}
-            disabled={isPending}
-            className={`rounded px-2 py-0.5 text-xs font-medium ${
-              section.section.enabled
-                ? 'bg-green-900/30 text-green-400'
-                : 'bg-zinc-800 text-zinc-500'
-            }`}
-          >
-            {section.section.enabled ? 'Увімк' : 'Вимк'}
-          </button>
-          <span className="text-sm font-medium text-zinc-200">
-            {def?.icon ?? '🧩'} {def?.label ?? section.section.type}
-          </span>
-          <span className="text-xs text-zinc-500">key: {section.section.key}</span>
-        </div>
+      {/* Header bar */}
+      <div
+        className={`flex items-center gap-2 px-3 py-2 border-b ${
+          section.section.enabled ? 'border-zinc-800/50' : 'border-zinc-800/20'
+        }`}
+      >
         <button
-          type="button"
-          onClick={handleDelete}
-          disabled={isPending}
-          className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50"
+          {...attributes}
+          {...listeners}
+          className="cursor-grab touch-none text-zinc-600 hover:text-zinc-400 transition-colors"
+          aria-label="Перетягнути"
         >
-          Видалити
+          <GripVertical className="w-4 h-4" />
+        </button>
+
+        <span className="text-sm">{def?.icon ?? '📄'}</span>
+        <span className="text-sm font-medium text-zinc-300 truncate">{def?.label ?? section.section.type}</span>
+        <span className="text-xs text-zinc-600 font-mono">{section.section.key}</span>
+
+        <div className="flex-1" />
+
+        {saving && <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-500" />}
+
+        <button
+          onClick={handleToggle}
+          className="rounded p-1 text-zinc-600 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
+          title={section.section.enabled ? 'Вимкнути' : 'Увімкнути'}
+        >
+          {section.section.enabled ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+        </button>
+
+        <button
+          onClick={handleDelete}
+          className="rounded p-1 text-zinc-600 hover:text-red-400 hover:bg-zinc-800 transition-colors"
+          title="Видалити"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
         </button>
       </div>
 
-      <BlockEditorPanel
-        sectionType={section.section.type}
-        sectionKey={section.section.key}
-        content={blockContent}
-        onSave={handleContentSave}
-        isPending={isPending}
-      />
+      {/* Editor body */}
+      {section.section.enabled && (
+        <div className="p-3">
+          <BlockEditorPanel
+            sectionType={section.section.type}
+            sectionKey={section.section.key}
+            content={blockContent}
+            onSave={handleContentSave}
+          />
+        </div>
+      )}
     </div>
   )
 }
 
-
-
-export function SectionEditor({ pageId, sections }: SectionEditorProps) {
-  const [isPending, startTransition] = useTransition()
-  const [showLibrary, setShowLibrary] = useState(false)
+export function SectionEditor({ pageId, sections: initialSections }: SectionEditorProps) {
+  const [sections, setSections] = useState(initialSections)
   const [sectionOrder, setSectionOrder] = useState<string[] | null>(null)
+  const [showLibrary, setShowLibrary] = useState(false)
   const [savingOrder, setSavingOrder] = useState(false)
-  const router = useRouter()
+  const [pending, setPending] = useState(false)
   const [addError, setAddError] = useState<string | null>(null)
-
-  const refresh = useCallback(() => {
-    router.refresh()
-  }, [router])
 
   const blockDefs = getAllBlockDefinitions()
 
@@ -184,8 +184,78 @@ export function SectionEditor({ pageId, sections }: SectionEditorProps) {
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   )
+  const handleAddSection = useCallback(async (formData: FormData) => {
+    setPending(true)
+    setAddError(null)
 
-  // Current section order (either from drag state or from props)
+    const type = String(formData.get('type') ?? 'text-block')
+    const key = `${type}-${Date.now()}`
+    formData.set('key', key)
+    formData.set('sortOrder', String(sections.length))
+
+    try {
+      const { sectionId } = await addSection(pageId, formData)
+
+      const ruContent = String(formData.get('ru_contentJson') ?? '')
+      const ukContent = String(formData.get('uk_contentJson') ?? '')
+
+      const translations: PageSectionWithTranslations['translations'] = [
+        { id: '', sectionId, locale: 'ru' as const, contentJson: ruContent || null },
+        { id: '', sectionId, locale: 'uk' as const, contentJson: ukContent || null },
+      ]
+
+      const newSection: PageSectionWithTranslations = {
+        section: {
+          id: sectionId,
+          pageId,
+          key,
+          type,
+          enabled: true,
+          sortOrder: sections.length,
+          settingsJson: '{}',
+        },
+        translations,
+      }
+
+      setSections((prev) => [...prev, newSection])
+    } catch (err) {
+      setAddError(err instanceof Error ? err.message : 'Невідома помилка')
+    } finally {
+      setPending(false)
+    }
+  }, [pageId, sections.length])
+
+  const handleInsertTemplate = useCallback((tpl: { sectionType: string; contentRu: string; contentUk: string }) => {
+    const fd = new FormData()
+    fd.set('type', tpl.sectionType)
+    fd.set('ru_contentJson', tpl.contentRu)
+    fd.set('uk_contentJson', tpl.contentUk)
+    handleAddSection(fd)
+  }, [handleAddSection])
+
+  const handleUpdate = useCallback((id: string, locale: 'ru' | 'uk', contentJson: string) => {
+    setSections((prev) => prev.map((s) => {
+      if (s.section.id !== id) return s
+      return {
+        ...s,
+        translations: s.translations.map((t) =>
+          t.locale === locale ? { ...t, contentJson } : t,
+        ),
+      }
+    }))
+  }, [])
+
+  const handleDelete = useCallback((id: string) => {
+    setSections((prev) => prev.filter((s) => s.section.id !== id))
+  }, [])
+
+  const handleToggle = useCallback((id: string, enabled: boolean) => {
+    setSections((prev) => prev.map((s) =>
+      s.section.id === id ? { ...s, section: { ...s.section, enabled } } : s,
+    ))
+  }, [])
+
+  // Current section order (either from drag state or from sections)
   const order = sectionOrder ?? sections.map((s) => s.section.id)
   // Stable reference for SortableContext
   const stableSections = useMemo(() =>
@@ -214,29 +284,6 @@ export function SectionEditor({ pageId, sections }: SectionEditorProps) {
     }
   }, [order, pageId])
 
-  const handleAddSection = (formData: FormData) => {
-    startTransition(async () => {
-      setAddError(null)
-      try {
-        await addSection(pageId, formData)
-        refresh()
-      } catch (err) {
-        setAddError(err instanceof Error ? err.message : 'Невідома помилка')
-      }
-    })
-  }
-
-  const handleInsertTemplate = (tpl: { sectionType: string; contentRu: string; contentUk: string }) => {
-    const key = `${tpl.sectionType}-${Date.now()}`
-    const fd = new FormData()
-    fd.set('type', tpl.sectionType)
-    fd.set('key', key)
-    fd.set('settings_json', '{}')
-    fd.set('ru_contentJson', tpl.contentRu)
-    fd.set('uk_contentJson', tpl.contentUk)
-    handleAddSection(fd)
-  }
-
   return (
     <div className={`space-y-4 ${savingOrder ? 'pointer-events-none opacity-60' : ''}`}>
       <div className="flex items-center justify-between">
@@ -262,7 +309,9 @@ export function SectionEditor({ pageId, sections }: SectionEditorProps) {
                   key={sec.section.id}
                   section={sec}
                   pageId={pageId}
-                  onRefresh={refresh}
+                  onUpdate={handleUpdate}
+                  onDelete={handleDelete}
+                  onToggle={handleToggle}
                 />
               ))}
             </div>
@@ -282,27 +331,17 @@ export function SectionEditor({ pageId, sections }: SectionEditorProps) {
             >
               {blockDefs.map((b) => (
                 <option key={b.type} value={b.type}>
-                  {b.icon} {b.label}
+                  {b.icon} {b.labelUk}
                 </option>
               ))}
             </select>
           </div>
-          <div>
-            <label className="block text-xs font-medium text-zinc-400 mb-1">Ключ (унікальний)</label>
-            <input
-              name="key"
-              required
-              placeholder="main-hero"
-              className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
-            />
-          </div>
-          <input type="hidden" name="settings_json" value="{}" />
           <button
             type="submit"
-            disabled={isPending}
+            disabled={pending}
             className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-500 disabled:opacity-50"
           >
-            + Додати
+            {pending ? 'Додавання…' : '+ Додати'}
           </button>
         </form>
         {addError && <p className="text-sm text-red-400 mt-2">{addError}</p>}

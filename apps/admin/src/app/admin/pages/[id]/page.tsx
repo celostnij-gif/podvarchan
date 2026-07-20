@@ -3,6 +3,7 @@ import { pages, pageTranslations, pageSections, pageSectionTranslations } from '
 import { eq } from 'drizzle-orm'
 import { notFound } from 'next/navigation'
 import { EditPageForm } from './edit-form'
+import ViewOnSiteLink from '@/components/admin/ViewOnSiteLink'
 import PreviewButton from '@/components/admin/PreviewButton'
 import type { PageTranslationRecord, PageSectionRecord, PageSectionTranslationRecord } from '../types'
 
@@ -56,6 +57,27 @@ export default async function EditPagePage(props: Props) {
           Редагувати сторінку
         </h1>
         <div className="flex items-center gap-2">
+          {page.status === 'PUBLISHED' && (
+            <>
+              {page.type === 'HOME' ? (
+                <>
+                  <ViewOnSiteLink href="/ru/" />
+                  <ViewOnSiteLink href="/uk/" />
+                </>
+              ) : (
+                (() => {
+                  const ruSlug = translations.find((t) => t.locale === 'ru')?.slug
+                  const ukSlug = translations.find((t) => t.locale === 'uk')?.slug
+                  return (
+                    <>
+                      {ruSlug && <ViewOnSiteLink href={`/ru/${ruSlug}`} />}
+                      {ukSlug && <ViewOnSiteLink href={`/uk/${ukSlug}`} />}
+                    </>
+                  )
+                })()
+              )}
+            </>
+          )}
           <PreviewButton
             entityType="page"
             slug={page.type}
