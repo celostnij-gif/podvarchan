@@ -1,4 +1,4 @@
-"use client'
+'use client'
 
 import { motion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
@@ -30,6 +30,7 @@ export function TsenyClient({ schemas, d1Sections: _d1Sections }: TsenyClientPro
           subtitle: content.subtitle || '',
           price: content.price || '',
           originalPrice: content.originalPrice || content.oldPrice,
+          oldPrice: content.oldPrice,
           description: content.description || '',
           features: content.features || [],
           badge: content.badge || '',
@@ -129,10 +130,10 @@ export function TsenyClient({ schemas, d1Sections: _d1Sections }: TsenyClientPro
               const description = plan.description ?? ''
               const subtitle = plan.subtitle ?? ''
               const title = plan.title ?? ''
-              const features = plan.features ?? []
+              const features: string[] = plan.features ?? []
               const originalPrice = plan.originalPrice
               const oldPrice = plan.oldPrice
-              
+
               return (
                 <motion.div
                   key={i}

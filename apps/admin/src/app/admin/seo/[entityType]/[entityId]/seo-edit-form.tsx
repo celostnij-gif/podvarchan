@@ -1,8 +1,9 @@
 'use client'
 
-import { useTransition } from 'react'
+import { useActionState } from 'react'
 import { saveSeoOverride } from '@/lib/actions/seo'
 import { useRouter } from 'next/navigation'
+import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
 interface EditFormProps {
   entityType: string
@@ -19,81 +20,95 @@ interface EditFormProps {
 }
 
 export function SeoEditForm({ entityType, entityId, locale, defaults }: EditFormProps) {
-  const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    const formData = new FormData(e.currentTarget)
-    startTransition(async () => {
-      await saveSeoOverride(formData)
-      router.refresh()
-    })
-  }
+  const [state, formAction, isPending] = useActionState(
+    async (_prev: { error?: string } | null, formData: FormData) => {
+      try {
+        await saveSeoOverride(formData)
+        router.refresh()
+        return null
+      } catch (err) {
+        if (isRedirectError(err)) throw err
+        return { error: err instanceof Error ? err.message : 'Невідома помилка' }
+      }
+    },
+    null,
+  )
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form action={formAction} className="space-y-4">
       <input type="hidden" name="entityType" value={entityType} />
       <input type="hidden" name="entityId" value={entityId} />
       <input type="hidden" name="locale" value={locale} />
 
+      {state?.error && (
+        <div className="rounded-lg border border-red-900/50 bg-red-900/20 p-3 text-sm text-red-400">{state.error}</div>
+      )}
+
       <div>
-        <label className="block text-sm font-medium text-gray-700">Title</label>
+        <label htmlFor="seo-title" className="block text-sm font-medium text-zinc-300">Заголовок</label>
         <input
+          id="seo-title"
           name="title"
           defaultValue={defaults.title}
           maxLength={60}
-          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 shadow-sm focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
         />
-        <p className="mt-0.5 text-xs text-gray-400">Recommended: 30-60 characters. Current: {defaults.title.length}</p>
+        <p className="mt-0.5 text-xs text-zinc-500">Рекомендовано: 30-60 символів. Зараз: {defaults.title.length}</p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">Meta Description</label>
+        <label htmlFor="seo-description" className="block text-sm font-medium text-zinc-300">Мета-опис</label>
         <textarea
+          id="seo-description"
           name="description"
           defaultValue={defaults.description}
           maxLength={200}
           rows={3}
-          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 shadow-sm focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
         />
-        <p className="mt-0.5 text-xs text-gray-400">Recommended: 70-160 characters. Current: {defaults.description.length}</p>
+        <p className="mt-0.5 text-xs text-zinc-500">Рекомендовано: 70-160 символів. Зараз: {defaults.description.length}</p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">Keywords (comma-separated)</label>
+        <label htmlFor="seo-keywords" className="block text-sm font-medium text-zinc-300">Ключові слова (через кому)</label>
         <input
+          id="seo-keywords"
           name="keywords"
           defaultValue={defaults.keywords}
-          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 shadow-sm focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">Canonical Path</label>
+        <label htmlFor="seo-canonical" className="block text-sm font-medium text-zinc-300">Канонічний шлях</label>
         <input
+          id="seo-canonical"
           name="canonicalPath"
           defaultValue={defaults.canonicalPath}
           placeholder="/ru/uslugi/gipnoterapiya-onlayn/"
-          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 shadow-sm focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700">OG Title</label>
+          <label htmlFor="seo-ogTitle" className="block text-sm font-medium text-zinc-300">OG Заголовок</label>
           <input
+            id="seo-ogTitle"
             name="ogTitle"
             defaultValue={defaults.ogTitle}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 shadow-sm focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">OG Description</label>
+          <label htmlFor="seo-ogDescription" className="block text-sm font-medium text-zinc-300">OG Опис</label>
           <input
+            id="seo-ogDescription"
             name="ogDescription"
             defaultValue={defaults.ogDescription}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 shadow-sm focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
           />
         </div>
       </div>
@@ -102,9 +117,9 @@ export function SeoEditForm({ entityType, entityId, locale, defaults }: EditForm
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-md bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+          className="rounded-lg bg-amber-600 px-6 py-2 text-sm font-medium text-white hover:bg-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 disabled:opacity-50"
         >
-          {isPending ? 'Saving...' : 'Save SEO Override'}
+          {isPending ? 'Збереження...' : 'Зберегти SEO'}
         </button>
       </div>
     </form>

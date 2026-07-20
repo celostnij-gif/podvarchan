@@ -1,7 +1,8 @@
 'use client'
 
-import { useTransition } from 'react'
+import { useActionState } from 'react'
 import { useRouter } from 'next/navigation'
+import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
 interface AssetMeta {
   id: string
@@ -20,96 +21,110 @@ interface Props {
 
 export function MediaEditForm({ asset, onDelete }: Props) {
   const router = useRouter()
-  const [isPending, startTransition] = useTransition()
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    const form = e.currentTarget
-    const formData = new FormData(form)
-
-    startTransition(async () => {
-      const { updateMediaMeta } = await import('@/lib/actions/media')
-      await updateMediaMeta(asset.id, formData)
-      router.refresh()
-    })
-  }
+  const [state, formAction, isPending] = useActionState(
+    async (_prev: { error?: string } | null, formData: FormData) => {
+      try {
+        const { updateMediaMeta } = await import('@/lib/actions/media')
+        await updateMediaMeta(asset.id, formData)
+        router.refresh()
+        return null
+      } catch (err) {
+        if (isRedirectError(err)) throw err
+        return { error: err instanceof Error ? err.message : 'Невідома помилка' }
+      }
+    },
+    null,
+  )
 
   async function handleDelete() {
     if (!confirm('Видалити цей файл? Цю дію не можна скасувати.')) return
-    startTransition(async () => {
+    try {
       await onDelete(asset.id)
       router.push('/admin/media')
-    })
+    } catch {
+      // error handled by parent
+    }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form action={formAction} className="space-y-4">
+      {state?.error && (
+        <div className="rounded-lg border border-red-900/50 bg-red-900/20 p-3 text-sm text-red-400">{state.error}</div>
+      )}
+
       {/* Alt text */}
-      <fieldset className="rounded-lg border p-4">
-        <legend className="text-sm font-medium text-gray-700">Alt текст (для SEO)</legend>
+      <fieldset className="rounded-lg border border-zinc-700/50 p-4">
+        <legend className="text-sm font-medium text-zinc-300">Alt текст (для SEO)</legend>
         <div className="mt-2 space-y-2">
           <div>
-            <label className="block text-xs text-gray-500">RU</label>
+            <label htmlFor="altRu" className="block text-xs text-zinc-500">RU</label>
             <input
+              id="altRu"
               name="altRu"
               defaultValue={asset.altRu}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
             />
           </div>
           <div>
-            <label className="block text-xs text-gray-500">UK</label>
+            <label htmlFor="altUk" className="block text-xs text-zinc-500">UK</label>
             <input
+              id="altUk"
               name="altUk"
               defaultValue={asset.altUk}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
             />
           </div>
         </div>
       </fieldset>
 
       {/* Title */}
-      <fieldset className="rounded-lg border p-4">
-        <legend className="text-sm font-medium text-gray-700">Title (підказка)</legend>
+      <fieldset className="rounded-lg border border-zinc-700/50 p-4">
+        <legend className="text-sm font-medium text-zinc-300">Заголовок (підказка)</legend>
         <div className="mt-2 space-y-2">
           <div>
-            <label className="block text-xs text-gray-500">RU</label>
+            <label htmlFor="titleRu" className="block text-xs text-zinc-500">RU</label>
             <input
+              id="titleRu"
               name="titleRu"
               defaultValue={asset.titleRu}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
             />
           </div>
           <div>
-            <label className="block text-xs text-gray-500">UK</label>
+            <label htmlFor="titleUk" className="block text-xs text-zinc-500">UK</label>
             <input
+              id="titleUk"
               name="titleUk"
               defaultValue={asset.titleUk}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
             />
           </div>
         </div>
       </fieldset>
 
       {/* Caption */}
-      <fieldset className="rounded-lg border p-4">
-        <legend className="text-sm font-medium text-gray-700">Підпис</legend>
+      <fieldset className="rounded-lg border border-zinc-700/50 p-4">
+        <legend className="text-sm font-medium text-zinc-300">Підпис</legend>
         <div className="mt-2 space-y-2">
           <div>
-            <label className="block text-xs text-gray-500">RU</label>
+            <label htmlFor="captionRu" className="block text-xs text-zinc-500">RU</label>
             <textarea
+              id="captionRu"
               name="captionRu"
               defaultValue={asset.captionRu}
               rows={2}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
             />
           </div>
           <div>
-            <label className="block text-xs text-gray-500">UK</label>
+            <label htmlFor="captionUk" className="block text-xs text-zinc-500">UK</label>
             <textarea
+              id="captionUk"
               name="captionUk"
               defaultValue={asset.captionUk}
               rows={2}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
             />
           </div>
         </div>
@@ -120,7 +135,7 @@ export function MediaEditForm({ asset, onDelete }: Props) {
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+          className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-500 disabled:opacity-50"
         >
           {isPending ? 'Збереження...' : 'Зберегти'}
         </button>
@@ -128,7 +143,7 @@ export function MediaEditForm({ asset, onDelete }: Props) {
           type="button"
           onClick={handleDelete}
           disabled={isPending}
-          className="rounded-md bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700 disabled:opacity-50"
+          className="rounded-lg bg-red-900/30 px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-900/50 disabled:opacity-50"
         >
           Видалити
         </button>
