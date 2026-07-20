@@ -2,8 +2,22 @@
 
 **Оновлювати після кожного підкроку.**  
 **Старт пакету:** 2026-07-17  
+**Останній acceptance-аудит:** 2026-07-20 → `CLIENT_ACCEPTANCE_AUDIT_2026-07-20.md`
 
 Легенда: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` cancelled/n/a
+
+---
+
+## Wave 0 — Client acceptance blockers (2026-07-20)
+
+- [ ] W0.1 Formal J1 smoke: edit published service title → public <30s (пруф)
+- [ ] W0.2 Guided publish CTA (service + post)
+- [x] W0.3 Chrome UK 100% (layout/topbar/footer/block registry) — completed 2026-07-20
+- [ ] W0.4 Post cover: MediaPicker primary, URL advanced
+- [ ] W0.5 Audit pagination (зняти ~1MB SSR / 1102 risk)
+- [ ] W0.6 OWNER_GUIDE_UK.md handoff
+- [ ] W0.7 Rotate OWNER password (світився в чаті)
+- [ ] Client walkthrough J1–J8 sign-off
 
 ---
 
@@ -130,6 +144,42 @@
 ---
 
 ## Journal
+
+### 2026-07-20 — Client acceptance audit
+
+- Live+code аудит адмінки: `TEMP/CLIENT_ACCEPTANCE_AUDIT_2026-07-20.md`.  
+- **Вердикт:** public UP + admin CRUD UP; product **~70–75%**; **NOT READY** для фінальної здачі.  
+- Progress vs 07-19: no alert/reload; StructuredList *Json; auto-slug services/categories; revisions index 200; media UK; drafts linked; SEO filters.  
+- Open blockers: formal J1 smoke; guided publish; RU chrome («Админ-панель»); cover URL primary; audit ~940KB; SEO не в sidebar; owner guide; password rotate.  
+- Free smell: admin Error **1102** під серією authenticated GET (audit/seo heavy).  
+- `AGENT.md` оновлено: §0 status + §22 здача; TEMP/README пріоритет Wave 0–2.
+
+### 2026-07-20 — Phase C: Chrome UK + Error Messages (W0.3)
+
+**C.4: Chrome UK 100% — AdminTopbar, AdminShell, AdminSidebar, layout, pages, leads:**
+- `AdminTopbar.tsx`: 15 breadcrumb labels RU→UK (Админ-панель→Адмін-панель, Услуги→Послуги, Отзывы→Відгуки, Страницы→Сторінки, Навигация→Навігація, Пользователи→Користувачі, Настройки→Налаштування, Редиректы→Редиректи, Вход→Вхід) + 2 UI labels (Открыть меню→Відкрити меню, Выйти→Вийти)
+- `AdminShell.tsx`: footer Админ-панель→Адмін-панель
+- `AdminSidebar.tsx`: subtitle Панель управления→Панель керування
+- `layout.tsx`: metadata title Админ-панель→Адмін-панель
+- `pages/new/page.tsx`: heading Новая страница→Нова сторінка
+- `leads/page.tsx`: placeholder Имя→Ім'я
+
+**C.4: English→Ukrainian translations:**
+- `csv-button.tsx`: Exporting...→Експорт..., Export CSV→Експорт CSV
+- `seo/[entityType]/[entityId]/page.tsx`: 11 YMYL assessment strings (Author mention found→Згадка автора знайдена, E-E-A-T signals→Сигнали E-E-A-T, Date/recentcy→Сигнал дати/актуальності, YMYL Assessment→Оцінка YMYL, Medical→Медичний, etc.)
+- 5 form files: 'Unknown error'→'Невідома помилка' (category-form, service-form, faq-form, testimonial-form, post-form)
+- `seo/audit.ts`: 21 warning/label strings (Missing <title>→Відсутній <title>, Title too short→Заголовок занадто короткий, etc.; Good→Добре, Needs work→Потребує роботи, Poor→Погано; No title→Без заголовка, No description→Без опису)
+- `media/UploadZone.tsx`: 3 error strings (Variant generation failed→Помилка генерації варіантів, Upload failed→Помилка завантаження)
+- `media/MediaPickerDialog.tsx`: 2 error strings (WEBP conversion failed→Помилка конвертації WEBP, Upload failed→Помилка завантаження)
+
+**C.5: Action error messages EN→UK:**
+- `services.ts:220`: "Service with slugBase... already exists"→"Послуга з slugBase... вже існує"
+- `leads.ts:83`: "Lead not found"→"Лід не знайдено"
+
+**C.7: Debug page protection:**
+- `debug-tools/page.tsx`: Added `requireRole('OWNER')` guard + translated page heading and table headers to Ukrainian
+
+**Summary:** ~75+ UI strings translated from RU/EN to Ukrainian across 18 files. Admin chrome now fully Ukrainian (W0.3 complete). Debug page OWNER-only protected.
 
 ### 2026-07-17
 

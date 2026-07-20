@@ -24,23 +24,23 @@ function checkYmyl(entityType: string, title: string | null, description: string
   // Check for author signal
   const fullText = `${title ?? ''} ${description ?? ''}`.toLowerCase()
   if (fullText.includes('подварчан') || fullText.includes('vyacheslav') || fullText.includes('специалист') || fullText.includes('сертифицирован')) {
-    signals.push('Author mention found')
+    signals.push('Згадка автора знайдена')
   } else {
-    missing.push('No author/specialist mention in title/description')
+    missing.push('Немає згадки автора/спеціаліста в заголовку/описі')
   }
 
   // Check for certification/experience signals
   if (fullText.includes('сертифи') || fullText.includes('гипнотерапевт') || fullText.includes('психолог') || fullText.includes('опыт')) {
-    signals.push('E-E-A-T signals (certification/experience) found')
+    signals.push('Сигнали E-E-A-T (сертифікація/досвід) знайдені')
   } else {
-    missing.push('No E-E-A-T signals (certification, experience) in metadata')
+    missing.push('Немає сигналів E-E-A-T (сертифікація, досвід) в метаданих')
   }
 
   // Date signal
   if (fullText.includes('202') || fullText.includes('дата')) {
-    signals.push('Date/recentcy signal found')
+    signals.push('Сигнал дати/актуальності знайдено')
   } else {
-    missing.push('No date/recentcy signal in metadata')
+    missing.push('Немає сигналу дати/актуальності в метаданих')
   }
 
   return { isYmyl: true, signals, missing }
@@ -185,14 +185,14 @@ export default async function SeoDetailPage(props: Props) {
       {/* YMYL Check */}
       <div className="mb-8 rounded-lg border border-zinc-700 bg-zinc-800/50 p-6">
         <h2 className="mb-4 text-lg font-semibold text-zinc-200">
-          YMYL Assessment
-          {ymylResult.isYmyl && <span className="ml-2 rounded bg-amber-900/30 px-2 py-0.5 text-xs font-medium text-amber-400 border border-amber-700/30">Medical</span>}
+          Оцінка YMYL
+          {ymylResult.isYmyl && <span className="ml-2 rounded bg-amber-900/30 px-2 py-0.5 text-xs font-medium text-amber-400 border border-amber-700/30">Медичний</span>}
         </h2>
         {ymylResult.isYmyl ? (
           <div>
             {ymylResult.signals.length > 0 && (
               <div className="mb-3">
-                <h3 className="mb-1 text-sm font-medium text-green-400">✓ E-E-A-T Signals Present</h3>
+                <h3 className="mb-1 text-sm font-medium text-green-400">✓ Сигнали E-E-A-T присутні</h3>
                 <ul className="list-inside list-disc text-sm text-green-400">
                   {ymylResult.signals.map((s, i) => (
                     <li key={i}>{s}</li>
@@ -202,7 +202,7 @@ export default async function SeoDetailPage(props: Props) {
             )}
             {ymylResult.missing.length > 0 && (
               <div>
-                <h3 className="mb-1 text-sm font-medium text-red-400">✗ Missing Signals</h3>
+                <h3 className="mb-1 text-sm font-medium text-red-400">✗ Відсутні сигнали</h3>
                 <ul className="list-inside list-disc text-sm text-red-400">
                   {ymylResult.missing.map((m, i) => (
                     <li key={i}>{m}</li>
@@ -212,7 +212,7 @@ export default async function SeoDetailPage(props: Props) {
             )}
           </div>
         ) : (
-          <p className="text-sm text-zinc-500">This content type does not require YMYL assessment.</p>
+          <p className="text-sm text-zinc-500">Цей тип контенту не потребує оцінки YMYL.</p>
         )}
       </div>
     </div>

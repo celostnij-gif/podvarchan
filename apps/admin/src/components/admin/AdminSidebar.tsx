@@ -141,7 +141,7 @@ export default function AdminSidebar({ isOpen, onClose, newLeadsCount }: AdminSi
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-zinc-100 truncate">{SITE.name}</p>
-            <p className="text-[10px] text-zinc-500 truncate">Панель управления</p>
+            <p className="text-[10px] text-zinc-500 truncate">Панель керування</p>
           </div>
         </div>
 

@@ -1,9 +1,11 @@
 import { getDB } from '@/db'
 import { getCloudflareContext } from '@opennextjs/cloudflare'
+import { requireRole } from '@/lib/auth/session'
 
 export const dynamic = 'force-dynamic'
 
 export default async function DebugPage() {
+  await requireRole('OWNER')
   const results: { label: string; ok: boolean; error?: string }[] = []
   const { env } = getCloudflareContext()
 
@@ -79,13 +81,13 @@ export default async function DebugPage() {
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-bold mb-6">Admin Debug Page</h1>
+      <h1 className="text-2xl font-bold mb-6">Сторінка діагностики</h1>
       <table className="min-w-full border-collapse border border-zinc-700">
         <thead>
           <tr className="bg-zinc-800">
-            <th className="border border-zinc-700 px-4 py-2 text-left text-sm font-medium">Test</th>
-            <th className="border border-zinc-700 px-4 py-2 text-left text-sm font-medium">Status</th>
-            <th className="border border-zinc-700 px-4 py-2 text-left text-sm font-medium">Error</th>
+            <th className="border border-zinc-700 px-4 py-2 text-left text-sm font-medium">Тест</th>
+            <th className="border border-zinc-700 px-4 py-2 text-left text-sm font-medium">Статус</th>
+            <th className="border border-zinc-700 px-4 py-2 text-left text-sm font-medium">Помилка</th>
           </tr>
         </thead>
         <tbody>

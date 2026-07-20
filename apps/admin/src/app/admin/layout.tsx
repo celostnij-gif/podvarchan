@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
   title: {
     template: '%s | Podvarchan.com',
-    default: 'Админ-панель | Podvarchan.com',
+    default: 'Адмін-панель | Podvarchan.com',
   },
 }
 

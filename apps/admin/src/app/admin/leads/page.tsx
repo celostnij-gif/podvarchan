@@ -88,7 +88,7 @@ export default async function LeadsListPage(props: Props) {
             name="q"
             type="search"
             defaultValue={params.q ?? ''}
-            placeholder="Имя, email або телефон..."
+            placeholder="Ім'я, email або телефон..."
             className="w-64 rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
           />
           <input

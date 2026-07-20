@@ -25,7 +25,7 @@ export function CsvExportButton() {
       disabled={isPending}
       className="rounded-md bg-zinc-800 px-4 py-2 text-sm font-medium text-zinc-300 hover:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:ring-offset-2 disabled:opacity-50"
     >
-      {isPending ? 'Exporting...' : 'Export CSV'}
+      {isPending ? 'Експорт...' : 'Експорт CSV'}
     </button>
   )
 }

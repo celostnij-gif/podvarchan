@@ -26,7 +26,7 @@ export function CategoryForm({ category, services }: Props) {
         return null
       } catch (err) {
         if (isRedirectError(err)) throw err
-        return { error: err instanceof Error ? err.message : 'Unknown error' }
+        return { error: err instanceof Error ? err.message : 'Невідома помилка' }
       }
     },
     null,

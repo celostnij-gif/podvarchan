@@ -217,7 +217,7 @@ export async function updateService(id: string, formData: FormData) {
   if (!duplicate) {
     const slugConflict = await db.select().from(services)
       .where(eq(services.slugBase, data.slugBase)).get()
-    if (slugConflict) throw new Error(`Service with slugBase "${data.slugBase}" already exists`)
+    if (slugConflict) throw new Error(`Послуга з slugBase "${data.slugBase}" вже існує`)
   }
 
   const ts = await now()

@@ -13,20 +13,20 @@ import type { SessionWithRole } from '@/types/auth'
 import StatusBadge, { type StatusVariant } from './StatusBadge'
 
 const BREADCRUMB_LABELS: Record<string, string> = {
-  'admin': 'Админ-панель',
-  'services': 'Услуги',
+  'admin': 'Адмін-панель',
+  'services': 'Послуги',
   'blog': 'Блог',
   'faq': 'FAQ',
-  'testimonials': 'Отзывы',
-  'pages': 'Страницы',
-  'media': 'Медиа',
+  'testimonials': 'Відгуки',
+  'pages': 'Сторінки',
+  'media': 'Медіа',
   'leads': 'Заявки',
-  'navigation': 'Навигация',
-  'users': 'Пользователи',
-  'settings': 'Настройки',
-  'redirects': 'Редиректы',
+  'navigation': 'Навігація',
+  'users': 'Користувачі',
+  'settings': 'Налаштування',
+  'redirects': 'Редиректи',
   'audit': 'Журнал',
-  'login': 'Вход',
+  'login': 'Вхід',
 }
 
 export interface AdminTopbarProps {
@@ -50,7 +50,7 @@ export default function AdminTopbar({ session, onToggleSidebar }: AdminTopbarPro
         <button
           onClick={onToggleSidebar}
           className="lg:hidden p-2 -ml-2 rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60 transition-colors"
-          aria-label="Открыть меню"
+          aria-label="Відкрити меню"
         >
           <Menu className="w-5 h-5" />
         </button>
@@ -87,7 +87,7 @@ export default function AdminTopbar({ session, onToggleSidebar }: AdminTopbarPro
         <button
           onClick={() => signOut({ callbackUrl: '/admin/login' })}
           className="p-2 rounded-lg text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/60 transition-colors"
-          title="Выйти"
+          title="Вийти"
         >
           <LogOut className="w-4 h-4" />
         </button>

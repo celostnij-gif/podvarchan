@@ -65,7 +65,7 @@ export function UploadZone() {
       } catch (err) {
         updateItem(item.id, {
           status: 'error',
-          error: err instanceof Error ? err.message : 'Variant generation failed',
+          error: err instanceof Error ? err.message : 'Помилка генерації варіантів',
         })
         return
       }
@@ -80,7 +80,7 @@ export function UploadZone() {
       const res = await fetch('/api/admin/media/upload', { method: 'POST', body })
 
       if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: 'Upload failed' }))
+        const err = await res.json().catch(() => ({ error: 'Помилка завантаження' }))
         throw new Error(err.error || `HTTP ${res.status}`)
       }
 
@@ -88,7 +88,7 @@ export function UploadZone() {
     } catch (err) {
       updateItem(item.id, {
         status: 'error',
-        error: err instanceof Error ? err.message : 'Upload failed',
+        error: err instanceof Error ? err.message : 'Помилка завантаження',
       })
     }
   }, [updateItem])

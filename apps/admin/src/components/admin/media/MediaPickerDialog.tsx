@@ -59,7 +59,7 @@ async function convertToWebp(file: File, quality = 0.85): Promise<Blob> {
 
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(
-      (blob) => (blob ? resolve(blob) : reject(new Error('WEBP conversion failed'))),
+      (blob) => (blob ? resolve(blob) : reject(new Error('Помилка конвертації WEBP'))),
       'image/webp',
       quality,
     )
@@ -151,7 +151,7 @@ export function MediaPickerDialog({ open, onClose, onSelect }: Props) {
       })
 
       if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: 'Upload failed' }))
+        const err = await res.json().catch(() => ({ error: 'Помилка завантаження' }))
         throw new Error(err.error || `HTTP ${res.status}`)
       }
 

@@ -55,7 +55,7 @@ export default function AdminShell({ children, session }: AdminShellProps) {
         </main>
         <footer className="px-4 lg:px-6 xl:px-8 py-4 border-t border-zinc-800/50">
           <p className="text-xs text-zinc-600 text-center">
-            &copy; {new Date().getFullYear()} Podvarchan.com &mdash; Админ-панель
+            &copy; {new Date().getFullYear()} Podvarchan.com &mdash; Адмін-панель
           </p>
         </footer>
       </div>

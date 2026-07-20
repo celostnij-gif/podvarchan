@@ -36,35 +36,35 @@ const SCORE_H1 = 10
 const SCORE_CONTENT = 10
 
 function scoreTitle(title: string | null): { points: number; warning: string | null } {
-  if (!title) return { points: 0, warning: 'Missing <title>' }
+  if (!title) return { points: 0, warning: 'Відсутній <title>' }
   const len = title.length
-  if (len < 10) return { points: 0, warning: `Title too short (${len} chars)` }
-  if (len < 30) return { points: 5, warning: `Title short (${len} chars, optimal 30-60)` }
+  if (len < 10) return { points: 0, warning: `Заголовок занадто короткий (${len} символів)` }
+  if (len < 30) return { points: 5, warning: `Заголовок короткий (${len} символів, оптимально 30-60)` }
   if (len <= 60) return { points: SCORE_TITLE_LENGTH, warning: null }
-  if (len <= 80) return { points: 5, warning: `Title long (${len} chars, optimal 30-60)` }
-  return { points: 0, warning: `Title too long (${len} chars, max 60)` }
+  if (len <= 80) return { points: 5, warning: `Заголовок довгий (${len} символів, оптимально 30-60)` }
+  return { points: 0, warning: `Заголовок занадто довгий (${len} символів, максимум 60)` }
 }
 
 function scoreDescription(desc: string | null): { points: number; warning: string | null } {
-  if (!desc) return { points: 0, warning: 'Missing meta description' }
+  if (!desc) return { points: 0, warning: 'Відсутній meta description' }
   const len = desc.length
-  if (len < 50) return { points: 0, warning: `Description too short (${len} chars)` }
-  if (len < 70) return { points: 5, warning: `Description short (${len} chars, optimal 70-160)` }
+  if (len < 50) return { points: 0, warning: `Опис занадто короткий (${len} символів)` }
+  if (len < 70) return { points: 5, warning: `Опис короткий (${len} символів, оптимально 70-160)` }
   if (len <= 160) return { points: SCORE_DESC_LENGTH, warning: null }
-  if (len <= 200) return { points: 5, warning: `Description long (${len} chars, optimal 70-160)` }
-  return { points: 0, warning: `Description too long (${len} chars, max 160)` }
+  if (len <= 200) return { points: 5, warning: `Опис довгий (${len} символів, оптимально 70-160)` }
+  return { points: 0, warning: `Опис занадто довгий (${len} символів, максимум 160)` }
 }
 
 function scoreH1(h1: string | null): { points: number; warning: string | null } {
-  if (!h1) return { points: 0, warning: 'Missing H1 heading' }
-  if (h1.length < 10) return { points: 3, warning: 'H1 too short' }
+  if (!h1) return { points: 0, warning: 'Відсутній заголовок H1' }
+  if (h1.length < 10) return { points: 3, warning: 'H1 занадто короткий' }
   return { points: SCORE_H1, warning: null }
 }
 
 function scoreContent(wordCount: number): { points: number; warning: string | null } {
-  if (wordCount === 0) return { points: 0, warning: 'No content body' }
-  if (wordCount < 100) return { points: 2, warning: `Thin content (~${wordCount} words)` }
-  if (wordCount < 300) return { points: 5, warning: `Short content (~${wordCount} words, aim for 300+)` }
+  if (wordCount === 0) return { points: 0, warning: 'Немає тіла контенту' }
+  if (wordCount < 100) return { points: 2, warning: `Тонкий контент (~${wordCount} слів)` }
+  if (wordCount < 300) return { points: 5, warning: `Короткий контент (~${wordCount} слів, прагніть до 300+)` }
   return { points: SCORE_CONTENT, warning: null }
 }
 
@@ -86,7 +86,7 @@ async function collectStaticPages(): Promise<SeoUrlRow[]> {
         hasContent: false,
         wordCount: 0,
         score: 0,
-        warnings: ['Static page — read metadata from messages/*.json'],
+        warnings: ['Статична сторінка — читайте метадані з messages/*.json'],
       })
     }
   }
@@ -276,17 +276,17 @@ export function scoreColorClass(score: number): string {
 }
 
 export function scoreLabel(score: number): string {
-  if (score >= 40) return 'Good'
-  if (score >= 20) return 'Needs work'
-  return 'Poor'
+  if (score >= 40) return 'Добре'
+  if (score >= 20) return 'Потребує роботи'
+  return 'Погано'
 }
 
 /** Build a fake Google search result snippet preview. */
 export function googleSnippetPreview(title: string | null, description: string | null, url: string): string {
   const siteName = 'Podvarchan.com › '
   const displayUrl = `${siteName}${url.replace(/^\/(ru|uk)\//, '').replace(/\/$/, '')}`
-  const snippetTitle = title ?? 'No title'
-  const snippetDesc = description ?? 'No description'
+  const snippetTitle = title ?? 'Без заголовка'
+  const snippetDesc = description ?? 'Без опису'
   return `[ ${snippetTitle} ]
 ${displayUrl}
 ${snippetDesc.length > 160 ? snippetDesc.slice(0, 157) + '...' : snippetDesc}`

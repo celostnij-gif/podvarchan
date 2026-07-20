@@ -80,7 +80,7 @@ export async function updateLeadStatus(id: string, formData: FormData) {
   if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
 
   const lead = await db.select().from(contactLeads).where(eq(contactLeads.id, id)).get()
-  if (!lead) throw new Error('Lead not found')
+  if (!lead) throw new Error('Лід не знайдено')
 
   const prevStatus = lead.status
   await db.update(contactLeads).set({ status: parsed.data.status, updatedAt: await now() }).where(eq(contactLeads.id, id))
