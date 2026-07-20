@@ -34,6 +34,12 @@ export default async function BlogCategoriesPage() {
           + Нова категорія
         </Link>
       </div>
+      <div className="mb-4 flex items-center gap-4 border-b border-zinc-800 pb-2">
+        <Link href="/admin/blog/posts" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
+          Пости
+        </Link>
+        <span className="text-sm font-medium text-amber-400">Категорії</span>
+      </div>
 
       <div className="overflow-hidden rounded-xl border border-zinc-800">
         <table className="min-w-full divide-y divide-zinc-800">

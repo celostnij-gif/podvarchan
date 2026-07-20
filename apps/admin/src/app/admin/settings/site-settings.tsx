@@ -158,6 +158,21 @@ function SettingInlineEditor({
 
 /* ── Main component ── */
 
+function knownValueDisplay(key: string, valueJson: string | null): string {
+  if (!valueJson) return '(порожньо)'
+  const known = KNOWN_MAP.get(key)
+  if (known?.type === 'json') {
+    try {
+      const parsed = JSON.parse(valueJson)
+      const summary = Array.isArray(parsed) ? `${parsed.length} елементів` : typeof parsed
+      return `${summary} · ${valueJson.slice(0, 60)}${valueJson.length > 60 ? '…' : ''}`
+    } catch {
+      return valueJson.slice(0, 80)
+    }
+  }
+  return valueJson
+}
+
 export function SiteSettingsList({ settings }: Props) {
   const [editing, setEditing] = useState<string | null>(null)
   const [filter, setFilter] = useState<'all' | 'known' | 'custom'>('all')
@@ -233,7 +248,9 @@ export function SiteSettingsList({ settings }: Props) {
                 {KNOWN_MAP.get(s.key)?.description && (
                   <p className="mt-0.5 text-xs text-zinc-600">{KNOWN_MAP.get(s.key)!.description}</p>
                 )}
-                <div className="mt-1.5 text-sm text-zinc-300 truncate">{s.valueJson}</div>
+                <div className="mt-1.5 text-sm text-zinc-300 truncate">
+                  {knownValueDisplay(s.key, s.valueJson)}
+                </div>
               </div>
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <span className="rounded bg-amber-600/10 px-1.5 py-0.5 text-[10px] text-amber-500">редагувати</span>

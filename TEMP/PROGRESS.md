@@ -57,6 +57,25 @@
 - [x] 5.4 slug change → 301 rules — `blog.ts`, `services.ts`, `pages.ts` insert redirect rules on slug change for PUBLISHED entities
 - [x] 5.5 (opt) edge apply redirects — `redirectRules` table + `syncRedirectRulesToKv()` + middleware reads from KV
 
+## Етап 9 — Доопрацювання до продукту (2026-07-19 сесія 2)
+
+- [x] 9.1 home/page.tsx + home-editor.tsx — повний переклад на українську (Головна, Параметри, Назва, Короткий опис, Чернетка/Опубліковано/Архів, Збереження)
+- [x] 9.2 pages/[id]/edit-form.tsx — UK переклад (Основне, 🇷🇺 Російська, 🇺🇦 Українська, Видалити, Зберегти)
+- [x] 9.3 pages/[id]/section-editor.tsx — UK переклад (Секції сторінки, Тип секції, Ключ унікальний, Увімк/Вимк, Видалити, Додати, З шаблону, або)
+- [x] 9.4 users/page.tsx — повний UK (Користувачі, Імʼя, Роль, Статус, Останній вхід, Власник/Адмін/Редактор/Спостерігач/Користувач, Активний/Неактивний)
+- [x] 9.5 settings/site-settings.tsx — UK KNOWN_KEYS (Назва сайту, Опис сайту, Email для зв'язку, Посилання на соцмережі, Години роботи, ID аналітики), filter tabs (Всі/Відомі/Власні), empty state
+- [x] 9.6 settings/contact-channels.tsx — UK (Основний, Увімк)
+- [x] 9.7 revisions/[entityType]/[entityId]/revisions-list.tsx — темні стилі адмінки, UK locale, emoji locale badges
+- [x] 9.8 revisions/[entityType]/[entityId]/page.tsx — темні стилі, UK рядки, truncated ID
+- [x] 9.9 revisions/page.tsx — **NEW** index stub (G47 ✅) — навігаційна сторінка з посиланнями на розділи
+- [x] 9.10 seo/page.tsx + seo-audit-client.tsx — **G46 ✅** клієнтський пошук за URL/заголовком, фільтр за типом, кліковані score-картки (green/yellow/red), UK заголовки, «Скинути фільтри»
+- [x] 9.11 src/lib/preview.ts — `canPreviewList()` helper для list-entities без slug-matching
+- [x] 9.12 src/lib/db/public.ts — `getFAQs(previewCookie?)` + `getTestimonials(previewCookie?)` — **G25 ✅** preview support для list helpers
+- [x] 9.13 Build PASS: admin + public (2026-07-19)
+- [x] 9.14 Commit `67cb6cf` pushed → CI deploy
+
+---
+
 ## Етап 6 — Admin UX P0
 
 - [x] 6.1 Shared TipTap component — `components/admin/editor/TipTapEditor.tsx` extracted from blog; old `tiptap-editor.tsx` deleted

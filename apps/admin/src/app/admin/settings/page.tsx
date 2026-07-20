@@ -15,7 +15,7 @@ export default async function SettingsPage() {
       <h1 className="text-2xl font-bold">Налаштування сайту</h1>
 
       <section>
-        <h2 className="text-lg font-semibold mb-4">Параметри (key-value)</h2>
+        <h2 className="text-lg font-semibold mb-4">Параметри</h2>
         <SiteSettingsList settings={settings} />
       </section>
 

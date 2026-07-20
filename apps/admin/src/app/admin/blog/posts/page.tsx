@@ -59,6 +59,12 @@ export default async function BlogPostsPage(props: Props) {
           + Новий пост
         </Link>
       </div>
+      <div className="mb-4 flex items-center gap-4 border-b border-zinc-800 pb-2">
+        <span className="text-sm font-medium text-amber-400">Пости</span>
+        <Link href="/admin/blog/categories" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
+          Категорії
+        </Link>
+      </div>
 
       <div className="mb-4">
         <form className="flex items-center gap-3" method="GET">
