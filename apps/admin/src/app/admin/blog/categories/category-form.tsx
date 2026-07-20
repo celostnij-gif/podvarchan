@@ -68,7 +68,7 @@ export function CategoryForm({ category, services }: Props) {
 
       <fieldset className="rounded-lg border border-zinc-700/50 p-4">
         <legend className="text-sm font-semibold text-zinc-300">Основні параметри</legend>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="status" className="block text-sm font-medium text-zinc-300">Статус</label>
             <select id="status" name="status" defaultValue={category?.status ?? 'PUBLISHED'}
@@ -77,11 +77,6 @@ export function CategoryForm({ category, services }: Props) {
               <option value="PUBLISHED">Опубліковано</option>
               <option value="ARCHIVED">Архів</option>
             </select>
-          </div>
-          <div>
-            <label htmlFor="sortOrder" className="block text-sm font-medium text-zinc-300">Порядок у списку</label>
-            <input id="sortOrder" name="sortOrder" type="number" min={0} defaultValue={category?.sortOrder ?? 0}
-              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
           <div>
             <label htmlFor="serviceId" className="block text-sm font-medium text-zinc-300">Пов&apos;язана послуга</label>
@@ -97,11 +92,18 @@ export function CategoryForm({ category, services }: Props) {
           </div>
         </div>
 
-        {/* Advanced slug override */}
+        {/* Advanced: sortOrder + slug */}
         <details className="mt-4" open={isEdit}>
           <summary className="cursor-pointer select-none text-xs text-zinc-500 hover:text-zinc-300">
-            {isEdit ? 'Slug (URL-ідентифікатор)' : 'Розширені налаштування slug (автоматичний)'}
+            Порядок у списку + slug
           </summary>
+          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div>
+              <label htmlFor="sortOrder" className="block text-xs font-medium text-zinc-400 mb-1">Порядок у списку</label>
+              <input id="sortOrder" name="sortOrder" type="number" min={0} defaultValue={category?.sortOrder ?? 0}
+                className="w-full rounded border border-zinc-700 bg-zinc-900/50 px-2 py-1.5 text-xs text-zinc-200 focus:border-amber-500/50 focus:outline-none" />
+            </div>
+          </div>
           <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div>
               <label className="block text-xs font-medium text-zinc-400 mb-1">Slug Base (внутрішній)</label>

@@ -6,6 +6,7 @@ import { createPost, updatePost } from '@/lib/actions/blog'
 import { TipTapEditor } from '@/components/admin/editor/TipTapEditor'
 import { MediaPickerDialog } from '@/components/admin/media/MediaPickerDialog'
 import { StructuredListEditor } from '@/components/admin/StructuredListEditor'
+import { slugify } from '@/lib/slugify'
 import type { PostWithTranslations } from '../types'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
@@ -31,6 +32,13 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
   const [showCoverPicker, setShowCoverPicker] = useState(false)
   const statusRef = useRef<HTMLSelectElement>(null)
   const formRef = useRef<HTMLFormElement>(null)
+  const slugAutoRef = useRef(!isEdit)
+
+  function handleTitleChange(locale: 'ru' | 'uk', value: string) {
+    if (!slugAutoRef.current) return
+    const slugInput = document.getElementById(`${locale}_slug`) as HTMLInputElement | null
+    if (slugInput) slugInput.value = slugify(value)
+  }
 
   function handlePublish(e: FormEvent, status: string) {
     e.preventDefault()
@@ -185,11 +193,13 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
           <div>
             <label htmlFor="ru_slug" className="block text-sm font-medium text-zinc-300">Slug *</label>
             <input id="ru_slug" name="ru_slug" defaultValue={tr('ru', 'slug')} required
+              onChange={() => { slugAutoRef.current = false }}
               className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
           <div>
             <label htmlFor="ru_title" className="block text-sm font-medium text-zinc-300">Заголовок *</label>
             <input id="ru_title" name="ru_title" defaultValue={tr('ru', 'title')} required
+              onChange={(e) => handleTitleChange('ru', e.target.value)}
               className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
           <div className="sm:col-span-2">
@@ -234,11 +244,13 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
           <div>
             <label htmlFor="uk_slug" className="block text-sm font-medium text-zinc-300">Slug *</label>
             <input id="uk_slug" name="uk_slug" defaultValue={tr('uk', 'slug')} required
+              onChange={() => { slugAutoRef.current = false }}
               className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
           <div>
             <label htmlFor="uk_title" className="block text-sm font-medium text-zinc-300">Заголовок *</label>
             <input id="uk_title" name="uk_title" defaultValue={tr('uk', 'title')} required
+              onChange={(e) => handleTitleChange('uk', e.target.value)}
               className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
           <div className="sm:col-span-2">

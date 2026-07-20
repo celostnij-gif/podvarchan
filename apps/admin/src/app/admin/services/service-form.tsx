@@ -128,43 +128,52 @@ export function ServiceForm({ service }: Props) {
               ))}
             </select>
           </div>
-          <div>
-            <label htmlFor="priority" className="block text-sm font-medium text-zinc-300">
-              Пріоритет
-            </label>
-            <input
-              id="priority"
-              name="priority"
-              type="number"
-              min={0}
-              defaultValue={service?.priority ?? 0}
-              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
-            />
-          </div>
-          <div>
-            <label htmlFor="sortOrder" className="block text-sm font-medium text-zinc-300">
-              Порядок у списку
-            </label>
-            <input
-              id="sortOrder"
-              name="sortOrder"
-              type="number"
-              min={0}
-              defaultValue={service?.sortOrder ?? 0}
-              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
-            />
-          </div>
-          <div className="flex items-end pb-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-zinc-300 cursor-pointer">
-              <input
-                name="featured"
-                type="checkbox"
-                defaultChecked={service?.featured ?? false}
-                className="rounded border-zinc-700 text-amber-500 shadow-sm focus:border-amber-500 focus:ring-amber-500"
-              />
-              Рекомендована послуга
-            </label>
-          </div>
+
+          {/* Advanced: sorting + featured */}
+          <details className="mt-4">
+            <summary className="cursor-pointer select-none text-xs text-zinc-500 hover:text-zinc-300">
+              Порядок, пріоритет, рекомендація
+            </summary>
+            <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div>
+                <label htmlFor="priority" className="block text-sm font-medium text-zinc-300">
+                  Пріоритет
+                </label>
+                <input
+                  id="priority"
+                  name="priority"
+                  type="number"
+                  min={0}
+                  defaultValue={service?.priority ?? 0}
+                  className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
+                />
+              </div>
+              <div>
+                <label htmlFor="sortOrder" className="block text-sm font-medium text-zinc-300">
+                  Порядок у списку
+                </label>
+                <input
+                  id="sortOrder"
+                  name="sortOrder"
+                  type="number"
+                  min={0}
+                  defaultValue={service?.sortOrder ?? 0}
+                  className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
+                />
+              </div>
+              <div className="flex items-end pb-2">
+                <label className="flex items-center gap-2 text-sm font-medium text-zinc-300 cursor-pointer">
+                  <input
+                    name="featured"
+                    type="checkbox"
+                    defaultChecked={service?.featured ?? false}
+                    className="rounded border-zinc-700 text-amber-500 shadow-sm focus:border-amber-500 focus:ring-amber-500"
+                  />
+                  Рекомендована послуга
+                </label>
+              </div>
+            </div>
+          </details>
         </div>
 
         {/* Advanced: show slug fields for edit or as override */}

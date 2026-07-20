@@ -63,7 +63,10 @@ export function ServicesSortableList({ items }: { items: ServiceRow[] }) {
                 Ред
               </Link>
               {item.status === 'PUBLISHED' && item.slugBase && (
-                <ViewOnSiteLink href={`/ru/uslugi/${item.slugBase}`} />
+                <>
+                  <ViewOnSiteLink href={`/ru/uslugi/${item.slugBase}`} label="RU" />
+                  <ViewOnSiteLink href={`/uk/uslugi/${item.slugBase}`} label="UK" />
+                </>
               )}
               <DeleteButton id={item.id} />
             </div>

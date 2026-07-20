@@ -15,6 +15,7 @@ import {
   Navigation,
   ArrowLeftRight,
   ClipboardList,
+  Search,
   type LucideIcon,
 } from 'lucide-react'
 import { LogoImage } from '@/components/ui/LogoImage'
@@ -55,6 +56,7 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Головна', href: '/admin/home', icon: FileText },
       { label: 'Сторінки', href: '/admin/pages', icon: FileText },
       { label: 'Медіа', href: '/admin/media', icon: Image },
+      { label: 'SEO', href: '/admin/seo', icon: Search },
     ],
   },
   {
