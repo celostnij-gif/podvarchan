@@ -233,6 +233,15 @@
 - **G22 🟡 — ActionResult/withRole:** Breaking change (signature + all callers), deferred. `guard.ts` hardened with `isRedirectError` re-throw for when migration resumes.
 - **GAPS_MAP.md:** G9/G14/G35/G40/G47/G25/G28 updated.
 
+- **G44 ✅ — owner publish guided CTA:** Already implemented (W0.2). service-form + post-form have «Зберегти чернетку» / «Опублікувати» buttons.
+- **G51 ✅ — post cover manual URL primary:** Already flipped by W0.4 (MediaPicker amber CTA, URL collapsed under `<details>`).
+
+- **G45 ✅ — live edit→public <30s:** Smoke: отредактировал вопрос FAQ, сохранил → сразу появился на podvarchan.com/ru/faq/. Откатил — чистo. ISR/OSS cache работает.
+
+### 2026-07-20 — G26 dashboard charts
+
+- **G26 ✅ — dashboard charts — SVG donut + progress bars, нуль зависимостей:** `DashboardCharts.tsx` (DonutChart/ProgressBar, SVG-окружность с stroke-dasharray анимацией) встроен в `/admin/` после блока dbAvailable, перед сеткой StatCard. 4 типа контента: Послуги (синий), Пости (зелёный), Відгуки (фиолетовый), FAQ (розовый). GAPS_MAP.md обновлён.
+
 ### 2026-07-17
 
 - TEMP очищено від сміття (звіти, алерти, скріни, старий backlog).  

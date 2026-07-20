@@ -14,6 +14,7 @@ import {
   Clock,
 } from 'lucide-react'
 import { getDashboardData } from '@/lib/admin/dashboard'
+import { DashboardCharts } from '@/components/admin/DashboardCharts'
 
 export const metadata: Metadata = {
   title: 'Дашборд',
@@ -111,6 +112,15 @@ export default async function DashboardPage() {
           </div>
         </div>
       )}
+
+      <DashboardCharts
+        stats={[
+          { label: 'Послуги', total: stats.services.total, published: stats.services.published, color: '#3b82f6', href: '/admin/services' },
+          { label: 'Пости', total: stats.blog.total, published: stats.blog.published, color: '#22c55e', href: '/admin/blog' },
+          { label: 'Відгуки', total: stats.testimonials.total, published: stats.testimonials.published, color: '#a855f7', href: '/admin/testimonials' },
+          { label: 'FAQ', total: stats.faq.total, published: stats.faq.published, color: '#ec4899', href: '/admin/faq' },
+        ]}
+      />
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
         <StatCard icon={Layers} label="Послуги" value={stats.services.total} sub={`${stats.services.published} опубліковано`} href="/admin/services" color="blue" />
