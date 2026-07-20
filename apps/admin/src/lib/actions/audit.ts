@@ -30,13 +30,44 @@ export async function getAuditLogs(options?: AuditLogFilters) {
   if (options?.userId) conditions.push(eq(auditLogs.userId, options.userId))
   if (options?.from) conditions.push(gte(auditLogs.createdAt, options.from))
   if (options?.to) conditions.push(lte(auditLogs.createdAt, options.to))
-  const query = db.select().from(auditLogs)
+
+  const cols = {
+    id: auditLogs.id,
+    userId: auditLogs.userId,
+    action: auditLogs.action,
+    entityType: auditLogs.entityType,
+    entityId: auditLogs.entityId,
+    ip: auditLogs.ip,
+    createdAt: auditLogs.createdAt,
+  }
+
+  const query = db.select(cols).from(auditLogs)
     .orderBy(desc(auditLogs.createdAt))
     .limit(options?.limit ?? 50)
     .offset(options?.offset ?? 0)
   return conditions.length > 0
     ? await query.where(and(...conditions)).all()
     : await query.all()
+}
+
+export async function getAuditLogsCount(options?: Pick<AuditLogFilters, 'entityType' | 'action' | 'userId'>) {
+  await requireAuditView()
+  const db = await getActionDb()
+  const conditions = []
+  if (options?.entityType) conditions.push(eq(auditLogs.entityType, options.entityType))
+  if (options?.action) conditions.push(eq(auditLogs.action, options.action))
+  if (options?.userId) conditions.push(eq(auditLogs.userId, options.userId))
+
+  const rows = conditions.length > 0
+    ? await db.select({ cnt: auditLogs.id }).from(auditLogs).where(and(...conditions)).all()
+    : await db.select({ cnt: auditLogs.id }).from(auditLogs).all()
+  return rows.length
+}
+
+export async function getAuditLogDetail(id: string) {
+  await requireAuditView()
+  const db = await getActionDb()
+  return db.select().from(auditLogs).where(eq(auditLogs.id, id)).get()
 }
 
 export async function getAuditLogById(id: string) {

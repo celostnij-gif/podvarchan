@@ -1,4 +1,4 @@
-import { getAuditLogs, getAuditEntityTypes, getAuditActions } from '@/lib/actions/audit'
+import { getAuditLogs, getAuditLogsCount, getAuditEntityTypes, getAuditActions } from '@/lib/actions/audit'
 import { AuditLogTable } from './audit-table'
 import { AuditFilters } from './audit-filters'
 
@@ -10,13 +10,11 @@ interface Props {
 
 export default async function AuditPage(props: Props) {
   const sp = await props.searchParams
-  const [logs, entityTypes, actions] = await Promise.all([
-    getAuditLogs({
-      entityType: sp.entityType,
-      userId: sp.userId,
-      action: sp.action,
-      offset: sp.offset ? parseInt(sp.offset) : 0,
-    }),
+  const offset = sp.offset ? parseInt(sp.offset) : 0
+  const filters = { entityType: sp.entityType, userId: sp.userId, action: sp.action }
+  const [logs, totalCount, entityTypes, actions] = await Promise.all([
+    getAuditLogs({ ...filters, offset }),
+    getAuditLogsCount(filters),
     getAuditEntityTypes(),
     getAuditActions(),
   ])
@@ -25,10 +23,10 @@ export default async function AuditPage(props: Props) {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Аудит</h1>
       <p className="text-sm text-zinc-500">
-        Журнал дій адміністраторів та редакторів.
+        Журнал дій адміністраторів та редакторів. Записів: {totalCount}
       </p>
       <AuditFilters entityTypes={entityTypes} actions={actions} />
-      <AuditLogTable logs={logs} offset={sp.offset ? parseInt(sp.offset) : 0} />
+      <AuditLogTable logs={logs} offset={offset} totalCount={totalCount} />
     </div>
   )
 }
