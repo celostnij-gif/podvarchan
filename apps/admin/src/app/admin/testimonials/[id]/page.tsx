@@ -1,3 +1,4 @@
+import PreviewButton from '@/components/admin/PreviewButton'
 import { getDB } from '@/db'
 import { testimonials, testimonialTranslations } from '@/db/schema/testimonials'
 import { eq } from 'drizzle-orm'
@@ -28,7 +29,14 @@ export default async function EditTestimonialPage(props: Props) {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-zinc-100">Редагувати відгук</h1>
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-zinc-100">Редагувати відгук</h1>
+        <PreviewButton
+          entityType="testimonial"
+          slug="list"
+          publicPath="/ru/"
+        />
+      </div>
       <TestimonialForm testimonial={testimonial} />
     </div>
   )

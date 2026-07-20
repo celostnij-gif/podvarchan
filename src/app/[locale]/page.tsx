@@ -75,8 +75,8 @@ export default async function HomePage({
   try {
     ;[d1Home, d1Testimonials, d1Faqs] = await Promise.all([
       getPageByType('HOME', locale, previewCookie),
-      getTestimonials(locale),
-      getFAQs(locale, 'HOME'),
+      getTestimonials(locale, previewCookie),
+      getFAQs(locale, 'HOME', previewCookie),
     ])
   } catch { /* D1 unavailable — fallback to messages */ }
 

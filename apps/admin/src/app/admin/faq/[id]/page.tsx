@@ -1,3 +1,4 @@
+import PreviewButton from '@/components/admin/PreviewButton'
 import { getDB } from '@/db'
 import { faqItems, faqItemTranslations } from '@/db/schema/faq'
 import { eq } from 'drizzle-orm'
@@ -28,7 +29,14 @@ export default async function EditFaqPage(props: Props) {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-zinc-200">Редагувати FAQ</h1>
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-zinc-200">Редагувати FAQ</h1>
+        <PreviewButton
+          entityType="faq"
+          slug="list"
+          publicPath="/ru/faq/"
+        />
+      </div>
       <FaqForm faq={faq} />
     </div>
   )

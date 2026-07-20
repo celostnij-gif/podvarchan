@@ -1,3 +1,5 @@
+import { deleteCategory } from '@/lib/actions/blog'
+import { DeleteButton } from '@/components/admin/DeleteButton'
 import { getDB } from '@/db'
 import { blogCategories, blogCategoryTranslations } from '@/db/schema/blog'
 import { eq } from 'drizzle-orm'
@@ -79,6 +81,10 @@ export default async function BlogCategoriesPage() {
                   <td className="whitespace-nowrap px-4 py-3 text-right text-sm">
                     <Link href={`/admin/blog/categories/${cat.id}`}
                       className="rounded px-2 py-1 text-amber-400 hover:bg-zinc-800">Редагувати</Link>
+                    <DeleteButton
+                      onDelete={deleteCategory.bind(null, cat.id)}
+                      confirmMessage="Видалити категорію? Це видалить також переклади."
+                    />
                   </td>
                 </tr>
               )

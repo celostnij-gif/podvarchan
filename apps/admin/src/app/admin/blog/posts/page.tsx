@@ -1,3 +1,5 @@
+import { DeleteButton } from '@/components/admin/DeleteButton'
+import { deletePost } from '@/lib/actions/blog'
 import ViewOnSiteLink from '@/components/admin/ViewOnSiteLink'
 import { getDB } from '@/db'
 import { blogPosts, blogPostTranslations, blogCategories, blogCategoryTranslations } from '@/db/schema/blog'
@@ -120,6 +122,10 @@ export default async function BlogPostsPage(props: Props) {
                     {post.status === 'PUBLISHED' && ru?.slug && (
                       <ViewOnSiteLink href={`/ru/blog/${ru.slug}`} />
                     )}
+                    <DeleteButton
+                      onDelete={deletePost.bind(null, post.id)}
+                      confirmMessage="Видалити публікацію? Це видалить також переклади."
+                    />
                   </td>
                 </tr>
               )

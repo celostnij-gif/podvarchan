@@ -11,13 +11,31 @@
 ## Wave 0 — Client acceptance blockers (2026-07-20)
 
 - [ ] W0.1 Formal J1 smoke: edit published service title → public <30s (пруф)
-- [ ] W0.2 Guided publish CTA (service + post)
+- [x] W0.2 Guided publish CTA (service + post) — commit 633bcd7
 - [x] W0.3 Chrome UK 100% (layout/topbar/footer/block registry) — completed 2026-07-20
-- [ ] W0.4 Post cover: MediaPicker primary, URL advanced
-- [ ] W0.5 Audit pagination (зняти ~1MB SSR / 1102 risk)
-- [ ] W0.6 OWNER_GUIDE_UK.md handoff
-- [ ] W0.7 Rotate OWNER password (світився в чаті)
+- [x] W0.4 Post cover: MediaPicker primary, URL advanced — commit c7a166f
+- [x] W0.5 Audit pagination (зняти ~1MB SSR / 1102 risk) — commit 58acd17
+- [x] W0.6 OWNER_GUIDE_UK.md handoff — TEMP/OWNER_GUIDE_UK.md created
+- [ ] W0.7 Rotate OWNER password — script at scripts/rotate-owner-password.mjs (run manually before handoff)
 - [ ] Client walkthrough J1–J8 sign-off
+
+## Wave 1 — Product polish (2026-07-20)
+
+- [x] W1.1 Post auto-slug from title (RU/UK independently) — commit 3240f37
+- [x] W1.2 Collapse sortOrder/priority/featured into advanced `<details>` — commit 3240f37
+- [x] W1.3 SEO link in sidebar (Контент group) — commit 3240f37
+- [x] W1.4 SEO audit table client-side pagination (50/page) — commit 56c804f
+- [-] W1.5 PreviewButton FAQ/testimonials — blocked (list helpers need previewCookie param)
+- [x] W1.6 home-editor + pages edit-form → useActionState — commit 56c804f
+- [x] W1.7 ViewOnSiteLink service: RU + UK links — commit 3240f37
+- [x] W1.8 Error strings UK human only — done in Phase C
+
+## Wave 2 — P2 (2026-07-20)
+
+- [x] W2.1 Revisions real list (recent 100 across all entities) — commit bcb1851
+- [x] W2.2 301 redirect /o-mne → /ru/ob-avtore/ — commit bcb1851
+- [ ] W2.3 E2E playwright smoke J1–J3
+- [-] W2.4 Scheduling / OAuth / charts — not for v1
 
 ---
 
@@ -153,6 +171,26 @@
 - Open blockers: formal J1 smoke; guided publish; RU chrome («Админ-панель»); cover URL primary; audit ~940KB; SEO не в sidebar; owner guide; password rotate.  
 - Free smell: admin Error **1102** під серією authenticated GET (audit/seo heavy).  
 - `AGENT.md` оновлено: §0 status + §22 здача; TEMP/README пріоритет Wave 0–2.
+
+### 2026-07-20 — Wave 0 tasks (W0.2, W0.4, W0.5, W0.6, W0.7)
+
+- **W0.2 — Guided publish CTA (633bcd7):** service-form.tsx + post-form.tsx — replaced single submit button + visible status select with two clear CTA buttons ("Зберегти чернетку" grey + "Опублікувати" amber). Status select hidden, controlled by ref. Advanced section with manual status override (REVIEW/ARCHIVED). Both builds pass.
+- **W0.4 — Post cover MediaPicker primary (c7a166f):** post-form.tsx — MediaPicker button is now prominent amber CTA; manual URL input moved to collapsed `<details>` summary; clear button labeled "Видалити".
+- **W0.5 — Audit pagination (58acd17):** Fixed Error 1102 risk (~1MB SSR). `getAuditLogs` now selects without `beforeJson`/`afterJson` columns (lite query). Table rows expand on demand via `getAuditLogDetail()`. Added `getAuditLogsCount` for page X of Y display. SSR payload reduced from potential 1MB+ to ~3KB.
+- **W0.6 — OWNER_GUIDE_UK.md:** Created `TEMP/OWNER_GUIDE_UK.md` — comprehensive Ukrainian-language site owner manual covering all admin sections (content, CRM, system). Step-by-step instructions for non-technical OWNER.
+- **W0.7 — Rotate OWNER password:** Created `scripts/rotate-owner-password.mjs` — generates random password, hashes with bcryptjs, updates D1 via wrangler. Run manually before client handoff.
+
+### 2026-07-20 — Wave 1 + Wave 2 polish
+
+- **W1.1 — Post auto-slug (3240f37):** post-form.tsx — slugify from title (RU/UK independently) with manual override via slugAutoRef.
+- **W1.2 — Advanced fields collapse (3240f37):** service-form.tsx — priority/sortOrder/featured wrapped in `<details>`. category-form.tsx — sortOrder moved into existing advanced `<details>`.
+- **W1.3 — SEO sidebar (3240f37):** AdminSidebar.tsx — SEO link added under Контент group with Search icon.
+- **W1.4 — SEO pagination (56c804f):** seo-audit-client.tsx — client-side pagination (50/page), page reset on filter change, prev/next controls.
+- **W1.6 — useActionState (56c804f):** home-editor.tsx + pages/[id]/edit-form.tsx — converted from manual useState+handleSave to useActionState with inline errors.
+- **W1.7 — ViewOnSiteLink service (3240f37):** services-sortable-list.tsx — both RU + UK links now shown.
+- **W2.1 — Revisions real list (bcb1851):** revisions/page.tsx — shows recent 100 revisions across all entities. Added getRecentRevisions() action.
+- **W2.2 — /o-mne 301 (bcb1851):** middleware.ts — legacyRedirects map: /o-mne → /ru/ob-avtore/.
+- **Grep §16:** clean — no alert(), no window.location.reload, no any, no @ts-ignore in admin/src.
 
 ### 2026-07-20 — Phase C: Chrome UK + Error Messages (W0.3)
 

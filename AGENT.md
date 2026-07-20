@@ -2,7 +2,45 @@
 
 > Постоянный контекст для ИИ-агента. Читать **перед каждой задачей**.  
 > Если задача противоречит этому файлу — **спроси**, не ломай инварианты.  
-> **Дата:** 2026-07-17
+> **Дата:** 2026-07-20
+
+---
+
+## 0. Текущий статус (для агента, 2026-07-20)
+
+| Слой | Статус |
+|---|---|
+| Public site | **UP** — CDN + D1 primary, SEO/cache OK |
+| Admin infra (auth, CRUD, audit, media, revalidate, YMYL) | **~90%+** — не «строить с нуля» |
+| Admin **product** (owner journeys, polish, acceptance) | **~70–75%** — **ещё НЕ готово к сдаче замовнику** |
+
+**Master product plan:** `TEMP/QUALITY_ADMIN_PLAN.md` (фази A–G).  
+**Останній live-аудит здачі:** `TEMP/CLIENT_ACCEPTANCE_AUDIT_2026-07-20.md`.  
+**DoD клієнту:** `TEMP/ACCEPTANCE_CHECKLIST.md` + `TEMP/OWNER_JOURNEYS.md` (J1–J8).
+
+### Що зараз робити (пріоритет)
+
+```
+Wave 0 (блокує здачу) → Wave 1 polish → Wave 2 P2
+```
+
+1. **Wave 0:** formal J1 smoke (edit→public <30s); guided publish CTA; chrome 100% UK; post cover = MediaPicker primary; audit pagination (Free 1102); `TEMP/OWNER_GUIDE_UK.md`; rotate OWNER password якщо світився.  
+2. **Wave 1:** auto-slug posts; SEO в sidebar + pagination; Preview FAQ/testimonials; home/pages `useActionState`; hide debug-tools; human UK errors only.  
+3. **Wave 2:** revisions real or hide stat; E2E; scheduling/OAuth/charts — **не** для v1.
+
+**Не робити:** «фікс 500 на public» (сайт 200), «написати 14 actions» (вже є), rewrite auth/shell/workers, Cloudflare Images, `no-store` на public HTML.
+
+### Критерій «можна здавати замовнику»
+
+- [ ] J1–J3 owner journeys green на **prod** без підказок розробника  
+- [ ] Formal proof: edit published title → public < 30s  
+- [ ] Нема raw JSON / alert / reload / primary Slug Base / primary manual media URL  
+- [ ] UI chrome **українською** (включно metadata/topbar/footer/block labels)  
+- [ ] Builds ×2 + seo-regression + public CDN headers  
+- [ ] 1-page owner guide UK + known limitations  
+- [ ] Client walkthrough sign-off  
+
+Поки пункти open — писати в звіті **«NOT READY for client»**, навіть якщо routes 200.
 
 ---
 
@@ -282,13 +320,20 @@ bash scripts/seo-regression.sh   # green
 
 ## 12. Что НЕ трогать без нужды
 
-Auth/permissions/session · AdminShell/layout/login (каркас) · split workers · CF Access domain ·  
+Auth/permissions/session **логика** · split workers · CF Access domain ·  
 TipTap **extensions core** (можно выносить shared wrapper) · soft-404 · 308 locale logic ·  
-CDN cache strategy · observability 1% public · полная переписка Drizzle schema «заодно».
+CDN cache strategy public · observability 1% public · полная переписка Drizzle schema «заодно».
 
-Точечные правки schema/actions/pages/forms — по этапу плана и §17 quality bar.  
-**Можно и нужно** править «карявые» forms (JSON textarea, alert, pages editor) — это не «не трогать»,  
-это целевой долг CMS (§17.1 reject list).
+**Можно и нужно** (product finish / здача):
+
+- labels UK у AdminShell / layout metadata / topbar / footer / block registry;  
+- forms: publish CTA, MediaPicker primary, auto-slug, advanced collapse tech fields;  
+- home/pages → `useActionState` contract;  
+- audit/seo **pagination** (важкі list pages → Error 1102 на Free);  
+- hide debug-tools від OWNER IA;  
+- owner guide + acceptance smoke.
+
+Точечные правки schema/actions/pages/forms — по `QUALITY_ADMIN_PLAN` Wave 0–1 і §17 / §22.
 
 ---
 
@@ -325,17 +370,18 @@ CDN cache strategy · observability 1% public · полная переписка
 
 ## 14. Рабочий процесс агента
 
-1. Прочитай `AGENT.md` **полностью** (особенно §17–§21 про админку) + `TEMP/README.md` + текущий этап.  
-2. Промпт етапу: `TEMP/AGENT_PROMPTS.md`.  
-3. Сверь код (не память): `public.ts`, actions, forms, wrangler.  
-4. Меняй **один** этап/подшаг → build → smoke.  
-5. Для admin UX: сначала shared-паттерн (TipTap/SortableList/useActionState), потом формы.  
-6. Обнови `TEMP/PROGRESS.md`.  
-7. Коммиты — атомарные, осмысленные; **секреты, токены, пароли, .env — никогда в git / TEMP / AGENT.md**.  
-8. Сомнение по SEO/CPU/cache/YMYL — **стоп и вопрос**.
+1. Прочитай `AGENT.md` **§0 + §17–§22** + `TEMP/README.md` + `TEMP/CLIENT_ACCEPTANCE_AUDIT_2026-07-20.md` (або новіший audit).  
+2. Master plan: `TEMP/QUALITY_ADMIN_PLAN.md` (Wave 0→1→2). Journeys: `TEMP/OWNER_JOURNEYS.md`.  
+3. Сверь код (не память): forms, actions, `public.ts`, wrangler.  
+4. Бери **один** gap / одну journey → code → build admin (+ public якщо `src/`) → **live smoke**.  
+5. Для admin UX: shared-паттерн (TipTap/SortableList/useActionState/MediaPicker) → форми.  
+6. Онови `TEMP/PROGRESS.md` + статус gap у `GAPS_MAP.md` / checklist.  
+7. Коммиты атомарні; **секрети/паролі ніколи** в git / TEMP / AGENT.md / chat-логах.  
+8. Сумнів по SEO/CPU/cache/YMYL — **стоп і питання**.  
+9. Перед «готово до здачі» — пройди `TEMP/ACCEPTANCE_CHECKLIST.md` end-to-end на prod.
 
-Не использовать как master: старые TEMP-отчёты/GSC/session-логи (удалены 2026-07-17)  
-и `implementation-guide-admin-CURRENT-STATE.md`.
+Не використовувати як master: старі TEMP-звіти з «10/11 URL 500» / «14 actions missing»  
+(див. `TEMP/DRAFT_PLAN_CORRECTIONS.md`).
 
 ---
 
@@ -415,14 +461,18 @@ rg "canEditContent.*publish|publish.*canEditContent" apps/admin/src/lib/actions
 | TipTap **только** в blog | Shared TipTap для FAQ answer, service description, testimonial text, text-block body |
 | `useTransition` + `alert(error)` | `useActionState` + inline error banner + `isRedirectError` |
 | `window.location.reload()` после save | `router.refresh()` / server revalidate admin path |
-| Смесь RU/UK UI-меток в разных формах | Единый UI language: **украинский** (контент-поля RU/UK как данные) |
-| Ручной ввод media URL без picker | `MediaPickerDialog` + upload zone |
+| Смесь RU/UK UI-меток / «Админ-панель» RU chrome | Единый UI language: **украинский** (контент-поля RU/UK як дані) |
+| Ручной URL media **як primary** (picker secondary) | `MediaPickerDialog` primary; manual URL тільки advanced |
+| `Slug Base` / sortOrder / priority як primary fields | Auto-slug з title; tech fields у `<details>` advanced |
+| Publish лише через status `<select>` без CTA | «Зберегти чернетку» + «Опублікувати» + YMYL human errors |
 | Reorder только «удали и создай» | DnD (`SortableList` / dnd-kit) + persist `sortOrder` |
-| Кнопки-аббревиатуры «Збр», «Дел» | Полные подписи: «Зберегти», «Видалити», «Редагувати» |
+| Кнопки-аббревиатуры «Збр», «Дел», «Зняти» | Полные подписи: «Зберегти», «Видалити», «Зняти з публікації» |
 | Publish через `canEditContent` | Только `canPublish` |
 | CRUD в admin без public D1 read | Полный цикл: admin → D1 → public helper → page |
 | Hardcode footer/nav/services в `constants` как primary | D1 primary; constants/messages = fallback |
+| SSR dump audit/seo без pagination (~MB HTML) | Pagination / filters / limit — Free admin CPU |
 | Тяжёлая логика на public worker «ради удобства админки» | Тяжёлое в browser (optimize) или admin (редко); public — cheap read + CDN |
+| «Routes 200 = готово до клієнта» | Тільки `ACCEPTANCE_CHECKLIST` + J1–J8 walkthrough |
 
 ### 17.2 Приемлемо / эталон
 
@@ -618,14 +668,17 @@ Admin UI ──write──► D1 (shared)
 
 ### 20.1 Приоритет работ (если не указан этап)
 
-1. **P0** Замкнуть цикл (public D1 + revalidate) — иначе UI бесполезен.  
-2. **P0** Убрать raw JSON / alert / reload из pages/home/services structured fields.  
-3. **P0** Shared TipTap во все rich-text поля.  
-4. **P1** DnD sections, preview, nav button labels, a11y htmlFor.  
-5. **P1** Footer/nav/sitemap/settings fully from D1.  
-6. **P2** Dashboard polish, charts, OAuth, deep analytics.
+> Інфра-цикл (D1 + revalidate + media + YMYL) **вже здебільшого закритий**.  
+> Зараз пріоритет = **product finish + client acceptance** (див. §0 Wave 0–1).
 
-Не начинать P2 polish, пока P0 цикл «edit → site» дырявый.
+1. **P0 Wave 0** Formal live smoke J1 (edit→public <30s) + guided publish CTA.  
+2. **P0 Wave 0** Chrome 100% UK; MediaPicker primary cover; audit pagination; owner guide.  
+3. **P0 Wave 1** SEO IA + list perf; auto-slug posts; Preview FAQ/testimonials; form contract home/pages.  
+4. **P1** Hide debug-tools; ViewOnSite locale slugs; error strings UK-only.  
+5. **P2** Revisions product, charts, OAuth, scheduling, E2E suite.
+
+Не починати P2, поки Wave 0 acceptance blockers open.  
+Не «лікувати» неіснуючі public 500 і «відсутні actions».
 
 ### 20.2 Секреты и доступы
 
@@ -653,3 +706,73 @@ Admin UI ──write──► D1 (shared)
 Всё это — **внутри Cloudflare Free**: public на CDN + cheap D1; admin отдельно; без worker image pipeline.
 
 Любая задача по админке должна **приближать** этот vision и **не** плодить half-CRUD, оторванный от public.
+
+---
+
+## 22. Здача замовнику (client acceptance)
+
+> Ціль цього розділу: **довести адмінку до ідеалу продукту** і закрити acceptance.  
+> Детальний gap-list: `TEMP/CLIENT_ACCEPTANCE_AUDIT_2026-07-20.md`.  
+> Checklist: `TEMP/ACCEPTANCE_CHECKLIST.md`. Journeys: `TEMP/OWNER_JOURNEYS.md`.
+
+### 22.1 Що вже є (не переписувати)
+
+- Login OWNER, RBAC, split workers, D1, R2 media, audit, revalidatePublic.  
+- Public D1 primary + CDN Free model.  
+- Shared TipTap, StructuredListEditor, MediaPicker, DnD lists/sections.  
+- YMYL gates (bilingual, meta, consent, canPublish, slug→301).  
+- Dashboard real stats + quick actions + draft links.
+
+### 22.2 Wave 0 — блокує здачу (робити першим)
+
+| # | Задача | DoD |
+|---|---|---|
+| W0.1 | Formal **J1 smoke** на prod | Edit published service title → public H1 < 30s; пруф у PROGRESS |
+| W0.2 | Guided publish CTA (service + post мінімум) | «Зберегти чернетку» / «Опублікувати»; YMYL errors UK |
+| W0.3 | Chrome UK 100% | Немає «Админ-панель» RU; block registry labels UK |
+| W0.4 | Post cover MediaPicker primary | Manual URL лише advanced collapse |
+| W0.5 | Audit list pagination | Не SSR dump ~1MB; без Error 1102 на list |
+| W0.6 | `TEMP/OWNER_GUIDE_UK.md` | 1 сторінка: послуга / пост / головна / медіа |
+| W0.7 | Security | Rotate OWNER password якщо був у чаті |
+
+### 22.3 Wave 1 — product polish перед walkthrough
+
+| # | Задача |
+|---|---|
+| W1.1 | Auto-slug blog post (+ category уже advanced) |
+| W1.2 | SEO в sidebar + server pagination/filter SEO list |
+| W1.3 | PreviewButton FAQ + testimonials (public helpers вже є) |
+| W1.4 | home/pages → `useActionState` + success banner |
+| W1.5 | Tech fields (priority/sortOrder/slugBase) глибше в advanced |
+| W1.6 | Hide `/admin/debug-tools` з OWNER IA (або flag) |
+| W1.7 | ViewOnSiteLink: locale slug, не лише slugBase |
+| W1.8 | Catch errors: тільки human UK (не `Unknown error`) |
+
+### 22.4 Wave 2 — після client walkthrough (не блокує v1)
+
+Revisions product UI · E2E playwright J1–J3 · optional 301 `/o-mne` · scheduling · OAuth · charts.
+
+### 22.5 Порядок «готово до здачі»
+
+```
+1. Закрити Wave 0 (код + deploy)
+2. Browser walkthrough J1–J8 як OWNER (TEMP/OWNER_JOURNEYS)
+3. Grep §16 + §17.1 reject list
+4. build public + admin
+5. seo-regression + curl public CDN
+6. Заповнити ACCEPTANCE_CHECKLIST [x]
+7. Sign-off: agent → product owner → client OWNER
+```
+
+**Формула:** якщо client walkthrough fail на J1/J2/J3 — **не ready**, навіть якщо build green і routes 200.
+
+### 22.6 Anti-goals v1
+
+Не блокують і не починати «замість» Wave 0:
+
+- OAuth / multi-provider login  
+- Dashboard charts  
+- Publish scheduling  
+- Deep revision restore  
+- Big-bang design system rewrite  
+- Cloudflare Images / paid AI / worker resize

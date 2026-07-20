@@ -1,4 +1,6 @@
 import { getTranslations, getMessages } from 'next-intl/server'
+import { cookies } from 'next/headers'
+
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { faqSchema } from '@/lib/schema'
 import { getFAQs } from '@/lib/db/public'
@@ -29,9 +31,10 @@ export default async function FaqPage({
 }) {
   // Try D1 first, fallback to messages
   let faqItems: FAQItem[] = []
+  const previewCookie = (await cookies()).get('__preview')?.value
 
   try {
-    const d1Items = await getFAQs((await _params).locale)
+    const d1Items = await getFAQs((await _params).locale, undefined, previewCookie)
     if (d1Items.length > 0) {
       faqItems = d1Items.map((item) => ({
         question: item.question,

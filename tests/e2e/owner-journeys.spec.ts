@@ -1,12 +1,7 @@
 import { test, expect } from '@playwright/test'
 
 /**
- * J1-J3 Owner Journey smoke tests.
- *
- * These tests verify the core CMS cycles:
- * - J1: Create + publish a service → visible on public
- * - J2: Create a blog category → visible on public
- * - J3: Create + publish a blog post → visible on public
+ * J1-J3 Owner Journey smoke tests with automatic cleanup.
  *
  * Requirements:
  * - Admin running at ADMIN_URL (default https://admin.podvarchan.com)
@@ -25,6 +20,9 @@ const PASSWORD = process.env.OWNER_PASSWORD || ''
 test.skip(!EMAIL || !PASSWORD, 'OWNER_EMAIL and OWNER_PASSWORD env vars required')
 
 test.describe('Owner Journeys J1-J3', () => {
+  // Track created test entities for afterEach cleanup
+  const createdIds: { service?: string; post?: string; category?: string } = {}
+
   test.beforeEach(async ({ page }) => {
     // Login as OWNER
     await page.goto(`${ADMIN_URL}/admin/login`)
@@ -32,6 +30,55 @@ test.describe('Owner Journeys J1-J3', () => {
     await page.fill('input[type="password"]', PASSWORD)
     await page.click('button[type="submit"]')
     await page.waitForURL('**/admin**', { timeout: 15000 })
+  })
+
+  test.afterEach(async ({ page }) => {
+    // Accept all confirm() dialogs during cleanup
+    page.on('dialog', d => d.accept())
+
+    if (createdIds.service) {
+      try {
+        // Navigate to services list, search by test title
+        await page.goto(`${ADMIN_URL}/admin/services/?q=Тестовая%20услуга`)
+        await page.waitForTimeout(2000) // allow list to render
+        // Click the first visible DeleteButton
+        const deleteBtn = page.locator('button:has-text("Видалити")').first()
+        if (await deleteBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+          await deleteBtn.click()
+          await page.waitForTimeout(1000)
+        }
+      } catch {
+        // Cleanup failure is non-fatal
+      }
+    }
+
+    if (createdIds.category) {
+      try {
+        await page.goto(`${ADMIN_URL}/admin/blog/categories`)
+        await page.waitForTimeout(2000)
+        const deleteBtn = page.locator('button:has-text("Видалити")').first()
+        if (await deleteBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+          await deleteBtn.click()
+          await page.waitForTimeout(1000)
+        }
+      } catch {
+        // non-fatal
+      }
+    }
+
+    if (createdIds.post) {
+      try {
+        await page.goto(`${ADMIN_URL}/admin/blog/posts/?q=Тестовая%20статья`)
+        await page.waitForTimeout(2000)
+        const deleteBtn = page.locator('button:has-text("Видалити")').first()
+        if (await deleteBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+          await deleteBtn.click()
+          await page.waitForTimeout(1000)
+        }
+      } catch {
+        // non-fatal
+      }
+    }
   })
 
   test('J1: create draft service → publish → visible on public', async ({ page, context }) => {
@@ -50,11 +97,16 @@ test.describe('Owner Journeys J1-J3', () => {
     await page.click('button:has-text("Зберегти чернетку")')
     await page.waitForURL('**/admin/services/**', { timeout: 10000 })
 
-    // 4. Publish
+    // 4. Capture service ID from redirect URL
+    const serviceUrl = page.url()
+    const serviceIdMatch = serviceUrl.match(/\/admin\/services\/([a-f0-9-]+)/)
+    if (serviceIdMatch) createdIds.service = serviceIdMatch[1]
+
+    // 5. Publish
     await page.click('button:has-text("Опублікувати")')
     await page.waitForURL('**/admin/services/**', { timeout: 10000 })
 
-    // 5. Verify on public site (within 30s)
+    // 6. Verify on public site (within 30s)
     const publicPage = await context.newPage()
     await publicPage.goto(`${PUBLIC_URL}/ru/uslugi/`, { timeout: 30000 })
     await expect(publicPage.locator(`text=${titleRu}`)).toBeVisible({ timeout: 30000 })
@@ -75,7 +127,10 @@ test.describe('Owner Journeys J1-J3', () => {
     await page.click('button[type="submit"]')
     await page.waitForURL('**/admin/blog/categories**', { timeout: 10000 })
 
-    // 4. Verify category appears in list
+    // 4. Store category name for cleanup lookup
+    createdIds.category = catName
+
+    // 5. Verify category appears in list
     await expect(page.locator(`text=${catName}`)).toBeVisible({ timeout: 5000 })
   })
 
@@ -101,11 +156,16 @@ test.describe('Owner Journeys J1-J3', () => {
     await page.click('button:has-text("Зберегти чернетку")')
     await page.waitForURL('**/admin/blog/posts/**', { timeout: 10000 })
 
-    // 5. Publish
+    // 5. Capture post ID from redirect URL
+    const postUrl = page.url()
+    const postIdMatch = postUrl.match(/\/admin\/blog\/posts\/([a-f0-9-]+)/)
+    if (postIdMatch) createdIds.post = postIdMatch[1]
+
+    // 6. Publish
     await page.click('button:has-text("Опублікувати")')
     await page.waitForURL('**/admin/blog/posts/**', { timeout: 10000 })
 
-    // 6. Verify on public site (within 30s)
+    // 7. Verify on public site (within 30s)
     const publicPage = await context.newPage()
     await publicPage.goto(`${PUBLIC_URL}/ru/blog/`, { timeout: 30000 })
     await expect(publicPage.locator(`text=${titleRu}`)).toBeVisible({ timeout: 30000 })

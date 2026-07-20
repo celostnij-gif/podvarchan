@@ -17,10 +17,12 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  webServer: {
-    command: 'npx opennextjs-cloudflare preview',
-    port: 8787,
-    reuseExistingServer: false,
-    timeout: 300_000,
-  },
+  webServer: process.env.ADMIN_URL
+    ? undefined
+    : {
+      command: 'npx opennextjs-cloudflare preview',
+      port: 8787,
+      reuseExistingServer: false,
+      timeout: 300_000,
+    },
 })
