@@ -113,19 +113,13 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
         <div className="mt-4 border-t pt-4">
           <label className="block text-sm font-medium text-zinc-300 mb-2">Обкладинка посту</label>
           <div className="flex items-start gap-4">
-            <div className="flex-1">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={coverImageUrl}
-                  onChange={(e) => { setCoverImageUrl(e.target.value); setCoverImageIdState(e.target.value) }}
-                  placeholder="/api/media/... або /images/..."
-                  className="flex-1 rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
-                />
+            <div className="flex-1 space-y-3">
+              {/* Primary: MediaPicker */}
+              <div className="flex items-center gap-3">
                 <button
                   type="button"
                   onClick={() => setShowCoverPicker(true)}
-                  className="rounded-lg bg-zinc-800 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-700"
+                  className="rounded-lg bg-amber-600/20 border border-amber-600/30 px-4 py-2 text-sm font-medium text-amber-400 hover:bg-amber-600/30 transition-colors"
                 >
                   Медіатека
                 </button>
@@ -135,11 +129,27 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
                     onClick={() => { setCoverImageUrl(''); setCoverImageIdState('') }}
                     className="rounded-lg bg-red-900/30 px-3 py-2 text-sm text-red-400 hover:bg-red-900/50"
                   >
-                    ×
+                    Видалити
                   </button>
                 )}
               </div>
+
+              {/* Advanced: manual URL input */}
+              <details className="text-xs text-zinc-500">
+                <summary className="cursor-pointer select-none hover:text-zinc-300">
+                  Ввести URL вручну
+                </summary>
+                <input
+                  type="text"
+                  value={coverImageUrl}
+                  onChange={(e) => { setCoverImageUrl(e.target.value); setCoverImageIdState(e.target.value) }}
+                  placeholder="/api/media/... або /images/..."
+                  className="mt-2 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
+                />
+              </details>
             </div>
+
+            {/* Preview */}
             {coverImageUrl && (
               <div className="shrink-0 overflow-hidden rounded-lg border border-zinc-700 bg-zinc-800" style={{ width: 160, height: 90 }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
