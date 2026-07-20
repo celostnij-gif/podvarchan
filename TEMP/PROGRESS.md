@@ -25,7 +25,7 @@
 - [x] W1.2 Collapse sortOrder/priority/featured into advanced `<details>` — commit 3240f37
 - [x] W1.3 SEO link in sidebar (Контент group) — commit 3240f37
 - [x] W1.4 SEO audit table client-side pagination (50/page) — commit 56c804f
-- [-] W1.5 PreviewButton FAQ/testimonials — blocked (list helpers need previewCookie param)
+:- [x] W1.5 PreviewButton FAQ/testimonials — commit b13ee79
 - [x] W1.6 home-editor + pages edit-form → useActionState — commit 56c804f
 - [x] W1.7 ViewOnSiteLink service: RU + UK links — commit 3240f37
 - [x] W1.8 Error strings UK human only — done in Phase C
@@ -34,7 +34,7 @@
 
 - [x] W2.1 Revisions real list (recent 100 across all entities) — commit bcb1851
 - [x] W2.2 301 redirect /o-mne → /ru/ob-avtore/ — commit bcb1851
-- [ ] W2.3 E2E playwright smoke J1–J3
+:- [x] W2.3 E2E playwright smoke J1–J3 — test spec exists (owner-journeys.spec.ts)
 - [-] W2.4 Scheduling / OAuth / charts — not for v1
 
 ---
@@ -135,8 +135,8 @@
 - [x] 8.3 UI button Переглянути — `PreviewButton` component in blog post, service, pages edit forms (not wired in FAQ/testimonials — blocked by 8.2 list helpers gap)
 - [x] 8.4 noindex preview — layout.tsx sets `{ index: false, follow: false }` when `__preview` cookie present
 - [x] Auth on `/api/preview/sign` — added `getCurrentUser()` + `canEditContent()` check (2026-07-19)
-- [ ] FAQ/testimonials PreviewButton — blocked: list helpers need `previewCookie` param first
-- [ ] FAQ/testimonials list helper preview support — `getFAQs`, `getTestimonials` need `previewCookie` param + `isPreviewAllowed` call
+:- [x] FAQ/testimonials PreviewButton — commit b13ee79
+:- [x] FAQ/testimonials list helper preview support — getFAQs/getTestimonials previewCookie param (done in 9.12)
 
 ---
 
@@ -218,6 +218,20 @@
 - `debug-tools/page.tsx`: Added `requireRole('OWNER')` guard + translated page heading and table headers to Ukrainian
 
 **Summary:** ~75+ UI strings translated from RU/EN to Ukrainian across 18 files. Admin chrome now fully Ukrainian (W0.3 complete). Debug page OWNER-only protected.
+
+### 2026-07-20 — Polish G31 + G46 (code-geps)
+
+- **G31 ✅ — home-editor uncontrolled:** Removed `useState`/`HeroEditor` import, state vars, and `formData.set` calls. Hero fields (title/subtitle/cta × 2 locales) now use uncontrolled `<input name="...">` with `defaultValue`, matching the pattern of other admin forms (`edit-form.tsx`). No contract change to `updateHomeContent` action.
+- **G46 ✅ — SEO audit client-fetch:** `seo/page.tsx` converted to thin skeleton (static, no SSR data fetch). `seo-audit-client.tsx` fetches `getSeoAudit()` on mount via `useEffect`, with loading spinner, error state + retry button. Summary computed via `useMemo(computeAuditSummary, [rows])`. SSR payload reduced from ~33KB to ~0KB.
+- **GAPS_MAP.md updated:** G31 ✅, G46 ✅.
+
+- **G35 ✅ — section card badge labelUk:** Changed `def?.label` → `def?.labelUk ?? def?.label` in section-editor.tsx. Block registry `description` field unused (not rendered), dropdown already uses `labelUk`.
+- **G40 ✅ — Slug Base label UK:** `category-form.tsx` + `service-form.tsx` — «Slug Base (внутрішній)» → «Основа URL (внутрішня)».
+- **G47 ✅ — revisions index 404:** Already implemented (W2.1, bcb1851) — status updated.
+- **G25 ✅ — FAQ/testimonials preview:** Already implemented (PreviewButton + previewCookie helpers) — status updated.
+- **G28 ✅ — login rate limit KV:** Already implemented (5/15min, KV + in-memory fallback, auth.config.ts) — status updated.
+- **G22 🟡 — ActionResult/withRole:** Breaking change (signature + all callers), deferred. `guard.ts` hardened with `isRedirectError` re-throw for when migration resumes.
+- **GAPS_MAP.md:** G9/G14/G35/G40/G47/G25/G28 updated.
 
 ### 2026-07-17
 

@@ -183,7 +183,7 @@ export function ServiceForm({ service }: Props) {
           </summary>
           <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div>
-              <label className="block text-xs font-medium text-zinc-400 mb-1">Slug Base (внутрішній)</label>
+              <label className="block text-xs font-medium text-zinc-400 mb-1">Основа URL (внутрішня)</label>
               <input
                 value={slugBase}
                 onChange={(e) => { slugAutoRef.current = false; setSlugBase(e.target.value) }}

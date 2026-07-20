@@ -1,24 +1,41 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import type { SeoUrlRow } from '@/lib/seo/audit'
 import { scoreColorClass, scoreLabel } from '@/lib/seo/audit'
+import { computeAuditSummary } from '@/lib/seo/audit'
+import { getSeoAudit } from '@/lib/actions/seo'
 import { CsvExportButton } from './csv-button'
 
-interface Props {
-  rows: SeoUrlRow[]
-  avgScore: number
-  green: number
-  yellow: number
-  red: number
-}
 
-export function SeoAuditClient({ rows, avgScore, green, yellow, red }: Props) {
+export function SeoAuditClient() {
+  const [rows, setRows] = useState<SeoUrlRow[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState('all')
   const [scoreFilter, setScoreFilter] = useState<'all' | 'green' | 'yellow' | 'red'>('all')
   const [page, setPage] = useState(0)
   const PAGE_SIZE = 50
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const data = await getSeoAudit()
+        if (!cancelled) setRows(data)
+      } catch (e) {
+        if (!cancelled) setError(e instanceof Error ? e.message : 'Не вдалося завантажити SEO аудит')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    })()
+    return () => { cancelled = true }
+  }, [])
+
+  const summary = useMemo(() => computeAuditSummary(rows), [rows])
 
   const entityTypes = useMemo(() => ['all', ...Array.from(new Set(rows.map((r) => r.entityType)))], [rows])
 
@@ -39,13 +56,55 @@ export function SeoAuditClient({ rows, avgScore, green, yellow, red }: Props) {
 
   const total = rows.length
 
+  if (loading) {
+    return (
+      <div>
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-zinc-100">SEO Аудит</h1>
+            <p className="mt-1 text-sm text-zinc-500">Завантаження SEO аудиту…</p>
+          </div>
+          <CsvExportButton />
+        </div>
+        <div className="flex items-center justify-center py-16">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-amber-500/30 border-t-amber-500" />
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div>
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-zinc-100">SEO Аудит</h1>
+          </div>
+          <CsvExportButton />
+        </div>
+        <div className="rounded-lg border border-red-800/40 bg-red-900/20 p-6 text-center">
+          <p className="text-red-400 mb-4">{error}</p>
+          <button
+            onClick={() => {
+              setLoading(true); setError(null)
+              getSeoAudit().then(d => { setRows(d); setLoading(false) }).catch(e => { setError(e instanceof Error ? e.message : 'Помилка'); setLoading(false) })
+            }}
+            className="rounded-md bg-zinc-800 px-4 py-2 text-sm font-medium text-zinc-300 hover:bg-zinc-700"
+          >
+            Спробувати знову
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-zinc-100">SEO Аудит</h1>
           <p className="mt-1 text-sm text-zinc-500">
-            {total} URL · Середній бал: {avgScore}/50
+            {total} URL · Середній бал: {summary.avgScore}/50
           </p>
         </div>
         <CsvExportButton />
@@ -57,21 +116,21 @@ export function SeoAuditClient({ rows, avgScore, green, yellow, red }: Props) {
           onClick={() => setScoreFilter(scoreFilter === 'green' ? 'all' : 'green')}
           className={`rounded-lg border p-4 text-left transition-all ${scoreFilter === 'green' ? 'border-green-600/60 bg-green-900/40 ring-1 ring-green-600/30' : 'border-green-800/40 bg-green-900/20 hover:border-green-700/60'}`}
         >
-          <p className="text-2xl font-bold text-green-400">{green}</p>
+          <p className="text-2xl font-bold text-green-400">{summary.green}</p>
           <p className="text-sm text-green-500">Добре (40–50)</p>
         </button>
         <button
           onClick={() => setScoreFilter(scoreFilter === 'yellow' ? 'all' : 'yellow')}
           className={`rounded-lg border p-4 text-left transition-all ${scoreFilter === 'yellow' ? 'border-yellow-600/60 bg-yellow-900/40 ring-1 ring-yellow-600/30' : 'border-yellow-800/40 bg-yellow-900/20 hover:border-yellow-700/60'}`}
         >
-          <p className="text-2xl font-bold text-yellow-400">{yellow}</p>
+          <p className="text-2xl font-bold text-yellow-400">{summary.yellow}</p>
           <p className="text-sm text-yellow-500">Треба покращити (20–39)</p>
         </button>
         <button
           onClick={() => setScoreFilter(scoreFilter === 'red' ? 'all' : 'red')}
           className={`rounded-lg border p-4 text-left transition-all ${scoreFilter === 'red' ? 'border-red-600/60 bg-red-900/40 ring-1 ring-red-600/30' : 'border-red-800/40 bg-red-900/20 hover:border-red-700/60'}`}
         >
-          <p className="text-2xl font-bold text-red-400">{red}</p>
+          <p className="text-2xl font-bold text-red-400">{summary.red}</p>
           <p className="text-sm text-red-500">Погано (0–19)</p>
         </button>
       </div>

@@ -1,10 +1,8 @@
 'use client'
 
-import { useState } from 'react'
 import { useActionState } from 'react'
 import { updateHomeContent } from '@/lib/actions/pages'
 import { SectionEditor } from '@/app/admin/pages/[id]/section-editor'
-import { HeroEditor } from '@/lib/blocks/editors/HeroEditor'
 import type { PageTranslationRecord, PageSectionWithTranslations } from '@/app/admin/pages/types'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
@@ -23,17 +21,9 @@ interface HomeEditorProps {
 }
 
 export function HomeEditor({ pageId, status, tr, hero, sections }: HomeEditorProps) {
-  const [ruHero, setRuHero] = useState({ title: hero.ru.title, subtitle: hero.ru.subtitle, cta: hero.ru.cta })
-  const [ukHero, setUkHero] = useState({ title: hero.uk.title, subtitle: hero.uk.subtitle, cta: hero.uk.cta })
 
   const [state, formAction, pending] = useActionState(
     async (_prev: { error?: string; saved?: boolean } | null, formData: FormData) => {
-      formData.set('ru_heroTitle', ruHero.title)
-      formData.set('ru_heroSubtitle', ruHero.subtitle)
-      formData.set('ru_heroCta', ruHero.cta)
-      formData.set('uk_heroTitle', ukHero.title)
-      formData.set('uk_heroSubtitle', ukHero.subtitle)
-      formData.set('uk_heroCta', ukHero.cta)
 
       try {
         await updateHomeContent(formData)
@@ -106,7 +96,34 @@ export function HomeEditor({ pageId, status, tr, hero, sections }: HomeEditorPro
             <span className="text-sm font-semibold text-zinc-200">Hero-блок</span>
             <span className="text-xs text-zinc-500">Головний екран</span>
           </div>
-          <HeroEditor content={ruHero} onChange={(c) => setRuHero(c as { title: string; subtitle: string; cta: string })} locale="ru" />
+        <div>
+          <label className="block text-xs font-medium text-zinc-400 mb-1">Заголовок</label>
+          <input
+            name="ru_heroTitle"
+            defaultValue={hero.ru.title}
+            className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
+            placeholder="Ваш внутренний мир заслуживает внимания"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-zinc-400 mb-1">Подзаголовок</label>
+          <textarea
+            name="ru_heroSubtitle"
+            defaultValue={hero.ru.subtitle}
+            rows={2}
+            className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
+            placeholder="Гипнотерапия и глубинная психология..."
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-zinc-400 mb-1">Текст кнопки (CTA)</label>
+          <input
+            name="ru_heroCta"
+            defaultValue={hero.ru.cta}
+            className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
+            placeholder="Записаться на консультацию"
+          />
+        </div>
         </div>
       </div>
 
@@ -151,7 +168,34 @@ export function HomeEditor({ pageId, status, tr, hero, sections }: HomeEditorPro
             <span className="text-sm font-semibold text-zinc-200">Hero-блок</span>
             <span className="text-xs text-zinc-500">Головний екран</span>
           </div>
-          <HeroEditor content={ukHero} onChange={(c) => setUkHero(c as { title: string; subtitle: string; cta: string })} locale="uk" />
+        <div>
+          <label className="block text-xs font-medium text-zinc-400 mb-1">Заголовок</label>
+          <input
+            name="uk_heroTitle"
+            defaultValue={hero.uk.title}
+            className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
+            placeholder="Ваш внутренний мир заслуживает внимания"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-zinc-400 mb-1">Подзаголовок</label>
+          <textarea
+            name="uk_heroSubtitle"
+            defaultValue={hero.uk.subtitle}
+            rows={2}
+            className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
+            placeholder="Гипнотерапия и глубинная психология..."
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-zinc-400 mb-1">Текст кнопки (CTA)</label>
+          <input
+            name="uk_heroCta"
+            defaultValue={hero.uk.cta}
+            className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
+            placeholder="Записаться на консультацию"
+          />
+        </div>
         </div>
       </div>
 

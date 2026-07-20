@@ -1,4 +1,5 @@
 'use server'
+import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
 import type { SessionWithRole } from '@/types/auth'
 import type { UserRole } from '@/types/auth'
@@ -19,6 +20,7 @@ function makeRoleCheck(check: (role: UserRole) => boolean) {
         }
         return action(session, ...args)
       } catch (e) {
+        if (isRedirectError(e)) throw e
         return fail(e instanceof Error ? e.message : 'Unauthorized')
       }
     }

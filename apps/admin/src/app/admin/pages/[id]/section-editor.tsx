@@ -131,7 +131,7 @@ function SectionEditorItem({
         </button>
 
         <span className="text-sm">{def?.icon ?? '📄'}</span>
-        <span className="text-sm font-medium text-zinc-300 truncate">{def?.label ?? section.section.type}</span>
+        <span className="text-sm font-medium text-zinc-300 truncate">{def?.labelUk ?? def?.label ?? section.section.type}</span>
         <span className="text-xs text-zinc-600 font-mono">{section.section.key}</span>
 
         <div className="flex-1" />

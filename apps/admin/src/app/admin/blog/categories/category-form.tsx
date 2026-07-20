@@ -106,7 +106,7 @@ export function CategoryForm({ category, services }: Props) {
           </div>
           <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div>
-              <label className="block text-xs font-medium text-zinc-400 mb-1">Slug Base (внутрішній)</label>
+              <label className="block text-xs font-medium text-zinc-400 mb-1">Основа URL (внутрішня)</label>
               <input value={slugBase}
                 onChange={(e) => { slugAutoRef.current = false; setSlugBase(e.target.value) }}
                 className="w-full rounded border border-zinc-700 bg-zinc-900/50 px-2 py-1.5 text-xs font-mono text-zinc-200 focus:border-amber-500/50 focus:outline-none" />
