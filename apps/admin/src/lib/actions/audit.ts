@@ -99,3 +99,12 @@ export async function getRevisions(entityType: string, entityId: string) {
     .orderBy(desc(contentRevisions.createdAt))
     .all()
 }
+
+export async function getRecentRevisions(limit = 50) {
+  await requireAuditView()
+  const db = await getActionDb()
+  return db.select().from(contentRevisions)
+    .orderBy(desc(contentRevisions.createdAt))
+    .limit(limit)
+    .all()
+}

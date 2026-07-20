@@ -52,6 +52,15 @@ export default function middleware(request: NextRequest) {
     return new Response(null, { status: 410 })
   }
 
+  // P1b: Legacy clean-URL redirects (301)
+  const legacyPath = pathname.replace(/\/+$/, '') // strip trailing slashes
+  const legacyRedirects: Record<string, string> = {
+    '/o-mne': '/ru/ob-avtore/',
+  }
+  if (legacyRedirects[legacyPath]) {
+    return NextResponse.redirect(new URL(legacyRedirects[legacyPath], request.url), 301)
+  }
+
   // P2: Old .html → new URL permanent redirects (301)
   const htmlPath = pathname.replace(/\/+$/, '') // strip trailing slashes for matching
   const oldHtmlRedirects: Record<string, string> = {
