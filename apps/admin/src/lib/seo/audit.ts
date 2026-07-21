@@ -2,6 +2,7 @@ import { STATIC_PAGES } from '@/constants'
 import { getDB } from '@/db'
 import { services, serviceTranslations } from '@/db/schema/services'
 import { blogPosts, blogPostTranslations, blogCategories, blogCategoryTranslations } from '@/db/schema/blog'
+import { pages, pageTranslations } from '@/db/schema/pages'
 import { eq } from 'drizzle-orm'
 
 /* ── Types ── */
@@ -71,22 +72,51 @@ function scoreContent(wordCount: number): { points: number; warning: string | nu
 /* ── Audit collection ── */
 
 async function collectStaticPages(): Promise<SeoUrlRow[]> {
+  const db = getDB()
+  const all = await db
+    .select()
+    .from(pages)
+    .leftJoin(pageTranslations, eq(pages.id, pageTranslations.pageId))
+    .all()
+
   const rows: SeoUrlRow[] = []
   for (const page of STATIC_PAGES) {
     for (const locale of ['ru', 'uk'] as const) {
       const url = `/${locale}/${page.slug}`
+      const slug = page.slug.replace(/\/$/, '') || ''
+      const match = all.find(r => {
+        const trans = r.page_translations
+        if (!trans) return false
+        const tSlug = trans.slug || ''
+        return tSlug === slug && trans.locale === locale
+      })
+      const trans = match?.page_translations
+      const title = trans?.title ?? null
+      const description = trans?.excerpt ?? null
+      const h1 = trans?.title ?? null
+      const contentLen = (trans?.title ?? '').length + (trans?.excerpt ?? '').length
+      const wordCount = Math.round(contentLen / 6)
+
+      const titleScore = scoreTitle(title)
+      const descScore = scoreDescription(description)
+      const h1Score = scoreH1(h1)
+      const contentScore = scoreContent(wordCount)
+      const total = titleScore.points + descScore.points + h1Score.points + contentScore.points
+
+      const warnings = [titleScore.warning, descScore.warning, h1Score.warning, contentScore.warning].filter(Boolean) as string[]
+
       rows.push({
         url,
         locale,
         entityType: 'static_page',
         entityId: page.slug.replace(/\//g, '_') || 'home',
-        title: null,
-        description: null,
-        h1: null,
-        hasContent: false,
-        wordCount: 0,
-        score: 0,
-        warnings: ['Статична сторінка — читайте метадані з messages/*.json'],
+        title,
+        description,
+        h1,
+        hasContent: wordCount > 0,
+        wordCount,
+        score: total,
+        warnings,
       })
     }
   }
