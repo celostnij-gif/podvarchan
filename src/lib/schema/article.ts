@@ -1,4 +1,4 @@
-import { SITE } from '@/constants'
+import { SITE, AUTHOR } from '@/constants'
 import { cleanUrl } from './utils'
 
 interface ArticleSchemaParams {
@@ -31,10 +31,11 @@ export function articleSchema(params: ArticleSchemaParams): Record<string, unkno
     image,
     imageAlt,
     imageCaption,
-    authorName = SITE.authorName,
+    authorName,
     locale,
     category,
   } = params
+  const effectiveAuthorName = authorName ?? (locale === 'uk' ? AUTHOR.nameUk : AUTHOR.name)
 
   /* ── Image: если есть alt-текст, используем ImageObject ── */
   const imageSchema = image
@@ -62,7 +63,7 @@ export function articleSchema(params: ArticleSchemaParams): Record<string, unkno
     author: {
       '@type': 'Person',
       '@id': `${SITE.url}/ob-avtore/#person`,
-      name: authorName,
+      name: effectiveAuthorName,
     },
     publisher: {
       '@type': 'Organization',
@@ -90,7 +91,7 @@ export function articleSchema(params: ArticleSchemaParams): Record<string, unkno
     schema.reviewedBy = {
       '@type': 'Person',
       '@id': `${SITE.url}/ob-avtore/#person`,
-      name: authorName || SITE.authorName,
+      name: effectiveAuthorName,
       description: reviewedByDesc,
     }
   }

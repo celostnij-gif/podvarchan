@@ -1,4 +1,4 @@
-import { SITE } from '@/constants'
+import { SITE, AUTHOR } from '@/constants'
 import { cleanUrl } from './utils'
 interface ServiceSchemaParams {
   name: string
@@ -20,10 +20,11 @@ export function serviceSchema(params: ServiceSchemaParams): Record<string, unkno
     description,
     url,
     image,
-    providerName = SITE.authorName,
+    providerName,
     areaServed = ['RU', 'UA'],
     locale,
   } = params
+  const effectiveProviderName = providerName ?? (locale === 'uk' ? AUTHOR.nameUk : AUTHOR.name)
 
   const localePrefix = locale === 'ru' ? 'ru' : locale ?? ''
 
@@ -38,7 +39,7 @@ export function serviceSchema(params: ServiceSchemaParams): Record<string, unkno
     provider: {
       '@type': 'Person',
       '@id': `${SITE.url}/ob-avtore/#person`,
-      name: providerName,
+      name: effectiveProviderName,
     },
     areaServed: areaServed.map((country) => ({
       '@type': 'Country',

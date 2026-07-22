@@ -39,9 +39,14 @@ function truncateAtWord(text: string, maxLen: number): string {
  */
 export function buildTitle(pageTitle: string, locale: string): string {
   const brand = BRAND[locale] ?? BRAND.ru
-  const suffixed = `${pageTitle} | ${brand}`
+  // Strip existing brand suffix to avoid duplication
+  const cleanTitle = pageTitle.replace(new RegExp(`\\s*\\|\\s*${BRAND.ru.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`), '')
+    .replace(new RegExp(`\\s*\\|\\s*${BRAND.uk.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`), '')
+    .trim()
+  if (cleanTitle.length === 0) return brand
+  const suffixed = `${cleanTitle} | ${brand}`
   if (suffixed.length <= 60) return suffixed
-  return truncateAtWord(pageTitle, 60)
+  return truncateAtWord(cleanTitle, 60)
 }
 
 /**
