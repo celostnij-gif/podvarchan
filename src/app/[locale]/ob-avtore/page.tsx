@@ -3,6 +3,7 @@ import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getPageByType } from '@/lib/db/public'
 import { cookies } from 'next/headers'
 import { ClientAboutPage } from './client-page'
+export const revalidate = 3600
 
 export async function generateMetadata({
   params,

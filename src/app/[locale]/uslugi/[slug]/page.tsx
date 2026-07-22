@@ -6,7 +6,9 @@ import { SERVICE_SLUG_UK, resolveServiceSlug } from '@/lib/slugMapping'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { serviceSchema, faqSchema } from '@/lib/schema'
 import { getServiceBySlug, getServices, getSEOMeta } from '@/lib/db/public'
+import type { ServicePublic } from '@/lib/db/public'
 import { ClientServicePage } from './client-page'
+import { buildTitle } from '@/lib/seo/metadata'
 
 export const revalidate = 3600
 
@@ -134,26 +136,21 @@ async function loadService(slug: string, locale: string): Promise<ServicePageDat
   try {
     const svc = await getServiceBySlug(slug, locale, previewCookie)
     if (svc) {
-      const seo = svc.id ? await getSEOMeta('service', svc.id, locale) : null
-
-      let allServices: ServicePageData['allServices'] = []
-      try {
-        const allSvc = await getServices(locale)
-        allServices = allSvc.map((s) => ({
-          slug: s.slug,
-          title: s.title,
-          shortTitle: s.shortTitle ?? '',
-          description: s.description ?? '',
-          cta: s.ctaText ?? '',
-        }))
-      } catch {
-        // related services best-effort
-      }
-
+      const [seo, allSvc] = await Promise.all([
+        svc.id ? getSEOMeta('service', svc.id, locale) : Promise.resolve(null),
+        getServices(locale).catch(() => [] as ServicePublic[]),
+      ])
+      const allServices = allSvc.map((s) => ({
+        slug: s.slug,
+        title: s.title,
+        shortTitle: s.shortTitle ?? '',
+        description: s.description ?? '',
+        cta: s.ctaText ?? '',
+      }))
       return {
         type: 'd1',
         slug: svc.slug,
-        title: seo?.title ?? svc.title,
+        title: buildTitle(seo?.title ?? svc.title, locale),
         shortTitle: svc.shortTitle ?? '',
         description: seo?.description ?? svc.description ?? '',
         metaDescription: seo?.description ?? svc.description ?? '',

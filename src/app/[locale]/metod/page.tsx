@@ -3,6 +3,7 @@ import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getPageByType } from '@/lib/db/public'
 import { cookies } from 'next/headers'
 import MetodClient from './client-page'
+export const revalidate = 3600
 
 type Props = {
   params: Promise<{ locale: string }>

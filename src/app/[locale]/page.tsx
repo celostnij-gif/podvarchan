@@ -8,6 +8,7 @@ import HomeClient from './home-client'
 import Hero from '@/components/sections/Hero'
 import { getPageByType, getTestimonials, getFAQs } from '@/lib/db/public'
 import { cookies } from 'next/headers'
+export const revalidate = 3600
 
 /* ── Metadata ── */
 

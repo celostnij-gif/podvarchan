@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getBlogPost, getAllBlogSlugs, getAllBlogPosts, formatDate } from '@/lib/content'
-import { getBlogPostBySlug, getBlogPostsByCategory, getMediaPublicUrl, getMediaWithVariants } from '@/lib/db/public'
+import { getBlogPostBySlug, getBlogPostsByCategory, getMediaWithVariants } from '@/lib/db/public'
+import type { BlogPostPublic } from '@/lib/db/public'
 import { articleSchema, faqSchema } from '@/lib/schema'
 import { ClientBlogPost } from './client-page'
 import { BLOG_SLUG_UK, resolveBlogSlug } from '@/lib/slugMapping'
@@ -96,14 +97,14 @@ async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData 
     const previewCookie = (await cookies()).get('__preview')?.value
     const post = await getBlogPostBySlug(slug, locale, previewCookie)
     if (post) {
-      let relatedPosts: { slug: string; title: string }[] = []
-      if (post.categorySlug) {
-        const inCategory = await getBlogPostsByCategory(post.categorySlug, locale)
-        relatedPosts = inCategory
-          .filter((p) => p.slug !== slug)
-          .slice(0, 4)
-          .map((p) => ({ slug: p.slug, title: p.title ?? '' }))
-      }
+      const [inCategory, media] = await Promise.all([
+        post.categorySlug ? getBlogPostsByCategory(post.categorySlug, locale) : Promise.resolve([] as BlogPostPublic[]),
+        post.coverImageId ? getMediaWithVariants(post.coverImageId) : Promise.resolve(null),
+      ])
+      const relatedPosts = inCategory
+        .filter((p) => p.slug !== slug)
+        .slice(0, 4)
+        .map((p) => ({ slug: p.slug, title: p.title ?? '' }))
 
       const clinical = isClinicalArticle(post.categorySlug, slug)
 
@@ -129,16 +130,9 @@ async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData 
           }
         } catch { /* faqJson parse error — skip */ }
       }
-      // Resolve coverImageId via single media lookup — with variants
-      let coverImageUrl: string | null = null
-      let coverImageVariants: { width: number; url: string }[] | undefined
-      if (post.coverImageId) {
-        const media = await getMediaWithVariants(post.coverImageId)
-        if (media) {
-          coverImageUrl = media.url
-          coverImageVariants = media.variants
-        }
-      }
+
+      let coverImageUrl: string | null = media?.url ?? null
+      const coverImageVariants: { width: number; url: string }[] | undefined = media?.variants
 
       // If D1 coverImageId is null/empty, fall back to static blog post image
       if (!coverImageUrl) {

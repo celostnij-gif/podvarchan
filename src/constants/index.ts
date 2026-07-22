@@ -1,5 +1,4 @@
 import type { Service, BlogCategory, NavItem } from '@/types'
-
 /* ── Site info ── */
 
 export const SITE = {
@@ -120,7 +119,9 @@ export const SERVICE_ICONS: Record<string, string> = {
 
 export const AUTHOR = {
   name: 'Вячеслав Подварчан',
+  nameUk: "В'ячеслав Подварчан",
   givenName: 'Вячеслав',
+  givenNameUk: "В'ячеслав",
   familyName: 'Подварчан',
   jobTitle: 'Гипнотерапевт онлайн',
   description: 'Помогаю освободиться от тревоги, внутренних блоков и самосаботажа через работу с подсознанием, голосом и индивидуальными музыкальными программами. Сертифицированный гипнотерапевт (ABH), практик НЛП (INLPTA), магистр музыкальной терапии (The University of Kansas).',

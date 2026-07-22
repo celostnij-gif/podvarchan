@@ -180,6 +180,18 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.rewrite(mdUrl)
   }
 
+  // ── Corrected UK slug redirects (301 from old misspelled slugs) ───
+  const correctedUkSlugs: Record<string, string> = {
+    '/uk/uslugi/nevnennist-i-strah-nevdachi/': '/uk/uslugi/nevpevnenist-i-strakh-provala/',
+    '/uk/uslugi/nabyadlivi-dumki/': '/uk/uslugi/navyazlyvi-dumky/',
+    '/uk/blog/nevnennist-yak-podolati/': '/uk/blog/nevpevnenist-yak-podolati/',
+    '/uk/blog/chomu-trivoga-ne-minaye-rokarami/': '/uk/blog/chomu-trivoga-ne-minaye-rokamy/',
+    '/uk/blog/psihosomatika-zamorochennya/': '/uk/blog/psihosomatika-zapamorochennya/',
+  }
+  if (correctedUkSlugs[pathname]) {
+    return NextResponse.redirect(new URL(correctedUkSlugs[pathname], request.url), 301)
+  }
+
   // ── KV-based redirect rules (populated by admin on redirect_rules mutations) ──
   const kvRules = await readKvRedirectRules()
   if (kvRules) {

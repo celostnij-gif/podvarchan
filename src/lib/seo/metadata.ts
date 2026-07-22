@@ -20,6 +20,29 @@ export function buildCanonical(path: string, locale: string): string {
   const cleanPath = path === '/' ? '' : path.startsWith('/') ? path.slice(1) : path
   return `${base}${localePrefix}/${cleanPath}`
 }
+/** Brand names per locale */
+const BRAND: Record<string, string> = {
+  ru: 'Вячеслав Подварчан',
+  uk: "В'ячеслав Подварчан",
+}
+
+/** Truncate to last word boundary before maxLen */
+function truncateAtWord(text: string, maxLen: number): string {
+  if (text.length <= maxLen) return text
+  const cut = text.lastIndexOf(' ', maxLen - 1)
+  return cut > 0 ? text.slice(0, cut) + '…' : text.slice(0, maxLen - 1) + '…'
+}
+
+/**
+ * Build title with brand suffix if it fits within 60 chars.
+ * If pageTitle + " | " + brand > 60 → use pageTitle only (truncated if needed).
+ */
+export function buildTitle(pageTitle: string, locale: string): string {
+  const brand = BRAND[locale] ?? BRAND.ru
+  const suffixed = `${pageTitle} | ${brand}`
+  if (suffixed.length <= 60) return suffixed
+  return truncateAtWord(pageTitle, 60)
+}
 
 /**
  * Generates full Metadata object for Next.js App Router.
@@ -56,10 +79,7 @@ export function generateMetadata({
   const defaultHref = `${SITE.url}/ru${path}/`
 
   return {
-    title: {
-      default: title,
-      template: `%s | ${SITE.authorName}`,
-    },
+    title: buildTitle(title, locale),
     description,
     keywords: keywords?.length ? keywords : undefined,
     metadataBase: new URL(SITE.url),
