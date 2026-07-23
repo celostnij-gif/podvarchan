@@ -1,35 +1,5 @@
-'use client'
-import { type ReactNode } from 'react'
 import { Link } from '@/i18n/routing'
 import HeroParallaxBackground from './HeroParallaxBackground'
-
-/** Parse <gold>…</gold> and <em>…</em> tags in D1 hero text */
-function parseHeroRichText(text: string): ReactNode[] {
-  const parts: ReactNode[] = []
-  const regex = /<(gold|em)>(.*?)<\/\1>/g
-  let lastIndex = 0
-  let match: RegExpExecArray | null
-  let key = 0
-  while ((match = regex.exec(text)) !== null) {
-    if (match.index > lastIndex) {
-      parts.push(text.slice(lastIndex, match.index))
-    }
-    const tag = match[1]
-    const content = match[2]
-    if (tag === 'gold') {
-      parts.push(
-        <span key={key++} className="text-transparent bg-clip-text bg-gradient-to-r from-gold via-gold-light to-gold">{content}</span>
-      )
-    } else {
-      parts.push(<em key={key++}>{content}</em>)
-    }
-    lastIndex = match.index + match[0].length
-  }
-  if (lastIndex < text.length) {
-    parts.push(text.slice(lastIndex))
-  }
-  return parts
-}
 
 /* ── Deterministic decoration points ── */
 
@@ -187,7 +157,7 @@ export default function Hero({ t, commonT, d1Title, d1Subtitle }: HeroProps) {
             style={{ animationDelay: '320ms' }}
           >
             {d1Title ? (
-              <>{parseHeroRichText(d1Title)}</>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold via-gold-light to-gold">{d1Title}</span>
             ) : (
               t.rich('heroTitle', {
                 gold: (chunks: React.ReactNode) => <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold via-gold-light to-gold">{chunks}</span>,
@@ -195,14 +165,14 @@ export default function Hero({ t, commonT, d1Title, d1Subtitle }: HeroProps) {
               })
             )}
           </h1>
-          
+
           {/* Subtitle */}
           <p
             className="mt-6 text-base md:text-lg lg:text-xl text-[#D0CDDC] leading-relaxed
                        max-w-2xl mx-auto animate-fade-in-up motion-reduce:animate-none"
             style={{ animationDelay: '440ms', textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}
           >
-            {d1Subtitle ? <>{parseHeroRichText(d1Subtitle)}</> : t('subtitle')}
+            {d1Subtitle ? d1Subtitle : t('subtitle')}
           </p>
 
           {/* Benefits */}
