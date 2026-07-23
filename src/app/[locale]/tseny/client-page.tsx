@@ -18,6 +18,19 @@ export function TsenyClient({ schemas, d1Sections: _d1Sections }: TsenyClientPro
   const d1Sections = _d1Sections ?? []
   useRegisterSchemas(schemas ?? [])
 
+  // D1 hero section: overlay text if present
+  const heroSection = d1Sections.find((s) => s.key === 'hero' && s.type === 'hero')
+  let heroTitle = t('pageTitle')
+  let heroSubtitle = t('pageDescription')
+  if (heroSection?.contentJson) {
+    try {
+      const parsed = JSON.parse(heroSection.contentJson)
+      if (parsed.title) heroTitle = parsed.title
+      if (parsed.subtitle) heroSubtitle = parsed.subtitle
+    } catch { /* fallback to messages */ }
+  }
+  useRegisterSchemas(schemas ?? [])
+
   // Extract pricing cards from D1 services-grid sections
   const servicesSections = d1Sections.filter(s => s.type === 'services-grid' && s.key)
   const pricingPlans = servicesSections
@@ -110,8 +123,8 @@ export function TsenyClient({ schemas, d1Sections: _d1Sections }: TsenyClientPro
     <>
       <PageHero
         label={t('badgeLabel')}
-        title={t('pageTitle')}
-        description={t('pageDescription')}
+        title={heroTitle}
+        description={heroSubtitle}
         breadcrumbItems={[
           { label: commonT('nav.home'), href: '/' },
           { label: t('badgeLabel') },

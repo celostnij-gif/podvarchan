@@ -9,7 +9,7 @@ import type { ContactChannelPublic, PageSectionPublic } from '@/lib/db/public'
 
 export default function KontaktyClient({
   d1Channels: _d1Channels,
-  d1Sections: _d1Sections,
+  d1Sections,
 }: {
   d1Channels?: ContactChannelPublic[]
   d1Sections?: PageSectionPublic[]
@@ -17,14 +17,26 @@ export default function KontaktyClient({
   const t = useTranslations('contacts')
   const commonT = useTranslations('common')
 
+  // D1 hero section: overlay text if present
+  const heroSection = d1Sections?.find((s) => s.key === 'hero' && s.type === 'hero')
+  let heroTitle = t('pageTitle')
+  let heroSubtitle = t('pageDescription')
+  if (heroSection?.contentJson) {
+    try {
+      const parsed = JSON.parse(heroSection.contentJson)
+      if (parsed.title) heroTitle = parsed.title
+      if (parsed.subtitle) heroSubtitle = parsed.subtitle
+    } catch { /* fallback to messages */ }
+  }
+
   return (
     <>
       <PageHero
-        title={t('pageTitle')}
-        description={t('pageDescription')}
+        title={heroTitle}
+        description={heroSubtitle}
         breadcrumbItems={[
           { label: commonT('nav.home'), href: '/' },
-          { label: t('pageTitle') },
+          { label: heroTitle },
         ]}
         clean
       />

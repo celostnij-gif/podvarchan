@@ -11,7 +11,7 @@
 |---|---|---|---|
 | **P0** | **UK Slugs & Data Integrity** | ✅ DONE | D1 query: 19 services UK≠RU, 108 redirect_rules (301). curl: `/uk/uslugi/hipnoterapiya-onlayn/` = 200, old slug → 301. hreflang correct. CDN `s-maxage=604800` intact. |
 | **P1** | **Home CMS Cycle** | ✅ DONE | D1 HOME: title/excerpt + hero/cta sections populated (RU+UK). Public: `<h1>` from D1, CTA from content_json. `revalidatePublic(['/ru/','/uk/'])` on save. Builds green. |
-| **P2** | **Static Pages CMS** | 🟡 IN PROGRESS | D1: page_translations filled (title/excerpt), 0 sections. Client pages pass `d1Sections` but 3/4 unused (`_d1Sections`). Block registry has all needed types. Inventory complete. |
+| **P2** | **Static Pages CMS** | 🟡 PARTIAL | Hero sections seeded in D1 for ABOUT/METHOD/PRICING/CONTACTS (4 pages). Client components wired to overlay D1 hero title/subtitle with messages fallback. Builds green. Remaining: full section content seed + admin SectionEditor for static pages. |
 | **P3** | **Data Integrity Guards** | ⏳ PLANNED | Включение защит от затираний и проверки уникальности slug'ов |
 | **P4** | **Acceptance & Delivery** | ⏳ PLANNED | Финальный проход по Owner Journeys, сборка и передача руководства |
 
@@ -34,10 +34,10 @@
 - [x] Проверка цикла обновления: изменения в админке отображаются на публичном сайте за секунды. → **curl /ru/ и /uk/ показывают D1 titles**
 
 ### Phase P2 — Static Pages CMS
-- [~] Первоначальный seed данных статических страниц в D1 из текстов живых страниц. → **Inventory done: 6 page types, 0 sections, all block types exist in registry. Seed SQL pending.**
-- [~] Подключение чтения секций в `src/app/[locale]/[...slug]/page.tsx`. → **Server components already call getPageByType() and pass d1Sections. Client wiring: PRICING partial, ABOUT/METHOD/CONTACTS unused.**
-- [ ] Интеграция `BlockEditorPanel` для удобного редактирования статических страниц. → **Admin section editor exists, needs wire-up for static pages**
-- [ ] Связывание `generateMetadata` с D1 `seo_meta` для статических маршрутов. → **Currently uses messages, D1 title available but not used for metadata**
+- [x] Seed hero sections для ABOUT/METHOD/PRICING/CONTACTS в D1. → **4 hero sections seeded (12 SQL statements), D1 verified**
+- [x] Wire-up client components для D1 hero overlay. → **ABOUT/METHOD/PRICING/CONTACTS: hero title/subtitle из D1 с messages fallback**
+- [~] Интеграция `BlockEditorPanel` для статических страниц. → **Admin section editor существует, hero работает. Остальные секции (text-block, timeline, etc.) — pending**
+- [ ] `generateMetadata` из D1 `seo_meta`. → **Currently uses messages, D1 title available but not wired for metadata**
 
 ### Phase P3 — Data Integrity Guards
 - [ ] Добавление валидаторов Zod на уникальность `(entity, locale, slug)`.
@@ -58,3 +58,4 @@
 * **2026-07-23 P0 DONE:** UK slugs verified in D1 remote — 19 services, 25+ blog posts, 8 categories all have authentic UK slugs (≠ RU). 108 redirect_rules (301) in place. Public site: direct UK URLs return 200 OK without 301 hop. hreflang RU↔UK correct. CDN `s-maxage=604800` unchanged. Both builds (public + admin) pass TypeScript + OpenNext.
 * **2026-07-23 P1 DONE:** Home CMS cycle closed — `getPageByType('HOME')` returns title/excerpt + hero/cta sections from D1. Hero renders D1 title with messages fallback. `home-client.tsx` uses `d1Sections` for CTA content. `updateHomeContent` calls `revalidatePublic({ paths: ['/ru/', '/uk/'] })`. Public `/ru/` and `/uk/` show D1 titles in `<h1>`. Both builds pass.
 * **2026-07-23 P2 IN PROGRESS:** Static pages inventory complete — 6 page types (ABOUT, METHOD, PRICING, CONTACTS, PRIVACY, DISCLAIMER), all with D1 page_translations filled but 0 sections. Block registry has all 12 needed types. Server components already call getPageByType() and pass d1Sections. Client wiring: PRICING partially uses d1Sections, ABOUT/METHOD/CONTACTS have `_d1Sections` unused. Seed SQL and client wire-up pending.
+* **2026-07-23 P2 PARTIAL:** Hero sections seeded in D1 for ABOUT/METHOD/PRICING/CONTACTS (4 pages, 12 SQL). Client components wired to overlay D1 hero title/subtitle with messages fallback. Both builds green. Remaining: full section content (text-block, timeline, CTA, etc.) + admin SectionEditor for static pages + generateMetadata from D1.

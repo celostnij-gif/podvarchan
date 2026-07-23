@@ -37,9 +37,21 @@ function HeroBackgroundParallax() {
 
 /* ── Component ── */
 
-export function ClientAboutPage({ d1Sections: _d1Sections }: { d1Sections?: PageSectionPublic[] } = {}) {
+export function ClientAboutPage({ d1Sections }: { d1Sections?: PageSectionPublic[] } = {}) {
   const t = useTranslations('pages.about')
   const commonT = useTranslations('common')
+
+  // D1 hero section: overlay text if present
+  const heroSection = d1Sections?.find((s) => s.key === 'hero' && s.type === 'hero')
+  let heroTitle = commonT('authorName')
+  let heroSubtitle = commonT('authorTitle')
+  if (heroSection?.contentJson) {
+    try {
+      const parsed = JSON.parse(heroSection.contentJson)
+      if (parsed.title) heroTitle = parsed.title
+      if (parsed.subtitle) heroSubtitle = parsed.subtitle
+    } catch { /* fallback to messages */ }
+  }
 
   useSetBreadcrumbs([
     { label: commonT('nav.home'), href: '/' },
@@ -100,7 +112,7 @@ export function ClientAboutPage({ d1Sections: _d1Sections }: { d1Sections?: Page
                   direction="up"
                   className="text-4xl md:text-5xl lg:text-6xl font-display text-gold-premium leading-tight"
                 >
-                  {commonT('authorName')}
+                  {heroTitle}
                 </AnimatedText>
                 <AnimatedText
                   as="p"
@@ -108,7 +120,7 @@ export function ClientAboutPage({ d1Sections: _d1Sections }: { d1Sections?: Page
                   delay={100}
                   className="mt-2 text-xl text-gold font-body"
                 >
-                  {commonT('authorTitle')}
+                  {heroSubtitle}
                 </AnimatedText>
                 <AnimatedText
                   direction="up"

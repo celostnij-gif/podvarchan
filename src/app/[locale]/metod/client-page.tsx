@@ -69,10 +69,22 @@ function HeroBackgroundImage() {
 
 /* ── Page ── */
 
-export default function MetodClient({ d1Sections: _d1Sections }: { d1Sections?: PageSectionPublic[] } = {}) {
+export default function MetodClient({ d1Sections }: { d1Sections?: PageSectionPublic[] } = {}) {
   const t = useTranslations('pages.metod')
   const methodT = useTranslations('method')
   const commonT = useTranslations('common')
+
+  // D1 hero section: overlay text if present
+  const heroSection = d1Sections?.find((s) => s.key === 'hero' && s.type === 'hero')
+  let heroTitle = t('heading')
+  let heroSubtitle = t('heroSubtitle')
+  if (heroSection?.contentJson) {
+    try {
+      const parsed = JSON.parse(heroSection.contentJson)
+      if (parsed.title) heroTitle = parsed.title
+      if (parsed.subtitle) heroSubtitle = parsed.subtitle
+    } catch { /* fallback to messages */ }
+  }
 
   useSetBreadcrumbs([
     { label: commonT('nav.home'), href: '/' },
@@ -117,13 +129,13 @@ export default function MetodClient({ d1Sections: _d1Sections }: { d1Sections?: 
             {/* Heading */}
             <AnimatedText as="h1" direction="up" delay={100} className="relative">
               <span className="block text-4xl md:text-5xl lg:text-6xl font-display text-gold-premium leading-tight">
-                {t('heading')} {t('headingAccent')}
+                {heroTitle}
               </span>
             </AnimatedText>
 
             <AnimatedText as="p" direction="up" delay={200} className="mt-6 text-lg text-text-secondary leading-relaxed max-w-2xl">
               <span className="bg-bg-deep/60 backdrop-blur-sm px-4 py-3 rounded-xl block">
-                {t('heroSubtitle')}
+                {heroSubtitle}
               </span>
             </AnimatedText>
 
