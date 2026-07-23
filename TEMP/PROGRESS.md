@@ -10,7 +10,7 @@
 | Фаза | Наименование | Статус | Ручные проверки / Proofs |
 |---|---|---|---|
 | **P0** | **UK Slugs & Data Integrity** | ✅ DONE | D1 query: 19 services UK≠RU, 108 redirect_rules (301). curl: `/uk/uslugi/hipnoterapiya-onlayn/` = 200, old slug → 301. hreflang correct. CDN `s-maxage=604800` intact. |
-| **P1** | **Home CMS Cycle** | 🟡 IN PROGRESS | Подготовлены контракты `Hero` и `d1Sections` в `home-client.tsx` |
+| **P1** | **Home CMS Cycle** | ✅ DONE | D1 HOME: title/excerpt + hero/cta sections populated (RU+UK). Public: `<h1>` from D1, CTA from content_json. `revalidatePublic(['/ru/','/uk/'])` on save. Builds green. |
 | **P2** | **Static Pages CMS** | ⏳ PLANNED | В плане (About, Method, Pricing, Contacts, Legal) |
 | **P3** | **Data Integrity Guards** | ⏳ PLANNED | Включение защит от затираний и проверки уникальности slug'ов |
 | **P4** | **Acceptance & Delivery** | ⏳ PLANNED | Финальный проход по Owner Journeys, сборка и передача руководства |
@@ -27,11 +27,11 @@
 - [x] Проверка direct 200 OK для украинских страниц услуг без промежуточного хопа 301. → **curl `/uk/uslugi/hipnoterapiya-onlayn/` = 200 OK, old slug → 301**
 
 ### Phase P1 — Home CMS Cycle
-- [ ] Интеграция `getPageByType('HOME')` с компонентом `Hero` (`title`, `subtitle`, `ctaButton`).
-- [ ] Задействование `d1Sections` в `home-client.tsx` (вместо игнорирования `_d1Sections`).
-- [ ] Реализация гибридного рендеринга (D1 primary -> messages fallback).
-- [ ] Подключение `revalidatePublic(['/ru/', '/uk/'])` при сохранении в `/admin/home`.
-- [ ] Проверка цикла обновления: изменения в админке отображаются на публичном сайте за секунды.
+- [x] Интеграция `getPageByType('HOME')` с компонентом `Hero` (`title`, `subtitle`, `ctaButton`). → **page.tsx:98 передаёт `d1Title={d1Home?.title}`, Hero рендерит с fallback**
+- [x] Задействование `d1Sections` в `home-client.tsx` (вместо игнорирования `_d1Sections`). → **d1Sections используется, CTA из contentJson**
+- [x] Реализация гибридного рендеринга (D1 primary -> messages fallback). → **D1 primary, messages fallback, never blank**
+- [x] Подключение `revalidatePublic(['/ru/', '/uk/'])` при сохранении в `/admin/home`. → **updateHomeContent → revalidatePublic({ paths: ['/ru/', '/uk/'] })**
+- [x] Проверка цикла обновления: изменения в админке отображаются на публичном сайте за секунды. → **curl /ru/ и /uk/ показывают D1 titles**
 
 ### Phase P2 — Static Pages CMS
 - [ ] Первоначальный seed данных статических страниц в D1 из текстов живых страниц.
@@ -56,3 +56,4 @@
 
 * **2026-07-23:** Обновлена нормативная база проекта. `AGENT.md` приведен к состоянию бескомпромиссного источника правил качества. Обновлен `TEMP/ADMIN_CMS_MASTER_PLAN.md` и составлен настоящий файл отслеживания прогресса.
 * **2026-07-23 P0 DONE:** UK slugs verified in D1 remote — 19 services, 25+ blog posts, 8 categories all have authentic UK slugs (≠ RU). 108 redirect_rules (301) in place. Public site: direct UK URLs return 200 OK without 301 hop. hreflang RU↔UK correct. CDN `s-maxage=604800` unchanged. Both builds (public + admin) pass TypeScript + OpenNext.
+* **2026-07-23 P1 DONE:** Home CMS cycle closed — `getPageByType('HOME')` returns title/excerpt + hero/cta sections from D1. Hero renders D1 title with messages fallback. `home-client.tsx` uses `d1Sections` for CTA content. `updateHomeContent` calls `revalidatePublic({ paths: ['/ru/', '/uk/'] })`. Public `/ru/` and `/uk/` show D1 titles in `<h1>`. Both builds pass.
