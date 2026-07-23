@@ -31,7 +31,7 @@ export default function HomeClient({
   schemas,
   d1Testimonials,
   d1Faqs,
-  d1Sections: _d1Sections,
+  d1Sections,
 }: {
   locale: string
   schemas?: Record<string, unknown>[]
@@ -41,6 +41,18 @@ export default function HomeClient({
 }) {
   const t = useTranslations('home')
   useRegisterSchemas(schemas ?? [])
+
+  // Check if D1 has custom CTA section content
+  const ctaSection = d1Sections?.find((s) => s.key === 'cta' || s.type === 'CTA')
+  let ctaTitle = t('ctaTitle')
+  let ctaDesc = t('ctaDescription')
+  if (ctaSection?.contentJson) {
+    try {
+      const parsed = JSON.parse(ctaSection.contentJson)
+      if (parsed.title) ctaTitle = parsed.title
+      if (parsed.description) ctaDesc = parsed.description
+    } catch { /* fallback to messages */ }
+  }
 
   return (
     <>
@@ -55,10 +67,10 @@ export default function HomeClient({
           <div className="relative max-w-3xl mx-auto text-center">
             <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-96 h-96 bg-gold/5 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
             <AnimatedText as="h2" direction="up" className="relative text-3xl md:text-4xl font-display text-text-primary">
-              {t('ctaTitle')}
+              {ctaTitle}
             </AnimatedText>
             <AnimatedText as="p" direction="up" delay={150} className="relative mt-6 text-base text-text-secondary leading-relaxed max-w-xl mx-auto">
-              {t('ctaDescription')}
+              {ctaDesc}
             </AnimatedText>
             <AnimatedText direction="up" delay={250} className="relative mt-8">
               <Link

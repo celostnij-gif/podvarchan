@@ -115,9 +115,11 @@ interface HeroProps {
     rich: (key: string, props?: Record<string, (chunks: React.ReactNode) => React.ReactNode>) => React.ReactNode
   }
   commonT: (key: string) => string
+  d1Title?: string | null
+  d1Subtitle?: string | null
 }
 
-export default function Hero({ t, commonT }: HeroProps) {
+export default function Hero({ t, commonT, d1Title, d1Subtitle }: HeroProps) {
   return (
     <section
       className="relative min-h-[90vh] md:min-h-screen flex flex-col justify-center overflow-hidden
@@ -154,10 +156,14 @@ export default function Hero({ t, commonT }: HeroProps) {
                        animate-fade-in-up"
             style={{ animationDelay: '320ms' }}
           >
-            {t.rich('heroTitle', {
-              gold: (chunks: React.ReactNode) => <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold via-gold-light to-gold">{chunks}</span>,
-              br: () => <br />,
-            })}
+            {d1Title ? (
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold via-gold-light to-gold">{d1Title}</span>
+            ) : (
+              t.rich('heroTitle', {
+                gold: (chunks: React.ReactNode) => <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold via-gold-light to-gold">{chunks}</span>,
+                br: () => <br />,
+              })
+            )}
           </h1>
 
           {/* Subtitle */}
@@ -166,7 +172,7 @@ export default function Hero({ t, commonT }: HeroProps) {
                        max-w-2xl mx-auto animate-fade-in-up motion-reduce:animate-none"
             style={{ animationDelay: '440ms', textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}
           >
-            {t('subtitle')}
+            {d1Subtitle ? d1Subtitle : t('subtitle')}
           </p>
 
           {/* Benefits */}

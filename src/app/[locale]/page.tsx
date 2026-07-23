@@ -95,7 +95,7 @@ export default async function HomePage({
 
   return (
     <>
-      <Hero t={t} commonT={commonT} />
+      <Hero t={t} commonT={commonT} d1Title={d1Home?.title} d1Subtitle={d1Home?.excerpt} />
       <HomeClient
         locale={locale}
         schemas={pageSchemas}
