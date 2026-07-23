@@ -9,7 +9,7 @@ export const SITE = {
   defaultOgImage: '/images/og-default.webp',
   themeColor: '#0A0A12',
   authorName: 'Вячеслав Подварчан',
-  authorTitle: 'Гипнотерапевт онлайн',
+  authorTitle: 'Психологическая помощь',
   authorSlug: 'ob-avtore',
 } as const
 
@@ -123,7 +123,7 @@ export const AUTHOR = {
   givenName: 'Вячеслав',
   givenNameUk: "В'ячеслав",
   familyName: 'Подварчан',
-  jobTitle: 'Гипнотерапевт онлайн',
+  jobTitle: 'Психологическая помощь',
   description: 'Помогаю освободиться от тревоги, внутренних блоков и самосаботажа через работу с подсознанием, голосом и индивидуальными музыкальными программами. Сертифицированный гипнотерапевт (ABH), практик НЛП (INLPTA), магистр музыкальной терапии (The University of Kansas).',
   image: '/images/about.webp',
   url: '/ob-avtore/',
