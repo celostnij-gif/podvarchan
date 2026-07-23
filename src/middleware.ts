@@ -80,6 +80,7 @@ export default async function middleware(request: NextRequest) {
   const htmlPath = pathname.replace(/\/+$/, '') // strip trailing slashes for matching
   const oldHtmlRedirects: Record<string, string> = {
     '/otzyvy.html': '/ru/',
+    '/o-mne.html': '/ru/ob-avtore/',
     '/diagnostika.html': '/ru/uslugi/',
     '/diagnostika_uk.html': '/uk/uslugi/',
     '/uslugi_uk.html': '/uk/uslugi/',
