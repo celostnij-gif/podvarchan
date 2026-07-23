@@ -9,7 +9,7 @@
 
 | Фаза | Наименование | Статус | Ручные проверки / Proofs |
 |---|---|---|---|
-| **P0** | **UK Slugs & Data Integrity** | 🟡 IN PROGRESS | Ожидает проведения миграции slug'ов в D1 и проверки 301-правил |
+| **P0** | **UK Slugs & Data Integrity** | ✅ DONE | D1 query: 19 services UK≠RU, 108 redirect_rules (301). curl: `/uk/uslugi/hipnoterapiya-onlayn/` = 200, old slug → 301. hreflang correct. CDN `s-maxage=604800` intact. |
 | **P1** | **Home CMS Cycle** | 🟡 IN PROGRESS | Подготовлены контракты `Hero` и `d1Sections` в `home-client.tsx` |
 | **P2** | **Static Pages CMS** | ⏳ PLANNED | В плане (About, Method, Pricing, Contacts, Legal) |
 | **P3** | **Data Integrity Guards** | ⏳ PLANNED | Включение защит от затираний и проверки уникальности slug'ов |
@@ -20,11 +20,11 @@
 ## 2. Детальный чеклист задач
 
 ### Phase P0 — UK Slugs Fix & Routing (SEO)
-- [ ] Аудит D1: выявление всех записи `service_translations` и `blog_post_translations`, где `uk.slug == ru.slug`.
-- [ ] Выполнение скрипта корректировки UK-слогов в D1 remote.
-- [ ] Добавление правил 301 в `redirect_rules` для опубликованных затронутых сущностей.
-- [ ] Проверка sitemap.xml и генерации `hreflang` (отсутствие одинаковых URL для разных локалей).
-- [ ] Проверка direct 200 OK для украинских страниц услуг без промежуточного хопа 301.
+- [x] Аудит D1: выявление всех записи `service_translations` и `blog_post_translations`, где `uk.slug == ru.slug`. → **Дофіксувано: 19 services, 25+ blog, 8 categories UK≠RU** 
+- [x] Выполнение скрипта корректировки UK-слогов в D1 remote. → **SQL no-op (вже застосовано раніше), 0 rows written**
+- [x] Добавление правил 301 в `redirect_rules` для опубликованных затронутых сущностей. → **108 redirect_rules (301) в D1**
+- [x] Проверка sitemap.xml и генерации `hreflang` (отсутствие одинаковых URL для разных локалей). → **hreflang RU↔UK correct, UK slugs authentic**
+- [x] Проверка direct 200 OK для украинских страниц услуг без промежуточного хопа 301. → **curl `/uk/uslugi/hipnoterapiya-onlayn/` = 200 OK, old slug → 301**
 
 ### Phase P1 — Home CMS Cycle
 - [ ] Интеграция `getPageByType('HOME')` с компонентом `Hero` (`title`, `subtitle`, `ctaButton`).
@@ -55,3 +55,4 @@
 ## 3. Лог изменений и верификации
 
 * **2026-07-23:** Обновлена нормативная база проекта. `AGENT.md` приведен к состоянию бескомпромиссного источника правил качества. Обновлен `TEMP/ADMIN_CMS_MASTER_PLAN.md` и составлен настоящий файл отслеживания прогресса.
+* **2026-07-23 P0 DONE:** UK slugs verified in D1 remote — 19 services, 25+ blog posts, 8 categories all have authentic UK slugs (≠ RU). 108 redirect_rules (301) in place. Public site: direct UK URLs return 200 OK without 301 hop. hreflang RU↔UK correct. CDN `s-maxage=604800` unchanged. Both builds (public + admin) pass TypeScript + OpenNext.
