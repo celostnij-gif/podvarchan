@@ -51,7 +51,7 @@ export async function generateMetadata({
   return {
     title: {
       default: t('siteTitle'),
-      template: `%s | ${t('siteTitle')}`,
+      template: '%s',
     },
     description: t('siteDescription'),
     metadataBase: new URL(SITE.url),

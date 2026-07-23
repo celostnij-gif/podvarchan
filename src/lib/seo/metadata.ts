@@ -34,8 +34,9 @@ function truncateAtWord(text: string, maxLen: number): string {
 }
 
 /**
- * Build title with brand suffix if it fits within 60 chars.
- * If pageTitle + " | " + brand > 60 → use pageTitle only (truncated if needed).
+ * Build title with brand suffix. Single source of truth for brand in <title>.
+ * Idempotent: strips existing brand before adding.
+ * If pageTitle + " | " + brand > 60 → truncate pageTitle (no brand).
  */
 export function buildTitle(pageTitle: string, locale: string): string {
   const brand = BRAND[locale] ?? BRAND.ru
