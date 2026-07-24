@@ -48,6 +48,9 @@ export default function HomeClient({
   const problemsD1 = parseHomeZoneContent('problems', d1Sections)
   const methodD1 = parseHomeZoneContent('method', d1Sections)
   const authorD1 = parseHomeZoneContent('author', d1Sections)
+  const servicesD1 = parseHomeZoneContent('services', d1Sections)
+  const testimonialsD1 = parseHomeZoneContent('testimonials', d1Sections)
+  const faqD1 = parseHomeZoneContent('faq', d1Sections)
   const ctaD1 = parseHomeZoneContent('cta', d1Sections)
 
   // Check if D1 has custom CTA section content
@@ -63,10 +66,10 @@ export default function HomeClient({
     <>
       <ProblemsSection d1Content={problemsD1} />
       <MethodSection d1Content={methodD1} />
-      <ServicesSection maxCards={9} />
+      <ServicesSection d1Content={servicesD1} maxCards={9} />
       <AuthorPreviewSection d1Content={authorD1} />
-      <TestimonialsSection d1Items={d1Testimonials} />
-      <FAQSection d1Items={d1Faqs} />
+      <TestimonialsSection d1Content={testimonialsD1} d1Items={d1Testimonials} />
+      <FAQSection d1Content={faqD1} d1Items={d1Faqs} />
       <AnimatedSection as="div" variant="fadeUp">
         <SectionContainer size="md">
           <div className="relative max-w-3xl mx-auto text-center">

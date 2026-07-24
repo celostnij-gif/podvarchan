@@ -47,9 +47,11 @@ const cardVariants = {
 }
 export default function ServicesSection({
   d1Services,
+  d1Content,
   maxCards,
 }: {
   d1Services?: ServicePublic[]
+  d1Content?: { heading?: string; subtitle?: string; allLink?: string }
   maxCards?: number
 } = {}) {
   const t = useTranslations('servicesSection')
@@ -82,8 +84,8 @@ export default function ServicesSection({
           viewport={{ once: true, margin: '-60px' }}
           className="text-center"
         >
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-display text-gold-premium">{t('heading')}</h2>
-          <p className="mt-4 text-base text-text-secondary max-w-2xl mx-auto">{t('subtitle')}</p>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-display text-gold-premium">{d1Content?.heading || t('heading')}</h2>
+          <p className="mt-4 text-base text-text-secondary max-w-2xl mx-auto">{d1Content?.subtitle || t('subtitle')}</p>
         </motion.div>
 
         {/* Cards grid */}

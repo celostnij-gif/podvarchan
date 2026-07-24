@@ -29,8 +29,10 @@ const faqItemVariants = {
 }
 export default function FAQSection({
   d1Items,
+  d1Content,
 }: {
   d1Items?: FAQPublic[]
+  d1Content?: { heading?: string; subtitle?: string }
 } = {}) {
   const faqT = useTranslations('faqSection')
   const messages = useMessages()
@@ -54,7 +56,7 @@ export default function FAQSection({
           className="text-center"
         >
           <h2 id="faq-heading" className="text-3xl md:text-4xl lg:text-5xl font-display text-gold-premium">
-            {faqT('heading')}
+            {d1Content?.heading || faqT('heading')}
           </h2>
         </motion.div>
 

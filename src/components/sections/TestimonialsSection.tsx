@@ -28,8 +28,10 @@ const variants = {
 }
 export default function TestimonialsSection({
   d1Items,
+  d1Content,
 }: {
   d1Items?: TestimonialPublic[]
+  d1Content?: { heading?: string; subtitle?: string }
 } = {}) {
   const t = useTranslations('testimonials')
   const messages = useMessages()
@@ -73,7 +75,7 @@ export default function TestimonialsSection({
           className="text-center"
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-display text-gold-premium">
-            {t.rich('heading', {
+            {d1Content?.heading || t.rich('heading', {
               gold: (chunks: React.ReactNode) => <>{chunks}</>,
             })}
           </h2>

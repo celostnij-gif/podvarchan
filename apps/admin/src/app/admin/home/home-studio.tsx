@@ -8,8 +8,11 @@ import { HeroZone } from './zones/HeroZone'
 import { ProblemsZone } from './zones/ProblemsZone'
 import { MethodZone } from './zones/MethodZone'
 import { AuthorZone } from './zones/AuthorZone'
+import { ServicesZone } from './zones/ServicesZone'
+import { TestimonialsZone } from './zones/TestimonialsZone'
+import { FaqZone } from './zones/FaqZone'
 import { CtaZone } from './zones/CtaZone'
-import { HOME_ZONE_KEYS, parseZoneContent, type HomeZoneKey, type HeroContent, type ProblemsContent, type MethodContent, type AuthorContent, type CtaContent } from '@/lib/home/blueprint'
+import { HOME_ZONE_KEYS, parseZoneContent, type HomeZoneKey, type HeroContent } from '@/lib/home/blueprint'
 import type { PageSectionRecord, PageSectionTranslationRecord } from '@/app/admin/pages/types'
 
 interface HomeStudioProps {
@@ -50,6 +53,9 @@ export function HomeStudio({ pageId, pageStatus, hero, sections, enabledMap, seo
   const problems = parseZone(sections, 'problems')
   const method = parseZone(sections, 'method')
   const author = parseZone(sections, 'author')
+  const services = parseZone(sections, 'services')
+  const testimonials = parseZone(sections, 'testimonials')
+  const faq = parseZone(sections, 'faq')
   const cta = parseZone(sections, 'cta')
 
   return (
@@ -95,18 +101,17 @@ export function HomeStudio({ pageId, pageStatus, hero, sections, enabledMap, seo
             {activeZone === 'author' && (
               <AuthorZone data={author} />
             )}
+            {activeZone === 'services' && (
+              <ServicesZone data={services} featuredCount={counts.featuredServices} />
+            )}
+            {activeZone === 'testimonials' && (
+              <TestimonialsZone data={testimonials} testimonialCount={counts.testimonials} />
+            )}
+            {activeZone === 'faq' && (
+              <FaqZone data={faq} faqCount={counts.faq} />
+            )}
             {activeZone === 'cta' && (
               <CtaZone data={cta} />
-            )}
-            {(['services', 'testimonials', 'faq'] as string[]).includes(activeZone) && (
-              <div className="text-center py-12">
-                <p className="text-sm text-zinc-500">Зона «{activeZone}» — керується через інші розділи адмінки</p>
-                <p className="text-xs text-zinc-600 mt-2">
-                  {activeZone === 'services' && 'Редагування послуг → /admin/services'}
-                  {activeZone === 'testimonials' && 'Редагування відгуків → /admin/testimonials'}
-                  {activeZone === 'faq' && 'Редагування FAQ → /admin/faq'}
-                </p>
-              </div>
             )}
           </div>
         </main>
