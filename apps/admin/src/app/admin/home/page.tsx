@@ -1,13 +1,18 @@
 import type { Metadata } from 'next'
 import { getDB } from '@/db'
 import { pages, pageTranslations, pageSections, pageSectionTranslations } from '@/db/schema/pages'
-import { eq } from 'drizzle-orm'
+import { seoMeta } from '@/db/schema/seo'
+import { faqItems } from '@/db/schema/faq'
+import { testimonials } from '@/db/schema/testimonials'
+import { services } from '@/db/schema/services'
+import { eq, and, count } from 'drizzle-orm'
 import { notFound } from 'next/navigation'
-import { HomeEditor } from './home-editor'
-import type { PageTranslationRecord, PageSectionRecord, PageSectionTranslationRecord } from '@/app/admin/pages/types'
+import { HomeStudio } from './home-studio'
+import { parseZoneContent } from '@/lib/home/blueprint'
+import type { PageSectionRecord, PageSectionTranslationRecord } from '@/app/admin/pages/types'
 
 export const metadata: Metadata = {
-  title: 'Головна',
+  title: 'Головна — Studio',
 }
 
 export default async function HomePage() {
@@ -16,14 +21,26 @@ export default async function HomePage() {
   const home = await db.select().from(pages).where(eq(pages.type, 'HOME')).get()
   if (!home) notFound()
 
+  // Translations + SEO
   const translationRows = await db
     .select()
     .from(pageTranslations)
     .where(eq(pageTranslations.pageId, home.id))
     .all()
 
-  const translations = translationRows.map((t) => t as PageTranslationRecord)
+  const seoRows = await db
+    .select()
+    .from(seoMeta)
+    .where(and(eq(seoMeta.entityType, 'page'), eq(seoMeta.entityId, home.id)))
+    .all()
 
+  const seoMap = { ru: null as typeof seoRows[0] | null, uk: null as typeof seoRows[0] | null }
+  for (const row of seoRows) {
+    if (row.locale === 'ru') seoMap.ru = row
+    if (row.locale === 'uk') seoMap.uk = row
+  }
+
+  // Sections with translations
   const sectionRows = await db
     .select()
     .from(pageSections)
@@ -47,41 +64,43 @@ export default async function HomePage() {
   }
   const sections = Array.from(sectionsMap.values())
 
-  // Parse hero content from contentJson
-  const ruTr = translations.find((t) => t.locale === 'ru')
-  const ukTr = translations.find((t) => t.locale === 'uk')
+  // Parse hero content from section translations (not from page_translations.contentJson)
+  const heroSection = sections.find((s) => s.section.key === 'hero')
+  const heroData = { ru: { title: '', subtitle: '', ctaPrimary: '', ctaSecondary: '', benefits: [] as string[] }, uk: { title: '', subtitle: '', ctaPrimary: '', ctaSecondary: '', benefits: [] as string[] } }
 
-  let ruHero = { title: '', subtitle: '', cta: '' }
-  let ukHero = { title: '', subtitle: '', cta: '' }
-
-  try {
-    if (ruTr?.contentJson) {
-      const parsed = JSON.parse(ruTr.contentJson)
-      ruHero = parsed.hero ?? ruHero
+  if (heroSection) {
+    for (const locale of ['ru', 'uk'] as const) {
+      const tr = heroSection.translations.find((t) => t.locale === locale)
+      if (tr?.contentJson) {
+        heroData[locale] = parseZoneContent('hero', tr.contentJson)
+      }
     }
-  } catch { /* ignore */ }
+  }
 
-  try {
-    if (ukTr?.contentJson) {
-      const parsed = JSON.parse(ukTr.contentJson)
-      ukHero = parsed.hero ?? ukHero
-    }
-  } catch { /* ignore */ }
+  // Enabled map for zone nav
+  const enabledMap = {} as Record<string, boolean>
+  for (const s of sections) {
+    enabledMap[s.section.key] = s.section.enabled
+  }
+
+  // Counts for linked entities
+  const [faqCount] = await db.select({ value: count() }).from(faqItems).where(eq(faqItems.group, 'HOME')).all()
+  const [testimonialCount] = await db.select({ value: count() }).from(testimonials).where(eq(testimonials.status, 'PUBLISHED')).all()
+  const [featuredCount] = await db.select({ value: count() }).from(services).where(and(eq(services.featured, true), eq(services.status, 'PUBLISHED'))).all()
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-zinc-100">Редактор головної</h1>
-        <p className="text-sm text-zinc-500 mt-1">Керування вмістом головної сторінки</p>
-      </div>
-
-      <HomeEditor
-        pageId={home.id}
-        status={home.status}
-        tr={{ ru: ruTr ?? null, uk: ukTr ?? null }}
-        hero={{ ru: ruHero, uk: ukHero }}
-        sections={sections}
-      />
-    </div>
+    <HomeStudio
+      pageId={home.id}
+      pageStatus={home.status}
+      hero={heroData}
+      sections={sections}
+      enabledMap={enabledMap}
+      seo={{ ru: seoMap.ru, uk: seoMap.uk }}
+      counts={{
+        faq: faqCount?.value ?? 0,
+        testimonials: testimonialCount?.value ?? 0,
+        featuredServices: featuredCount?.value ?? 0,
+      }}
+    />
   )
 }
