@@ -1,7 +1,7 @@
 'use client'
 
-import { useActionState, useState, useTransition } from 'react'
-import { updateHomeMeta, ensureHomeBlueprint } from '@/lib/actions/home'
+import { useActionState, useState } from 'react'
+import { updateHomeMeta } from '@/lib/actions/home'
 import { LocaleTabs } from '../components/LocaleTabs'
 
 interface MetaZoneProps {
@@ -10,46 +10,6 @@ interface MetaZoneProps {
     ru: { title: string | null; description: string | null; keywords: string | null } | null
     uk: { title: string | null; description: string | null; keywords: string | null } | null
   }
-}
-
-function SeedBlueprintButton() {
-  const [pending, startTransition] = useTransition()
-  const [result, setResult] = useState<{ ok?: boolean; created?: number; error?: string } | null>(null)
-
-  const handleSeed = () => {
-    startTransition(async () => {
-      try {
-        const res = await ensureHomeBlueprint()
-        setResult({ ok: true, created: res.created })
-      } catch (e) {
-        setResult({ error: e instanceof Error ? e.message : 'Помилка' })
-      }
-    })
-  }
-
-  return (
-    <div className="rounded-lg border border-zinc-700/50 bg-zinc-900/40 p-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h4 className="text-sm font-semibold text-zinc-200">Blueprint Seed</h4>
-          <p className="text-xs text-zinc-500 mt-1">Створити відсутні секції та seo_meta в D1 (безпечний re-run)</p>
-        </div>
-        <button
-          onClick={handleSeed}
-          disabled={pending}
-          className="px-3 py-1.5 rounded-lg bg-zinc-700/50 text-zinc-300 border border-zinc-600/50 text-xs font-medium hover:bg-zinc-700 transition-colors disabled:opacity-50"
-        >
-          {pending ? 'Створення...' : 'Seed'}
-        </button>
-      </div>
-      {result?.ok && (
-        <p className="text-xs text-green-400 mt-2">Створено {result.created} елементів</p>
-      )}
-      {result?.error && (
-        <p className="text-xs text-red-400 mt-2">{result.error}</p>
-      )}
-    </div>
-  )
 }
 
 export function MetaZone({ pageStatus, seo }: MetaZoneProps) {
@@ -156,8 +116,6 @@ export function MetaZone({ pageStatus, seo }: MetaZoneProps) {
         </form>
       </div>
 
-      {/* Blueprint seed — one-shot */}
-      <SeedBlueprintButton />
     </div>
   )
 }

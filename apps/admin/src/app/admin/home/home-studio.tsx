@@ -13,7 +13,7 @@ import { ServicesZone } from './zones/ServicesZone'
 import { TestimonialsZone } from './zones/TestimonialsZone'
 import { FaqZone } from './zones/FaqZone'
 import { CtaZone } from './zones/CtaZone'
-import { HOME_ZONE_KEYS, parseZoneContent, type HomeZoneKey, type HeroContent } from '@/lib/home/blueprint'
+import { HOME_ZONE_KEYS, HOME_ZONE_META, parseZoneContent, type HomeZoneKey, type HeroContent } from '@/lib/home/blueprint'
 import { ensureHomeBlueprint } from '@/lib/actions/home'
 import type { PageSectionRecord, PageSectionTranslationRecord } from '@/app/admin/pages/types'
 
@@ -80,6 +80,73 @@ function BlueprintMissingBanner() {
       >
         {pending ? 'Створення...' : 'Застосувати Blueprint'}
       </button>
+    </div>
+  )
+}
+
+/** Always-visible Blueprint management section — seed/re-seed zones and translations. */
+function BlueprintSection() {
+  const [pending, startTransition] = useTransition()
+  const [result, setResult] = useState<{ ok?: boolean; created?: number; error?: string } | null>(null)
+
+  const handleSeed = () => {
+    setResult(null)
+    startTransition(async () => {
+      try {
+        const res = await ensureHomeBlueprint()
+        setResult({ ok: true, created: res.created })
+      } catch (e) {
+        setResult({ error: e instanceof Error ? e.message : 'Помилка' })
+      }
+    })
+  }
+
+  return (
+    <div className="rounded-lg border border-zinc-700/50 bg-zinc-900/40 p-5">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-lg">📋</span>
+            <h3 className="text-base font-semibold text-zinc-100">Blueprint — схема секцій головної сторінки</h3>
+          </div>
+          <p className="text-xs text-zinc-500 leading-relaxed">
+            За потреби створює відсутні секції та переклади з типовими значеннями.
+            Безпечно використовувати повторно — існуючі дані не перезаписуються.
+            Зони: {HOME_ZONE_KEYS.map(k => HOME_ZONE_META[k].label.replace(/\s*\/.*$/, '')).join(', ')}.
+          </p>
+        </div>
+        <button
+          onClick={handleSeed}
+          disabled={pending}
+          className="shrink-0 px-4 py-2 rounded-lg bg-zinc-700/50 text-zinc-300 border border-zinc-600/50 text-sm font-medium hover:bg-zinc-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+        >
+          {pending ? (
+            <><span className="inline-block w-3 h-3 border-2 border-zinc-400 border-t-transparent rounded-full animate-spin" /> Створення...</>
+          ) : (
+            'Застосувати Blueprint'
+          )}
+        </button>
+      </div>
+      {result?.ok && result.created !== undefined && (
+        <div className="mt-3 flex items-center gap-2 text-sm text-green-400 bg-green-900/20 border border-green-700/30 rounded-lg px-3 py-2">
+          <span>✓</span>
+          <span>Blueprint застосовано: створено {result.created} елементів. {result.created > 0 ? 'Оновіть сторінку.' : 'Усі секції вже існують.'}</span>
+          {result.created === 0 && (
+            <button
+              onClick={() => window.location.reload()}
+              className="ml-auto text-xs px-2 py-1 rounded bg-green-800/40 text-green-300 border border-green-700/40 hover:bg-green-800/70 transition-colors"
+            >
+              Оновити
+            </button>
+          )}
+        </div>
+      )}
+      {result?.error && (
+        <div className="mt-3 flex items-center gap-2 text-sm text-red-400 bg-red-900/20 border border-red-700/30 rounded-lg px-3 py-2">
+          <span>⚠</span>
+          <span>{result.error}</span>
+        </div>
+      )}
     </div>
   )
 }
@@ -179,6 +246,9 @@ export function HomeStudio({ pageId, pageStatus, hero, sections, enabledMap, seo
           </div>
         </main>
       </div>
+
+      {/* Blueprint — always visible, not hidden in a sub-tab */}
+      <BlueprintSection />
 
       <SaveBanner state="idle" />
     </div>
