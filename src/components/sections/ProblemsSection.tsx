@@ -168,7 +168,7 @@ export default function ProblemsSection({ d1Content }: { d1Content?: ProblemsD1 
   const t = useTranslations('problems')
   const commonT = useTranslations('common')
 
-  const problems = useMemo(() => {
+  const problems = (() => {
     if (d1Content?.items && d1Content.items.length > 0) {
       return d1Content.items.map((item) => ({
         icon: item.icon ?? '😰',
@@ -184,7 +184,7 @@ export default function ProblemsSection({ d1Content }: { d1Content?: ProblemsD1 
       { icon: '😤', title: t('problem5Title'), description: t('problem5Desc') },
       { icon: '😔', title: t('problem6Title'), description: t('problem6Desc') },
     ]
-  }, [d1Content?.items, t])
+  })()
 
   const headingText = d1Content?.heading || t('problemsTitle', { gold: '' })
 

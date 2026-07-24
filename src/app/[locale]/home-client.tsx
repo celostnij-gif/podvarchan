@@ -43,20 +43,19 @@ export default function HomeClient({
 }) {
   const t = useTranslations('home')
   useRegisterSchemas(schemas ?? [])
-
-  // Parse per-zone D1 content
-  const problemsD1 = parseHomeZoneContent('problems', d1Sections)
-  const methodD1 = parseHomeZoneContent('method', d1Sections)
-  const authorD1 = parseHomeZoneContent('author', d1Sections)
-  const servicesD1 = parseHomeZoneContent('services', d1Sections)
-  const testimonialsD1 = parseHomeZoneContent('testimonials', d1Sections)
-  const faqD1 = parseHomeZoneContent('faq', d1Sections)
-  const ctaD1 = parseHomeZoneContent('cta', d1Sections)
+  // Parse per-zone D1 content (null → undefined for prop compatibility)
+  const problemsD1 = parseHomeZoneContent('problems', d1Sections) ?? undefined
+  const methodD1 = parseHomeZoneContent('method', d1Sections) ?? undefined
+  const authorD1 = parseHomeZoneContent('author', d1Sections) ?? undefined
+  const servicesD1 = parseHomeZoneContent('services', d1Sections) ?? undefined
+  const testimonialsD1 = parseHomeZoneContent('testimonials', d1Sections) ?? undefined
+  const faqD1 = parseHomeZoneContent('faq', d1Sections) ?? undefined
+  const ctaD1 = parseHomeZoneContent('cta', d1Sections) ?? undefined
 
   // Check if D1 has custom CTA section content
   let ctaTitle = t('ctaTitle')
   let ctaDesc = t('ctaDescription')
-  let ctaBtn = t('ctaButton')
+  const ctaBtn = t('ctaButton')
   if (ctaD1) {
     if (ctaD1.title) ctaTitle = ctaD1.title
     if (ctaD1.description) ctaDesc = ctaD1.description

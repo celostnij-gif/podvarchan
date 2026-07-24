@@ -109,17 +109,24 @@ function ScrollIndicator() {
 
 /* ── Hero Component (Server Component) ── */
 
+interface HeroD1Bag {
+  title?: string | null
+  subtitle?: string | null
+  ctaPrimary?: string | null
+  ctaSecondary?: string | null
+  benefits?: string[] | null
+}
+
 interface HeroProps {
   t: {
     (key: string): string
     rich: (key: string, props?: Record<string, (chunks: React.ReactNode) => React.ReactNode>) => React.ReactNode
   }
   commonT: (key: string) => string
-  d1Title?: string | null
-  d1Subtitle?: string | null
+  d1?: HeroD1Bag
 }
 
-export default function Hero({ t, commonT, d1Title, d1Subtitle }: HeroProps) {
+export default function Hero({ t, commonT, d1 }: HeroProps) {
   return (
     <section
       className="relative min-h-[90vh] md:min-h-screen flex flex-col justify-center overflow-hidden
@@ -156,8 +163,8 @@ export default function Hero({ t, commonT, d1Title, d1Subtitle }: HeroProps) {
                        animate-fade-in-up"
             style={{ animationDelay: '320ms' }}
           >
-            {d1Title ? (
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold via-gold-light to-gold">{d1Title}</span>
+            {(d1?.title ?? '') ? (
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold via-gold-light to-gold">{d1!.title}</span>
             ) : (
               t.rich('heroTitle', {
                 gold: (chunks: React.ReactNode) => <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold via-gold-light to-gold">{chunks}</span>,
@@ -172,7 +179,7 @@ export default function Hero({ t, commonT, d1Title, d1Subtitle }: HeroProps) {
                        max-w-2xl mx-auto animate-fade-in-up motion-reduce:animate-none"
             style={{ animationDelay: '440ms', textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}
           >
-            {d1Subtitle ? d1Subtitle : t('subtitle')}
+            {d1?.subtitle || t('subtitle')}
           </p>
 
           {/* Benefits */}
@@ -180,7 +187,7 @@ export default function Hero({ t, commonT, d1Title, d1Subtitle }: HeroProps) {
             className="mt-8 flex flex-wrap justify-center gap-3 animate-fade-in-up motion-reduce:animate-none"
             style={{ animationDelay: '560ms' }}
           >
-            {['benefit1', 'benefit2', 'benefit3'].map((key, i) => (
+            {(d1?.benefits?.length ? d1.benefits : [t('benefit1'), t('benefit2'), t('benefit3')]).map((text, i) => (
               <li key={i}
                 className="group flex items-center gap-2.5 px-4 py-2.5 rounded-xl
                            bg-white/[0.03] border border-white/[0.05]
@@ -191,7 +198,7 @@ export default function Hero({ t, commonT, d1Title, d1Subtitle }: HeroProps) {
                 <span className={`w-1.5 h-1.5 rounded-full shrink-0 transition-all duration-300 ${
                   i % 2 === 0 ? 'bg-gold' : 'bg-green'
                 }`} />
-                <span className="text-sm text-text-secondary/90 leading-tight">{t(key)}</span>
+                <span className="text-sm text-text-secondary/90 leading-tight">{text}</span>
               </li>
             ))}
           </ul>
@@ -223,7 +230,7 @@ export default function Hero({ t, commonT, d1Title, d1Subtitle }: HeroProps) {
                                transition-transform duration-700 bg-gradient-to-r
                                from-transparent via-white/20 to-transparent" aria-hidden="true" />
               <span className="relative z-10 flex items-center gap-2.5">
-                {commonT('cta.booking')}
+                {d1?.ctaPrimary || commonT('cta.booking')}
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
                      strokeLinejoin="round"
@@ -243,7 +250,7 @@ export default function Hero({ t, commonT, d1Title, d1Subtitle }: HeroProps) {
                          transition-all duration-300"
             >
               <span>
-                {t('ctaSecondary')}
+                {d1?.ctaSecondary || t('ctaSecondary')}
               </span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                    stroke="currentColor" strokeWidth="2" strokeLinecap="round"
