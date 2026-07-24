@@ -6,14 +6,35 @@ import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/routing'
 import { AnimatedSection, SectionContainer } from '@/components/ui'
 
-export default function AuthorPreviewSection() {
+/* ── D1 content type ── */
+interface AuthorD1 {
+  headingPrefix?: string
+  headingHighlight?: string
+  headingSuffix?: string
+  paragraphs?: string[]
+  readMore?: string
+  experience?: string
+  education?: string
+}
+
+export default function AuthorPreviewSection({ d1Content }: { d1Content?: AuthorD1 }) {
   const t = useTranslations('authorPreview')
 
-  const credentials = [
-    { icon: '🎓', text: t('cert1') },
-    { icon: '🏆', text: t('cert2') },
-    { icon: '💼', text: t('cert3') },
-  ]
+  const credentials = d1Content?.experience || d1Content?.education
+    ? [
+        ...(d1Content.experience ? [{ icon: '🎓', text: d1Content.experience }] : []),
+        ...(d1Content.education ? [{ icon: '💼', text: d1Content.education }] : []),
+      ]
+    : [
+        { icon: '🎓', text: t('cert1') },
+        { icon: '🏆', text: t('cert2') },
+        { icon: '💼', text: t('cert3') },
+      ]
+
+  const headingPrefix = d1Content?.headingPrefix || t('headingPrefix')
+  const headingHighlight = d1Content?.headingHighlight || t('headingHighlight')
+  const headingSuffix = d1Content?.headingSuffix || t('headingSuffix')
+  const description = d1Content?.paragraphs?.[0] || t('description')
 
   return (
     <AnimatedSection as="section" variant="fadeUp" aria-label={t('ariaLabel')}>
@@ -50,12 +71,12 @@ export default function AuthorPreviewSection() {
             transition={{ duration: 0.6, ease: [0.25, 0.1, 0, 1] as const }}
           >
             <h2 className="text-2xl md:text-3xl font-serif font-semibold mb-4 text-foreground">
-              {t('headingPrefix')}
-              <span className="text-gold">{t('headingHighlight')}</span>
-              {t('headingSuffix')}
+              {headingPrefix}
+              <span className="text-gold">{headingHighlight}</span>
+              {headingSuffix}
             </h2>
             <p className="text-foreground/70 mb-6 leading-relaxed">
-              {t('description')}
+              {description}
             </p>
 
             <div className="space-y-3">
@@ -73,7 +94,7 @@ export default function AuthorPreviewSection() {
                 className="group inline-flex items-center gap-2 text-sm font-medium text-green-light
                            hover:text-green transition-colors duration-200"
               >
-                {t('readMore')}
+                {d1Content?.readMore || t('readMore')}
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" strokeWidth="2" strokeLinecap="round"
                      strokeLinejoin="round"

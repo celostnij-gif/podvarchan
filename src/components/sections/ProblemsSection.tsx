@@ -152,20 +152,41 @@ function ProblemCard({
   )
 }
 
+/* ── D1 content type ── */
+interface ProblemsD1 {
+  heading?: string
+  headingAccent?: string
+  items?: { icon?: string; title: string; subtitle?: string }[]
+  calloutTitle?: string
+  calloutText?: string
+  cta?: string
+}
+
 /* ── Problems Section ── */
 
-export default function ProblemsSection() {
+export default function ProblemsSection({ d1Content }: { d1Content?: ProblemsD1 }) {
   const t = useTranslations('problems')
   const commonT = useTranslations('common')
 
-  const problems = [
-    { icon: '😰', title: t('problem1Title'), description: t('problem1Desc') },
-    { icon: '🫢', title: t('problem2Title'), description: t('problem2Desc') },
-    { icon: '😣', title: t('problem3Title'), description: t('problem3Desc') },
-    { icon: '😩', title: t('problem4Title'), description: t('problem4Desc') },
-    { icon: '😤', title: t('problem5Title'), description: t('problem5Desc') },
-    { icon: '😔', title: t('problem6Title'), description: t('problem6Desc') },
-  ]
+  const problems = useMemo(() => {
+    if (d1Content?.items && d1Content.items.length > 0) {
+      return d1Content.items.map((item) => ({
+        icon: item.icon ?? '😰',
+        title: item.title,
+        description: item.subtitle ?? '',
+      }))
+    }
+    return [
+      { icon: '😰', title: t('problem1Title'), description: t('problem1Desc') },
+      { icon: '🫢', title: t('problem2Title'), description: t('problem2Desc') },
+      { icon: '😣', title: t('problem3Title'), description: t('problem3Desc') },
+      { icon: '😩', title: t('problem4Title'), description: t('problem4Desc') },
+      { icon: '😤', title: t('problem5Title'), description: t('problem5Desc') },
+      { icon: '😔', title: t('problem6Title'), description: t('problem6Desc') },
+    ]
+  }, [d1Content?.items, t])
+
+  const headingText = d1Content?.heading || t('problemsTitle', { gold: '' })
 
   return (
     <AnimatedSection as="section" variant="fadeUp" className="relative overflow-hidden" aria-label={t('ariaLabel')}>
@@ -180,9 +201,13 @@ export default function ProblemsSection() {
             <span className="w-8 h-px bg-gold/40" aria-hidden="true" />
           </div>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-display text-gold-premium leading-tight">
-            {t.rich('problemsTitle', {
-              gold: (chunks: React.ReactNode) => <>{chunks}</>,
-            })}
+            {d1Content?.heading ? (
+              <>{d1Content.heading}{d1Content.headingAccent ? <span className="text-gold"> {d1Content.headingAccent}</span> : null}</>
+            ) : (
+              t.rich('problemsTitle', {
+                gold: (chunks: React.ReactNode) => <>{chunks}</>,
+              })
+            )}
           </h2>
         </motion.div>
 
@@ -201,8 +226,12 @@ export default function ProblemsSection() {
                      bg-gradient-to-br from-green/[0.06] to-green/[0.02]
                      border border-green/[0.12]"
         >
-          <p className="text-xl font-display text-text-primary">{t('calloutTitle')}</p>
-          <p className="mt-2 text-sm text-text-muted">{t('calloutText')}</p>
+          <p className="text-xl font-display text-text-primary">
+            {d1Content?.calloutTitle || t('calloutTitle')}
+          </p>
+          <p className="mt-2 text-sm text-text-muted">
+            {d1Content?.calloutText || t('calloutText')}
+          </p>
           <div className="mt-6">
             <Link
               href="/kontakty/"
@@ -219,7 +248,7 @@ export default function ProblemsSection() {
                                transition-transform duration-700 bg-gradient-to-r
                                from-transparent via-white/20 to-transparent" aria-hidden="true" />
               <span className="relative z-10 flex items-center gap-2">
-                {commonT('cta.booking')}
+                {d1Content?.cta || commonT('cta.booking')}
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
                      strokeLinejoin="round"

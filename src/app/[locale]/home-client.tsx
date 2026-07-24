@@ -3,6 +3,8 @@
 import { useTranslations } from 'next-intl'
 import dynamic from 'next/dynamic'
 import type { TestimonialPublic, FAQPublic, PageSectionPublic } from '@/lib/db/public'
+import { parseHomeZoneContent } from '@/lib/home/parse-d1'
+
 const ProblemsSection = dynamic(() => import('@/components/sections/ProblemsSection'), {
   loading: () => <div className="h-48 md:h-64" aria-hidden="true" />,
 })
@@ -42,24 +44,27 @@ export default function HomeClient({
   const t = useTranslations('home')
   useRegisterSchemas(schemas ?? [])
 
+  // Parse per-zone D1 content
+  const problemsD1 = parseHomeZoneContent('problems', d1Sections)
+  const methodD1 = parseHomeZoneContent('method', d1Sections)
+  const authorD1 = parseHomeZoneContent('author', d1Sections)
+  const ctaD1 = parseHomeZoneContent('cta', d1Sections)
+
   // Check if D1 has custom CTA section content
-  const ctaSection = d1Sections?.find((s) => s.key === 'cta' || s.type === 'CTA')
   let ctaTitle = t('ctaTitle')
   let ctaDesc = t('ctaDescription')
-  if (ctaSection?.contentJson) {
-    try {
-      const parsed = JSON.parse(ctaSection.contentJson)
-      if (parsed.title) ctaTitle = parsed.title
-      if (parsed.description) ctaDesc = parsed.description
-    } catch { /* fallback to messages */ }
+  let ctaBtn = t('ctaButton')
+  if (ctaD1) {
+    if (ctaD1.title) ctaTitle = ctaD1.title
+    if (ctaD1.description) ctaDesc = ctaD1.description
   }
 
   return (
     <>
-      <ProblemsSection />
-      <MethodSection />
+      <ProblemsSection d1Content={problemsD1} />
+      <MethodSection d1Content={methodD1} />
       <ServicesSection maxCards={9} />
-      <AuthorPreviewSection />
+      <AuthorPreviewSection d1Content={authorD1} />
       <TestimonialsSection d1Items={d1Testimonials} />
       <FAQSection d1Items={d1Faqs} />
       <AnimatedSection as="div" variant="fadeUp">
@@ -86,7 +91,7 @@ export default function HomeClient({
                                  transition-transform duration-700 bg-gradient-to-r
                                  from-transparent via-white/20 to-transparent" aria-hidden="true" />
                 <span className="relative z-10 flex items-center gap-2.5">
-                  {t('ctaButton')}
+                  {ctaD1?.button || ctaBtn}
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                        stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
                        strokeLinejoin="round"

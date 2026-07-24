@@ -72,16 +72,29 @@ function BackgroundDecorations() {
   )
 }
 
+/* ── D1 content type ── */
+interface MethodD1 {
+  heading?: string
+  subtitle?: string
+  items?: { title: string; description?: string; duration?: string }[]
+}
+
 /* ── Component ── */
 
-export default function MethodSection() {
+export default function MethodSection({ d1Content }: { d1Content?: MethodD1 }) {
   const t = useTranslations('method')
 
-  const steps = [
-    { num: '01', title: t('step1Title'), desc: t('step1Desc') },
-    { num: '02', title: t('step2Title'), desc: t('step2Desc') },
-    { num: '03', title: t('step3Title'), desc: t('step3Desc') },
-  ]
+  const steps = d1Content?.items && d1Content.items.length > 0
+    ? d1Content.items.slice(0, 3).map((item, i) => ({
+        num: String(i + 1).padStart(2, '0'),
+        title: item.title,
+        desc: item.description ?? '',
+      }))
+    : [
+        { num: '01', title: t('step1Title'), desc: t('step1Desc') },
+        { num: '02', title: t('step2Title'), desc: t('step2Desc') },
+        { num: '03', title: t('step3Title'), desc: t('step3Desc') },
+      ]
 
   return (
     <AnimatedSection as="section" variant="fadeUp" className="relative overflow-hidden" aria-label={t('ariaLabel')}>
@@ -97,9 +110,11 @@ export default function MethodSection() {
           className="text-center"
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-display text-gold-premium">
-            {t('heading')}
+            {d1Content?.heading || t('heading')}
           </h2>
-          <p className="mt-4 text-base text-text-secondary max-w-2xl mx-auto">{t('subtitle')}</p>
+          <p className="mt-4 text-base text-text-secondary max-w-2xl mx-auto">
+            {d1Content?.subtitle || t('subtitle')}
+          </p>
         </motion.div>
 
         {/* Steps grid */}
