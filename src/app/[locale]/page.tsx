@@ -6,8 +6,9 @@ import { aggregateRatingSchema } from '@/lib/schema'
 import type { Testimonial } from '@/types'
 import HomeClient from './home-client'
 import Hero from '@/components/sections/Hero'
-import { getPageByType, getTestimonials, getFAQs } from '@/lib/db/public'
+import { getPageByType, getSEOMeta, getTestimonials, getFAQs } from '@/lib/db/public'
 import { cookies } from 'next/headers'
+import { parseZoneContent, type HeroContent } from '@/lib/home/blueprint'
 export const revalidate = 3600
 
 /* ── Metadata ── */
@@ -20,14 +21,37 @@ export async function generateMetadata({
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'home' })
 
+  // Try D1 SEO meta first, fall back to messages
+  let title = t('metaTitle')
+  let description = t('metaDescription')
+  let keywords: string[] = []
+  try {
+    keywords = JSON.parse(t('metaKeywords'))
+  } catch { /* ignore */ }
+
+  try {
+    const d1Home = await getPageByType('HOME', locale)
+    if (d1Home) {
+      const seo = await getSEOMeta('page', d1Home.id, locale)
+      if (seo) {
+        if (seo.title) title = seo.title
+        if (seo.description) description = seo.description
+        if (seo.keywords) {
+          try { keywords = JSON.parse(seo.keywords) } catch { /* keep defaults */ }
+        }
+      }
+    }
+  } catch { /* D1 unavailable */ }
+
   return seoMetadata({
-    title: t('metaTitle'),
-    description: t('metaDescription'),
-    keywords: JSON.parse(t('metaKeywords')),
+    title,
+    description,
+    keywords,
     path: '',
     type: 'page',
     locale,
   })
+
 }
 
 /* ── WebPage JSON-LD ── */
@@ -81,6 +105,21 @@ export default async function HomePage({
     ])
   } catch { /* D1 unavailable — fallback to messages */ }
 
+  // Parse hero from section translations (canonical source)
+  const heroSection = d1Home?.sections.find((s) => s.key === 'hero')
+  let d1Hero: HeroContent = { title: '', subtitle: '', ctaPrimary: '', ctaSecondary: '', benefits: [] }
+  if (heroSection?.contentJson) {
+    d1Hero = parseZoneContent('hero', heroSection.contentJson)
+  }
+
+  // Fallback: use page_translations.title/excerpt if hero section is empty
+  if (!d1Hero.title && d1Home?.title) {
+    d1Hero.title = d1Home.title
+  }
+  if (!d1Hero.subtitle && d1Home?.excerpt) {
+    d1Hero.subtitle = d1Home.excerpt
+  }
+
   const testimonials = (messages?.testimonials?.items as Testimonial[]) ?? []
   const ratingSchema = testimonials.length > 0 || d1Testimonials.length > 0
     ? aggregateRatingSchema((d1Testimonials.length > 0 ? d1Testimonials : testimonials).map((t, i) => ({
@@ -95,7 +134,7 @@ export default async function HomePage({
 
   return (
     <>
-      <Hero t={t} commonT={commonT} d1Title={d1Home?.title} d1Subtitle={d1Home?.excerpt} />
+      <Hero t={t} commonT={commonT} d1={d1Hero} />
       <HomeClient
         locale={locale}
         schemas={pageSchemas}
