@@ -100,7 +100,7 @@ export function MetaZone({ pageStatus, seo }: MetaZoneProps) {
           <LocaleTabs active={locale} onChange={setLocale} />
         </div>
 
-        <form action={formAction} className="space-y-4">
+        <form key={locale} action={formAction} className="space-y-4">
           <input type="hidden" name="locale" value={locale} />
 
           <div>

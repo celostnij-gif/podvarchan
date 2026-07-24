@@ -46,7 +46,7 @@ export function AuthorZone({ data }: AuthorZoneProps) {
 
       <LocaleTabs active={locale} onChange={setLocale} />
 
-      <form action={formAction} className="space-y-4">
+      <form key={locale} action={formAction} className="space-y-4">
         <input type="hidden" name="locale" value={locale} />
 
         <div className="grid grid-cols-3 gap-3">

@@ -36,7 +36,7 @@ export function CtaZone({ data }: CtaZoneProps) {
 
       <LocaleTabs active={locale} onChange={setLocale} />
 
-      <form action={formAction} className="space-y-4">
+      <form key={locale} action={formAction} className="space-y-4">
         <input type="hidden" name="locale" value={locale} />
 
         <div>

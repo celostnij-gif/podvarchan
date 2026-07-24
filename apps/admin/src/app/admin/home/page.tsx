@@ -96,6 +96,7 @@ export default async function HomePage() {
       sections={sections}
       enabledMap={enabledMap}
       seo={{ ru: seoMap.ru, uk: seoMap.uk }}
+      blueprintMissing={sections.length === 0}
       counts={{
         faq: faqCount?.value ?? 0,
         testimonials: testimonialCount?.value ?? 0,

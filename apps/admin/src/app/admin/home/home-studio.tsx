@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useTransition } from 'react'
 import { ZoneNav, type NavKey } from './components/ZoneNav'
 import { SaveBanner } from './components/SaveBanner'
 import { BilingualChecklist } from './components/BilingualChecklist'
@@ -14,6 +14,7 @@ import { TestimonialsZone } from './zones/TestimonialsZone'
 import { FaqZone } from './zones/FaqZone'
 import { CtaZone } from './zones/CtaZone'
 import { HOME_ZONE_KEYS, parseZoneContent, type HomeZoneKey, type HeroContent } from '@/lib/home/blueprint'
+import { ensureHomeBlueprint } from '@/lib/actions/home'
 import type { PageSectionRecord, PageSectionTranslationRecord } from '@/app/admin/pages/types'
 
 interface HomeStudioProps {
@@ -27,6 +28,60 @@ interface HomeStudioProps {
     uk: { title: string | null; description: string | null; keywords: string | null } | null
   }
   counts: { faq: number; testimonials: number; featuredServices: number }
+  /** True when no blueprint sections exist in D1 yet */
+  blueprintMissing?: boolean
+}
+
+/** Inline blueprint seed banner — shown when D1 has no sections for HOME */
+function BlueprintMissingBanner() {
+  const [pending, startTransition] = useTransition()
+  const [done, setDone] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleSeed = () => {
+    startTransition(async () => {
+      try {
+        const res = await ensureHomeBlueprint()
+        if (res.created >= 0) setDone(true)
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Помилка')
+      }
+    })
+  }
+
+  if (done) {
+    return (
+      <div className="rounded-lg border border-green-700/40 bg-green-900/20 px-4 py-3 flex items-center gap-3">
+        <span className="text-green-400 text-sm font-medium">✓ Blueprint застосовано — перезавантажте сторінку, щоб побачити дані</span>
+        <button
+          onClick={() => window.location.reload()}
+          className="ml-auto text-xs px-3 py-1.5 rounded-md bg-green-800/40 text-green-300 border border-green-700/40 hover:bg-green-800/70 transition-colors"
+        >
+          Оновити сторінку
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="rounded-lg border border-amber-600/40 bg-amber-900/20 px-4 py-3 flex items-start gap-3">
+      <span className="text-amber-400 text-lg mt-0.5">⚠️</span>
+      <div className="flex-1">
+        <p className="text-sm font-semibold text-amber-300">Blueprint не застосовано — поля порожні</p>
+        <p className="text-xs text-amber-500/80 mt-0.5">
+          В D1 немає секцій для головної сторінки. Натисніть «Застосувати», щоб створити їх із типовим вмістом.
+        </p>
+        {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
+      </div>
+      <button
+        onClick={handleSeed}
+        disabled={pending}
+        className="shrink-0 px-4 py-1.5 rounded-md bg-amber-600/20 text-amber-300 border border-amber-600/40 text-sm font-medium hover:bg-amber-600/30 transition-colors disabled:opacity-50"
+      >
+        {pending ? 'Створення...' : 'Застосувати Blueprint'}
+      </button>
+    </div>
+  )
 }
 
 /** Parse a zone's content from section translations, per locale. */
@@ -43,7 +98,7 @@ function parseZone<K extends HomeZoneKey>(
   }
 }
 
-export function HomeStudio({ pageId, pageStatus, hero, sections, enabledMap, seo, counts }: HomeStudioProps) {
+export function HomeStudio({ pageId, pageStatus, hero, sections, enabledMap, seo, counts, blueprintMissing }: HomeStudioProps) {
   const [activeZone, setActiveZone] = useState<NavKey>('hero')
   const [enabledState, setEnabledState] = useState<Record<string, boolean>>(enabledMap)
 
@@ -66,6 +121,7 @@ export function HomeStudio({ pageId, pageStatus, hero, sections, enabledMap, seo
 
   return (
     <div className="space-y-6">
+      {blueprintMissing && <BlueprintMissingBanner />}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-zinc-100">Home Studio</h1>
