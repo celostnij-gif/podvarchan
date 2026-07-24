@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { ZoneNav, type NavKey } from './components/ZoneNav'
 import { SaveBanner } from './components/SaveBanner'
+import { BilingualChecklist } from './components/BilingualChecklist'
 import { MetaZone } from './zones/MetaZone'
 import { HeroZone } from './zones/HeroZone'
 import { ProblemsZone } from './zones/ProblemsZone'
@@ -44,11 +45,16 @@ function parseZone<K extends HomeZoneKey>(
 
 export function HomeStudio({ pageId, pageStatus, hero, sections, enabledMap, seo, counts }: HomeStudioProps) {
   const [activeZone, setActiveZone] = useState<NavKey>('hero')
+  const [enabledState, setEnabledState] = useState<Record<string, boolean>>(enabledMap)
 
   const enabled = {} as Record<HomeZoneKey, boolean>
   for (const key of HOME_ZONE_KEYS) {
-    enabled[key] = enabledMap[key] ?? true
+    enabled[key] = enabledState[key] ?? true
   }
+
+  const handleToggle = useCallback((zone: HomeZoneKey, newEnabled: boolean) => {
+    setEnabledState((prev) => ({ ...prev, [zone]: newEnabled }))
+  }, [])
 
   const problems = parseZone(sections, 'problems')
   const method = parseZone(sections, 'method')
@@ -78,8 +84,9 @@ export function HomeStudio({ pageId, pageStatus, hero, sections, enabledMap, seo
       <div className="flex gap-6">
         {/* Sidebar nav */}
         <aside className="w-56 shrink-0">
-          <div className="sticky top-24">
-            <ZoneNav activeZone={activeZone} onSelect={setActiveZone} enabled={enabled} />
+          <div className="sticky top-24 space-y-4">
+            <ZoneNav activeZone={activeZone} onSelect={setActiveZone} enabled={enabled} onToggle={handleToggle} />
+            <BilingualChecklist sections={sections} enabledMap={enabledState} hero={hero} />
           </div>
         </aside>
 
