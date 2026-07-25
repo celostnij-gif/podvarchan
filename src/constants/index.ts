@@ -115,6 +115,10 @@ export const SERVICE_ICONS: Record<string, string> = {
   'vnutrenneye-napryazheniye': 'zap',
   'navyazchivye-mysli': 'refresh-cw',
   'strakh-budushchego': 'sunset',
+  'psiholog-dlya-emigrantov': 'globe',
+  'psiholog-onlajn-germaniya': 'globe',
+  'psiholog-onlajn-avstriya': 'globe',
+  'psiholog-onlajn-polsha': 'globe',
 }
 
 export const AUTHOR = {
