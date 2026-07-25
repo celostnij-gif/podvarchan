@@ -27,6 +27,8 @@ interface ServiceData {
   benefitsJson?: string | null
   faqJson?: string | null
   icon?: string | null
+  /** Full page HTML content — rendered between hero and symptoms */
+  contentHtml?: string | null
 }
 
 interface Props {
@@ -592,6 +594,22 @@ function TrevogaAlsoReadSection({ service, locale }: { service: ServiceData; loc
   )
 }
 
+/* ── Content Section (full HTML from contentHtml) ── */
+
+function ContentSection({ service }: { service: ServiceData }) {
+  if (!service.contentHtml) return null
+  return (
+    <AnimatedSection as="section" variant="fadeUp">
+      <SectionContainer size="md">
+        <div
+          className="service-content prose prose-invert max-w-none"
+          dangerouslySetInnerHTML={{ __html: service.contentHtml }}
+        />
+      </SectionContainer>
+    </AnimatedSection>
+  )
+}
+
 /* ── Main Component ── */
 
 export function ClientServicePage({ service, schemas, locale, allServices: allServicesProp }: Props) {
@@ -604,6 +622,7 @@ export function ClientServicePage({ service, schemas, locale, allServices: allSe
   return (
     <>
       <HeroSection service={service} />
+      <ContentSection service={service} />
       <SymptomsSection service={service} />
       <MethodSection service={service} />
       <TrevogaHubBanner service={service} locale={locale} />

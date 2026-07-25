@@ -58,6 +58,7 @@ export interface ServicePublic {
   title: string
   shortTitle: string | null
   description: string | null
+  contentHtml: string | null
   heroTitle: string | null
   heroSubtitle: string | null
   symptomsJson: string | null
@@ -156,6 +157,7 @@ function mapServiceRow(r: {
     title: r.service_translations.title ?? '',
     shortTitle: r.service_translations.shortTitle,
     description: r.service_translations.description,
+    contentHtml: r.service_translations.contentHtml,
     heroTitle: r.service_translations.heroTitle,
     heroSubtitle: r.service_translations.heroSubtitle,
     symptomsJson: r.service_translations.symptomsJson,

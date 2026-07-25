@@ -96,6 +96,7 @@ export const STATIC_PAGES = [
 /* ── Service Icons ── */
 
 export const SERVICE_ICONS: Record<string, string> = {
+  /* RU slugs */
   'gipnoterapiya-onlayn': 'brain',
   'onlajn-konsultaciya-psyhologa': 'user-check',
   'psyholog-bioenergetyk': 'sparkles',
@@ -119,6 +120,29 @@ export const SERVICE_ICONS: Record<string, string> = {
   'psiholog-onlajn-germaniya': 'globe',
   'psiholog-onlajn-avstriya': 'globe',
   'psiholog-onlajn-polsha': 'globe',
+  /* UK slugs */
+  'hipnoterapiya-onlayn': 'brain',
+  'onlayn-konsultatsiya-psihologa': 'user-check',
+  'psiholog-bioenergetik': 'sparkles',
+  'trivoga-i-panichni-ataki': 'heart',
+  'robota-z-pidsvidomistyu': 'moon',
+  'emotsiyne-vigorannya': 'flame',
+  'nevpevnenist-i-strakh-provala': 'shield-off',
+  'psihosomatika': 'leaf',
+  'osobistisna-kriza': 'compass',
+  'tsifroviy-detoks-i-gadzhet-zalezhnist': 'smartphone',
+  'yak-pozbutisya-trivogi': 'feather',
+  'postiyna-trivoga-bez-prichini': 'cloud-fog',
+  'ranishnya-trivoga': 'sunrise',
+  'trivoga-pered-snom': 'moon',
+  'trivoga-pislya-stresu': 'waves',
+  'vnutrishnya-napruga': 'zap',
+  'navyazlyvi-dumky': 'refresh-cw',
+  'strakh-maybutnogo': 'sunset',
+  'psikholog-dlya-emigrantiv': 'globe',
+  'psikholog-onlajn-germaniya': 'globe',
+  'psikholog-onlajn-avstriya': 'globe',
+  'psikholog-onlajn-polsha': 'globe',
 }
 
 export const AUTHOR = {

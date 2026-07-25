@@ -4,7 +4,7 @@ import type { FC, SVGProps } from 'react'
 import {
   Brain, Heart, Moon, Lock, Flame, Shield, ShieldOff, Leaf, Compass,
   Smartphone, Feather, CloudSun, CloudFog, Sunrise, Waves, Zap,
-  RefreshCw, Sunset, UserCheck, Sparkles, House, FileText, User,
+  RefreshCw, Sunset, UserCheck, Sparkles, Globe, House, FileText, User,
   BookOpen, HelpCircle, DollarSign, Phone, Search, type LucideIcon,
 } from 'lucide-react'
 
@@ -31,6 +31,7 @@ const iconMap: Record<string, LucideIcon> = {
   sunset: Sunset,
   'user-check': UserCheck,
   sparkles: Sparkles,
+  globe: Globe,
   /* nav icons */
   house: House,
   'file-text': FileText,

@@ -21,6 +21,7 @@ export const serviceTranslations = sqliteTable('service_translations', {
   title: text('title'),
   shortTitle: text('short_title'),
   description: text('description'),
+  contentHtml: text('content_html'),
   heroTitle: text('hero_title'),
   heroSubtitle: text('hero_subtitle'),
   symptomsJson: text('symptoms_json'),

@@ -111,6 +111,7 @@ type ServicePageData =
       benefitsJson: string | null
       faqJson: string | null
       icon: string | null
+      contentHtml: string | null
       allServices: Array<{
         slug: string
         title: string
@@ -163,6 +164,7 @@ async function loadService(slug: string, locale: string): Promise<ServicePageDat
         benefitsJson: svc.benefitsJson,
         faqJson: svc.faqJson,
         icon: svc.icon,
+        contentHtml: svc.contentHtml,
         allServices,
       }
     }

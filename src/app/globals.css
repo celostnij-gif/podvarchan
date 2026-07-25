@@ -838,4 +838,27 @@
     animation: scroll-indicator 2.5s ease-in-out infinite;
   }
 
+  /* ── Service detail page content ── */
+  .service-content h2 {
+    @apply text-2xl font-display text-text-primary mt-10 mb-4;
+  }
+  .service-content h3 {
+    @apply text-xl font-display text-green mt-8 mb-3;
+  }
+  .service-content p {
+    @apply text-base text-text-secondary leading-relaxed mb-4;
+  }
+  .service-content a {
+    @apply text-gold underline hover:text-gold-light;
+  }
+  .service-content ul {
+    @apply list-disc pl-6 mb-4 text-text-secondary;
+  }
+  .service-content li {
+    @apply mb-2;
+  }
+  .service-content strong {
+    @apply text-text-primary font-semibold;
+  }
+
 }

@@ -290,6 +290,7 @@ function LocaleTab({
   onTitleChange: (v: string) => void
 }) {
   const [descriptionHtml, setDescriptionHtml] = useState(tr(locale, 'description'))
+  const [contentHtml, setContentHtml] = useState(tr(locale, 'contentHtml'))
 
   // Structured list states
   const [symptomsJson, setSymptomsJson] = useState(tr(locale, 'symptomsJson'))
@@ -379,6 +380,12 @@ function LocaleTab({
           <input type="hidden" name={`${locale}_description`} value={descriptionHtml} />
           <TipTapEditor value={descriptionHtml} onChange={(html) => setDescriptionHtml(html)} placeholder="Детальний опис послуги..." />
         </div>
+        <div className="sm:col-span-2">
+          <label className="block text-sm font-medium text-zinc-300 mb-1">Контент сторінки (HTML)</label>
+          <input type="hidden" name={`${locale}_contentHtml`} value={contentHtml} />
+          <TipTapEditor value={contentHtml} onChange={(html) => setContentHtml(html)} placeholder="Повний контент сторінки (HTML)..." />
+        </div>
+
 
         {/* Symptoms — visual list */}
         <div className="sm:col-span-2">
