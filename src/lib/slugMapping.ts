@@ -24,6 +24,11 @@ export const SERVICE_SLUG_UK: Record<string, string> = {
   'navyazchivye-mysli': 'navyazlyvi-dumky',
   'strakh-budushchego': 'strakh-maybutnogo',
   'tsifrovoy-detoks-i-gadzhet-zavisimost': 'tsifroviy-detoks-i-gadzhet-zalezhnist',
+  /* ── Emigration services ── */
+  'psiholog-onlajn-avstriya': 'psikholog-onlajn-avstriya',
+  'psiholog-dlya-emigrantov': 'psikholog-dlya-emigrantiv',
+  'psiholog-onlajn-germaniya': 'psikholog-onlajn-germaniya',
+  'psiholog-onlajn-polsha': 'psikholog-onlajn-polsha',
 }
 
 /* ── Blog Posts ── */

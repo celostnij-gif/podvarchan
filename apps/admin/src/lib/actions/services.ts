@@ -131,10 +131,11 @@ export async function createService(formData: FormData) {
     await db.insert(serviceTranslations).values({
       id: crypto.randomUUID(), serviceId: serviceId, locale: t.locale,
       slug: t.slug, title: t.title || null, shortTitle: t.shortTitle || null,
-      description: t.description || null, heroTitle: t.heroTitle || null,
-      heroSubtitle: t.heroSubtitle || null, symptomsJson: t.symptomsJson || null,
-      processJson: t.processJson || null, benefitsJson: t.benefitsJson || null,
-      faqJson: t.faqJson || null, ctaText: t.ctaText || null,
+      description: t.description || null, contentHtml: t.contentHtml || null,
+      heroTitle: t.heroTitle || null, heroSubtitle: t.heroSubtitle || null,
+      symptomsJson: t.symptomsJson || null, processJson: t.processJson || null,
+      benefitsJson: t.benefitsJson || null, faqJson: t.faqJson || null,
+      ctaText: t.ctaText || null,
     })
   }
 
@@ -237,19 +238,21 @@ export async function updateService(id: string, formData: FormData) {
     if (existingTr) {
       await db.update(serviceTranslations).set({
         slug: t.slug, title: t.title || null, shortTitle: t.shortTitle || null,
-        description: t.description || null, heroTitle: t.heroTitle || null,
-        heroSubtitle: t.heroSubtitle || null, symptomsJson: t.symptomsJson || null,
-        processJson: t.processJson || null, benefitsJson: t.benefitsJson || null,
-        faqJson: t.faqJson || null, ctaText: t.ctaText || null,
+        description: t.description || null, contentHtml: t.contentHtml || null,
+        heroTitle: t.heroTitle || null, heroSubtitle: t.heroSubtitle || null,
+        symptomsJson: t.symptomsJson || null, processJson: t.processJson || null,
+        benefitsJson: t.benefitsJson || null, faqJson: t.faqJson || null,
+        ctaText: t.ctaText || null,
       }).where(and(eq(serviceTranslations.serviceId, id), eq(serviceTranslations.locale, t.locale)))
     } else {
       await db.insert(serviceTranslations).values({
         id: crypto.randomUUID(), serviceId: id, locale: t.locale, slug: t.slug,
         title: t.title || null, shortTitle: t.shortTitle || null,
-        description: t.description || null, heroTitle: t.heroTitle || null,
-        heroSubtitle: t.heroSubtitle || null, symptomsJson: t.symptomsJson || null,
-        processJson: t.processJson || null, benefitsJson: t.benefitsJson || null,
-        faqJson: t.faqJson || null, ctaText: t.ctaText || null,
+        description: t.description || null, contentHtml: t.contentHtml || null,
+        heroTitle: t.heroTitle || null, heroSubtitle: t.heroSubtitle || null,
+        symptomsJson: t.symptomsJson || null, processJson: t.processJson || null,
+        benefitsJson: t.benefitsJson || null, faqJson: t.faqJson || null,
+        ctaText: t.ctaText || null,
       })
     }
   }
