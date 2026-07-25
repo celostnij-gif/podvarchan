@@ -104,7 +104,7 @@ export default function AnimatedSection({
   return (
     <Tag
       ref={ref as React.Ref<HTMLDivElement>}
-      className={`${className} ${isVisible ? animationClass : 'opacity-0'}`}
+      className={`${className} ${isVisible ? animationClass : ''}`}
       style={{
         ...(delay > 0 && isVisible ? { animationDelay: `${delay}s` } : {}),
         '--stagger-delay': `${staggerDelay}s`,
