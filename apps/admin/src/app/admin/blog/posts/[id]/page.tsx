@@ -19,7 +19,7 @@ interface Props {
  * - If it's a path (starts with /), prepend the public site URL (the admin worker
  *   doesn't have static blog images in its assets)
  * - If it's a UUID, resolve from media_assets.publicUrl
- * - If null/empty, derive from the RU slug: /images/blog/{slug}.webp
+ * - If null/empty, derive from the RU slug: /api/media/blog/{slug}.webp
  */
 async function resolveCoverImageUrl(
   coverImageId: string | null,
@@ -50,7 +50,7 @@ async function resolveCoverImageUrl(
 
   // Fallback: derive image path from RU slug (matches src/content/blog/ pattern)
   if (slug) {
-    return `${PUBLIC_SITE_URL}/images/blog/${slug}.webp`
+    return `${PUBLIC_SITE_URL}/api/media/blog/${slug}.webp`
   }
 
   return null

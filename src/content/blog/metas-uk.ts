@@ -15,7 +15,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-05-28",
     author: "В'ячеслав Подварчан",
     readingTime: 12,
-    image: "/images/blog/chto-takoe-gipnoterapiya-uk.webp",
+    image: "/api/media/blog/chto-takoe-gipnoterapiya-uk.webp",
     imageAlt: "Гіпнотерапія — робота з підсвідомістю через транс, науково обґрунтований метод психотерапії",
   },
   {
@@ -30,7 +30,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-04-28",
     author: "В'ячеслав Подварчан",
     readingTime: 10,
-    image: "/images/blog/kak-rabotaet-gipnoz-uk.webp",
+    image: "/api/media/blog/kak-rabotaet-gipnoz-uk.webp",
     imageAlt: "Як працює гіпноз — наукове пояснення механізмів трансу та змін у мозку",
   },
   {
@@ -45,7 +45,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-03-28",
     author: "В'ячеслав Подварчан",
     readingTime: 11,
-    image: "/images/blog/trevoga-prichiny-i-simptomy-uk.webp",
+    image: "/api/media/blog/trevoga-prichiny-i-simptomy-uk.webp",
     imageAlt: "Тривога: причини та симптоми — як відрізнити норму від тривожного розладу",
   },
   {
@@ -60,7 +60,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-04-02",
     author: "В'ячеслав Подварчан",
     readingTime: 9,
-    image: "/images/blog/kak-spravitsya-s-trevogoy-uk.webp",
+    image: "/api/media/blog/kak-spravitsya-s-trevogoy-uk.webp",
     imageAlt: "Як впоратися з тривогою — 5 дієвих методів від гіпнотерапевта",
   },
   {
@@ -75,7 +75,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-05-09",
     author: "В'ячеслав Подварчан",
     readingTime: 10,
-    image: "/images/blog/panicheskiye-ataki-chto-delat-uk.webp",
+    image: "/api/media/blog/panicheskiye-ataki-chto-delat-uk.webp",
     imageAlt: "Панічні атаки: що робити — перша допомога та лікування через гіпнотерапію",
   },
   {
@@ -90,7 +90,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-05-19",
     author: "В'ячеслав Подварчан",
     readingTime: 10,
-    image: "/images/blog/chto-takoe-samosabotazh-uk.webp",
+    image: "/api/media/blog/chto-takoe-samosabotazh-uk.webp",
     imageAlt: "Самосаботаж: що це таке і як проявляється в житті — причини та методи роботи",
   },
   {
@@ -105,7 +105,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-05-22",
     author: "В'ячеслав Подварчан",
     readingTime: 10,
-    image: "/images/blog/samosabotazh-prichiny-uk.webp",
+    image: "/api/media/blog/samosabotazh-prichiny-uk.webp",
     imageAlt: "Причини самосаботажу: психологія підсвідомості — страх успіху, внутрішні блоки і конфлікти",
   },
   {
@@ -120,7 +120,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-05-13",
     author: "В'ячеслав Подварчан",
     readingTime: 10,
-    image: "/images/blog/emotsionalnoye-vygoraniye-simptomy-uk.webp",
+    image: "/api/media/blog/emotsionalnoye-vygoraniye-simptomy-uk.webp",
     imageAlt: "Емоційне вигорання: ознаки, причини та методи відновлення через гіпнотерапію",
   },
   {
@@ -135,7 +135,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-05-30",
     author: "В'ячеслав Подварчан",
     readingTime: 10,
-    image: "/images/blog/vnutrenniy-kritik-uk.webp",
+    image: "/api/media/blog/vnutrenniy-kritik-uk.webp",
     imageAlt: "Внутрішній критик: психологія, вплив на самооцінку і як його приручити за допомогою терапії",
   },
   {
@@ -150,7 +150,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-01-30",
     author: "В'ячеслав Подварчан",
     readingTime: 10,
-    image: "/images/blog/podavlennyye-emotsii-uk.webp",
+    image: "/api/media/blog/podavlennyye-emotsii-uk.webp",
     imageAlt: "Придушені емоції: наслідки для психіки і тіла — психосоматика і гіпнотерапія",
   },
   {
@@ -165,7 +165,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-05-25",
     author: "В'ячеслав Подварчан",
     readingTime: 10,
-    image: "/images/blog/gipnoterapiya-onlayn-kak-prokhodit-uk.webp",
+    image: "/api/media/blog/gipnoterapiya-onlayn-kak-prokhodit-uk.webp",
     imageAlt: "Онлайн-гіпноз: як проходить сесія гіпнотерапії через відеозв'язок — безпечно та ефективно",
   },
   {
@@ -180,7 +180,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-04-01",
     author: "В'ячеслав Подварчан",
     readingTime: 10,
-    image: "/images/blog/priznaki-gadzhet-zavisimosti-uk.webp",
+    image: "/api/media/blog/priznaki-gadzhet-zavisimosti-uk.webp",
     imageAlt: "Гаджетозалежність: 10 ознак того, що телефон керує вашим життям",
   },
   {
@@ -195,7 +195,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-06-01",
     author: "В'ячеслав Подварчан",
     readingTime: 12,
-    image: "/images/blog/tsifrovoy-detoks-poshagovoe-rukovodstvo-uk.webp",
+    image: "/api/media/blog/tsifrovoy-detoks-poshagovoe-rukovodstvo-uk.webp",
     imageAlt: "Цифровий детокс: покрокове керівництво з очищення від гаджетів і відновлення контролю",
   },
   {
@@ -210,7 +210,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-06-07",
     author: "В'ячеслав Подварчан",
     readingTime: 14,
-    image: "/images/blog/vliyanie-pesen-na-podsoznanie-uk.webp",
+    image: "/api/media/blog/vliyanie-pesen-na-podsoznanie-uk.webp",
     imageAlt: "Вплив пісень на підсвідомість — як музика змінює нейронні зв'язки, емоції та глибинні установки",
   },
   {
@@ -225,7 +225,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-02-01",
     author: "В'ячеслав Подварчан",
     readingTime: 11,
-    image: "/images/blog/detskaya-gadzhet-zavisimost-uk.webp",
+    image: "/api/media/blog/detskaya-gadzhet-zavisimost-uk.webp",
     imageAlt: "Дитина постійно в телефоні: поради психолога батькам про гаджетозалежність",
   },
   {
@@ -240,7 +240,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-04-18",
     author: "В'ячеслав Подварчан",
     readingTime: 12,
-    image: "/images/blog/net-sil-chto-delat-uk.webp",
+    image: "/api/media/blog/net-sil-chto-delat-uk.webp",
     imageAlt: "Що робити, якщо немає сил та енергії — психологічні причини вигорання, апатії та хронічної втоми",
   },
   {
@@ -255,7 +255,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-06-03",
     author: "В'ячеслав Подварчан",
     readingTime: 13,
-    image: "/images/blog/postoyannaya-ustalost-prichiny-uk.webp",
+    image: "/api/media/blog/postoyannaya-ustalost-prichiny-uk.webp",
     imageAlt: "Постійна втома — підсвідомі причини хронічного занепаду сил і як гіпнотерапія допомагає відновити енергію",
   },
   {
@@ -270,7 +270,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-03-09",
     author: "В'ячеслав Подварчан",
     readingTime: 10,
-    image: "/images/blog/vliyanie-pesen-na-kachestvo-zhizni-uk.webp",
+    image: "/api/media/blog/vliyanie-pesen-na-kachestvo-zhizni-uk.webp",
     imageAlt: "Вплив пісень на якість життя людини — як музичні треки та тексти програмують підсвідомість",
   },
   {
@@ -285,7 +285,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-05-10",
     author: "В'ячеслав Подварчан",
     readingTime: 10,
-    image: "/images/blog/eksistentsialnyy-krizis-uk.webp",
+    image: "/api/media/blog/eksistentsialnyy-krizis-uk.webp",
     imageAlt: "Екзистенційна криза: втрата сенсу життя і як знайти внутрішню опору",
   },
   {
@@ -300,7 +300,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-06-20",
     author: "В'ячеслав Подварчан",
     readingTime: 12,
-    image: "/images/blog/psikhosomatika-chto-eto-uk.webp",
+    image: "/api/media/blog/psikhosomatika-chto-eto-uk.webp",
     imageAlt: "Психосоматика — зв'язок психологічних проблем та фізичного здоров'я, як емоції стають хворобами",
   },
   {
@@ -315,7 +315,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-06-20",
     author: "В'ячеслав Подварчан",
     readingTime: 10,
-    image: "/images/blog/neyverennost-kak-preodolet-uk.webp",
+    image: "/api/media/blog/neyverennost-kak-preodolet-uk.webp",
     imageAlt: "Невпевненість у собі — як подолати сумніви та знайти впевненість через роботу з підсвідомістю",
   },
   {
@@ -330,7 +330,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-06-21",
     author: "В'ячеслав Подварчан",
     readingTime: 14,
-    image: "/images/blog/pochemu-trevoga-ne-prokhodit-godami-uk.webp",
+    image: "/api/media/blog/pochemu-trevoga-ne-prokhodit-godami-uk.webp",
     imageAlt: "Чому тривога не минає роками — глибинні причини хронічної тривоги",
   },
   {
@@ -345,7 +345,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-06-21",
     author: "В'ячеслав Подварчан",
     readingTime: 10,
-    image: "/images/blog/kom-v-gorle-pri-trevoge-uk.webp",
+    image: "/api/media/blog/kom-v-gorle-pri-trevoge-uk.webp",
     imageAlt: "Грудка в горлі при тривозі — психосоматичний симптом тривожного розладу",
   },
   {
@@ -360,7 +360,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-06-21",
     author: "В'ячеслав Подварчан",
     readingTime: 12,
-    image: "/images/blog/pochemu-voznikaet-panika-nochyu-uk.webp",
+    image: "/api/media/blog/pochemu-voznikaet-panika-nochyu-uk.webp",
     imageAlt: "Чому виникає паніка вночі — нічні панічні атаки та їхні причини",
   },
   {
@@ -375,7 +375,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-06-21",
     author: "В'ячеслав Подварчан",
     readingTime: 13,
-    image: "/images/blog/strakh-smerti-bez-prichiny-uk.webp",
+    image: "/api/media/blog/strakh-smerti-bez-prichiny-uk.webp",
     imageAlt: "Страх смерті без причини — екзистенційний страх як симптом тривожного розладу",
   },
   {
@@ -390,7 +390,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-06-21",
     author: "В'ячеслав Подварчан",
     readingTime: 12,
-    image: "/images/blog/postoyannoe-vnutrennee-napryazhenie-uk.webp",
+    image: "/api/media/blog/postoyannoe-vnutrennee-napryazhenie-uk.webp",
     imageAlt: "Постійна внутрішня напруга — хронічний м'язовий спазм на фоні тривоги",
   },
   {
@@ -405,7 +405,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-06-21",
     author: "В'ячеслав Подварчан",
     readingTime: 11,
-    image: "/images/blog/kak-perestat-boyatsya-budushchego-uk.webp",
+    image: "/api/media/blog/kak-perestat-boyatsya-budushchego-uk.webp",
     imageAlt: "Як перестати боятися майбутнього — страх невизначеності та тривога про завтрашній день",
   },
   {
@@ -420,7 +420,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-06-21",
     author: "В'ячеслав Подварчан",
     readingTime: 11,
-    image: "/images/blog/psikhosomatika-golovokruzheniya-uk.webp",
+    image: "/api/media/blog/psikhosomatika-golovokruzheniya-uk.webp",
     imageAlt: "Психосоматика запаморочення — як тривога викликає відчуття дурноти та хиткість",
   },
   {
@@ -435,7 +435,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-06-21",
     author: "В'ячеслав Подварчан",
     readingTime: 12,
-    image: "/images/blog/psikhosomatika-boli-v-shee-uk.webp",
+    image: "/api/media/blog/psikhosomatika-boli-v-shee-uk.webp",
     imageAlt: "Психосоматика болю в шиї — зв'язок хронічного напруження та тривоги",
   },
   {
@@ -450,7 +450,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-06-21",
     author: "В'ячеслав Подварчан",
     readingTime: 13,
-    image: "/images/blog/psikhosomatika-davleniya-uk.webp",
+    image: "/api/media/blog/psikhosomatika-davleniya-uk.webp",
     imageAlt: "Психосоматика тиску — як тривога і стрес впливають на артеріальний тиск",
   },
   {
@@ -465,7 +465,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-06-29",
     author: "В'ячеслав Подварчан",
     readingTime: 18,
-    image: "/images/blog/ptsr-u-veteranov-simptomy-i-pomoshch-uk.webp",
+    image: "/api/media/blog/ptsr-u-veteranov-simptomy-i-pomoshch-uk.webp",
     imageAlt: "ПТСР у ветеранів: симптоми і як упоратися після війни — флешбеки, безсоння, тривога, агресія",
   },
   {
@@ -480,7 +480,7 @@ export const BLOG_POST_METAS_UK: Omit<BlogPost, 'body'>[] = [
     dateModified: "2026-07-14",
     author: "В'ячеслав Подварчан",
     readingTime: 8,
-    image: "/images/blog/trevoga-polnyy-putevoditel-uk.webp",
+    image: "/api/media/blog/trevoga-polnyy-putevoditel-uk.webp",
     imageAlt: "Тривога: повний путівник — види, причини, симптоми та методи роботи",
   },
 ]

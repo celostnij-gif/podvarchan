@@ -19,7 +19,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-05-28',
     author: 'Вячеслав Подварчан',
     readingTime: 12,
-    image: '/images/blog/chto-takoe-gipnoterapiya.webp',
+    image: '/api/media/blog/chto-takoe-gipnoterapiya.webp',
     imageAlt: 'Гипнотерапия — работа с подсознанием через транс, научно обоснованный метод психотерапии',
     body: `
 <p>Гипнотерапия — это метод психотерапии, который использует гипнотическое состояние (транс) для доступа к подсознанию и работы с глубинными причинами психологических проблем. Вопреки распространённым мифам, это не магия и не контроль сознания — это научно обоснованный подход с доказанной эффективностью.</p>
@@ -129,7 +129,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-04-28',
     author: 'Вячеслав Подварчан',
     readingTime: 10,
-    image: '/images/blog/kak-rabotaet-gipnoz.webp',
+    image: '/api/media/blog/kak-rabotaet-gipnoz.webp',
     imageAlt: 'Как работает гипноз — научное объяснение механизмов транса и изменений в мозге',
     body: `
 <p>Гипноз окружён мифами: одни считают его магией, другие — шарлатанством, третьи — опасным инструментом контроля сознания. Реальность, как всегда, посередине. Гипноз — это естественное состояние нервной системы, которое имеет чёткое научное объяснение.</p>
@@ -200,7 +200,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-03-28',
     author: 'Вячеслав Подварчан',
     readingTime: 11,
-    image: '/images/blog/trevoga-prichiny-i-simptomy.webp',
+    image: '/api/media/blog/trevoga-prichiny-i-simptomy.webp',
     imageAlt: 'Тревога: причины и симптомы — как отличить норму от тревожного расстройства',
     body: `
 <p>Тревога — нормальная реакция психики на угрозу. Проблема начинается тогда, когда тревога становится хронической: вы просыпаетесь уже с беспокойством, прокручиваете в голове страхи, а тело находится в постоянном напряжении. Такое состояние не просто мешает жить — оно разрушает здоровье.</p>
@@ -296,7 +296,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-04-02',
     author: 'Вячеслав Подварчан',
     readingTime: 9,
-    image: '/images/blog/kak-spravitsya-s-trevogoy.webp',
+    image: '/api/media/blog/kak-spravitsya-s-trevogoy.webp',
     imageAlt: 'Как справиться с тревогой — 5 действенных методов от гипнотерапевта',
     body: `
 <p>Тревога — один из самых частых запросов, с которыми ко мне приходят клиенты. "Головой понимаю, что повода нет, а тело всё равно реагирует страхом". Знакомо? Хорошая новость: с тревогой можно работать, и методы есть разные — от быстрых техник самопомощи до глубинной проработки причин.</p>
@@ -363,7 +363,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-05-09',
     author: 'Вячеслав Подварчан',
     readingTime: 10,
-    image: '/images/blog/panicheskiye-ataki-chto-delat.webp',
+    image: '/api/media/blog/panicheskiye-ataki-chto-delat.webp',
     imageAlt: 'Панические атаки: что делать — первая помощь и поддержка через гипнотерапию',
     body: `
 <p>Паническая атака — это внезапный приступ интенсивного страха, который сопровождается физическими симптомами: сердце колотится, не хватает воздуха, тело трясётся, кажется, что вы теряете контроль или умираете. Это одно из самых пугающих состояний, которые может испытывать человек.</p>
@@ -442,7 +442,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-05-19',
     author: 'Вячеслав Подварчан',
     readingTime: 10,
-    image: '/images/blog/chto-takoe-samosabotazh.webp',
+    image: '/api/media/blog/chto-takoe-samosabotazh.webp',
     imageAlt: 'Самосаботаж: что это такое и как проявляется в жизни — причины и методы работы',
     body: `
 
@@ -575,7 +575,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-05-22',
     author: 'Вячеслав Подварчан',
     readingTime: 10,
-    image: '/images/blog/samosabotazh-prichiny.webp',
+    image: '/api/media/blog/samosabotazh-prichiny.webp',
     imageAlt: 'Причины самосаботажа: психология подсознания — страх успеха, внутренние блоки и конфликты',
     body: `
 
@@ -695,7 +695,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-05-13',
     author: 'Вячеслав Подварчан',
     readingTime: 10,
-    image: '/images/blog/emotsionalnoye-vygoraniye-simptomy.webp',
+    image: '/api/media/blog/emotsionalnoye-vygoraniye-simptomy.webp',
     imageAlt: 'Эмоциональное выгорание: признаки, причины и методы восстановления через гипнотерапию',
     body: `
 
@@ -864,7 +864,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-05-30',
     author: 'Вячеслав Подварчан',
     readingTime: 10,
-    image: '/images/blog/vnutrenniy-kritik.webp',
+    image: '/api/media/blog/vnutrenniy-kritik.webp',
     imageAlt: 'Внутренний критик: психология, влияние на самооценку и как его приручить с помощью терапии',
     body: `
 
@@ -980,7 +980,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-01-30',
     author: 'Вячеслав Подварчан',
     readingTime: 10,
-    image: '/images/blog/podavlennyye-emotsii.webp',
+    image: '/api/media/blog/podavlennyye-emotsii.webp',
     imageAlt: 'Подавленные эмоции: последствия для психики и тела — психосоматика и гипнотерапия',
     body: `
 
@@ -1093,7 +1093,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-05-10',
     author: 'Вячеслав Подварчан',
     readingTime: 10,
-    image: '/images/blog/eksistentsialnyy-krizis.webp',
+    image: '/api/media/blog/eksistentsialnyy-krizis.webp',
     imageAlt: 'Экзистенциальный кризис: потеря смысла жизни и как найти внутреннюю опору',
     body: `
 
@@ -1208,7 +1208,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-05-25',
     author: 'Вячеслав Подварчан',
     readingTime: 10,
-    image: '/images/blog/gipnoterapiya-onlayn-kak-prokhodit.webp',
+    image: '/api/media/blog/gipnoterapiya-onlayn-kak-prokhodit.webp',
     imageAlt: 'Онлайн-гипноз: как проходит сессия гипнотерапии через видеосвязь — безопасно и эффективно',
     body: `
 
@@ -1326,7 +1326,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-04-01',
     author: 'Вячеслав Подварчан',
     readingTime: 10,
-    image: '/images/blog/priznaki-gadzhet-zavisimosti.webp',
+    image: '/api/media/blog/priznaki-gadzhet-zavisimosti.webp',
     imageAlt: 'Гаджетозависимость: 10 признаков того, что телефон управляет вашей жизнью',
     body: `
 <p>Вы берёте телефон в руки, чтобы проверить одно сообщение, — и обнаруживаете себя через час в ленте TikTok. Вы кладёте телефон экраном вниз, но через минуту переворачиваете, чтобы проверить уведомления. Вы ложитесь спать в 11 вечера, но «ещё пять минут» превращаются в час пролистывания рилсов.</p>
@@ -1392,7 +1392,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-06-01',
     author: 'Вячеслав Подварчан',
     readingTime: 12,
-    image: '/images/blog/tsifrovoy-detoks-poshagovoe-rukovodstvo.webp',
+    image: '/api/media/blog/tsifrovoy-detoks-poshagovoe-rukovodstvo.webp',
     imageAlt: 'Цифровой детокс: пошаговое руководство по очищению от гаджетов и восстановлению контроля',
     body: `
 <p>Среднестатистический человек проводит в телефоне 5–7 часов в день. Это больше, чем мы тратим на сон, еду или встречи с близкими. Причём эти часы — не про работу и не про полезное общение. Это бесконечный скроллинг, лайки, шортсы и рилсы, которые оставляют после себя пустоту и чувство потерянного времени.</p>
@@ -1496,7 +1496,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-06-07',
     author: 'Вячеслав Подварчан',
     readingTime: 14,
-    image: '/images/blog/vliyanie-pesen-na-podsoznanie.webp',
+    image: '/api/media/blog/vliyanie-pesen-na-podsoznanie.webp',
     imageAlt: 'Влияние песен на подсознание — как музыка меняет нейронные связи, эмоции и глубинные установки',
     body: `
 <p>Вы когда-нибудь замечали, как одна песня может мгновенно изменить ваше состояние? Ещё минуту назад вы были спокойны — а теперь по спине бегут мурашки, на глазах слёзы, а в груди разливается тепло. Или наоборот: знакомый трек поднимает настроение, наполняет энергией, возвращает в прошлое.</p>
@@ -1637,7 +1637,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-02-01',
     author: 'Вячеслав Подварчан',
     readingTime: 11,
-    image: '/images/blog/detskaya-gadzhet-zavisimost.webp',
+    image: '/api/media/blog/detskaya-gadzhet-zavisimost.webp',
     imageAlt: 'Ребёнок постоянно в телефоне: советы психолога родителям о гаджетозависимости',
     body: `
 <p>«Сын просыпается — сразу берёт телефон. Ест — с телефоном. Делает уроки — телефон лежит рядом. Засыпает — с телефоном. Мы пробовали забирать, ругаться, наказывать — ничего не работает. Он становится агрессивным, если остаётся без гаджета.»</p>
@@ -1738,7 +1738,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-04-18',
     author: 'Вячеслав Подварчан',
     readingTime: 12,
-    image: '/images/blog/net-sil-chto-delat.webp',
+    image: '/api/media/blog/net-sil-chto-delat.webp',
     imageAlt: 'Что делать, если нет сил и энергии — психологические причины выгорания, апатии и хронической усталости',
     body: `
 <p>Знакома ли вам ситуация: вы спите по 8–10 часов, пьёте витамины, сдали все анализы, и врачи говорят, что вы здоровы, но утром вы всё равно просыпаетесь уставшим? Состояние, когда физически «нет сил делать вообще ничего», а любая мелкая задача кажется непреодолимым препятствием, стало настоящей эпидемией современного мира.</p>
@@ -1818,7 +1818,7 @@ export const BLOG_POSTS: BlogPost[] = [
   dateModified: '2026-06-03',
   author: 'Вячеслав Подварчан',
   readingTime: 13,
-  image: '/images/blog/postoyannaya-ustalost-prichiny.webp',
+  image: '/api/media/blog/postoyannaya-ustalost-prichiny.webp',
   imageAlt: 'Постоянная усталость — подсознательные причины хронического упадка сил и как гипнотерапия помогает восстановить энергию',
   body: `
 <p>Вы высыпаетесь, берёте выходной, уезжаете в отпуск — а усталость никуда не уходит. Она как фон: тупая, давящая, лишающая радости и сил. Утром вы уже устали. Вечером — тем более. Стандартные советы «больше спать» и «меньше нервничать» не работают.</p>
@@ -1955,7 +1955,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-03-09',
     author: 'Вячеслав Подварчан',
     readingTime: 10,
-    image: '/images/blog/vliyanie-pesen-na-kachestvo-zhizni.webp',
+    image: '/api/media/blog/vliyanie-pesen-na-kachestvo-zhizni.webp',
     imageAlt: 'Влияние песен на качество жизни человека — как музыкальные треки и тексты программируют подсознание',
     body: `
 <p>Музыка сопровождает человека на протяжении всей истории и присутствует в нашей жизни ежедневно. Но мало кто задумывается, что песни способны не только служить фоном или поднимать настроение, но и напрямую влиять на уровень стресса, самооценку, мотивацию, отношения и даже физическое здоровье.</p>
@@ -2041,7 +2041,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-06-20',
     author: 'Вячеслав Подварчан',
     readingTime: 12,
-    image: '/images/blog/psikhosomatika-chto-eto.webp',
+    image: '/api/media/blog/psikhosomatika-chto-eto.webp',
     imageAlt: 'Психосоматика — связь психологических проблем и физического здоровья, как эмоции становятся болезнями',
     body: `
 <p>Замечали ли вы, что перед важным событием вдруг начинает болеть горло? Или что после тяжёлого разговора возникает тяжесть в груди, а в период хронического стресса обостряются все хронические заболевания? Это не совпадение — это психосоматика. Научное направление на стыке психологии и медицины, которое изучает, как эмоции, мысли и подсознательные установки влияют на физическое здоровье человека.</p>
@@ -2104,7 +2104,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-06-20',
     author: 'Вячеслав Подварчан',
     readingTime: 10,
-    image: '/images/blog/neyverennost-kak-preodolet.webp',
+    image: '/api/media/blog/neyverennost-kak-preodolet.webp',
     imageAlt: 'Неуверенность в себе — как преодолеть сомнения и обрести уверенность через работу с подсознанием',
     body: `
 <p>Неуверенность в себе — одна из самых распространённых психологических проблем, с которыми люди приходят к психологу и гипнотерапевту. Она маскируется под скромность, осторожность или «здоровый критицизм», но на деле отравляет жизнь: мешает строить карьеру, создавать отношения, отстаивать личные границы и просто чувствовать себя счастливым.</p>
@@ -2178,7 +2178,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-06-21',
     author: 'Вячеслав Подварчан',
     readingTime: 14,
-    image: '/images/blog/pochemu-trevoga-ne-prokhodit-godami.webp',
+    image: '/api/media/blog/pochemu-trevoga-ne-prokhodit-godami.webp',
     imageAlt: 'Почему тревога не проходит годами — глубинные причины хронической тревоги',
     body: `
 <p>«Я борюсь с тревогой уже пять лет. Перепробовала всё — психологов, таблетки, медитации, дыхание. Становится легче на день-два, а потом возвращается». Это сообщение я получаю едва ли не каждый день. Хроническая тревога — одна из самых частых и одновременно самых обескураживающих проблем, с которыми люди приходят к психотерапевту.</p>
@@ -2298,7 +2298,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-06-21',
     author: 'Вячеслав Подварчан',
     readingTime: 10,
-    image: '/images/blog/kom-v-gorle-pri-trevoge.webp',
+    image: '/api/media/blog/kom-v-gorle-pri-trevoge.webp',
     imageAlt: 'Ком в горле при тревоге — психосоматический симптом тревожного расстройства',
     body: `
 <p>Ощущение кома в горле — один из самых ярких телесных симптомов тревоги. Человек чувствует, что в горле что-то мешает, давит, не даёт нормально глотнуть. Горло сжимается, голос может дрожать или пропадать. Вы начинаете глубоко дышать, пытаясь расслабиться, но ком не уходит.</p>
@@ -2412,7 +2412,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-06-21',
     author: 'Вячеслав Подварчан',
     readingTime: 12,
-    image: '/images/blog/pochemu-voznikaet-panika-nochyu.webp',
+    image: '/api/media/blog/pochemu-voznikaet-panika-nochyu.webp',
     imageAlt: 'Почему возникает паника ночью — ночные панические атаки и их причины',
     body: `
 <p>«Я просыпаюсь среди ночи от дикого страха. Сердце колотится, не хватает воздуха, кажется, что я умираю. Не могу понять, что происходит. Это длится уже несколько месяцев, и я боюсь ложиться спать». С такими описаниями ко мне приходят многие клиенты. Ночная паника — одно из самых мучительных проявлений тревожного расстройства.</p>
@@ -2524,7 +2524,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-06-21',
     author: 'Вячеслав Подварчан',
     readingTime: 13,
-    image: '/images/blog/strakh-smerti-bez-prichiny.webp',
+    image: '/api/media/blog/strakh-smerti-bez-prichiny.webp',
     imageAlt: 'Страх смерти без причины — экзистенциальный страх как симптом тревожного расстройства',
     body: `
 <p>«Мне 28 лет, я здорова, у меня хорошая жизнь. Но последние полгода меня преследует навязчивый страх смерти. Я могу сидеть за ужином или гулять в парке, и вдруг меня накрывает мысль: "Я умру". Сердце начинает бешено колотиться, руки холодеют, становится трудно дышать. Я не могу понять — откуда это? Никто не умирал, ничего не случилось. Но страх приходит снова и снова».</p>
@@ -2625,7 +2625,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-06-21',
     author: 'Вячеслав Подварчан',
     readingTime: 12,
-    image: '/images/blog/postoyannoe-vnutrennee-napryazhenie.webp',
+    image: '/api/media/blog/postoyannoe-vnutrennee-napryazhenie.webp',
     imageAlt: 'Постоянное внутреннее напряжение — хронический мышечный спазм на фоне тревоги',
     body: `
 <p>«Я не помню, когда в последний раз чувствовал себя расслабленным. Даже когда я отдыхаю, внутри всё сжато. Плечи подняты, челюсть стиснута, живот напряжён. Я просыпаюсь уже уставшим. Знакомо?»</p>
@@ -2722,7 +2722,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-06-21',
     author: 'Вячеслав Подварчан',
     readingTime: 11,
-    image: '/images/blog/kak-perestat-boyatsya-budushchego.webp',
+    image: '/api/media/blog/kak-perestat-boyatsya-budushchego.webp',
     imageAlt: 'Как перестать бояться будущего — страх неопределённости и тревога о завтрашнем дне',
     body: `
 <p>«Я не могу строить планы, потому что всё равно случится что-то плохое», «Мне страшно даже думать о следующем годе», «Я постоянно прокручиваю в голове негативные сценарии, и это отнимает все силы». Знакомо? Страх будущего — одна из самых изматывающих форм тревоги.</p>
@@ -2825,7 +2825,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-06-21',
     author: 'Вячеслав Подварчан',
     readingTime: 11,
-    image: '/images/blog/psikhosomatika-golovokruzheniya.webp',
+    image: '/api/media/blog/psikhosomatika-golovokruzheniya.webp',
     imageAlt: 'Психосоматика головокружения — как тревога вызывает чувство дурноты и шаткость',
     body: `
 <p>«Внезапно начинает кружиться голова. Ощущение, что пол уходит из-под ног. Или что я плыву, как в тумане. Сердце колотится, меня бросает в пот. Мне кажется, я сейчас упаду в обморок. Врачи говорят — со здоровьем всё в порядке. Но голова продолжает кружиться снова и снова».</p>
@@ -2921,7 +2921,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-06-21',
     author: 'Вячеслав Подварчан',
     readingTime: 12,
-    image: '/images/blog/psikhosomatika-boli-v-shee.webp',
+    image: '/api/media/blog/psikhosomatika-boli-v-shee.webp',
     imageAlt: 'Психосоматика боли в шее — связь хронического напряжения и тревоги',
     body: `
 <p>«Шея болит постоянно. Хожу к массажистам, делаю упражнения, меняю подушки — боль возвращается снова и снова. Врачи говорят — остеохондроз, но лечение помогает только временно». Знакомая история? Возможно, причина боли в шее не в позвоночнике, а в ваших эмоциях.</p>
@@ -3024,7 +3024,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-06-21',
     author: 'Вячеслав Подварчан',
     readingTime: 13,
-    image: '/images/blog/psikhosomatika-davleniya.webp',
+    image: '/api/media/blog/psikhosomatika-davleniya.webp',
     imageAlt: 'Психосоматика давления — как тревога и стресс влияют на артериальное давление',
     body: `
 <p>«В спокойном состоянии у меня давление 120/80. Но стоит мне понервничать — и оно подскакивает до 150/100. Кардиолог говорит, что с сердцем всё в порядке, но таблетки от давления назначает. А я чувствую: это не сердце, это нервы». Если вы узнаёте себя — вы не одиноки.</p>
@@ -3138,7 +3138,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-06-29',
     author: 'Вячеслав Подварчан',
     readingTime: 18,
-    image: '/images/blog/ptsr-u-veteranov-simptomy-i-pomoshch.webp',
+    image: '/api/media/blog/ptsr-u-veteranov-simptomy-i-pomoshch.webp',
     imageAlt: 'ПТСР у ветеранов: симптомы и как справиться после войны — флешбеки, бессонница, тревога, агрессия',
     body: `
 <p>Жена говорит «он вернулся другим человеком». Мать — «он стал как чужой». Сам ветеран чаще всего говорит короче: «Со мной всё нормально, просто не лезьте». А ночью — снова не спит, снова слышит то, чего давно нет рядом, снова просыпается в холодном поту от звука, который никого больше не пугает.</p>
@@ -3259,7 +3259,7 @@ export const BLOG_POSTS: BlogPost[] = [
     dateModified: '2026-07-14',
     author: 'Вячеслав Подварчан',
     readingTime: 8,
-    image: '/images/blog/trevoga-polnyy-putevoditel.webp',
+    image: '/api/media/blog/trevoga-polnyy-putevoditel.webp',
     imageAlt: 'Тревога: полный путеводитель — виды, причины, симптомы и методы работы',
     body: `
 <p>Тревога — одно из самых частых состояний, с которым люди обращаются за психологической поддержкой. Но тревога бывает разной: у кого-то она возникает без видимой причины, у кого-то — только по утрам или перед сном, а кто-то испытывает её после стрессовой ситуации. Этот путеводитель поможет вам разобраться в видах тревоги, её причинах и выбрать подходящий путь работы.</p>
