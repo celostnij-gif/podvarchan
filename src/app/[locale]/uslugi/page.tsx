@@ -1,8 +1,8 @@
 import { getTranslations } from 'next-intl/server'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
-import { getServices } from '@/lib/db/public'
+import { getServiceSidebar } from '@/lib/db/public'
 import { UslugiClient } from './page-client'
-import type { ServicePublic } from '@/lib/db/public'
+import type { ServiceSidebarItem } from '@/lib/db/public'
 
 export const revalidate = 3600
 
@@ -32,7 +32,7 @@ interface ServiceItem {
   cta: string
 }
 
-function mapServiceToItem(svc: ServicePublic): ServiceItem {
+function mapServiceToItem(svc: ServiceSidebarItem): ServiceItem {
   return {
     slug: svc.slug,
     title: svc.title,
@@ -53,7 +53,7 @@ export default async function UslugiPage({
   let services: ServiceItem[] = []
 
   try {
-    const d1Services = await getServices(locale)
+    const d1Services = await getServiceSidebar(locale)
     services = d1Services.map(mapServiceToItem)
   } catch {
     // D1 unavailable — client will show empty state (fallback via messages in future)

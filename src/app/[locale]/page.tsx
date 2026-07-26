@@ -6,7 +6,7 @@ import { aggregateRatingSchema } from '@/lib/schema'
 import type { Testimonial } from '@/types'
 import HomeClient from './home-client'
 import Hero from '@/components/sections/Hero'
-import { getPageByType, getSEOMeta, getTestimonials, getFAQs } from '@/lib/db/public'
+import { getPageByType, getTestimonials, getFAQs } from '@/lib/db/public'
 import { cookies } from 'next/headers'
 import { parseZoneContent, type HeroContent } from '@/lib/home/blueprint'
 export const revalidate = 3600
@@ -21,27 +21,14 @@ export async function generateMetadata({
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'home' })
 
-  // Try D1 SEO meta first, fall back to messages
+  // Use translations for metadata (avoids 3 D1 queries in generateMetadata)
+  // D1 SEO overrides can be added via admin panel in the future
   let title = t('metaTitle')
   let description = t('metaDescription')
   let keywords: string[] = []
   try {
     keywords = JSON.parse(t('metaKeywords'))
   } catch { /* ignore */ }
-
-  try {
-    const d1Home = await getPageByType('HOME', locale)
-    if (d1Home) {
-      const seo = await getSEOMeta('page', d1Home.id, locale)
-      if (seo) {
-        if (seo.title) title = seo.title
-        if (seo.description) description = seo.description
-        if (seo.keywords) {
-          try { keywords = JSON.parse(seo.keywords) } catch { /* keep defaults */ }
-        }
-      }
-    }
-  } catch { /* D1 unavailable */ }
 
   return seoMetadata({
     title,

@@ -5,8 +5,8 @@ import { SERVICES } from '@/constants'
 import { SERVICE_SLUG_UK, resolveServiceSlug } from '@/lib/slugMapping'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { serviceSchema, faqSchema } from '@/lib/schema'
-import { getServiceBySlug, getServices, getSEOMeta } from '@/lib/db/public'
-import type { ServicePublic } from '@/lib/db/public'
+import { getServiceBySlug, getServiceSidebar, getSEOMeta } from '@/lib/db/public'
+import type { ServiceSidebarItem } from '@/lib/db/public'
 import { ClientServicePage } from './client-page'
 import { buildTitle } from '@/lib/seo/metadata'
 
@@ -139,11 +139,11 @@ async function loadService(slug: string, locale: string): Promise<ServicePageDat
   try {
     const svc = await getServiceBySlug(slug, locale, previewCookie)
     if (svc) {
-      const [seo, allSvc] = await Promise.all([
+      const [seo, sidebarItems] = await Promise.all([
         svc.id ? getSEOMeta('service', svc.id, locale) : Promise.resolve(null),
-        getServices(locale).catch(() => [] as ServicePublic[]),
+        getServiceSidebar(locale).catch(() => [] as ServiceSidebarItem[]),
       ])
-      const allServices = allSvc.map((s) => ({
+      const allServices = sidebarItems.map((s) => ({
         slug: s.slug,
         title: s.title,
         shortTitle: s.shortTitle ?? '',

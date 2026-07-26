@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/routing'
-import { getServices, getBlogCategories, getContactChannels, getSiteSetting } from '@/lib/db/public'
+import { getServiceSidebar, getBlogCategories, getContactChannels, getSiteSetting } from '@/lib/db/public'
 
 
 /* ── Footer Column ── */
@@ -29,7 +29,7 @@ function FooterLink({ href, children }: { href: string; children: ReactNode }) {
 
 export default async function Footer({ locale }: { locale: string }) {
   const t = await getTranslations({ locale, namespace: 'common' })
-  const services = await getServices(locale).catch(() => [])
+  const services = await getServiceSidebar(locale).catch(() => [])
   const blogCategories = await getBlogCategories(locale).catch(() => [])
   const contactChannels = await getContactChannels().catch(() => [])
   const rawEmail = await getSiteSetting('contactEmail').catch(() => null)

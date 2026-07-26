@@ -189,6 +189,39 @@ export async function getServices(locale: string): Promise<ServicePublic[]> {
 
   return rows.map(mapServiceRow)
 }
+// ─── Service Sidebar (lightweight — only 5 fields for listing/sidebar) ───
+
+export interface ServiceSidebarItem {
+  slug: string
+  title: string
+  shortTitle: string | null
+  description: string | null
+  ctaText: string | null
+}
+
+/** Lightweight service list for sidebar/footer — skips heavy JSON columns (contentHtml, heroTitle, etc.) */
+export async function getServiceSidebar(locale: string): Promise<ServiceSidebarItem[]> {
+  const db = getDB()
+  const loc = locale as 'ru' | 'uk'
+  const rows = await db
+    .select({
+      slug: serviceTranslations.slug,
+      title: serviceTranslations.title,
+      shortTitle: serviceTranslations.shortTitle,
+      description: serviceTranslations.description,
+      ctaText: serviceTranslations.ctaText,
+    })
+    .from(services)
+    .innerJoin(serviceTranslations, eq(services.id, serviceTranslations.serviceId))
+    .where(
+      and(eq(services.status, 'PUBLISHED'), eq(serviceTranslations.locale, loc)),
+    )
+    .orderBy(services.sortOrder)
+    .limit(LIMIT_SERVICES)
+    .all()
+
+  return rows.map((r) => ({ ...r, title: r.title ?? '' }))
+}
 
 /** Single service by translation slug — no full-table scan. */
 export async function getServiceBySlug(
