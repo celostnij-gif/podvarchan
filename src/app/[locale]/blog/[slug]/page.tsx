@@ -131,15 +131,15 @@ async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData 
         } catch { /* faqJson parse error — skip */ }
       }
 
-      let coverImageUrl: string | null = media?.url ?? null
-      const coverImageVariants: { width: number; url: string }[] | undefined = media?.variants
+      // Prefer locale-specific static image over D1 (shared between locales)
+      const staticPost = getBlogPost(slug, locale)
+      let coverImageUrl: string | null = staticPost?.image ?? null
+      let coverImageVariants: { width: number; url: string }[] | undefined
 
-      // If D1 coverImageId is null/empty, fall back to static blog post image
-      if (!coverImageUrl) {
-        const staticPost = getBlogPost(slug, locale)
-        if (staticPost?.image) {
-          coverImageUrl = staticPost.image
-        }
+      // Fall back to D1 cover image if static content doesn't have one
+      if (!coverImageUrl && media?.url) {
+        coverImageUrl = media.url
+        coverImageVariants = media?.variants
       }
 
       return {
