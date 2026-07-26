@@ -75,6 +75,17 @@ const nextConfig = {
         { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
       ],
     },
+    /* ── CDN cache for HTML pages (7 days CDN, 30d stale-while-revalidate) ── */
+    /* Middleware Cache-Control doesn't propagate to page responses in Cloudflare Workers */
+    {
+      source: '/:locale(ru|uk)/:path*',
+      headers: [
+        {
+          key: 'Cache-Control',
+          value: 'public, s-maxage=604800, stale-while-revalidate=2592000, stale-if-error=604800',
+        },
+      ],
+    },
   ],
 
   /** Redirects */
