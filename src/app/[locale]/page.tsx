@@ -23,8 +23,8 @@ export async function generateMetadata({
 
   // Use translations for metadata (avoids 3 D1 queries in generateMetadata)
   // D1 SEO overrides can be added via admin panel in the future
-  let title = t('metaTitle')
-  let description = t('metaDescription')
+  const title = t('metaTitle')
+  const description = t('metaDescription')
   let keywords: string[] = []
   try {
     keywords = JSON.parse(t('metaKeywords'))
