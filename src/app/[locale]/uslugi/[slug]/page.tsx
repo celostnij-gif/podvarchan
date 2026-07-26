@@ -50,22 +50,24 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props) {
   const { slug: rawSlug, locale } = await params
-  const slug = resolveServiceSlug(rawSlug)
+  const resolvedSlug = resolveServiceSlug(rawSlug) // canonical RU slug (needed for SERVICE_SLUG_UK mapping)
+  const displaySlug = locale === 'uk' ? rawSlug : resolvedSlug // locale-appropriate slug for path
   const previewCookie = (await cookies()).get('__preview')?.value
 
   // Try D1 first
   try {
-    const svc = await getServiceBySlug(slug, locale, previewCookie)
+    // Use rawSlug for D1 lookup — for UK locale, rawSlug is the UK slug which matches DB
+    const svc = await getServiceBySlug(rawSlug, locale, previewCookie)
     if (svc) {
       const seo = svc.id ? await getSEOMeta('service', svc.id, locale) : null
       const title = seo?.title ?? svc.title
       const description = seo?.description ?? svc.description ?? ''
-      const ukSlug = SERVICE_SLUG_UK[slug]
+      const ukSlug = SERVICE_SLUG_UK[resolvedSlug]
       const ukPath = ukSlug ? `/uslugi/${ukSlug}` : undefined
       return seoMetadata({
         title,
         description,
-        path: `/uslugi/${slug}`,
+        path: `/uslugi/${displaySlug}`,
         ukPath,
         type: 'service',
         locale,
@@ -73,19 +75,19 @@ export async function generateMetadata({ params }: Props) {
     }
   } catch { /* fallback to messages */ }
 
-  // Fallback to messages
+  // Fallback to messages — use resolved (RU) slug for messages lookup
   const messages = await getMessages({ locale })
   const servicesData = (messages.servicesData as ServicesMessage[])
-  const svc = servicesData.find((s) => s.slug === slug)
+  const svc = servicesData.find((s) => s.slug === resolvedSlug)
   if (!svc) return {}
 
-  const ukSlug = SERVICE_SLUG_UK[slug]
+  const ukSlug = SERVICE_SLUG_UK[resolvedSlug]
   const ukPath = ukSlug ? `/uslugi/${ukSlug}` : undefined
 
   return seoMetadata({
     title: svc.title,
     description: svc.metaDescription,
-    path: `/uslugi/${slug}`,
+    path: `/uslugi/${resolvedSlug}`,
     ukPath,
     type: 'service',
     locale,
@@ -191,7 +193,9 @@ async function loadService(slug: string, locale: string): Promise<ServicePageDat
 
 export default async function ServicePage({ params }: Props) {
   const { slug: rawSlug, locale } = await params
-  const slug = resolveServiceSlug(rawSlug)
+  // For UK locale, use the raw slug directly (it's the correct DB slug for UK locale).
+  // For RU locale, resolveServiceSlug is a no-op (already RU slug).
+  const slug = locale === 'uk' ? rawSlug : resolveServiceSlug(rawSlug)
   const data = await loadService(slug, locale)
   if (!data) notFound()
 
