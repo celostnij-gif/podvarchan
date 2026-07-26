@@ -5,7 +5,7 @@ import { getBlogPostBySlug, getBlogPostsByCategory, getMediaWithVariants } from 
 import type { BlogPostPublic } from '@/lib/db/public'
 import { articleSchema, faqSchema } from '@/lib/schema'
 import { ClientBlogPost } from './client-page'
-import { BLOG_SLUG_UK, resolveBlogSlug } from '@/lib/slugMapping'
+import { BLOG_SLUG_UK } from '@/lib/slugMapping'
 import { cookies } from 'next/headers'
 
 /**
@@ -34,7 +34,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props) {
   const { slug: rawSlug, locale } = await params
-  const slug = resolveBlogSlug(rawSlug)
+  const slug = rawSlug
 
   try {
     const previewCookie = (await cookies()).get('__preview')?.value
@@ -191,7 +191,7 @@ async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData 
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug: rawSlug, locale } = await params
-  const slug = resolveBlogSlug(rawSlug)
+  const slug = rawSlug
   const data = await loadBlogPost(slug, locale)
   if (!data) notFound()
 

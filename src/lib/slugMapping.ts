@@ -65,6 +65,16 @@ export const BLOG_SLUG_UK: Record<string, string> = {
   'psikhosomatika-davleniya': 'psihosomatika-tisku',
   'ptsr-u-veteranov-simptomy-i-pomoshch': 'ptsr-u-veteraniv-oznaky-i-dopomoha',
   'trevoga-polnyy-putevoditel': 'trivoga-povniy-putivnik',
+
+  /* ── 8 new SEO blog posts ── */
+  'chto-takoe-eriksonovskiy-gipnoz': 'shcho-take-eriksonivskiy-gipnoz',
+  'effektivna-li-gipnoterapiya-onlajn': 'chy-efektivna-gipnoterapiya-onlayn',
+  'kak-ostanovit-panicheskuyu-ataku': 'yak-zupiniti-panichnu-ataku',
+  'kulturnyy-shok': 'kulturniy-shok',
+  'nostalgiya-po-rodine': 'nostalgiya-za-batkivshchinoyu',
+  'odinochestvo-v-emigracii': 'samotnist-v-emigraciyi',
+  'postoyannaya-trevoga-bez-prichiny': 'postiyna-trivoga-bez-prichini',
+  'trevoga-posle-pereezda': 'trivoga-pislya-pereyizdu',
 }
 
 /* ── Blog Categories ── */
