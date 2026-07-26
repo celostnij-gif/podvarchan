@@ -43,12 +43,17 @@ export async function generateMetadata({ params }: Props) {
     if (post) {
       const ukSlug = BLOG_SLUG_UK[slug]
       const ukPath = ukSlug ? `/blog/${ukSlug}` : undefined
+      // Use locale-specific cover image from override map for og:image
+      const resolvedSlug = resolveBlogSlug(slug)
+      const overrideCover = COVER_IMAGE_OVERRIDES[resolvedSlug]
+      const ogImage = overrideCover?.[locale === 'uk' ? 'uk' : 'ru']
       return seoMetadata({
         title: post.title ?? '',
         description: post.excerpt ?? post.title ?? '',
         path: `/blog/${slug}`,
         ukPath,
         type: 'article',
+        ogImage,
         publishedTime: post.publishedAt ?? undefined,
         modifiedTime: post.updatedAt ?? undefined,
         locale,
