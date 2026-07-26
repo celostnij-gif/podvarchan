@@ -10,6 +10,7 @@ import { SERVICE_ICONS } from '@/constants'
 import { ServiceIcon } from '@/components/ui/Icons'
 import { AnimatedSection, AnimatedText, SectionContainer, TiltCard, FaqAccordion } from '@/components/ui'
 import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
+import { useMemo } from 'react'
 
 interface ServiceData {
   slug: string
@@ -594,17 +595,146 @@ function TrevogaAlsoReadSection({ service, locale }: { service: ServiceData; loc
   )
 }
 
-/* ── Content Section (full HTML from contentHtml) ── */
+/* ════════════════════════════════════════════════════════
+   Content Section — Smart HTML splitter + premium cards
+   ════════════════════════════════════════════════════════ */
+
+interface ContentSectionBlock {
+  type: 'intro' | 'h2-section'
+  headingHtml?: string   // raw <h2>...</h2> or empty for intro
+  contentHtml: string    // body content before any h3
+  h3Blocks?: Array<{
+    headingHtml: string   // raw <h3>...</h3>
+    contentHtml: string
+  }>
+}
+
+/**
+ * Parses the flat contentHtml into structured sections:
+ * - Everything before the first <h2> → intro block
+ * - Each <h2> + following content (until next <h2>) → h2-section
+ * - Within a h2-section, <h3> tags split out sub-blocks
+ */
+function parseServiceContent(html: string): ContentSectionBlock[] {
+  // 1) Split by <h2 boundaries, keeping the h2 tag as separator
+  const h2Parts = html.split(/(<h2[^>]*>[\s\S]*?<\/h2>)/)
+  const blocks: ContentSectionBlock[] = []
+
+  // First part = intro (content before the very first h2)
+  const introRaw = h2Parts[0]?.trim()
+  if (introRaw) {
+    blocks.push({ type: 'intro', contentHtml: introRaw })
+  }
+
+  // Remaining parts alternate: heading (odd index), content (even index)
+  for (let i = 1; i < h2Parts.length; i += 2) {
+    const headingHtml = h2Parts[i]
+    const restHtml = (h2Parts[i + 1] || '').trim()
+    if (!restHtml) continue
+
+    // Within the content, split by <h3 boundaries
+    const h3Parts = restHtml.split(/(<h3[^>]*>[\s\S]*?<\/h3>)/)
+    const mainContent = h3Parts[0]?.trim() || ''
+    const h3Blocks: Array<{ headingHtml: string; contentHtml: string }> = []
+
+    for (let j = 1; j < h3Parts.length; j += 2) {
+      const subHeading = h3Parts[j]
+      const subContent = (h3Parts[j + 1] || '').trim()
+      if (subHeading) {
+        h3Blocks.push({ headingHtml: subHeading, contentHtml: subContent })
+      }
+    }
+
+    blocks.push({
+      type: 'h2-section',
+      headingHtml,
+      contentHtml: mainContent,
+      h3Blocks: h3Blocks.length > 0 ? h3Blocks : undefined,
+    })
+  }
+
+  return blocks
+}
+
+/* ── Content Section — renders parsed blocks as beautiful cards ── */
 
 function ContentSection({ service }: { service: ServiceData }) {
-  if (!service.contentHtml) return null
+  const blocks = useMemo(
+    () => (service.contentHtml ? parseServiceContent(service.contentHtml) : []),
+    [service.contentHtml],
+  )
+
+  if (blocks.length === 0) return null
+
   return (
     <AnimatedSection as="section" variant="fadeUp">
       <SectionContainer size="md">
-        <div
-          className="service-content prose prose-invert max-w-none"
-          dangerouslySetInnerHTML={{ __html: service.contentHtml }}
-        />
+        <div className="service-content space-y-10">
+          {blocks.map((block, i) => {              if (block.type === 'intro') {
+              /* Strip h1 from intro to avoid duplicate h1 (hero already has one) */
+              const introHtml = block.contentHtml.replace(/<\/?h1[^>]*>/gi, '')
+              return (
+                <motion.div
+                  key="intro"
+                  variants={cardUp(i)}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                  className="content-intro"
+                  dangerouslySetInnerHTML={{ __html: introHtml }}
+                />
+              )
+            }
+
+            return (
+              <motion.div
+                key={i}
+                variants={cardUp(i)}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                className={`content-section-card ${i % 2 === 0 ? 'card-surface' : 'card-elevated'}`}
+              >
+                {/* Decorative gold accent bar on top */}
+                <div className="section-card-accent" aria-hidden="true" />
+
+                {/* Section heading */}
+                {block.headingHtml && (
+                  <div
+                    className="section-card-heading"
+                    dangerouslySetInnerHTML={{ __html: block.headingHtml }}
+                  />
+                )}
+
+                {/* Body content before any h3 subsections */}
+                {block.contentHtml && (
+                  <div
+                    className="section-card-body"
+                    dangerouslySetInnerHTML={{ __html: block.contentHtml }}
+                  />
+                )}
+
+                {/* H3 sub-blocks as nested cards */}
+                {block.h3Blocks?.map((sub, j) => (
+                  <div key={j} className="subsection-block">
+                    {sub.headingHtml && (
+                      <div
+                        className="subsection-heading"
+                        dangerouslySetInnerHTML={{ __html: sub.headingHtml }}
+                      />
+                    )}
+                    {sub.contentHtml && (
+                      <div
+                        className="subsection-body"
+                        dangerouslySetInnerHTML={{ __html: sub.contentHtml }}
+                      />
+                    )}
+                  </div>
+                ))}
+              </motion.div>
+            )
+          })}
+        </div>
       </SectionContainer>
     </AnimatedSection>
   )
@@ -622,8 +752,8 @@ export function ClientServicePage({ service, schemas, locale, allServices: allSe
   return (
     <>
       <HeroSection service={service} />
-      <ContentSection service={service} />
       <SymptomsSection service={service} />
+      <ContentSection service={service} />
       <MethodSection service={service} />
       <TrevogaHubBanner service={service} locale={locale} />
       <TrevogaAlsoReadSection service={service} locale={locale} />
