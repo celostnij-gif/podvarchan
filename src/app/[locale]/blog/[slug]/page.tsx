@@ -5,7 +5,8 @@ import { getBlogPostBySlug, getBlogPostsByCategory, getMediaWithVariants } from 
 import type { BlogPostPublic } from '@/lib/db/public'
 import { articleSchema, faqSchema } from '@/lib/schema'
 import { ClientBlogPost } from './client-page'
-import { BLOG_SLUG_UK } from '@/lib/slugMapping'
+import { BLOG_SLUG_UK, resolveBlogSlug } from '@/lib/slugMapping'
+import { COVER_IMAGE_OVERRIDES } from '@/lib/content/cover-images'
 import { cookies } from 'next/headers'
 
 /**
@@ -130,13 +131,13 @@ async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData 
           }
         } catch { /* faqJson parse error — skip */ }
       }
-
-      // Prefer locale-specific static image over D1 (shared between locales)
-      const staticPost = getBlogPost(slug, locale)
-      let coverImageUrl: string | null = staticPost?.image ?? null
+      // Locale-specific cover image from override map (covers posts with RU/UK variants)
+      const resolvedSlug = resolveBlogSlug(slug)
+      const override = COVER_IMAGE_OVERRIDES[resolvedSlug]
+      let coverImageUrl: string | null = override?.[locale === 'uk' ? 'uk' : 'ru'] ?? null
       let coverImageVariants: { width: number; url: string }[] | undefined
 
-      // Fall back to D1 cover image if static content doesn't have one
+      // Fall back to D1 cover image (shared between locales) if no locale-specific override
       if (!coverImageUrl && media?.url) {
         coverImageUrl = media.url
         coverImageVariants = media?.variants
