@@ -2,12 +2,14 @@
 
 import { motion, useScroll, useTransform } from 'framer-motion'
 import Image from 'next/image'
+import { useLocale } from 'next-intl'
 
 /**
  * Микро-клиентский компонент только для параллакс-эффекта фона Hero.
  * Остальная Hero-секция — серверный компонент со статическим HTML и CSS-анимациями.
  */
 export default function HeroParallaxBackground() {
+  const locale = useLocale()
   const { scrollY } = useScroll()
   const imgY = useTransform(scrollY, [0, 800], [0, 150])
 
@@ -20,7 +22,7 @@ export default function HeroParallaxBackground() {
       <div className="relative w-full h-full">
         <Image
           src="/images/hero-bg.webp"
-          alt="Спокійна атмосфера онлайн-сесії гіпнотерапії"
+          alt={locale === 'uk' ? 'Спокійна атмосфера онлайн-сесії гіпнотерапії' : 'Спокойная атмосфера онлайн-сессии гипнотерапии'}
           fill
           className="object-cover object-center"
           priority

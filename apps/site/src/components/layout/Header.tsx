@@ -106,7 +106,7 @@ function LangSwitcher({ className = '' }: { className?: string }) {
   const pathWithoutLocale = pathname.replace(/^\/(ru|uk)/, '') || '/'
 
   return (
-    <div className={`flex items-center gap-1 ${className}`} role="navigation" aria-label="Выбор языка">
+    <div className={`flex items-center gap-1 ${className}`} role="navigation" aria-label={currentLocale === 'uk' ? 'Вибір мови' : 'Выбор языка'}>
       <Link
         href={pathWithoutLocale}
         locale="ru"
@@ -362,6 +362,14 @@ function DesktopDropdown({ item, pathname, t }: { item: NavItem; pathname: strin
                   </Link>
                 )
               })}
+              <Link
+                href="/uslugi/"
+                className="group flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                           text-gold hover:bg-gold/[0.06]"
+              >
+                <span className="w-1 h-1 rounded-full bg-gold shadow-glow-gold" />
+                <span>{t('nav.allServices')}</span>
+              </Link>
             </nav>
 
             <div className="mt-2 pt-2 border-t border-gold/[0.08] px-2">

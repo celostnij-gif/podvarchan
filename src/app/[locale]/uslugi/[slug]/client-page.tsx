@@ -475,7 +475,7 @@ const TREVOGA_HUB_SLUGS = new Set([
 function TrevogaHubBanner({ service, locale }: { service: ServiceData; locale: string }) {
   if (!TREVOGA_HUB_SLUGS.has(service.slug)) return null
 
-  const hubPath = locale === 'uk' ? '/uk/blog/trivoga-povniy-putivnik/' : '/ru/blog/trevoga-polnyy-putevoditel/'
+  const hubPath = locale === 'uk' ? '/blog/trivoga-povniy-putivnik/' : '/blog/trevoga-polnyy-putevoditel/'
   const text = locale === 'uk'
     ? 'Ця сторінка — частина серії матеріалів про тривогу. Ознайомтеся з повним путівником.'
     : 'Эта страница — часть серии материалов о тревоге. Ознакомьтесь с полным путеводителем.'
