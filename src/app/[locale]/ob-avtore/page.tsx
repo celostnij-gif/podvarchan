@@ -17,6 +17,7 @@ export async function generateMetadata({
     title: t('metaTitle'),
     description: t('metaDescription'),
     path: '/ob-avtore',
+    ukPath: '/pro-avtora',
     keywords: ['гипнотерапевт онлайн', 'Вячеслав Подварчан', 'гипнотерапия', 'психолог гипнотерапевт'],
     locale,
   })

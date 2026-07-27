@@ -95,6 +95,13 @@ export default async function middleware(request: NextRequest) {
   if (pathname.includes('.html')) {
     return new Response(null, { status: 410 })
   }
+  // ── UK static page slug localization (Russian → Ukrainian) ──
+  if (pathname === '/uk/tseny/' || pathname === '/uk/tseny') {
+    return NextResponse.redirect(new URL('/uk/tsiny/', request.url), 301)
+  }
+  if (pathname === '/uk/ob-avtore/' || pathname === '/uk/ob-avtore') {
+    return NextResponse.redirect(new URL('/uk/pro-avtora/', request.url), 301)
+  }
 
   // ── UK slug redirects ──
   const segments = pathname.split('/').filter(Boolean)

@@ -19,6 +19,7 @@ export async function generateMetadata({
     description: t('metaDescription'),
     keywords: ['цена гипнотерапии', 'стоимость сессии гипноза', 'гипнотерапия онлайн цена', 'сколько стоит гипнотерапия'],
     path: '/tseny',
+    ukPath: '/tsiny',
     locale,
   })
 }
