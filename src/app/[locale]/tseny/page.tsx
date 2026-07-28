@@ -1,7 +1,7 @@
 import { getTranslations } from 'next-intl/server'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { SITE } from '@/constants'
-import { getPageByType } from '@/lib/db/public'
+import { getPageByType, getSEOMeta } from '@/lib/db/public'
 import { cookies } from 'next/headers'
 import { TsenyClient } from './client-page'
 export const revalidate = 3600
@@ -14,9 +14,21 @@ export async function generateMetadata({
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'tseny' })
 
+  let seoTitle = t('metaTitle')
+  let seoDescription = t('metaDescription')
+  try {
+    const previewCookie = (await cookies()).get('__preview')?.value
+    const page = await getPageByType('PRICING', locale, previewCookie)
+    if (page?.id) {
+      const seo = await getSEOMeta('page', page.id, locale).catch(() => null)
+      if (seo?.title) seoTitle = seo.title
+      if (seo?.description) seoDescription = seo.description
+    }
+  } catch { /* D1 unavailable */ }
+
   return seoMetadata({
-    title: t('metaTitle'),
-    description: t('metaDescription'),
+    title: seoTitle,
+    description: seoDescription,
     keywords: ['цена гипнотерапии', 'стоимость сессии гипноза', 'гипнотерапия онлайн цена', 'сколько стоит гипнотерапия'],
     path: '/tseny',
     ukPath: '/tsiny',

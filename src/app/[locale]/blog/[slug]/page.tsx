@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getBlogPost, getAllBlogSlugs, getAllBlogPosts, formatDate } from '@/lib/content'
-import { getBlogPostBySlug, getBlogPostsByCategory, getMediaWithVariants } from '@/lib/db/public'
+import { getBlogPostBySlug, getBlogPostsByCategory, getMediaWithVariants, getSEOMeta } from '@/lib/db/public'
 import type { BlogPostPublic } from '@/lib/db/public'
 import { articleSchema, faqSchema } from '@/lib/schema'
 import { ClientBlogPost } from './client-page'
@@ -41,6 +41,7 @@ export async function generateMetadata({ params }: Props) {
     const previewCookie = (await cookies()).get('__preview')?.value
     const post = await getBlogPostBySlug(slug, locale, previewCookie)
     if (post) {
+      const seo = post.id ? await getSEOMeta('blog_post', post.id, locale).catch(() => null) : null
       const ukSlug = BLOG_SLUG_UK[slug]
       const ukPath = ukSlug ? `/blog/${ukSlug}` : undefined
       // Use locale-specific cover image from override map for og:image
@@ -48,8 +49,8 @@ export async function generateMetadata({ params }: Props) {
       const overrideCover = COVER_IMAGE_OVERRIDES[resolvedSlug]
       const ogImage = overrideCover?.[locale === 'uk' ? 'uk' : 'ru']
       return seoMetadata({
-        title: post.title ?? '',
-        description: post.excerpt ?? post.title ?? '',
+        title: seo?.title ?? post.title ?? '',
+        description: seo?.description ?? post.excerpt ?? post.title ?? '',
         path: `/blog/${slug}`,
         ukPath,
         type: 'article',
