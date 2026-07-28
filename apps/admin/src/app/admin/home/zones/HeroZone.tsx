@@ -63,7 +63,7 @@ export function HeroZone({ data }: HeroZoneProps) {
             name="title"
             defaultValue={current.title}
             className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
-            placeholder="Избавиться от тревоги и панических атак"
+            placeholder="Позбутися тривоги та панічних атак"
           />
           <p className="text-xs text-zinc-600 mt-1">Синхронізується з page_translations.title</p>
         </div>
@@ -75,7 +75,7 @@ export function HeroZone({ data }: HeroZoneProps) {
             defaultValue={current.subtitle}
             rows={3}
             className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
-            placeholder="Помогаю справиться с тревогой через эриксоновский гипноз..."
+            placeholder="Допомагаю впоратися з тривогою через ериксонівський гіпноз..."
           />
           <p className="text-xs text-zinc-600 mt-1">Синхронізується з page_translations.excerpt</p>
         </div>
@@ -87,7 +87,7 @@ export function HeroZone({ data }: HeroZoneProps) {
               name="ctaPrimary"
               defaultValue={current.ctaPrimary}
               className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
-              placeholder="Записаться на консультацию"
+              placeholder="Записатися на консультацію"
             />
           </div>
           <div>
@@ -96,7 +96,7 @@ export function HeroZone({ data }: HeroZoneProps) {
               name="ctaSecondary"
               defaultValue={current.ctaSecondary}
               className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
-              placeholder="Узнать о методе"
+              placeholder="Дізнатися про метод"
             />
           </div>
         </div>

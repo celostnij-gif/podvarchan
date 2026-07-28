@@ -39,7 +39,7 @@ export function CtaZone({ data }: CtaZoneProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-zinc-100">CTA / Призыв</h3>
+        <h3 className="text-lg font-semibold text-zinc-100">CTA / Заклик</h3>
         <p className="text-sm text-zinc-500 mt-1">Нижній блок-заклик до дії</p>
       </div>
 

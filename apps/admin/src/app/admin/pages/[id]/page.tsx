@@ -81,7 +81,14 @@ export default async function EditPagePage(props: Props) {
           <PreviewButton
             entityType="page"
             slug={page.type}
+            locale="ru"
             publicPath={page.type === 'HOME' ? '/ru/' : `/ru/${translations.find((t) => t.locale === 'ru')?.slug || page.type.toLowerCase()}`}
+          />
+          <PreviewButton
+            entityType="page"
+            slug={page.type}
+            locale="uk"
+            publicPath={page.type === 'HOME' ? '/uk/' : `/uk/${translations.find((t) => t.locale === 'uk')?.slug || page.type.toLowerCase()}`}
           />
           <a
             href={`/admin/seo/page/${page.id}`}

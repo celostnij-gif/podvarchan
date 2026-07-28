@@ -87,7 +87,7 @@ export default async function LeadDetailPage(props: Props) {
               <div>
                 <dt className="text-xs font-medium text-zinc-500">Мова</dt>
                 <dd className="mt-1 text-sm text-zinc-200">
-                  {lead.locale === 'uk' ? 'Українська' : lead.locale === 'ru' ? 'Русский' : '—'}
+                  {lead.locale === 'uk' ? 'Українська' : lead.locale === 'ru' ? 'Російська' : '—'}
                 </dd>
               </div>
               <div>

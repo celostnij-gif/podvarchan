@@ -103,6 +103,7 @@ export default async function BlogPostsPage(props: Props) {
               </tr>
             ) : allPosts.map((post) => {
               const ru = post.translations.find((t) => t.locale === 'ru')
+              const uk = post.translations.find((t) => t.locale === 'uk')
               return (
                 <tr key={post.id} className="hover:bg-zinc-800/30">
                   <td className="whitespace-nowrap px-4 py-3">
@@ -119,7 +120,10 @@ export default async function BlogPostsPage(props: Props) {
                     <Link href={`/admin/blog/posts/${post.id}`}
                       className="rounded px-2 py-1 text-amber-400 hover:bg-zinc-800">Редагувати</Link>
                     {post.status === 'PUBLISHED' && ru?.slug && (
-                      <ViewOnSiteLink href={`/ru/blog/${ru.slug}`} />
+                      <ViewOnSiteLink href={`/ru/blog/${ru.slug}`} label="RU" />
+                    )}
+                    {post.status === 'PUBLISHED' && uk?.slug && (
+                      <ViewOnSiteLink href={`/uk/blog/${uk.slug}`} label="UK" />
                     )}
                     <DeleteButton
                       onDelete={deletePost.bind(null, post.id)}

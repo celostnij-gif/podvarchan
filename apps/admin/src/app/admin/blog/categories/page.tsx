@@ -58,7 +58,7 @@ export default async function BlogCategoriesPage() {
             {allCats.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-4 py-8 text-center text-sm text-zinc-500">
-                  Категорій ще немас.{' '}
+                  Категорій ще немає.{' '}
                   <Link href="/admin/blog/categories/new" className="text-amber-400 hover:text-amber-300">Створити першу</Link>
                 </td>
               </tr>

@@ -38,11 +38,21 @@ export default async function EditServicePage(props: Props) {
         </h1>
         <div className="flex items-center gap-2">
           {svc.translations.find((t) => t.locale === 'ru')?.slug && (
-            <PreviewButton
-              entityType="service"
-              slug={svc.translations.find((t) => t.locale === 'ru')!.slug}
-              publicPath={`/ru/uslugi/${svc.translations.find((t) => t.locale === 'ru')!.slug}`}
-            />
+            <>
+              <PreviewButton
+                entityType="service"
+                slug={svc.translations.find((t) => t.locale === 'ru')!.slug}
+                locale="ru"
+                publicPath={`/ru/uslugi/${svc.translations.find((t) => t.locale === 'ru')!.slug}`}
+              />
+              <PreviewButton
+                entityType="service"
+                slug={svc.translations.find((t) => t.locale === 'uk')?.slug ?? ''}
+                locale="uk"
+                disabled={!svc.translations.find((t) => t.locale === 'uk')?.slug}
+                publicPath={`/uk/uslugi/${svc.translations.find((t) => t.locale === 'uk')?.slug ?? ''}`}
+              />
+            </>
           )}
           <a
             href={`/admin/seo/service/${svc.id}`}

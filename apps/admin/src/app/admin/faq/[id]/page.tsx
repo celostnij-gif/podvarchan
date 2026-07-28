@@ -34,7 +34,14 @@ export default async function EditFaqPage(props: Props) {
         <PreviewButton
           entityType="faq"
           slug="list"
+          locale="ru"
           publicPath="/ru/faq/"
+        />
+        <PreviewButton
+          entityType="faq"
+          slug="list"
+          locale="uk"
+          publicPath="/uk/faq/"
         />
       </div>
       <FaqForm faq={faq} />

@@ -60,7 +60,7 @@ export function AuthorZone({ data }: AuthorZoneProps) {
 
         <div className="grid grid-cols-3 gap-3">
           <div>
-            <label className="block text-xs font-medium text-zinc-400 mb-1">Prefix</label>
+            <label className="block text-xs font-medium text-zinc-400 mb-1">Префікс</label>
             <input name="headingPrefix" defaultValue={current.headingPrefix} className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 focus:border-amber-500/50 focus:outline-none" />
           </div>
           <div>
@@ -68,7 +68,7 @@ export function AuthorZone({ data }: AuthorZoneProps) {
             <input name="headingHighlight" defaultValue={current.headingHighlight} className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 focus:border-amber-500/50 focus:outline-none" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-zinc-400 mb-1">Suffix</label>
+            <label className="block text-xs font-medium text-zinc-400 mb-1">Суфікс</label>
             <input name="headingSuffix" defaultValue={current.headingSuffix} className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 focus:border-amber-500/50 focus:outline-none" />
           </div>
         </div>

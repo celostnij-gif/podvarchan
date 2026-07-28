@@ -82,7 +82,7 @@ export function MetaZone({ pageStatus, seo }: MetaZoneProps) {
               defaultValue={currentSeo?.title ?? ''}
               maxLength={60}
               className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
-              placeholder="Психолог по тревоге онлайн | Подварчан"
+              placeholder="Психолог по тривозі онлайн | Подварчан"
             />
           </div>
 
@@ -97,7 +97,7 @@ export function MetaZone({ pageStatus, seo }: MetaZoneProps) {
               rows={3}
               maxLength={160}
               className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
-              placeholder="Эриксоновский гипноз при тревоге — мягко и с проработкой первопричины."
+              placeholder="Ериксонівський гіпноз при тривозі — м'яко та з опрацюванням першопричини."
             />
           </div>
 
@@ -107,7 +107,7 @@ export function MetaZone({ pageStatus, seo }: MetaZoneProps) {
               name="seo_keywords"
               defaultValue={currentSeo?.keywords ?? ''}
               className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
-              placeholder="гипнотерапия онлайн, тревога, панические атаки"
+              placeholder="гіпнотерапія онлайн, тривога, панічні атаки"
             />
           </div>
 

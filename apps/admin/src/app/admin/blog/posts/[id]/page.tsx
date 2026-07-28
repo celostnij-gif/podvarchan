@@ -78,6 +78,8 @@ export default async function EditPostPage(props: Props) {
   // Get RU slug for fallback image path derivation
   const ruTranslation = rows.find((r) => r.blog_post_translations?.locale === 'ru')
   const ruSlug = ruTranslation?.blog_post_translations?.slug ?? null
+  const ukTranslation = rows.find((r) => r.blog_post_translations?.locale === 'uk')
+  const ukSlug = ukTranslation?.blog_post_translations?.slug ?? null
 
   // Resolve coverImageId to a displayable URL (with fallback to static path)
   const coverImageResolvedUrl = await resolveCoverImageUrl(
@@ -112,7 +114,16 @@ export default async function EditPostPage(props: Props) {
             <PreviewButton
               entityType="blog_post"
               slug={ruSlug}
+              locale="ru"
               publicPath={`/ru/blog/${ruSlug}`}
+            />
+          )}
+          {ukSlug && (
+            <PreviewButton
+              entityType="blog_post"
+              slug={ukSlug}
+              locale="uk"
+              publicPath={`/uk/blog/${ukSlug}`}
             />
           )}
           <a

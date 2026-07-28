@@ -34,7 +34,14 @@ export default async function EditTestimonialPage(props: Props) {
         <PreviewButton
           entityType="testimonial"
           slug="list"
+          locale="ru"
           publicPath="/ru/"
+        />
+        <PreviewButton
+          entityType="testimonial"
+          slug="list"
+          locale="uk"
+          publicPath="/uk/"
         />
       </div>
       <TestimonialForm testimonial={testimonial} />

@@ -51,7 +51,7 @@ export function ProblemsZone({ data }: ProblemsZoneProps) {
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold text-zinc-100">Проблеми</h3>
-        <p className="text-sm text-zinc-500 mt-1">Блок «Що привело вас сюда» — заголовок, картки проблем, callout</p>
+        <p className="text-sm text-zinc-500 mt-1">Блок «Що привело вас сюди» — заголовок, картки проблем, callout</p>
       </div>
 
       <LocaleTabs active={locale} onChange={setLocale} />

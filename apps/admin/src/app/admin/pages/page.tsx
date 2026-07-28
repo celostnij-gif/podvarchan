@@ -55,7 +55,7 @@ export default async function PagesListPage(props: Props) {
   const getLocalizedTitle = (translations: PageTranslationRecord[]) => {
     const ru = translations.find((t) => t.locale === 'ru')
     const uk = translations.find((t) => t.locale === 'uk')
-    return ru?.title || uk?.title || 'Без названия'
+    return ru?.title || uk?.title || 'Без назви'
   }
 
   const getLocalizedSlug = (translations: PageTranslationRecord[]) => {
@@ -145,7 +145,10 @@ export default async function PagesListPage(props: Props) {
                         Редагувати
                       </Link>
                       {page.status === 'PUBLISHED' && slugs.ru && (
-                        <ViewOnSiteLink href={`/ru/${slugs.ru}`} />
+                        <ViewOnSiteLink href={`/ru/${slugs.ru}`} label="RU" />
+                      )}
+                      {page.status === 'PUBLISHED' && slugs.uk && (
+                        <ViewOnSiteLink href={`/uk/${slugs.uk}`} label="UK" />
                       )}
                       <DeleteButton pageId={page.id} pageTitle={getLocalizedTitle(page.translations)} />
                     </div>
