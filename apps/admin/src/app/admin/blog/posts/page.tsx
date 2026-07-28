@@ -2,7 +2,7 @@ import { DeleteButton } from '@/components/admin/DeleteButton'
 import { deletePost } from '@/lib/actions/blog'
 import ViewOnSiteLink from '@/components/admin/ViewOnSiteLink'
 import { getDB } from '@/db'
-import { blogPosts, blogPostTranslations, blogCategories, blogCategoryTranslations } from '@/db/schema/blog'
+import { blogPosts, blogPostTranslations, blogCategories } from '@/db/schema/blog'
 import { eq, desc, and, like } from 'drizzle-orm'
 import Link from 'next/link'
 import type { PostWithTranslations } from '../types'
@@ -28,7 +28,6 @@ export default async function BlogPostsPage(props: Props) {
     .from(blogPosts)
     .leftJoin(blogPostTranslations, eq(blogPosts.id, blogPostTranslations.postId))
     .leftJoin(blogCategories, eq(blogPosts.categoryId, blogCategories.id))
-    .leftJoin(blogCategoryTranslations, eq(blogCategories.id, blogCategoryTranslations.categoryId))
     .orderBy(desc(blogPosts.updatedAt))
 
   const rows = conditions.length > 0

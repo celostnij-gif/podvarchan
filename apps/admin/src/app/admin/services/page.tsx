@@ -18,7 +18,10 @@ export default async function ServicesListPage(props: Props) {
     conditions.push(eq(services.status, params.status as 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'))
   }
   if (params.q) {
-    conditions.push(like(serviceTranslations.title, `%${params.q}%`))
+    conditions.push(and(
+      eq(serviceTranslations.locale, 'ru'),
+      like(serviceTranslations.title, `%${params.q}%`)
+    ))
   }
 
   const query = db

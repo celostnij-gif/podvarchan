@@ -23,6 +23,7 @@ const faqSchema = z.object({
   group: z.enum(['HOME', 'GENERAL', 'SERVICE', 'CONTACTS']).optional().default('GENERAL'),
   sortOrder: z.coerce.number().int().min(0).optional().default(0),
   status: z.enum(['DRAFT', 'PUBLISHED']).optional().default('DRAFT'),
+  serviceId: z.string().nullable().optional().default(null),
   translations: z.array(z.object({
     locale: z.enum(['ru', 'uk']),
     question: z.string().min(1).max(1000).optional().default(''),
@@ -40,11 +41,12 @@ export async function createFaqItem(formData: FormData) {
   const parsed = faqSchema.safeParse({
     group: formData.get('group'), sortOrder: formData.get('sortOrder'),
     status: formData.get('status'), translations,
+    serviceId: formData.get('serviceId'),
   })
   if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
   const data = parsed.data
   const id = crypto.randomUUID()
-  await db.insert(faqItems).values({ id, group: data.group, sortOrder: data.sortOrder, status: data.status })
+  await db.insert(faqItems).values({ id, group: data.group, sortOrder: data.sortOrder, status: data.status, serviceId: data.serviceId || null })
   for (const t of data.translations) {
     await db.insert(faqItemTranslations).values({
       id: crypto.randomUUID(), faqItemId: id, locale: t.locale,
@@ -69,10 +71,11 @@ export async function updateFaqItem(id: string, formData: FormData) {
   const parsed = faqSchema.safeParse({
     group: formData.get('group'), sortOrder: formData.get('sortOrder'),
     status: formData.get('status'), translations,
+    serviceId: formData.get('serviceId'),
   })
   if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
   const data = parsed.data
-  await db.update(faqItems).set({ group: data.group, sortOrder: data.sortOrder, status: data.status }).where(eq(faqItems.id, id))
+  await db.update(faqItems).set({ group: data.group, sortOrder: data.sortOrder, status: data.status, serviceId: data.serviceId || null }).where(eq(faqItems.id, id))
   for (const t of data.translations) {
     const existingTr = await db.select().from(faqItemTranslations).where(and(eq(faqItemTranslations.faqItemId, id), eq(faqItemTranslations.locale, t.locale))).get()
     if (existingTr) {

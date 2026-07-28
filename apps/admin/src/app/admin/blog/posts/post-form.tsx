@@ -9,7 +9,6 @@ import { StructuredListEditor } from '@/components/admin/StructuredListEditor'
 import { slugify } from '@/lib/slugify'
 import type { PostWithTranslations } from '../types'
 import { useToast } from '@/components/admin'
-import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
 interface Props {
   post?: PostWithTranslations
@@ -67,7 +66,7 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
         showToast('success', 'Збережено')
         return null
       } catch (err) {
-        if (isRedirectError(err)) throw err
+        if ((err as any)?.digest === 'NEXT_REDIRECT') throw err
         const msg = err instanceof Error ? err.message : 'Невідома помилка'
         showToast('error', msg)
         return { error: msg }

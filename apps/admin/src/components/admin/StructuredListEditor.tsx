@@ -35,7 +35,7 @@ export function StructuredListEditor({ value, onChange, fields, emptyItem, label
   }
 
   const addItem = () => {
-    updateItems([...items, { ...emptyItem }])
+    updateItems([...items, { ...emptyItem, _key: crypto.randomUUID() }])
   }
 
   const removeItem = (index: number) => {
@@ -54,7 +54,7 @@ export function StructuredListEditor({ value, onChange, fields, emptyItem, label
         <p className="text-xs text-zinc-500 italic">Немає елементів</p>
       )}
       {items.map((item, i) => (
-        <div key={i} className="flex items-start gap-2 rounded-lg border border-zinc-700/50 bg-zinc-800/30 p-3">
+        <div key={item._key ?? i} className="flex items-start gap-2 rounded-lg border border-zinc-700/50 bg-zinc-800/30 p-3">
           <div className="flex-1 space-y-2">
             {fields.map((f) => (
               f.type === 'textarea' ? (

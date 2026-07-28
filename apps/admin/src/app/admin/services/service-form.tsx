@@ -4,7 +4,6 @@ import { useActionState, useState, useRef, type FormEvent } from 'react'
 import { createService, updateService } from '@/lib/actions/services'
 import Link from 'next/link'
 import type { ServiceWithTranslations } from './types'
-import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import { TipTapEditor } from '@/components/admin/editor/TipTapEditor'
 import { StructuredListEditor } from '@/components/admin/StructuredListEditor'
 import { slugify } from '@/lib/slugify'
@@ -43,7 +42,7 @@ export function ServiceForm({ service }: Props) {
         showToast('success', 'Збережено')
         return null
       } catch (err) {
-        if (isRedirectError(err)) throw err
+        if ((err as any)?.digest === 'NEXT_REDIRECT') throw err
         showToast('error', err instanceof Error ? err.message : 'Помилка')
         return { error: err instanceof Error ? err.message : 'Невідома помилка' }
       }

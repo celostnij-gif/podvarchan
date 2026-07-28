@@ -2,7 +2,6 @@
 
 import { useActionState, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import { useToast, ConfirmDialog } from '@/components/admin'
 
 interface AssetMeta {
@@ -35,7 +34,7 @@ export function MediaEditForm({ asset, onDelete }: Props) {
         router.refresh()
         return null
       } catch (err) {
-        if (isRedirectError(err)) throw err
+        if ((err as any)?.digest === 'NEXT_REDIRECT') throw err
         return { error: err instanceof Error ? err.message : 'Невідома помилка' }
       }
     },

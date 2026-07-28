@@ -58,11 +58,13 @@ export function FaqForm({ faq }: Props) {
     return (t as unknown as Record<string, string | null>)[field] ?? ''
   }
 
+  const serviceId = faq?.serviceId ?? ''
   const [ruAnswer, setRuAnswer] = useState(tr('ru', 'answer'))
   const [ukAnswer, setUkAnswer] = useState(tr('uk', 'answer'))
 
   return (
     <form action={formAction} className="space-y-6">
+      <input type="hidden" name="serviceId" value={serviceId} />
       {state?.error && <div className="rounded-lg border border-red-900/50 bg-red-900/20 p-3 text-sm text-red-400">{state.error}</div>}
 
       <fieldset className="rounded-lg border p-4">

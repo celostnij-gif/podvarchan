@@ -4,7 +4,6 @@ import { useActionState, useState, useRef } from 'react'
 import Link from 'next/link'
 import { createCategory, updateCategory } from '@/lib/actions/blog'
 import type { CategoryWithTranslations } from '../types'
-import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import { slugify } from '@/lib/slugify'
 import { useToast } from '@/components/admin'
 
@@ -28,7 +27,7 @@ export function CategoryForm({ category, services }: Props) {
         showToast('success', 'Збережено')
         return null
       } catch (err) {
-        if (isRedirectError(err)) throw err
+        if ((err as any)?.digest === 'NEXT_REDIRECT') throw err
         const msg = err instanceof Error ? err.message : 'Сталася помилка'
         showToast('error', msg)
         return { error: msg }

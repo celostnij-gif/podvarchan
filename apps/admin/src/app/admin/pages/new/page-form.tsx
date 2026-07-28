@@ -4,7 +4,6 @@ import { createPage } from '@/lib/actions/pages'
 import { useActionState } from 'react'
 import { useToast } from '@/components/admin'
 import Link from 'next/link'
-import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
 export function PageForm() {
   const { showToast } = useToast()
@@ -16,7 +15,7 @@ export function PageForm() {
         showToast('success', 'Створено')
         return null
       } catch (err) {
-        if (isRedirectError(err)) throw err
+        if ((err as any)?.digest === 'NEXT_REDIRECT') throw err
         const msg = err instanceof Error ? err.message : 'Невідома помилка'
         showToast('error', msg)
         return { error: msg }
