@@ -57,7 +57,9 @@
       "legal": "Юридична інформація"
     },
     "footerSearchPrompt": "Не знайшли що шукали?",
-    "footerSearchLink": "Скористайтеся пошуком"
+    "footerSearchLink": "Скористайтеся пошуком",
+    "visitorToday": "Сьогодні:",
+    "visitorTotal": "Всього:"
   },
   "seo": {
     "homeTitle": "Гіпнотерапія онлайн — позбавтеся тривоги та поверніть спокій",
