@@ -4,6 +4,7 @@ import { useActionState, useState } from 'react'
 import { updateHomeZone } from '@/lib/actions/home'
 import { LocaleTabs } from '../components/LocaleTabs'
 import type { ProblemsContent } from '@/lib/home/blueprint'
+import { useToast } from '@/components/admin'
 
 interface ProblemsZoneProps {
   data: { ru: ProblemsContent; uk: ProblemsContent }
@@ -11,27 +12,35 @@ interface ProblemsZoneProps {
 
 export function ProblemsZone({ data }: ProblemsZoneProps) {
   const [locale, setLocale] = useState<'ru' | 'uk'>('ru')
+  const { showToast } = useToast()
   const [state, formAction, pending] = useActionState(
     async (_prev: { error?: string; saved?: boolean } | null, formData: FormData) => {
-      const items = []
-      for (let i = 0; i < 6; i++) {
-        const icon = formData.get(`item${i}_icon`) as string
-        const title = formData.get(`item${i}_title`) as string
-        const subtitle = formData.get(`item${i}_subtitle`) as string
-        if (title) items.push({ icon: icon ?? '', title, subtitle: subtitle ?? '' })
+      try {
+        const items = []
+        for (let i = 0; i < 6; i++) {
+          const icon = formData.get(`item${i}_icon`) as string
+          const title = formData.get(`item${i}_title`) as string
+          const subtitle = formData.get(`item${i}_subtitle`) as string
+          if (title) items.push({ icon: icon ?? '', title, subtitle: subtitle ?? '' })
+        }
+        const content: ProblemsContent = {
+          heading: (formData.get('heading') as string) ?? '',
+          headingAccent: (formData.get('headingAccent') as string) ?? '',
+          items,
+          calloutTitle: (formData.get('calloutTitle') as string) ?? '',
+          calloutAccent: (formData.get('calloutAccent') as string) ?? '',
+          calloutText: (formData.get('calloutText') as string) ?? '',
+          cta: (formData.get('cta') as string) ?? '',
+        }
+        const result = await updateHomeZone({ zone: 'problems', locale, content })
+        if (!result.ok) throw new Error('Помилка збереження')
+        showToast('success', 'Збережено')
+        return { saved: true }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Сталася помилка'
+        showToast('error', msg)
+        return { error: msg }
       }
-      const content: ProblemsContent = {
-        heading: (formData.get('heading') as string) ?? '',
-        headingAccent: (formData.get('headingAccent') as string) ?? '',
-        items,
-        calloutTitle: (formData.get('calloutTitle') as string) ?? '',
-        calloutAccent: (formData.get('calloutAccent') as string) ?? '',
-        calloutText: (formData.get('calloutText') as string) ?? '',
-        cta: (formData.get('cta') as string) ?? '',
-      }
-      const result = await updateHomeZone({ zone: 'problems', locale, content })
-      if (result.ok) return { saved: true }
-      return { error: 'Помилка збереження' }
     },
     null,
   )

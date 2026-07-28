@@ -4,6 +4,7 @@ import { useActionState, useState } from 'react'
 import { updateHomeZone } from '@/lib/actions/home'
 import { LocaleTabs } from '../components/LocaleTabs'
 import type { MethodContent } from '@/lib/home/blueprint'
+import { useToast } from '@/components/admin'
 
 interface MethodZoneProps {
   data: { ru: MethodContent; uk: MethodContent }
@@ -11,23 +12,31 @@ interface MethodZoneProps {
 
 export function MethodZone({ data }: MethodZoneProps) {
   const [locale, setLocale] = useState<'ru' | 'uk'>('ru')
+  const { showToast } = useToast()
   const [state, formAction, pending] = useActionState(
     async (_prev: { error?: string; saved?: boolean } | null, formData: FormData) => {
-      const items = []
-      for (let i = 0; i < 4; i++) {
-        const title = formData.get(`item${i}_title`) as string
-        const description = formData.get(`item${i}_description`) as string
-        const duration = formData.get(`item${i}_duration`) as string
-        if (title) items.push({ title, description: description ?? '', duration: duration ?? '' })
+      try {
+        const items = []
+        for (let i = 0; i < 4; i++) {
+          const title = formData.get(`item${i}_title`) as string
+          const description = formData.get(`item${i}_description`) as string
+          const duration = formData.get(`item${i}_duration`) as string
+          if (title) items.push({ title, description: description ?? '', duration: duration ?? '' })
+        }
+        const content: MethodContent = {
+          heading: (formData.get('heading') as string) ?? '',
+          subtitle: (formData.get('subtitle') as string) ?? '',
+          items,
+        }
+        const result = await updateHomeZone({ zone: 'method', locale, content })
+        if (!result.ok) throw new Error('Помилка збереження')
+        showToast('success', 'Збережено')
+        return { saved: true }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Сталася помилка'
+        showToast('error', msg)
+        return { error: msg }
       }
-      const content: MethodContent = {
-        heading: (formData.get('heading') as string) ?? '',
-        subtitle: (formData.get('subtitle') as string) ?? '',
-        items,
-      }
-      const result = await updateHomeZone({ zone: 'method', locale, content })
-      if (result.ok) return { saved: true }
-      return { error: 'Помилка збереження' }
     },
     null,
   )

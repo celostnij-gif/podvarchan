@@ -2,18 +2,24 @@
 
 import { createPage } from '@/lib/actions/pages'
 import { useActionState } from 'react'
+import { useToast } from '@/components/admin'
 import Link from 'next/link'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
 export function PageForm() {
+  const { showToast } = useToast()
+
   const [state, formAction, isPending] = useActionState(
     async (_prev: { error?: string } | null, formData: FormData) => {
       try {
         await createPage(formData)
+        showToast('success', 'Створено')
         return null
       } catch (err) {
         if (isRedirectError(err)) throw err
-        return { error: err instanceof Error ? err.message : 'Невідома помилка' }
+        const msg = err instanceof Error ? err.message : 'Невідома помилка'
+        showToast('error', msg)
+        return { error: msg }
       }
     },
     null,

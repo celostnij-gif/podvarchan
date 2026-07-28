@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useToast } from '@/components/admin'
 import { saveContactChannel, deleteContactChannel } from '@/lib/actions/settings'
 import type { InferSelectModel } from 'drizzle-orm'
 import type { contactChannels as contactChannelsSchema } from '@/db/schema/settings'
@@ -24,6 +25,8 @@ const CHANNEL_TYPE_LABELS: Record<string, string> = {
 export function ContactChannelList({ channels }: Props) {
   const [editing, setEditing] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const { showToast } = useToast()
+
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -32,8 +35,10 @@ export function ContactChannelList({ channels }: Props) {
       const form = new FormData(e.currentTarget)
       await saveContactChannel(form)
       setEditing(null)
+      showToast('success', 'Збережено')
     } catch (err) {
-      console.error(err)
+      const msg = err instanceof Error ? err.message : 'Сталася помилка'
+      showToast('error', msg)
     } finally {
       setLoading(false)
     }
@@ -41,7 +46,13 @@ export function ContactChannelList({ channels }: Props) {
 
   async function handleDelete(id: string) {
     if (!confirm('Видалити канал?')) return
-    await deleteContactChannel(id)
+    try {
+      await deleteContactChannel(id)
+      showToast('success', 'Видалено')
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Сталася помилка'
+      showToast('error', msg)
+    }
   }
 
   function renderForm(channel?: Channel) {

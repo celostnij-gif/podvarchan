@@ -3,6 +3,7 @@
 import { useActionState, useState } from 'react'
 import { updateHomeMeta } from '@/lib/actions/home'
 import { LocaleTabs } from '../components/LocaleTabs'
+import { useToast } from '@/components/admin'
 
 interface MetaZoneProps {
   pageStatus: string
@@ -14,16 +15,24 @@ interface MetaZoneProps {
 
 export function MetaZone({ pageStatus, seo }: MetaZoneProps) {
   const [locale, setLocale] = useState<'ru' | 'uk'>('ru')
+  const { showToast } = useToast()
   const [state, formAction, pending] = useActionState(
     async (_prev: { error?: string; saved?: boolean } | null, formData: FormData) => {
-      const result = await updateHomeMeta({
-        locale,
-        title: (formData.get('seo_title') as string) || undefined,
-        description: (formData.get('seo_description') as string) || undefined,
-        keywords: (formData.get('seo_keywords') as string) || undefined,
-      })
-      if (result.ok) return { saved: true }
-      return { error: 'Помилка збереження' }
+      try {
+        const result = await updateHomeMeta({
+          locale,
+          title: (formData.get('seo_title') as string) || undefined,
+          description: (formData.get('seo_description') as string) || undefined,
+          keywords: (formData.get('seo_keywords') as string) || undefined,
+        })
+        if (!result.ok) throw new Error('Помилка збереження')
+        showToast('success', 'Збережено')
+        return { saved: true }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Сталася помилка'
+        showToast('error', msg)
+        return { error: msg }
+      }
     },
     null,
   )

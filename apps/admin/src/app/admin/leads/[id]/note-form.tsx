@@ -3,6 +3,8 @@
 import { useFormStatus } from 'react-dom'
 import { updateInternalNote } from '@/lib/actions/leads'
 import { useState } from 'react'
+import { useToast } from '@/components/admin'
+
 
 interface Props {
   leadId: string
@@ -26,8 +28,20 @@ export function InternalNoteForm({ leadId, currentNote }: Props) {
   const [note, setNote] = useState(currentNote)
   const dirty = note !== currentNote
 
+  const { showToast } = useToast()
+
+  async function handleSubmit(formData: FormData) {
+    try {
+      await updateInternalNote(leadId, formData)
+      showToast('success', 'Нотатку збережено')
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Сталася помилка'
+      showToast('error', msg)
+    }
+  }
+
   return (
-    <form action={updateInternalNote.bind(null, leadId)}>
+    <form action={handleSubmit}>
       <textarea
         name="note"
         value={note}

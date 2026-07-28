@@ -5,6 +5,7 @@ import { updateHomeContent } from '@/lib/actions/pages'
 import { SectionEditor } from '@/app/admin/pages/[id]/section-editor'
 import type { PageTranslationRecord, PageSectionWithTranslations } from '@/app/admin/pages/types'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
+import { useToast } from '@/components/admin'
 
 interface HomeEditorProps {
   pageId: string
@@ -22,15 +23,19 @@ interface HomeEditorProps {
 
 export function HomeEditor({ pageId, status, tr, hero, sections }: HomeEditorProps) {
 
+  const { showToast } = useToast()
   const [state, formAction, pending] = useActionState(
     async (_prev: { error?: string; saved?: boolean } | null, formData: FormData) => {
 
       try {
         await updateHomeContent(formData)
+        showToast('success', 'Збережено')
         return { saved: true }
       } catch (err) {
         if (isRedirectError(err)) throw err
-        return { error: err instanceof Error ? err.message : 'Невідома помилка' }
+        const msg = err instanceof Error ? err.message : 'Невідома помилка'
+        showToast('error', msg)
+        return { error: msg }
       }
     },
     null,

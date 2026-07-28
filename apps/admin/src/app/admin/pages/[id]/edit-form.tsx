@@ -4,6 +4,7 @@ import { updatePageMeta, deletePage } from '@/lib/actions/pages'
 import { useActionState } from 'react'
 import Link from 'next/link'
 import { SectionEditor } from './section-editor'
+import { useToast } from '@/components/admin'
 import type { PageTranslationRecord, PageSectionWithTranslations } from '../types'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
@@ -19,15 +20,19 @@ interface EditFormProps {
 export function EditPageForm({ page, translations, sections }: EditFormProps) {
   const ru = translations.find((t) => t.locale === 'ru')
   const uk = translations.find((t) => t.locale === 'uk')
+  const { showToast } = useToast()
 
   const [state, formAction, pending] = useActionState(
     async (_prev: { error?: string; saved?: boolean } | null, formData: FormData) => {
       try {
         await updatePageMeta(page.id, formData)
+        showToast('success', 'Збережено')
         return { saved: true }
       } catch (err) {
         if (isRedirectError(err)) throw err
-        return { error: err instanceof Error ? err.message : 'Невідома помилка' }
+        const msg = err instanceof Error ? err.message : 'Невідома помилка'
+        showToast('error', msg)
+        return { error: msg }
       }
     },
     null,

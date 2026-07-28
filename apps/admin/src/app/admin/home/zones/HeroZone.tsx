@@ -4,6 +4,7 @@ import { useActionState, useState } from 'react'
 import { updateHomeZone } from '@/lib/actions/home'
 import { LocaleTabs } from '../components/LocaleTabs'
 import type { HeroContent } from '@/lib/home/blueprint'
+import { useToast } from '@/components/admin'
 
 interface HeroZoneProps {
   data: {
@@ -14,22 +15,30 @@ interface HeroZoneProps {
 
 export function HeroZone({ data }: HeroZoneProps) {
   const [locale, setLocale] = useState<'ru' | 'uk'>('ru')
+  const { showToast } = useToast()
   const [state, formAction, pending] = useActionState(
     async (_prev: { error?: string; saved?: boolean } | null, formData: FormData) => {
-      const content: HeroContent = {
-        title: (formData.get('title') as string) ?? '',
-        subtitle: (formData.get('subtitle') as string) ?? '',
-        ctaPrimary: (formData.get('ctaPrimary') as string) ?? '',
-        ctaSecondary: (formData.get('ctaSecondary') as string) ?? '',
-        benefits: [
-          (formData.get('benefit1') as string) ?? '',
-          (formData.get('benefit2') as string) ?? '',
-          (formData.get('benefit3') as string) ?? '',
-        ].filter(Boolean),
+      try {
+        const content: HeroContent = {
+          title: (formData.get('title') as string) ?? '',
+          subtitle: (formData.get('subtitle') as string) ?? '',
+          ctaPrimary: (formData.get('ctaPrimary') as string) ?? '',
+          ctaSecondary: (formData.get('ctaSecondary') as string) ?? '',
+          benefits: [
+            (formData.get('benefit1') as string) ?? '',
+            (formData.get('benefit2') as string) ?? '',
+            (formData.get('benefit3') as string) ?? '',
+          ].filter(Boolean),
+        }
+        const result = await updateHomeZone({ zone: 'hero', locale, content })
+        if (!result.ok) throw new Error('Помилка збереження')
+        showToast('success', 'Збережено')
+        return { saved: true }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Сталася помилка'
+        showToast('error', msg)
+        return { error: msg }
       }
-      const result = await updateHomeZone({ zone: 'hero', locale, content })
-      if (result.ok) return { saved: true }
-      return { error: 'Помилка збереження' }
     },
     null,
   )

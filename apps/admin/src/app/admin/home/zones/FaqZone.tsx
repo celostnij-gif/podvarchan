@@ -5,6 +5,7 @@ import { updateHomeZone } from '@/lib/actions/home'
 import { LocaleTabs } from '../components/LocaleTabs'
 import { LinkedEntityCard } from '../components/LinkedEntityCard'
 import type { FaqContent } from '@/lib/home/blueprint'
+import { useToast } from '@/components/admin'
 
 interface FaqZoneProps {
   data: { ru: FaqContent; uk: FaqContent }
@@ -13,15 +14,23 @@ interface FaqZoneProps {
 
 export function FaqZone({ data, faqCount }: FaqZoneProps) {
   const [locale, setLocale] = useState<'ru' | 'uk'>('ru')
+  const { showToast } = useToast()
   const [state, formAction, pending] = useActionState(
     async (_prev: { error?: string; saved?: boolean } | null, formData: FormData) => {
-      const content: FaqContent = {
-        heading: (formData.get('heading') as string) ?? '',
-        subtitle: (formData.get('subtitle') as string) ?? '',
+      try {
+        const content: FaqContent = {
+          heading: (formData.get('heading') as string) ?? '',
+          subtitle: (formData.get('subtitle') as string) ?? '',
+        }
+        const result = await updateHomeZone({ zone: 'faq', locale, content })
+        if (!result.ok) throw new Error('Помилка збереження')
+        showToast('success', 'Збережено')
+        return { saved: true }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Сталася помилка'
+        showToast('error', msg)
+        return { error: msg }
       }
-      const result = await updateHomeZone({ zone: 'faq', locale, content })
-      if (result.ok) return { saved: true }
-      return { error: 'Помилка збереження' }
     },
     null,
   )

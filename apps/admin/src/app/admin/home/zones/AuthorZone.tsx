@@ -4,6 +4,7 @@ import { useActionState, useState } from 'react'
 import { updateHomeZone } from '@/lib/actions/home'
 import { LocaleTabs } from '../components/LocaleTabs'
 import type { AuthorContent } from '@/lib/home/blueprint'
+import { useToast } from '@/components/admin'
 
 interface AuthorZoneProps {
   data: { ru: AuthorContent; uk: AuthorContent }
@@ -11,26 +12,34 @@ interface AuthorZoneProps {
 
 export function AuthorZone({ data }: AuthorZoneProps) {
   const [locale, setLocale] = useState<'ru' | 'uk'>('ru')
+  const { showToast } = useToast()
   const [state, formAction, pending] = useActionState(
     async (_prev: { error?: string; saved?: boolean } | null, formData: FormData) => {
-      const paragraphs = [
-        formData.get('paragraph1') as string,
-        formData.get('paragraph2') as string,
-        formData.get('paragraph3') as string,
-      ].filter(Boolean)
-      const content: AuthorContent = {
-        headingPrefix: (formData.get('headingPrefix') as string) ?? '',
-        headingHighlight: (formData.get('headingHighlight') as string) ?? '',
-        headingSuffix: (formData.get('headingSuffix') as string) ?? '',
-        paragraphs,
-        readMore: (formData.get('readMore') as string) ?? '',
-        readMoreLink: (formData.get('readMoreLink') as string) ?? '',
-        experience: (formData.get('experience') as string) ?? '',
-        education: (formData.get('education') as string) ?? '',
+      try {
+        const paragraphs = [
+          formData.get('paragraph1') as string,
+          formData.get('paragraph2') as string,
+          formData.get('paragraph3') as string,
+        ].filter(Boolean)
+        const content: AuthorContent = {
+          headingPrefix: (formData.get('headingPrefix') as string) ?? '',
+          headingHighlight: (formData.get('headingHighlight') as string) ?? '',
+          headingSuffix: (formData.get('headingSuffix') as string) ?? '',
+          paragraphs,
+          readMore: (formData.get('readMore') as string) ?? '',
+          readMoreLink: (formData.get('readMoreLink') as string) ?? '',
+          experience: (formData.get('experience') as string) ?? '',
+          education: (formData.get('education') as string) ?? '',
+        }
+        const result = await updateHomeZone({ zone: 'author', locale, content })
+        if (!result.ok) throw new Error('Помилка збереження')
+        showToast('success', 'Збережено')
+        return { saved: true }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Сталася помилка'
+        showToast('error', msg)
+        return { error: msg }
       }
-      const result = await updateHomeZone({ zone: 'author', locale, content })
-      if (result.ok) return { saved: true }
-      return { error: 'Помилка збереження' }
     },
     null,
   )

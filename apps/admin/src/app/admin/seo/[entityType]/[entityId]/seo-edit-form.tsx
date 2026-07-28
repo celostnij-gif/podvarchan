@@ -4,6 +4,7 @@ import { useActionState } from 'react'
 import { saveSeoOverride } from '@/lib/actions/seo'
 import { useRouter } from 'next/navigation'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
+import { useToast } from '@/components/admin'
 
 interface EditFormProps {
   entityType: string
@@ -22,15 +23,20 @@ interface EditFormProps {
 export function SeoEditForm({ entityType, entityId, locale, defaults }: EditFormProps) {
   const router = useRouter()
 
+  const { showToast } = useToast()
+
   const [state, formAction, isPending] = useActionState(
     async (_prev: { error?: string } | null, formData: FormData) => {
       try {
         await saveSeoOverride(formData)
+        showToast('success', 'Збережено')
         router.refresh()
         return null
       } catch (err) {
         if (isRedirectError(err)) throw err
-        return { error: err instanceof Error ? err.message : 'Невідома помилка' }
+        const msg = err instanceof Error ? err.message : 'Сталася помилка'
+        showToast('error', msg)
+        return { error: msg }
       }
     },
     null,

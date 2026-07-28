@@ -3,6 +3,7 @@
 import { useActionState } from 'react'
 import { useRouter } from 'next/navigation'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
+import { useToast } from '@/components/admin'
 
 interface AssetMeta {
   id: string
@@ -22,11 +23,14 @@ interface Props {
 export function MediaEditForm({ asset, onDelete }: Props) {
   const router = useRouter()
 
+  const { showToast } = useToast()
+
   const [state, formAction, isPending] = useActionState(
     async (_prev: { error?: string } | null, formData: FormData) => {
       try {
         const { updateMediaMeta } = await import('@/lib/actions/media')
         await updateMediaMeta(asset.id, formData)
+        showToast('success', 'Збережено')
         router.refresh()
         return null
       } catch (err) {
@@ -41,9 +45,11 @@ export function MediaEditForm({ asset, onDelete }: Props) {
     if (!confirm('Видалити цей файл? Цю дію не можна скасувати.')) return
     try {
       await onDelete(asset.id)
+      showToast('success', 'Видалено')
       router.push('/admin/media')
-    } catch {
-      // error handled by parent
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Сталася помилка'
+      showToast('error', msg)
     }
   }
 

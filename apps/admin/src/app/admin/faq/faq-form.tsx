@@ -4,6 +4,7 @@ import { useActionState, useState } from 'react'
 import Link from 'next/link'
 import { createFaq, updateFaq } from '@/lib/actions/faq'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
+import { useToast } from '@/components/admin'
 import { TipTapEditor } from '@/components/admin/editor/TipTapEditor'
 
 interface FaqItem {
@@ -28,6 +29,7 @@ interface Props {
 
 export function FaqForm({ faq }: Props) {
   const isEdit = !!faq
+  const { showToast } = useToast()
 
   const [state, formAction, pending] = useActionState(
     async (_prev: { error?: string } | null, formData: FormData) => {
@@ -37,10 +39,13 @@ export function FaqForm({ faq }: Props) {
         } else {
           await createFaq(formData)
         }
+        showToast('success', 'Збережено')
         return null
       } catch (err) {
         if (isRedirectError(err)) throw err
-        return { error: err instanceof Error ? err.message : 'Невідома помилка' }
+        const msg = err instanceof Error ? err.message : 'Сталася помилка'
+        showToast('error', msg)
+        return { error: msg }
       }
     },
     null,

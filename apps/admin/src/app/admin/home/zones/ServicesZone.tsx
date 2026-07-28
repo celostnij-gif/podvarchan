@@ -5,6 +5,7 @@ import { updateHomeZone } from '@/lib/actions/home'
 import { LocaleTabs } from '../components/LocaleTabs'
 import { LinkedEntityCard } from '../components/LinkedEntityCard'
 import type { ServicesContent } from '@/lib/home/blueprint'
+import { useToast } from '@/components/admin'
 
 interface ServicesZoneProps {
   data: { ru: ServicesContent; uk: ServicesContent }
@@ -13,16 +14,24 @@ interface ServicesZoneProps {
 
 export function ServicesZone({ data, featuredCount }: ServicesZoneProps) {
   const [locale, setLocale] = useState<'ru' | 'uk'>('ru')
+  const { showToast } = useToast()
   const [state, formAction, pending] = useActionState(
     async (_prev: { error?: string; saved?: boolean } | null, formData: FormData) => {
-      const content: ServicesContent = {
-        heading: (formData.get('heading') as string) ?? '',
-        subtitle: (formData.get('subtitle') as string) ?? '',
-        allLink: (formData.get('allLink') as string) ?? '',
+      try {
+        const content: ServicesContent = {
+          heading: (formData.get('heading') as string) ?? '',
+          subtitle: (formData.get('subtitle') as string) ?? '',
+          allLink: (formData.get('allLink') as string) ?? '',
+        }
+        const result = await updateHomeZone({ zone: 'services', locale, content })
+        if (!result.ok) throw new Error('Помилка збереження')
+        showToast('success', 'Збережено')
+        return { saved: true }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Сталася помилка'
+        showToast('error', msg)
+        return { error: msg }
       }
-      const result = await updateHomeZone({ zone: 'services', locale, content })
-      if (result.ok) return { saved: true }
-      return { error: 'Помилка збереження' }
     },
     null,
   )

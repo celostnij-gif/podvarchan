@@ -1,6 +1,7 @@
 'use client'
 
 import { useActionState, useState } from 'react'
+import { useToast } from '@/components/admin'
 import Link from 'next/link'
 import { createTestimonial, updateTestimonial } from '@/lib/actions/testimonials'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
@@ -32,6 +33,7 @@ interface Props {
 
 export function TestimonialForm({ testimonial }: Props) {
   const isEdit = !!testimonial
+  const { showToast } = useToast()
 
   const [state, formAction, pending] = useActionState(
     async (_prev: { error?: string } | null, formData: FormData) => {
@@ -41,10 +43,13 @@ export function TestimonialForm({ testimonial }: Props) {
         } else {
           await createTestimonial(formData)
         }
+        showToast('success', 'Збережено')
         return null
       } catch (err) {
         if (isRedirectError(err)) throw err
-        return { error: err instanceof Error ? err.message : 'Невідома помилка' }
+        const msg = err instanceof Error ? err.message : 'Невідома помилка'
+        showToast('error', msg)
+        return { error: msg }
       }
     },
     null,

@@ -8,6 +8,7 @@ import { MediaPickerDialog } from '@/components/admin/media/MediaPickerDialog'
 import { StructuredListEditor } from '@/components/admin/StructuredListEditor'
 import { slugify } from '@/lib/slugify'
 import type { PostWithTranslations } from '../types'
+import { useToast } from '@/components/admin'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
 interface Props {
@@ -19,6 +20,7 @@ interface Props {
 
 export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
   const isEdit = !!post
+  const { showToast } = useToast()
   const [ruContentHtml, setRuContentHtml] = useState(post?.translations.find(t => t.locale === 'ru')?.contentHtml ?? '')
   const [ruContentJson, setRuContentJson] = useState(post?.translations.find(t => t.locale === 'ru')?.contentJson ?? '')
   const [ukContentHtml, setUkContentHtml] = useState(post?.translations.find(t => t.locale === 'uk')?.contentHtml ?? '')
@@ -62,10 +64,13 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
         } else {
           await createPost(formData)
         }
+        showToast('success', 'Збережено')
         return null
       } catch (err) {
         if (isRedirectError(err)) throw err
-        return { error: err instanceof Error ? err.message : 'Невідома помилка' }
+        const msg = err instanceof Error ? err.message : 'Невідома помилка'
+        showToast('error', msg)
+        return { error: msg }
       }
     },
     null,

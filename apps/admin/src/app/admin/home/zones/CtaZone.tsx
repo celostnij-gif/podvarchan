@@ -4,6 +4,7 @@ import { useActionState, useState } from 'react'
 import { updateHomeZone } from '@/lib/actions/home'
 import { LocaleTabs } from '../components/LocaleTabs'
 import type { CtaContent } from '@/lib/home/blueprint'
+import { useToast } from '@/components/admin'
 
 interface CtaZoneProps {
   data: { ru: CtaContent; uk: CtaContent }
@@ -11,16 +12,24 @@ interface CtaZoneProps {
 
 export function CtaZone({ data }: CtaZoneProps) {
   const [locale, setLocale] = useState<'ru' | 'uk'>('ru')
+  const { showToast } = useToast()
   const [state, formAction, pending] = useActionState(
     async (_prev: { error?: string; saved?: boolean } | null, formData: FormData) => {
-      const content: CtaContent = {
-        title: (formData.get('title') as string) ?? '',
-        description: (formData.get('description') as string) ?? '',
-        button: (formData.get('button') as string) ?? '',
+      try {
+        const content: CtaContent = {
+          title: (formData.get('title') as string) ?? '',
+          description: (formData.get('description') as string) ?? '',
+          button: (formData.get('button') as string) ?? '',
+        }
+        const result = await updateHomeZone({ zone: 'cta', locale, content })
+        if (!result.ok) throw new Error('Помилка збереження')
+        showToast('success', 'Збережено')
+        return { saved: true }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Сталася помилка'
+        showToast('error', msg)
+        return { error: msg }
       }
-      const result = await updateHomeZone({ zone: 'cta', locale, content })
-      if (result.ok) return { saved: true }
-      return { error: 'Помилка збереження' }
     },
     null,
   )

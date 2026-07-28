@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Plus, Pencil, Trash2, Power, PowerOff, ExternalLink, ArrowRight } from 'lucide-react'
 import { saveRedirectRule, deleteRedirectRule, toggleRedirectRule } from '@/lib/actions/redirects'
+import { useToast } from '@/components/admin'
 import type { InferSelectModel } from 'drizzle-orm'
 import type { redirectRules as redirectSchema } from '@/db/schema/settings'
 
@@ -15,6 +16,8 @@ interface Props {
 export function RedirectRulesList({ rules }: Props) {
   const [editing, setEditing] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const { showToast } = useToast()
+
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -23,16 +26,23 @@ export function RedirectRulesList({ rules }: Props) {
       const form = new FormData(e.currentTarget)
       await saveRedirectRule(form)
       setEditing(null)
+      showToast('success', 'Збережено')
     } catch (err) {
-      console.error(err)
-    } finally {
+      const msg = err instanceof Error ? err.message : 'Сталася помилка'
+      showToast('error', msg)
       setLoading(false)
     }
   }
 
   async function handleDelete(id: string) {
     if (!confirm('Видалити правило редиректу?')) return
-    await deleteRedirectRule(id)
+    try {
+      await deleteRedirectRule(id)
+      showToast('success', 'Видалено')
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Сталася помилка'
+      showToast('error', msg)
+    }
   }
 
   function renderForm(rule?: Rule) {

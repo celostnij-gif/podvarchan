@@ -5,6 +5,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { Trash2, Search, X, Upload } from 'lucide-react'
 import Link from 'next/link'
 import { deleteMediaBatch } from '@/lib/actions/media'
+import { useToast } from '@/components/admin'
 import { UploadZone } from '@/components/admin/media/UploadZone'
 
 interface MediaAsset {
@@ -51,6 +52,8 @@ export default function MediaListPage() {
   const [deleting, setDeleting] = useState(false)
   const [deletingSingle, setDeletingSingle] = useState<string | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const { showToast } = useToast()
+
 
   const fetchAssets = useCallback(async (q: string) => {
     setLoading(true)
@@ -110,10 +113,11 @@ export default function MediaListPage() {
     setDeleting(true)
     try {
       await deleteMediaBatch(Array.from(selected))
+      showToast('success', 'Видалено')
       setSelected(new Set())
       await fetchAssets(searchQuery)
     } catch {
-      setDeleteError('Помилка при видаленні. Спробуйте ще раз.')
+      showToast('error', 'Помилка при видаленні. Спробуйте ще раз.')
     } finally {
       setDeleting(false)
     }
@@ -125,10 +129,11 @@ export default function MediaListPage() {
     setDeletingSingle(id)
     try {
       await deleteMediaBatch([id])
+      showToast('success', 'Видалено')
       setSelected((prev) => { const n = new Set(prev); n.delete(id); return n })
       await fetchAssets(searchQuery)
     } catch {
-      setDeleteError('Помилка при видаленні. Спробуйте ще раз.')
+      showToast('error', 'Помилка при видаленні. Спробуйте ще раз.')
     } finally {
       setDeletingSingle(null)
     }

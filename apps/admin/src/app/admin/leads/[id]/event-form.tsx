@@ -2,6 +2,8 @@
 
 import { useFormStatus } from 'react-dom'
 import { addLeadEvent } from '@/lib/actions/leads'
+import { useToast } from '@/components/admin'
+
 
 interface Props {
   leadId: string
@@ -21,8 +23,20 @@ function SubmitButton() {
 }
 
 export function AddEventForm({ leadId }: Props) {
+  const { showToast } = useToast()
+
+  async function handleSubmit(formData: FormData) {
+    try {
+      await addLeadEvent(leadId, formData)
+      showToast('success', 'Подію додано')
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Сталася помилка'
+      showToast('error', msg)
+    }
+  }
+
   return (
-    <form action={addLeadEvent.bind(null, leadId)} className="space-y-2">
+    <form action={handleSubmit} className="space-y-2">
       <input
         name="type"
         type="text"

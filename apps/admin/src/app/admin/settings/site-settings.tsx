@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { updateSiteSetting, deleteSiteSetting } from '@/lib/actions/settings'
+import { useToast } from '@/components/admin'
 
 interface Props {
   settings: { key: string; valueJson: string | null }[]
@@ -46,6 +47,8 @@ function SettingInlineEditor({
 }) {
   const [localKey, setLocalKey] = useState(settingKey)
   const [localValue, setLocalValue] = useState(valueJson ?? '')
+  const { showToast } = useToast()
+
   const [loading, setLoading] = useState(false)
   const isNew = !valueJson && !KNOWN_MAP.has(settingKey) // only show key edit for new custom keys
   const known = KNOWN_MAP.get(localKey)
@@ -55,6 +58,10 @@ function SettingInlineEditor({
     setLoading(true)
     try {
       await onSave(localKey, localValue)
+      showToast('success', 'Збережено')
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Сталася помилка'
+      showToast('error', msg)
     } finally {
       setLoading(false)
     }
@@ -145,7 +152,16 @@ function SettingInlineEditor({
         {!isNew && (
           <button
             type="button"
-            onClick={() => { if (confirm('Видалити налаштування?')) onDelete(localKey) }}
+            onClick={async () => {
+              if (!confirm('Видалити налаштування?')) return
+              try {
+                await onDelete(localKey)
+                showToast('success', 'Видалено')
+              } catch (err) {
+                const msg = err instanceof Error ? err.message : 'Сталася помилка'
+                showToast('error', msg)
+              }
+            }}
             className="ml-auto rounded-lg px-4 py-2 text-sm text-red-400 hover:bg-red-900/30 hover:text-red-300 transition-colors"
           >
             Видалити

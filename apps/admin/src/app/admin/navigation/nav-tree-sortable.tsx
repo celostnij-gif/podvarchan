@@ -20,6 +20,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical, ChevronRight, ChevronDown, Plus } from 'lucide-react'
 import { saveNavigationItem, deleteNavigationItem, toggleNavigationItem, reorderNavigationItems } from '@/lib/actions/navigation'
+import { useToast } from '@/components/admin'
 
 interface NavItemData {
   id: string
@@ -112,6 +113,7 @@ function TreeItem({ node, collapsed, onToggle, onEdit }: { node: FlatNode; colla
 
 function EditForm({ item, items, onCancel }: { item?: NavItemData; items: NavItemData[]; onCancel: () => void }) {
   const [pending, setPending] = useState(false)
+  const { showToast } = useToast()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -119,8 +121,11 @@ function EditForm({ item, items, onCancel }: { item?: NavItemData; items: NavIte
     try {
       const form = new FormData(e.currentTarget)
       await saveNavigationItem(form)
+      showToast('success', 'Збережено')
       onCancel()
-    } catch {
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Сталася помилка'
+      showToast('error', msg)
       setPending(false)
     }
   }
@@ -191,6 +196,7 @@ export function NavTreeSortable({ items }: Props) {
   const [editing, setEditing] = useState<string | null>(null)
   const [flatItems, setFlatItems] = useState<FlatNode[]>(() => flattenTree(items, collapsed))
   const [saving, setSaving] = useState(false)
+  const { showToast } = useToast()
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -216,8 +222,11 @@ export function NavTreeSortable({ items }: Props) {
     try {
       const restored = restoreParents(reordered)
       await reorderNavigationItems(restored.map((i) => ({ id: i.id, parentId: i.parentId, sortOrder: i.sortOrder })))
-    } catch { setFlatItems(visibleItems) }
-    finally { setSaving(false) }
+      showToast('success', 'Порядок збережено')
+    } catch {
+      showToast('error', 'Не вдалося зберегти порядок')
+      setFlatItems(visibleItems)
+    }
   }, [flatItems, visibleItems])
 
   return (

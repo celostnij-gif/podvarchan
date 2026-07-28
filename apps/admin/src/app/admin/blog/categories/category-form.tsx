@@ -6,6 +6,7 @@ import { createCategory, updateCategory } from '@/lib/actions/blog'
 import type { CategoryWithTranslations } from '../types'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import { slugify } from '@/lib/slugify'
+import { useToast } from '@/components/admin'
 
 interface Props {
   category?: CategoryWithTranslations
@@ -14,6 +15,7 @@ interface Props {
 
 export function CategoryForm({ category, services }: Props) {
   const isEdit = !!category
+  const { showToast } = useToast()
 
   const [state, formAction, pending] = useActionState(
     async (_prev: { error?: string } | null, formData: FormData) => {
@@ -23,10 +25,13 @@ export function CategoryForm({ category, services }: Props) {
         } else {
           await createCategory(formData)
         }
+        showToast('success', 'Збережено')
         return null
       } catch (err) {
         if (isRedirectError(err)) throw err
-        return { error: err instanceof Error ? err.message : 'Невідома помилка' }
+        const msg = err instanceof Error ? err.message : 'Сталася помилка'
+        showToast('error', msg)
+        return { error: msg }
       }
     },
     null,

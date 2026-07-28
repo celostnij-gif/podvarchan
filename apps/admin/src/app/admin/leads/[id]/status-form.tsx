@@ -2,6 +2,8 @@
 
 import { useFormStatus } from 'react-dom'
 import { updateLeadStatus } from '@/lib/actions/leads'
+import { useToast } from '@/components/admin'
+
 
 interface Props {
   leadId: string
@@ -32,8 +34,20 @@ function SubmitButton() {
 }
 
 export function StatusChangeForm({ leadId, currentStatus }: Props) {
+  const { showToast } = useToast()
+
+  async function handleSubmit(formData: FormData) {
+    try {
+      await updateLeadStatus(leadId, formData)
+      showToast('success', 'Статус оновлено')
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Сталася помилка'
+      showToast('error', msg)
+    }
+  }
+
   return (
-    <form action={updateLeadStatus.bind(null, leadId)}>
+    <form action={handleSubmit}>
       <select
         name="status"
         defaultValue={currentStatus}

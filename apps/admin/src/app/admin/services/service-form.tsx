@@ -8,6 +8,7 @@ import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import { TipTapEditor } from '@/components/admin/editor/TipTapEditor'
 import { StructuredListEditor } from '@/components/admin/StructuredListEditor'
 import { slugify } from '@/lib/slugify'
+import { useToast } from '@/components/admin'
 
 interface Props {
   service?: ServiceWithTranslations
@@ -29,6 +30,7 @@ const CATEGORY_OPTIONS: { value: string; label: string }[] = [
 
 export function ServiceForm({ service }: Props) {
   const isEdit = !!service
+  const { showToast } = useToast()
 
   const [state, formAction, pending] = useActionState(
     async (_prev: { error?: string } | null, formData: FormData) => {
@@ -38,9 +40,11 @@ export function ServiceForm({ service }: Props) {
         } else {
           await createService(formData)
         }
+        showToast('success', 'Збережено')
         return null
       } catch (err) {
         if (isRedirectError(err)) throw err
+        showToast('error', err instanceof Error ? err.message : 'Помилка')
         return { error: err instanceof Error ? err.message : 'Невідома помилка' }
       }
     },

@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import AdminSidebar from './AdminSidebar'
 import AdminTopbar from './AdminTopbar'
 import CommandPalette from './CommandPalette'
+import { ToastProvider } from './Toast'
 import type { SessionWithRole } from '@/types/auth'
 import { getNewLeadCount } from '@/lib/actions/search'
 
@@ -45,20 +46,22 @@ export default function AdminShell({ children, session }: AdminShellProps) {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950">
-      <CommandPalette newLeadsCount={newLeadsCount} />
-      <AdminSidebar isOpen={sidebarOpen} onClose={handleCloseSidebar} newLeadsCount={newLeadsCount} />
-      <div className="lg:pl-64 flex flex-col min-h-screen">
-        <AdminTopbar session={session} onToggleSidebar={handleToggleSidebar} />
-        <main className="flex-1 p-4 lg:p-6 xl:p-8">
-          {children}
-        </main>
-        <footer className="px-4 lg:px-6 xl:px-8 py-4 border-t border-zinc-800/50">
-          <p className="text-xs text-zinc-600 text-center">
-            &copy; {new Date().getFullYear()} Podvarchan.com &mdash; Адмін-панель
-          </p>
-        </footer>
+    <ToastProvider>
+      <div className="min-h-screen bg-zinc-950">
+        <CommandPalette newLeadsCount={newLeadsCount} />
+        <AdminSidebar isOpen={sidebarOpen} onClose={handleCloseSidebar} newLeadsCount={newLeadsCount} />
+        <div className="lg:pl-64 flex flex-col min-h-screen">
+          <AdminTopbar session={session} onToggleSidebar={handleToggleSidebar} />
+          <main className="flex-1 p-4 lg:p-6 xl:p-8">
+            {children}
+          </main>
+          <footer className="px-4 lg:px-6 xl:px-8 py-4 border-t border-zinc-800/50">
+            <p className="text-xs text-zinc-600 text-center">
+              &copy; {new Date().getFullYear()} Podvarchan.com &mdash; Адмін-панель
+            </p>
+          </footer>
+        </div>
       </div>
-    </div>
+    </ToastProvider>
   )
 }
