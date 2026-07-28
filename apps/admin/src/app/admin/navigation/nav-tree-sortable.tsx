@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useRef } from 'react'
 import {
   DndContext,
   closestCenter,
@@ -20,6 +20,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical, ChevronRight, ChevronDown, Plus } from 'lucide-react'
 import { saveNavigationItem, deleteNavigationItem, toggleNavigationItem, reorderNavigationItems } from '@/lib/actions/navigation'
+import { ConfirmDialog } from '@/components/admin'
 import { useToast } from '@/components/admin'
 
 interface NavItemData {
@@ -57,6 +58,9 @@ function TreeItem({ node, collapsed, onToggle, onEdit }: { node: FlatNode; colla
   }
 
   const hasCollapse = node.depth < 2
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const confirmedRef = useRef(false)
+  const submitRef = useRef<HTMLButtonElement>(null)
 
   return (
     <div
@@ -100,11 +104,31 @@ function TreeItem({ node, collapsed, onToggle, onEdit }: { node: FlatNode; colla
       </button>
       <form
         action={deleteNavigationItem.bind(null, node.id)}
-        onSubmit={(e) => { if (!confirm('Видалити пункт і всі дочірні?')) e.preventDefault() }}
+        onSubmit={(e) => {
+          if (confirmedRef.current) {
+            confirmedRef.current = false
+            return
+          }
+          e.preventDefault()
+          setConfirmDelete(true)
+        }}
         className="inline"
       >
         <button type="submit" className="rounded px-1.5 py-0.5 text-xs text-red-500 hover:bg-zinc-800">Дел</button>
+        <button type="submit" ref={submitRef} className="hidden" aria-hidden="true" />
       </form>
+      <ConfirmDialog
+        open={confirmDelete}
+        title="Видалити пункт"
+        message="Видалити пункт і всі дочірні?"
+        confirmLabel="Видалити"
+        onConfirm={() => {
+          setConfirmDelete(false)
+          confirmedRef.current = true
+          submitRef.current?.click()
+        }}
+        onCancel={() => setConfirmDelete(false)}
+      />
     </div>
   )
 }

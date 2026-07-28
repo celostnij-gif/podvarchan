@@ -5,7 +5,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { Trash2, Search, X, Upload } from 'lucide-react'
 import Link from 'next/link'
 import { deleteMediaBatch } from '@/lib/actions/media'
-import { useToast } from '@/components/admin'
+import { useToast, ConfirmDialog } from '@/components/admin'
 import { UploadZone } from '@/components/admin/media/UploadZone'
 
 interface MediaAsset {
@@ -52,6 +52,8 @@ export default function MediaListPage() {
   const [deleting, setDeleting] = useState(false)
   const [deletingSingle, setDeletingSingle] = useState<string | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [batchConfirmOpen, setBatchConfirmOpen] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
   const { showToast } = useToast()
 
 
@@ -104,39 +106,13 @@ export default function MediaListPage() {
       setSelected(new Set(assets.map((a) => a.id)))
     }
   }
-
-  const handleDeleteSelected = async () => {
+  const handleDeleteSelected = () => {
     if (selected.size === 0) return
-    const label = selected.size === 1 ? '1 файл' : `${selected.size} файли(ів)`
-    if (!confirm(`Видалити ${label}? Цю дію не можна скасувати.`)) return
-    setDeleteError(null)
-    setDeleting(true)
-    try {
-      await deleteMediaBatch(Array.from(selected))
-      showToast('success', 'Видалено')
-      setSelected(new Set())
-      await fetchAssets(searchQuery)
-    } catch {
-      showToast('error', 'Помилка при видаленні. Спробуйте ще раз.')
-    } finally {
-      setDeleting(false)
-    }
+    setBatchConfirmOpen(true)
   }
 
-  const handleDeleteSingle = async (id: string) => {
-    if (!confirm('Видалити цей файл? Цю дію не можна скасувати.')) return
-    setDeleteError(null)
-    setDeletingSingle(id)
-    try {
-      await deleteMediaBatch([id])
-      showToast('success', 'Видалено')
-      setSelected((prev) => { const n = new Set(prev); n.delete(id); return n })
-      await fetchAssets(searchQuery)
-    } catch {
-      showToast('error', 'Помилка при видаленні. Спробуйте ще раз.')
-    } finally {
-      setDeletingSingle(null)
-    }
+  const handleDeleteSingle = (id: string) => {
+    setDeleteTarget(id)
   }
 
   return (
@@ -310,6 +286,53 @@ export default function MediaListPage() {
           })}
         </div>
       )}
+
+      {/* Confirm delete selected */}
+      <ConfirmDialog
+        open={batchConfirmOpen}
+        title="Підтвердження видалення"
+        message={`Видалити ${selected.size === 1 ? '1 файл' : `${selected.size} файли(ів)`}? Цю дію не можна скасувати.`}
+        onConfirm={async () => {
+          setDeleteError(null)
+          setDeleting(true)
+          try {
+            await deleteMediaBatch(Array.from(selected))
+            showToast('success', 'Видалено')
+            setSelected(new Set())
+            await fetchAssets(searchQuery)
+          } catch {
+            showToast('error', 'Помилка при видаленні. Спробуйте ще раз.')
+          } finally {
+            setDeleting(false)
+            setBatchConfirmOpen(false)
+          }
+        }}
+        onCancel={() => setBatchConfirmOpen(false)}
+      />
+
+      {/* Confirm delete single */}
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title="Підтвердження видалення"
+        message="Видалити цей файл? Цю дію не можна скасувати."
+        onConfirm={async () => {
+          const id = deleteTarget!
+          setDeleteTarget(null)
+          setDeleteError(null)
+          setDeletingSingle(id)
+          try {
+            await deleteMediaBatch([id])
+            showToast('success', 'Видалено')
+            setSelected((prev) => { const n = new Set(prev); n.delete(id); return n })
+            await fetchAssets(searchQuery)
+          } catch {
+            showToast('error', 'Помилка при видаленні. Спробуйте ще раз.')
+          } finally {
+            setDeletingSingle(null)
+          }
+        }}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   )
 }

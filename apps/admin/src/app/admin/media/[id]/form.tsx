@@ -1,9 +1,9 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
-import { useToast } from '@/components/admin'
+import { useToast, ConfirmDialog } from '@/components/admin'
 
 interface AssetMeta {
   id: string
@@ -24,6 +24,7 @@ export function MediaEditForm({ asset, onDelete }: Props) {
   const router = useRouter()
 
   const { showToast } = useToast()
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   const [state, formAction, isPending] = useActionState(
     async (_prev: { error?: string } | null, formData: FormData) => {
@@ -40,17 +41,8 @@ export function MediaEditForm({ asset, onDelete }: Props) {
     },
     null,
   )
-
   async function handleDelete() {
-    if (!confirm('Видалити цей файл? Цю дію не можна скасувати.')) return
-    try {
-      await onDelete(asset.id)
-      showToast('success', 'Видалено')
-      router.push('/admin/media')
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Сталася помилка'
-      showToast('error', msg)
-    }
+    setConfirmOpen(true)
   }
 
   return (
@@ -154,6 +146,24 @@ export function MediaEditForm({ asset, onDelete }: Props) {
           Видалити
         </button>
       </div>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Підтвердження видалення"
+        message="Видалити цей файл? Цю дію не можна скасувати."
+        onConfirm={async () => {
+          setConfirmOpen(false)
+          try {
+            await onDelete(asset.id)
+            showToast('success', 'Видалено')
+            router.push('/admin/media')
+          } catch (err) {
+            const msg = err instanceof Error ? err.message : 'Сталася помилка'
+            showToast('error', msg)
+          }
+        }}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </form>
   )
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { ZoneNav, type NavKey } from './components/ZoneNav'
 import { SaveBanner } from './components/SaveBanner'
 import { BilingualChecklist } from './components/BilingualChecklist'
@@ -32,8 +33,8 @@ interface HomeStudioProps {
   blueprintMissing?: boolean
 }
 
-/** Inline blueprint seed banner — shown when D1 has no sections for HOME */
 function BlueprintMissingBanner() {
+  const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [done, setDone] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -54,7 +55,7 @@ function BlueprintMissingBanner() {
       <div className="rounded-lg border border-green-700/40 bg-green-900/20 px-4 py-3 flex items-center gap-3">
         <span className="text-green-400 text-sm font-medium">✓ Blueprint застосовано — перезавантажте сторінку, щоб побачити дані</span>
         <button
-          onClick={() => window.location.reload()}
+          onClick={() => router.refresh()}
           className="ml-auto text-xs px-3 py-1.5 rounded-md bg-green-800/40 text-green-300 border border-green-700/40 hover:bg-green-800/70 transition-colors"
         >
           Оновити сторінку
@@ -86,6 +87,7 @@ function BlueprintMissingBanner() {
 
 /** Always-visible Blueprint management section — seed/re-seed zones and translations. */
 function BlueprintSection() {
+  const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [result, setResult] = useState<{ ok?: boolean; created?: number; error?: string } | null>(null)
 
@@ -133,7 +135,7 @@ function BlueprintSection() {
           <span>Blueprint застосовано: створено {result.created} елементів. {result.created > 0 ? 'Оновіть сторінку.' : 'Усі секції вже існують.'}</span>
           {result.created === 0 && (
             <button
-              onClick={() => window.location.reload()}
+              onClick={() => router.refresh()}
               className="ml-auto text-xs px-2 py-1 rounded bg-green-800/40 text-green-300 border border-green-700/40 hover:bg-green-800/70 transition-colors"
             >
               Оновити

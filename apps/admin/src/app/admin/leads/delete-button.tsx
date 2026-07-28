@@ -1,7 +1,9 @@
 'use client'
 
+import { useState, useRef } from 'react'
 import { useFormStatus } from 'react-dom'
 import { deleteLead } from '@/lib/actions/leads'
+import { ConfirmDialog } from '@/components/admin'
 
 interface Props {
   id: string
@@ -21,16 +23,37 @@ function SubmitButton() {
 }
 
 export function DeleteButton({ id }: Props) {
+  const [open, setOpen] = useState(false)
+  const submitRef = useRef<HTMLButtonElement>(null)
+  const submittedRef = useRef(false)
+
   return (
-    <form
-      action={deleteLead.bind(null, id)}
-      onSubmit={(e) => {
-        if (!confirm('Видалити заявку? Це також видалить історію подій.')) {
+    <>
+      <form
+        action={deleteLead.bind(null, id)}
+        onSubmit={(e) => {
+          if (submittedRef.current) {
+            submittedRef.current = false
+            return
+          }
           e.preventDefault()
-        }
-      }}
-    >
-      <SubmitButton />
-    </form>
+          setOpen(true)
+        }}
+      >
+        <SubmitButton />
+        <button type="submit" ref={submitRef} style={{ display: 'none' }} />
+      </form>
+      <ConfirmDialog
+        open={open}
+        title="Видалити заявку"
+        message="Видалити заявку? Це також видалить історію подій."
+        onConfirm={() => {
+          setOpen(false)
+          submittedRef.current = true
+          submitRef.current?.click()
+        }}
+        onCancel={() => setOpen(false)}
+      />
+    </>
   )
 }

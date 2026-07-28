@@ -1,10 +1,10 @@
 'use client'
 
 import { updatePageMeta, deletePage } from '@/lib/actions/pages'
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import Link from 'next/link'
 import { SectionEditor } from './section-editor'
-import { useToast } from '@/components/admin'
+import { ConfirmDialog, useToast } from '@/components/admin'
 import type { PageTranslationRecord, PageSectionWithTranslations } from '../types'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
@@ -21,6 +21,7 @@ export function EditPageForm({ page, translations, sections }: EditFormProps) {
   const ru = translations.find((t) => t.locale === 'ru')
   const uk = translations.find((t) => t.locale === 'uk')
   const { showToast } = useToast()
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   const [state, formAction, pending] = useActionState(
     async (_prev: { error?: string; saved?: boolean } | null, formData: FormData) => {
@@ -37,9 +38,12 @@ export function EditPageForm({ page, translations, sections }: EditFormProps) {
     },
     null,
   )
+  function handleDelete() {
+    setConfirmOpen(true)
+  }
 
-  async function handleDelete() {
-    if (!confirm('Видалити сторінку назавжди?')) return
+  async function handleConfirmDelete() {
+    setConfirmOpen(false)
     try {
       await deletePage(page.id)
     } catch (err) {
@@ -142,6 +146,16 @@ export function EditPageForm({ page, translations, sections }: EditFormProps) {
       </form>
 
       <SectionEditor pageId={page.id} sections={sections} />
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Видалити сторінку"
+        message="Видалити сторінку назавжди? Цю дію не можна скасувати."
+        confirmLabel="Видалити"
+        variant="danger"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </div>
   )
 }

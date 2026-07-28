@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { updateSiteSetting, deleteSiteSetting } from '@/lib/actions/settings'
-import { useToast } from '@/components/admin'
+import { useToast, ConfirmDialog } from '@/components/admin'
 
 interface Props {
   settings: { key: string; valueJson: string | null }[]
@@ -50,6 +50,7 @@ function SettingInlineEditor({
   const { showToast } = useToast()
 
   const [loading, setLoading] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
   const isNew = !valueJson && !KNOWN_MAP.has(settingKey) // only show key edit for new custom keys
   const known = KNOWN_MAP.get(localKey)
 
@@ -67,9 +68,20 @@ function SettingInlineEditor({
     }
   }
 
+  async function handleDeleteConfirm() {
+    try {
+      await onDelete(localKey)
+      setConfirmOpen(false)
+      showToast('success', 'Видалено')
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Сталася помилка'
+      showToast('error', msg)
+    }
+  }
+
   return (
-    <form onSubmit={handleSave} className="space-y-3 rounded-lg border border-zinc-700/50 bg-zinc-800/40 p-4">
-      <div className="flex items-start gap-3">
+    <>
+      <form onSubmit={handleSave} className="space-y-3 rounded-lg border border-zinc-700/50 bg-zinc-800/40 p-4">
         {/* Key field */}
         <div className="flex-1">
           <label className="mb-1 block text-xs font-medium text-zinc-500">
@@ -102,7 +114,6 @@ function SettingInlineEditor({
             ))}
           </datalist>
         </div>
-      </div>
 
       {/* Value field */}
       <div>
@@ -152,16 +163,7 @@ function SettingInlineEditor({
         {!isNew && (
           <button
             type="button"
-            onClick={async () => {
-              if (!confirm('Видалити налаштування?')) return
-              try {
-                await onDelete(localKey)
-                showToast('success', 'Видалено')
-              } catch (err) {
-                const msg = err instanceof Error ? err.message : 'Сталася помилка'
-                showToast('error', msg)
-              }
-            }}
+            onClick={() => setConfirmOpen(true)}
             className="ml-auto rounded-lg px-4 py-2 text-sm text-red-400 hover:bg-red-900/30 hover:text-red-300 transition-colors"
           >
             Видалити
@@ -169,6 +171,16 @@ function SettingInlineEditor({
         )}
       </div>
     </form>
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Видалити налаштування"
+        message="Ви впевнені, що хочете видалити це налаштування?"
+        confirmLabel="Видалити"
+        variant="danger"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setConfirmOpen(false)}
+      />
+    </>
   )
 }
 

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Plus, Pencil, Trash2, Power, PowerOff, ExternalLink, ArrowRight } from 'lucide-react'
 import { saveRedirectRule, deleteRedirectRule, toggleRedirectRule } from '@/lib/actions/redirects'
-import { useToast } from '@/components/admin'
+import { useToast, ConfirmDialog } from '@/components/admin'
 import type { InferSelectModel } from 'drizzle-orm'
 import type { redirectRules as redirectSchema } from '@/db/schema/settings'
 
@@ -17,6 +17,7 @@ export function RedirectRulesList({ rules }: Props) {
   const [editing, setEditing] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const { showToast } = useToast()
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
 
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -34,10 +35,11 @@ export function RedirectRulesList({ rules }: Props) {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm('Видалити правило редиректу?')) return
+  async function handleDeleteConfirm() {
+    if (!confirmDelete) return
     try {
-      await deleteRedirectRule(id)
+      await deleteRedirectRule(confirmDelete)
+      setConfirmDelete(null)
       showToast('success', 'Видалено')
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Сталася помилка'
@@ -201,7 +203,7 @@ export function RedirectRulesList({ rules }: Props) {
                   <Pencil className="h-3.5 w-3.5" />
                 </button>
                 <button
-                  onClick={() => handleDelete(r.id)}
+                  onClick={() => setConfirmDelete(r.id)}
                   className="rounded p-1.5 text-zinc-500 hover:bg-zinc-800 hover:text-red-400 transition-colors"
                   title="Видалити"
                 >
@@ -230,6 +232,16 @@ export function RedirectRulesList({ rules }: Props) {
           {renderForm()}
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmDelete !== null}
+        title="Видалити правило редиректу"
+        message="Ви впевнені, що хочете видалити це правило назавжди?"
+        confirmLabel="Видалити"
+        variant="danger"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setConfirmDelete(null)}
+      />
     </div>
   )
 }

@@ -1,7 +1,9 @@
 'use client'
 
+import { useState, useRef } from 'react'
 import { useFormStatus } from 'react-dom'
 
+import { ConfirmDialog } from '@/components/admin'
 /**
  * Shared destructive-row "Видалити" button used in list pages (services, categories).
  * `onDelete` is a server-action bound with its id (e.g. `deleteService.bind(null, id)`).
@@ -17,17 +19,40 @@ export function DeleteButton({
   label?: string
   className?: string
 }) {
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const hiddenRef = useRef<HTMLButtonElement>(null)
+  const shouldSubmit = useRef(false)
+
   return (
-    <form
-      action={onDelete}
-      onSubmit={(e) => {
-        if (!confirm(confirmMessage)) {
+    <>
+      <form
+        action={onDelete}
+        onSubmit={(e) => {
+          if (shouldSubmit.current) {
+            shouldSubmit.current = false
+            return
+          }
           e.preventDefault()
-        }
-      }}
-    >
-      <SubmitButton label={label} className={className} />
-    </form>
+          setConfirmOpen(true)
+        }}
+      >
+        <SubmitButton label={label} className={className} />
+        <button ref={hiddenRef} type="submit" style={{ display: 'none' }} />
+      </form>
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Підтвердження"
+        message={confirmMessage}
+        confirmLabel="Видалити"
+        variant="danger"
+        onConfirm={() => {
+          shouldSubmit.current = true
+          hiddenRef.current?.click()
+          setConfirmOpen(false)
+        }}
+        onCancel={() => setConfirmOpen(false)}
+      />
+    </>
   )
 }
 

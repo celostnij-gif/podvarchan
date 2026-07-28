@@ -6,6 +6,7 @@ import type { PageSectionWithTranslations } from '../types'
 import { BlockEditorPanel } from '@/components/admin/BlockEditorPanel'
 import { BlockLibraryDialog } from '@/components/admin/BlockLibraryDialog'
 import { getBlockDefinition, getAllBlockDefinitions, parseBlockContent } from '@/lib/blocks/registry'
+import { ConfirmDialog } from '@/components/admin'
 import {
   DndContext,
   closestCenter,
@@ -44,6 +45,7 @@ function SectionEditorItem({
   onToggle: (id: string, enabled: boolean) => void
 }) {
   const [saving, setSaving] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   const {
     attributes,
@@ -84,9 +86,12 @@ function SectionEditorItem({
       setSaving(false)
     }
   }, [section.section.id, onUpdate])
+  const handleDelete = useCallback(() => {
+    setConfirmOpen(true)
+  }, [])
 
-  const handleDelete = useCallback(async () => {
-    if (!confirm('Видалити секцію?')) return
+  const handleConfirmDelete = useCallback(async () => {
+    setConfirmOpen(false)
     try {
       await deleteSection(section.section.id)
       onDelete(section.section.id)
@@ -94,6 +99,10 @@ function SectionEditorItem({
       console.error(err)
     }
   }, [section.section.id, onDelete])
+
+  const handleCancelDelete = useCallback(() => {
+    setConfirmOpen(false)
+  }, [])
 
   const handleToggle = useCallback(async () => {
     const next = !section.section.enabled
@@ -107,7 +116,7 @@ function SectionEditorItem({
 
   const def = getBlockDefinition(section.section.type)
 
-  return (
+  return (<>
     <div
       ref={setNodeRef}
       style={style}
@@ -167,7 +176,16 @@ function SectionEditorItem({
         </div>
       )}
     </div>
-  )
+    <ConfirmDialog
+      open={confirmOpen}
+      title="Видалити секцію"
+      message={`Видалити секцію «${section.section.key}»? Цю дію не можна скасувати.`}
+      confirmLabel="Видалити"
+      variant="danger"
+      onConfirm={handleConfirmDelete}
+      onCancel={handleCancelDelete}
+    />
+  </>)
 }
 
 export function SectionEditor({ pageId, sections: initialSections }: SectionEditorProps) {

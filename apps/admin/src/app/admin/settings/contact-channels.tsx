@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useToast } from '@/components/admin'
+import { useToast, ConfirmDialog } from '@/components/admin'
 import { saveContactChannel, deleteContactChannel } from '@/lib/actions/settings'
 import type { InferSelectModel } from 'drizzle-orm'
 import type { contactChannels as contactChannelsSchema } from '@/db/schema/settings'
@@ -26,6 +26,7 @@ export function ContactChannelList({ channels }: Props) {
   const [editing, setEditing] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const { showToast } = useToast()
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
 
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -44,10 +45,11 @@ export function ContactChannelList({ channels }: Props) {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm('Видалити канал?')) return
+  async function handleDeleteConfirm() {
+    if (!confirmDelete) return
     try {
-      await deleteContactChannel(id)
+      await deleteContactChannel(confirmDelete)
+      setConfirmDelete(null)
       showToast('success', 'Видалено')
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Сталася помилка'
@@ -169,7 +171,7 @@ export function ContactChannelList({ channels }: Props) {
               Редагувати
             </button>
             <button
-              onClick={() => handleDelete(ch.id)}
+              onClick={() => setConfirmDelete(ch.id)}
               className="rounded px-2 py-1 text-xs text-red-400 hover:bg-zinc-800 hover:text-red-300 transition-colors"
             >
               Видалити
@@ -190,6 +192,16 @@ export function ContactChannelList({ channels }: Props) {
           {renderForm()}
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmDelete !== null}
+        title="Видалити канал"
+        message="Ви впевнені, що хочете видалити цей канал зв'язку?"
+        confirmLabel="Видалити"
+        variant="danger"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setConfirmDelete(null)}
+      />
     </div>
   )
 }
