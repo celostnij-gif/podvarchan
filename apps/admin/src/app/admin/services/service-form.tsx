@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useState, useRef, type FormEvent } from 'react'
+import { useActionState, useState, useRef, useEffect, type FormEvent } from 'react'
 import { createService, updateService } from '@/lib/actions/services'
 import Link from 'next/link'
 import type { ServiceWithTranslations } from './types'
@@ -67,6 +67,17 @@ export function ServiceForm({ service }: Props) {
   const slugAutoRef = useRef(!isEdit) // only auto-derive on create
   const statusRef = useRef<HTMLSelectElement>(null)
   const formRef = useRef<HTMLFormElement>(null)
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault()
+      }
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [hasUnsavedChanges])
 
   function handlePublish(e: FormEvent, status: string) {
     e.preventDefault()
@@ -76,6 +87,7 @@ export function ServiceForm({ service }: Props) {
 
   function handleRuTitleChange(v: string) {
     setRuTitle(v)
+    setHasUnsavedChanges(true)
     if (!slugAutoRef.current) return
     const s = slugify(v)
     setSlugBase(s)
@@ -189,7 +201,7 @@ export function ServiceForm({ service }: Props) {
               <label className="block text-xs font-medium text-zinc-400 mb-1">Основа URL (внутрішня)</label>
               <input
                 value={slugBase}
-                onChange={(e) => { slugAutoRef.current = false; setSlugBase(e.target.value) }}
+                onChange={(e) => { slugAutoRef.current = false; setSlugBase(e.target.value); setHasUnsavedChanges(true) }}
                 className="w-full rounded border border-zinc-700 bg-zinc-900/50 px-2 py-1.5 text-xs font-mono text-zinc-200 focus:border-amber-500/50 focus:outline-none"
               />
             </div>
@@ -197,7 +209,7 @@ export function ServiceForm({ service }: Props) {
               <label className="block text-xs font-medium text-zinc-400 mb-1">Slug RU</label>
               <input
                 value={ruSlug}
-                onChange={(e) => { slugAutoRef.current = false; setRuSlug(e.target.value) }}
+                onChange={(e) => { slugAutoRef.current = false; setRuSlug(e.target.value); setHasUnsavedChanges(true) }}
                 className="w-full rounded border border-zinc-700 bg-zinc-900/50 px-2 py-1.5 text-xs font-mono text-zinc-200 focus:border-amber-500/50 focus:outline-none"
               />
             </div>
@@ -205,7 +217,7 @@ export function ServiceForm({ service }: Props) {
               <label className="block text-xs font-medium text-zinc-400 mb-1">Slug UK</label>
               <input
                 value={ukSlug}
-                onChange={(e) => { slugAutoRef.current = false; setUkSlug(e.target.value) }}
+                onChange={(e) => { slugAutoRef.current = false; setUkSlug(e.target.value); setHasUnsavedChanges(true) }}
                 className="w-full rounded border border-zinc-700 bg-zinc-900/50 px-2 py-1.5 text-xs font-mono text-zinc-200 focus:border-amber-500/50 focus:outline-none"
               />
             </div>
@@ -220,6 +232,7 @@ export function ServiceForm({ service }: Props) {
         titleValue={ruTitle}
         slugValue={ruSlug}
         onTitleChange={handleRuTitleChange}
+        onFieldChange={() => setHasUnsavedChanges(true)}
       />
       <LocaleTab
         label="🇺🇦 Українська"
@@ -228,6 +241,7 @@ export function ServiceForm({ service }: Props) {
         titleValue={tr('uk', 'title')}
         slugValue={ukSlug}
         onTitleChange={() => {}}
+        onFieldChange={() => setHasUnsavedChanges(true)}
       />
 
       <div className="flex items-center gap-3 border-t border-zinc-800 pt-4">
@@ -284,6 +298,7 @@ function LocaleTab({
   titleValue,
   slugValue,
   onTitleChange,
+  onFieldChange,
 }: {
   label: string
   locale: string
@@ -291,6 +306,7 @@ function LocaleTab({
   titleValue: string
   slugValue: string
   onTitleChange: (v: string) => void
+  onFieldChange?: () => void
 }) {
   const [descriptionHtml, setDescriptionHtml] = useState(tr(locale, 'description'))
   const [contentHtml, setContentHtml] = useState(tr(locale, 'contentHtml'))
@@ -317,7 +333,7 @@ function LocaleTab({
             id={`${locale}_title`}
             name={`${locale}_title`}
             defaultValue={titleValue}
-            onChange={(e) => locale === 'ru' && onTitleChange(e.target.value)}
+            onChange={(e) => { locale === 'ru' && onTitleChange(e.target.value); onFieldChange?.() }}
             required
             placeholder={locale === 'ru' ? 'Наприклад: Гіпнотерапія' : 'Наприклад: Гіпнотерапія (UK)'}
             className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
@@ -381,12 +397,12 @@ function LocaleTab({
         <div className="sm:col-span-2">
           <label className="block text-sm font-medium text-zinc-300 mb-1">Опис послуги</label>
           <input type="hidden" name={`${locale}_description`} value={descriptionHtml} />
-          <TipTapEditor value={descriptionHtml} onChange={(html) => setDescriptionHtml(html)} placeholder="Детальний опис послуги..." />
+          <TipTapEditor value={descriptionHtml} onChange={(html) => { setDescriptionHtml(html); onFieldChange?.() }} placeholder="Детальний опис послуги..." />
         </div>
         <div className="sm:col-span-2">
           <label className="block text-sm font-medium text-zinc-300 mb-1">Контент сторінки (HTML)</label>
           <input type="hidden" name={`${locale}_contentHtml`} value={contentHtml} />
-          <TipTapEditor value={contentHtml} onChange={(html) => setContentHtml(html)} placeholder="Повний контент сторінки (HTML)..." />
+          <TipTapEditor value={contentHtml} onChange={(html) => { setContentHtml(html); onFieldChange?.() }} placeholder="Повний контент сторінки (HTML)..." />
         </div>
 
 
@@ -395,7 +411,7 @@ function LocaleTab({
           <input type="hidden" name={`${locale}_symptomsJson`} value={symptomsJson} />
           <StructuredListEditor
             value={symptomsJson}
-            onChange={setSymptomsJson}
+            onChange={(v) => { setSymptomsJson(v); onFieldChange?.() }}
             fields={[
               { key: 'icon', label: 'Іконка (emoji)' },
               { key: 'title', label: 'Симптом' },
@@ -411,7 +427,7 @@ function LocaleTab({
           <input type="hidden" name={`${locale}_processJson`} value={processJson} />
           <StructuredListEditor
             value={processJson}
-            onChange={setProcessJson}
+            onChange={(v) => { setProcessJson(v); onFieldChange?.() }}
             fields={[
               { key: 'step', label: 'Крок (номер або назва)' },
               { key: 'title', label: 'Заголовок' },
@@ -427,7 +443,7 @@ function LocaleTab({
           <input type="hidden" name={`${locale}_benefitsJson`} value={benefitsJson} />
           <StructuredListEditor
             value={benefitsJson}
-            onChange={setBenefitsJson}
+            onChange={(v) => { setBenefitsJson(v); onFieldChange?.() }}
             fields={[
               { key: 'icon', label: 'Іконка (emoji)' },
               { key: 'title', label: 'Перевага' },
@@ -443,7 +459,7 @@ function LocaleTab({
           <input type="hidden" name={`${locale}_faqJson`} value={faqJson} />
           <StructuredListEditor
             value={faqJson}
-            onChange={setFaqJson}
+            onChange={(v) => { setFaqJson(v); onFieldChange?.() }}
             fields={[
               { key: 'question', label: 'Питання' },
               { key: 'answer', label: 'Відповідь', type: 'textarea' },

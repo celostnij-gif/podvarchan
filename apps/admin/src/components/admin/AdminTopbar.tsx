@@ -20,14 +20,19 @@ const BREADCRUMB_LABELS: Record<string, string> = {
   'testimonials': 'Відгуки',
   'pages': 'Сторінки',
   'media': 'Медіа',
-  'leads': 'Заявки',
+  'leads': 'Ліди',
   'navigation': 'Навігація',
   'users': 'Користувачі',
   'settings': 'Налаштування',
   'redirects': 'Редиректи',
-  'audit': 'Журнал',
+  'audit': 'Аудит',
   'login': 'Вхід',
+  'revisions': 'Версії',
+  'debug-tools': 'Інструменти',
+  'home': 'Головна',
+  'seo': 'SEO',
 }
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 export interface AdminTopbarProps {
   session: SessionWithRole | null
@@ -40,7 +45,7 @@ export default function AdminTopbar({ session, onToggleSidebar }: AdminTopbarPro
   const segments = pathname.split('/').filter(Boolean)
   const breadcrumbs = segments.map((segment, index) => {
     const href = '/' + segments.slice(0, index + 1).join('/')
-    return { label: BREADCRUMB_LABELS[segment] ?? segment, href }
+    return { label: BREADCRUMB_LABELS[segment] ?? (UUID_RE.test(segment) ? 'Редагувати' : segment), href }
   })
 
 

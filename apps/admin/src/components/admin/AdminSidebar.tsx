@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -127,6 +128,10 @@ function NavGroupComponent({ group, pathname, newLeadsCount }: { group: NavGroup
 
 export default function AdminSidebar({ isOpen, onClose, newLeadsCount }: AdminSidebarProps) {
   const pathname = usePathname()
+
+  useEffect(() => {
+    onClose()
+  }, [pathname, onClose])
 
   return (
     <>

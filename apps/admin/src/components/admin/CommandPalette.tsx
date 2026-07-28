@@ -18,7 +18,7 @@ import {
   Loader2,
   type LucideIcon,
 } from 'lucide-react'
-import { searchAdmin, type SearchResultItem } from '@/lib/actions/search'
+import { adminSearch, type SearchResultItem } from '@/lib/actions/search'
 
 interface QuickAction {
   label: string
@@ -85,7 +85,7 @@ export default function CommandPalette({ newLeadsCount: _newLeadsCount }: Comman
 
     const timer = setTimeout(async () => {
       setLoading(true)
-      const result = await searchAdmin(query)
+      const result = await adminSearch(query)
       if (result.success && result.data) {
         setResults(result.data)
       }

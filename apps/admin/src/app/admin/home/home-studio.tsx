@@ -3,7 +3,6 @@
 import { useState, useCallback, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { ZoneNav, type NavKey } from './components/ZoneNav'
-import { SaveBanner } from './components/SaveBanner'
 import { BilingualChecklist } from './components/BilingualChecklist'
 import { MetaZone } from './zones/MetaZone'
 import { HeroZone } from './zones/HeroZone'
@@ -252,7 +251,6 @@ export function HomeStudio({ pageId, pageStatus, hero, sections, enabledMap, seo
       {/* Blueprint — always visible, not hidden in a sub-tab */}
       <BlueprintSection />
 
-      <SaveBanner state="idle" />
     </div>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useState, useRef } from 'react'
+import { useActionState, useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { createCategory, updateCategory } from '@/lib/actions/blog'
 import type { CategoryWithTranslations } from '../types'
@@ -49,9 +49,21 @@ export function CategoryForm({ category, services }: Props) {
   const [ruSlug, setRuSlug] = useState(tr('ru', 'slug'))
   const [ukSlug, setUkSlug] = useState(tr('uk', 'slug'))
   const slugAutoRef = useRef(!isEdit)
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault()
+      }
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [hasUnsavedChanges])
 
   function handleRuNameChange(v: string) {
     setRuName(v)
+    setHasUnsavedChanges(true)
     if (!slugAutoRef.current) return
     const s = slugify(v)
     setSlugBase(s)
@@ -112,19 +124,19 @@ export function CategoryForm({ category, services }: Props) {
             <div>
               <label className="block text-xs font-medium text-zinc-400 mb-1">Основа URL (внутрішня)</label>
               <input value={slugBase}
-                onChange={(e) => { slugAutoRef.current = false; setSlugBase(e.target.value) }}
+                onChange={(e) => { slugAutoRef.current = false; setSlugBase(e.target.value); setHasUnsavedChanges(true) }}
                 className="w-full rounded border border-zinc-700 bg-zinc-900/50 px-2 py-1.5 text-xs font-mono text-zinc-200 focus:border-amber-500/50 focus:outline-none" />
             </div>
             <div>
               <label className="block text-xs font-medium text-zinc-400 mb-1">Slug RU</label>
               <input value={ruSlug}
-                onChange={(e) => { slugAutoRef.current = false; setRuSlug(e.target.value) }}
+                onChange={(e) => { slugAutoRef.current = false; setRuSlug(e.target.value); setHasUnsavedChanges(true) }}
                 className="w-full rounded border border-zinc-700 bg-zinc-900/50 px-2 py-1.5 text-xs font-mono text-zinc-200 focus:border-amber-500/50 focus:outline-none" />
             </div>
             <div>
               <label className="block text-xs font-medium text-zinc-400 mb-1">Slug UK</label>
               <input value={ukSlug}
-                onChange={(e) => { slugAutoRef.current = false; setUkSlug(e.target.value) }}
+                onChange={(e) => { slugAutoRef.current = false; setUkSlug(e.target.value); setHasUnsavedChanges(true) }}
                 className="w-full rounded border border-zinc-700 bg-zinc-900/50 px-2 py-1.5 text-xs font-mono text-zinc-200 focus:border-amber-500/50 focus:outline-none" />
             </div>
           </div>

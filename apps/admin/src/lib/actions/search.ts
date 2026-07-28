@@ -184,8 +184,6 @@ export async function adminSearch(query: string): Promise<{ success: boolean; da
   }
 }
 
-/** @deprecated use adminSearch */
-export const searchAdmin = adminSearch
 
 export async function getNewLeadCount(): Promise<{ success: boolean; data: number }> {
   const user = await getCurrentUser()

@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useState } from 'react'
+import { useActionState, useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createFaq, updateFaq } from '@/lib/actions/faq'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
@@ -61,6 +61,17 @@ export function FaqForm({ faq }: Props) {
   const serviceId = faq?.serviceId ?? ''
   const [ruAnswer, setRuAnswer] = useState(tr('ru', 'answer'))
   const [ukAnswer, setUkAnswer] = useState(tr('uk', 'answer'))
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault()
+      }
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [hasUnsavedChanges])
 
   return (
     <form action={formAction} className="space-y-6">
@@ -73,6 +84,7 @@ export function FaqForm({ faq }: Props) {
           <div>
             <label htmlFor="group" className="block text-sm font-medium text-zinc-300">Група</label>
             <select id="group" name="group" defaultValue={faq?.group ?? 'GENERAL'}
+              onChange={() => setHasUnsavedChanges(true)}
               className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30">
               <option value="HOME">Головна</option>
               <option value="GENERAL">Загальні</option>
@@ -83,6 +95,7 @@ export function FaqForm({ faq }: Props) {
           <div>
             <label htmlFor="status" className="block text-sm font-medium text-zinc-300">Статус</label>
             <select id="status" name="status" defaultValue={faq?.status ?? 'DRAFT'}
+              onChange={() => setHasUnsavedChanges(true)}
               className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30">
               <option value="DRAFT">Чернетка</option>
               <option value="PUBLISHED">Опубліковано</option>
@@ -91,11 +104,13 @@ export function FaqForm({ faq }: Props) {
           <div>
             <label htmlFor="sortOrder" className="block text-sm font-medium text-zinc-300">Порядок</label>
             <input id="sortOrder" name="sortOrder" type="number" min={0} defaultValue={faq?.sortOrder ?? 0}
+              onChange={() => setHasUnsavedChanges(true)}
               className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
           <div>
             <label htmlFor="serviceId" className="block text-sm font-medium text-zinc-300">ID послуги</label>
             <input id="serviceId" name="serviceId" defaultValue={faq?.serviceId ?? ''}
+              onChange={() => setHasUnsavedChanges(true)}
               className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
         </div>
@@ -107,12 +122,13 @@ export function FaqForm({ faq }: Props) {
           <div>
             <label htmlFor="ru_question" className="block text-sm font-medium text-zinc-300">Питання *</label>
             <input id="ru_question" name="ru_question" defaultValue={tr('ru', 'question')} required
+              onChange={() => setHasUnsavedChanges(true)}
               className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
           <div>
             <label className="block text-sm font-medium text-zinc-300">Відповідь *</label>
             <input type="hidden" name="ru_answer" value={ruAnswer} />
-            <TipTapEditor value={ruAnswer} onChange={(html) => setRuAnswer(html)} placeholder="Відповідь на питання..." />
+            <TipTapEditor value={ruAnswer} onChange={(html) => { setRuAnswer(html); setHasUnsavedChanges(true) }} placeholder="Відповідь на питання..." />
           </div>
         </div>
       </fieldset>
@@ -123,12 +139,13 @@ export function FaqForm({ faq }: Props) {
           <div>
             <label htmlFor="uk_question" className="block text-sm font-medium text-zinc-300">Питання *</label>
             <input id="uk_question" name="uk_question" defaultValue={tr('uk', 'question')} required
+              onChange={() => setHasUnsavedChanges(true)}
               className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
           <div>
             <label className="block text-sm font-medium text-zinc-300">Відповідь *</label>
             <input type="hidden" name="uk_answer" value={ukAnswer} />
-            <TipTapEditor value={ukAnswer} onChange={(html) => setUkAnswer(html)} placeholder="Відповідь на питання..." />
+            <TipTapEditor value={ukAnswer} onChange={(html) => { setUkAnswer(html); setHasUnsavedChanges(true) }} placeholder="Відповідь на питання..." />
           </div>
         </div>
       </fieldset>

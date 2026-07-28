@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useState, useCallback, useRef, type FormEvent } from 'react'
+import { useActionState, useState, useCallback, useRef, useEffect, type FormEvent } from 'react'
 import Link from 'next/link'
 import { createPost, updatePost } from '@/lib/actions/blog'
 import { TipTapEditor } from '@/components/admin/editor/TipTapEditor'
@@ -34,8 +34,20 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
   const statusRef = useRef<HTMLSelectElement>(null)
   const formRef = useRef<HTMLFormElement>(null)
   const slugAutoRef = useRef(!isEdit)
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault()
+      }
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [hasUnsavedChanges])
 
   function handleTitleChange(locale: 'ru' | 'uk', value: string) {
+    setHasUnsavedChanges(true)
     if (!slugAutoRef.current) return
     const slugInput = document.getElementById(`${locale}_slug`) as HTMLInputElement | null
     if (slugInput) slugInput.value = slugify(value)
@@ -138,7 +150,7 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
                 {coverImageUrl && (
                   <button
                     type="button"
-                    onClick={() => { setCoverImageUrl(''); setCoverImageIdState('') }}
+                    onClick={() => { setCoverImageUrl(''); setCoverImageIdState(''); setHasUnsavedChanges(true) }}
                     className="rounded-lg bg-red-900/30 px-3 py-2 text-sm text-red-400 hover:bg-red-900/50"
                   >
                     Видалити
@@ -154,7 +166,7 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
                 <input
                   type="text"
                   value={coverImageUrl}
-                  onChange={(e) => { setCoverImageUrl(e.target.value); setCoverImageIdState(e.target.value) }}
+                  onChange={(e) => { setCoverImageUrl(e.target.value); setCoverImageIdState(e.target.value); setHasUnsavedChanges(true) }}
                   placeholder="/api/media/... або /images/..."
                   className="mt-2 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
                 />
@@ -187,6 +199,7 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
           if (asset.publicUrl) setCoverImageUrl(asset.publicUrl)
           if (asset.id) setCoverImageIdState(asset.id)
           setShowCoverPicker(false)
+          setHasUnsavedChanges(true)
         }}
       />
 
@@ -197,7 +210,7 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
           <div>
             <label htmlFor="ru_slug" className="block text-sm font-medium text-zinc-300">Slug *</label>
             <input id="ru_slug" name="ru_slug" defaultValue={tr('ru', 'slug')} required
-              onChange={() => { slugAutoRef.current = false }}
+              onChange={() => { slugAutoRef.current = false; setHasUnsavedChanges(true) }}
               className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
           <div>
@@ -215,7 +228,7 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
             <label className="block text-sm font-medium text-zinc-300 mb-1">Контент (RU)</label>
             <TipTapEditor
               value={ruContentHtml}
-              onChange={(html, json) => { setRuContentHtml(html); setRuContentJson(json) }}
+              onChange={(html, json) => { setRuContentHtml(html); setRuContentJson(json); setHasUnsavedChanges(true) }}
               placeholder="Введіть текст статті..."
               onImageSelected={(asset) => {
                 if (asset.publicUrl) setCoverImageUrl(asset.publicUrl)
@@ -229,7 +242,7 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
             <input type="hidden" name="ru_faqJson" value={ruFaqJson} />
             <StructuredListEditor
               value={ruFaqJson}
-              onChange={setRuFaqJson}
+              onChange={(v) => { setRuFaqJson(v); setHasUnsavedChanges(true) }}
               fields={[
                 { key: 'question', label: 'Питання' },
                 { key: 'answer', label: 'Відповідь', type: 'textarea' },
@@ -248,7 +261,7 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
           <div>
             <label htmlFor="uk_slug" className="block text-sm font-medium text-zinc-300">Slug *</label>
             <input id="uk_slug" name="uk_slug" defaultValue={tr('uk', 'slug')} required
-              onChange={() => { slugAutoRef.current = false }}
+              onChange={() => { slugAutoRef.current = false; setHasUnsavedChanges(true) }}
               className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
           <div>
@@ -266,7 +279,7 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
             <label className="block text-sm font-medium text-zinc-300 mb-1">Контент (UK)</label>
             <TipTapEditor
               value={ukContentHtml}
-              onChange={(html, json) => { setUkContentHtml(html); setUkContentJson(json) }}
+              onChange={(html, json) => { setUkContentHtml(html); setUkContentJson(json); setHasUnsavedChanges(true) }}
               placeholder="Введіть текст статті..."
               onImageSelected={(asset) => {
                 if (asset.publicUrl) setCoverImageUrl(asset.publicUrl)
@@ -280,7 +293,7 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
             <input type="hidden" name="uk_faqJson" value={ukFaqJson} />
             <StructuredListEditor
               value={ukFaqJson}
-              onChange={setUkFaqJson}
+              onChange={(v) => { setUkFaqJson(v); setHasUnsavedChanges(true) }}
               fields={[
                 { key: 'question', label: 'Питання' },
                 { key: 'answer', label: 'Відповідь', type: 'textarea' },
@@ -317,7 +330,7 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
             <label htmlFor="status-override" className="block text-xs font-medium text-zinc-400 mb-1">Статус</label>
             <select
               id="status-override"
-              onChange={(e) => { if (statusRef.current) statusRef.current.value = e.target.value }}
+              onChange={(e) => { if (statusRef.current) statusRef.current.value = e.target.value; setHasUnsavedChanges(true) }}
               defaultValue={post?.status ?? 'DRAFT'}
               className="block w-48 rounded border border-zinc-700 bg-zinc-900/50 px-2 py-1.5 text-xs text-zinc-200 focus:border-amber-500/50 focus:outline-none"
             >

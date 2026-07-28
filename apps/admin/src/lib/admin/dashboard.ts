@@ -153,5 +153,3 @@ export async function getDashboardData(): Promise<DashboardData> {
   }
 }
 
-/** @deprecated use getDashboardData */
-export const getDashboardStats = getDashboardData

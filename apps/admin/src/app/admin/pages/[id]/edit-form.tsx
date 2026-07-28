@@ -1,7 +1,7 @@
 'use client'
 
 import { updatePageMeta, deletePage } from '@/lib/actions/pages'
-import { useActionState, useState } from 'react'
+import { useActionState, useState, useEffect } from 'react'
 import Link from 'next/link'
 import { SectionEditor } from './section-editor'
 import { ConfirmDialog, useToast } from '@/components/admin'
@@ -22,6 +22,17 @@ export function EditPageForm({ page, translations, sections }: EditFormProps) {
   const uk = translations.find((t) => t.locale === 'uk')
   const { showToast } = useToast()
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault()
+      }
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [hasUnsavedChanges])
 
   const [state, formAction, pending] = useActionState(
     async (_prev: { error?: string; saved?: boolean } | null, formData: FormData) => {
@@ -92,6 +103,7 @@ export function EditPageForm({ page, translations, sections }: EditFormProps) {
           <select
             name="status"
             defaultValue={page.status}
+            onChange={() => setHasUnsavedChanges(true)}
             className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
           >
             <option value="DRAFT">Чернетка</option>
@@ -105,18 +117,18 @@ export function EditPageForm({ page, translations, sections }: EditFormProps) {
           <legend className="text-sm font-semibold text-amber-400">🇷🇺 Російська</legend>
           <div className="space-y-4 mt-3">
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1">URL (slug)</label>
               <input name="ru_slug" defaultValue={ru?.slug ?? ''} required
+                onChange={() => setHasUnsavedChanges(true)}
                 className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1">Назва</label>
               <input name="ru_title" defaultValue={ru?.title ?? ''}
+                onChange={() => setHasUnsavedChanges(true)}
                 className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1">Опис (excerpt)</label>
               <textarea name="ru_excerpt" defaultValue={ru?.excerpt ?? ''} rows={2}
+                onChange={() => setHasUnsavedChanges(true)}
                 className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
             </div>
           </div>
@@ -127,18 +139,18 @@ export function EditPageForm({ page, translations, sections }: EditFormProps) {
           <legend className="text-sm font-semibold text-blue-400">🇺🇦 Українська</legend>
           <div className="space-y-4 mt-3">
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1">URL (slug)</label>
               <input name="uk_slug" defaultValue={uk?.slug ?? ''} required
+                onChange={() => setHasUnsavedChanges(true)}
                 className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1">Назва</label>
               <input name="uk_title" defaultValue={uk?.title ?? ''}
+                onChange={() => setHasUnsavedChanges(true)}
                 className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1">Опис (excerpt)</label>
               <textarea name="uk_excerpt" defaultValue={uk?.excerpt ?? ''} rows={2}
+                onChange={() => setHasUnsavedChanges(true)}
                 className="w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
             </div>
           </div>

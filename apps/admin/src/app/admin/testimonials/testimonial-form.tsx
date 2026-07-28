@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useState } from 'react'
+import { useActionState, useState, useEffect } from 'react'
 import { useToast } from '@/components/admin'
 import Link from 'next/link'
 import { createTestimonial, updateTestimonial } from '@/lib/actions/testimonials'
@@ -60,6 +60,17 @@ export function TestimonialForm({ testimonial }: Props) {
     if (!t) return ''
     return (t as unknown as Record<string, string | null>)[field] ?? ''
   }
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault()
+      }
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [hasUnsavedChanges])
 
   return (
     <form action={formAction} className="space-y-6">
@@ -117,8 +128,8 @@ export function TestimonialForm({ testimonial }: Props) {
         </div>
       </fieldset>
 
-      <LocaleSection locale="ru" label="RU" tr={tr} />
-      <LocaleSection locale="uk" label="UK" tr={tr} />
+      <LocaleSection locale="ru" label="RU" tr={tr} onChange={() => setHasUnsavedChanges(true)} />
+      <LocaleSection locale="uk" label="UK" tr={tr} onChange={() => setHasUnsavedChanges(true)} />
 
       <div className="flex items-center gap-3 border-t pt-4">
         <button type="submit" disabled={pending}
@@ -131,7 +142,7 @@ export function TestimonialForm({ testimonial }: Props) {
   )
 }
 
-function LocaleSection({ locale, label, tr }: { locale: string; label: string; tr: (l: string, f: string) => string }) {
+function LocaleSection({ locale, label, tr, onChange }: { locale: string; label: string; tr: (l: string, f: string) => string; onChange?: () => void }) {
   const [textHtml, setTextHtml] = useState(tr(locale, 'text'))
   return (
     <fieldset className="rounded-lg border border-zinc-700/50 p-4">
@@ -140,17 +151,19 @@ function LocaleSection({ locale, label, tr }: { locale: string; label: string; t
         <div>
           <label htmlFor={`${locale}_text`} className="block text-sm font-medium text-zinc-300">Текст відгуку *</label>
           <input type="hidden" name={`${locale}_text`} value={textHtml} />
-          <TipTapEditor value={textHtml} onChange={(html) => setTextHtml(html)} placeholder="Текст відгуку..." />
+          <TipTapEditor value={textHtml} onChange={(html) => { setTextHtml(html); onChange?.() }} placeholder="Текст відгуку..." />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label htmlFor={`${locale}_problem`} className="block text-sm font-medium text-zinc-300">Проблема</label>
             <textarea id={`${locale}_problem`} name={`${locale}_problem`} rows={3} defaultValue={tr(locale, 'problem')}
+              onChange={() => onChange?.()}
               className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
           <div>
             <label htmlFor={`${locale}_result`} className="block text-sm font-medium text-zinc-300">Результат</label>
             <textarea id={`${locale}_result`} name={`${locale}_result`} rows={3} defaultValue={tr(locale, 'result')}
+              onChange={() => onChange?.()}
               className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30" />
           </div>
         </div>
