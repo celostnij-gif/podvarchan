@@ -1,13 +1,14 @@
 import { getDB } from '@/db'
 import { contactLeads } from '@/db/schema/leads'
-import { desc, eq, and, or, like, gte, lte } from 'drizzle-orm'
+import { desc, eq, and, or, like, gte, lte, sql } from 'drizzle-orm'
 import Link from 'next/link'
 import { DeleteButton } from './delete-button'
+import Pagination from '@/components/admin/Pagination'
 
 export const dynamic = 'force-dynamic'
 
 interface Props {
-  searchParams: Promise<{ status?: string; q?: string; from?: string; to?: string }>
+  searchParams: Promise<{ status?: string; q?: string; from?: string; to?: string; page?: string }>
 }
 
 const statusConfig: Record<string, { label: string; color: string }> = {
@@ -33,6 +34,9 @@ export default async function LeadsListPage(props: Props) {
   const db = getDB()
 
   const conditions = []
+  const PAGE_SIZE = 20
+  const page = Number(params.page) || 1
+  const offset = (page - 1) * PAGE_SIZE
   if (params.status && params.status !== 'all') {
     conditions.push(eq(contactLeads.status, params.status as 'NEW' | 'IN_PROGRESS' | 'CONTACTED' | 'BOOKED' | 'CLOSED' | 'SPAM'))
   }
@@ -53,14 +57,24 @@ export default async function LeadsListPage(props: Props) {
     conditions.push(lte(contactLeads.createdAt, params.to))
   }
 
-  const query = db
+  const where = conditions.length > 0 ? and(...conditions) : undefined
+
+  const [total] = await db
+    .select({ count: sql<number>`count(DISTINCT ${contactLeads.id})` })
+    .from(contactLeads)
+    .where(where)
+    .all()
+    ?? []
+  const totalPages = Math.ceil((total?.count ?? 0) / PAGE_SIZE)
+
+  const rows = await db
     .select()
     .from(contactLeads)
+    .where(where)
     .orderBy(desc(contactLeads.createdAt))
-
-  const rows = conditions.length > 0
-    ? await query.where(and(...conditions)).all()
-    : await query.all()
+    .limit(PAGE_SIZE)
+    .offset(offset)
+    .all()
 
   return (
     <div>
@@ -180,6 +194,7 @@ export default async function LeadsListPage(props: Props) {
           </tbody>
         </table>
       </div>
+      <Pagination currentPage={page} totalPages={totalPages} baseUrl="/admin/leads" />
     </div>
   )
 }

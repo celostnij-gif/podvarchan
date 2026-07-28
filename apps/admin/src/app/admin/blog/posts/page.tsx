@@ -3,12 +3,13 @@ import { deletePost } from '@/lib/actions/blog'
 import ViewOnSiteLink from '@/components/admin/ViewOnSiteLink'
 import { getDB } from '@/db'
 import { blogPosts, blogPostTranslations, blogCategories } from '@/db/schema/blog'
-import { eq, desc, and, like } from 'drizzle-orm'
+import { eq, desc, and, like, sql } from 'drizzle-orm'
 import Link from 'next/link'
 import type { PostWithTranslations } from '../types'
+import Pagination from '@/components/admin/Pagination'
 
 interface Props {
-  searchParams: Promise<{ status?: string; q?: string; cat?: string }>
+  searchParams: Promise<{ status?: string; q?: string; cat?: string; page?: string }>
 }
 
 export default async function BlogPostsPage(props: Props) {
@@ -23,6 +24,21 @@ export default async function BlogPostsPage(props: Props) {
     conditions.push(like(blogPostTranslations.title, `%${params.q}%`))
   }
 
+  const PAGE_SIZE = 20
+  const page = Number(params.page) || 1
+  const offset = (page - 1) * PAGE_SIZE
+
+  const countQuery = db
+    .select({ count: sql<number>`count(DISTINCT ${blogPosts.id})` })
+    .from(blogPosts)
+    .leftJoin(blogPostTranslations, eq(blogPosts.id, blogPostTranslations.postId))
+    .leftJoin(blogCategories, eq(blogPosts.categoryId, blogCategories.id))
+
+  const total = conditions.length > 0
+    ? await countQuery.where(and(...conditions)).get()
+    : await countQuery.get()
+  const totalPages = Math.ceil((total?.count ?? 0) / PAGE_SIZE)
+
   const query = db
     .select()
     .from(blogPosts)
@@ -31,8 +47,8 @@ export default async function BlogPostsPage(props: Props) {
     .orderBy(desc(blogPosts.updatedAt))
 
   const rows = conditions.length > 0
-    ? await query.where(and(...conditions)).all()
-    : await query.all()
+    ? await query.where(and(...conditions)).limit(PAGE_SIZE).offset(offset).all()
+    : await query.limit(PAGE_SIZE).offset(offset).all()
 
   // Group translations
   const grouped = new Map<string, PostWithTranslations>()
@@ -136,6 +152,7 @@ export default async function BlogPostsPage(props: Props) {
           </tbody>
         </table>
       </div>
+      <Pagination currentPage={page} totalPages={totalPages} baseUrl="/admin/blog/posts" />
     </div>
   )
 }

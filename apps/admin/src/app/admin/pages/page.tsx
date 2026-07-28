@@ -1,21 +1,25 @@
 import ViewOnSiteLink from '@/components/admin/ViewOnSiteLink'
 import { getDB } from '@/db'
 import { pages, pageTranslations } from '@/db/schema/pages'
-import { desc, eq, and, like } from 'drizzle-orm'
+import { desc, eq, and, like, sql } from 'drizzle-orm'
 import Link from 'next/link'
 import { DeleteButton } from './delete-button'
+import Pagination from '@/components/admin/Pagination'
 import { PublishToggle } from './publish-toggle'
 import type { PageRecord, PageTranslationRecord } from './types'
 
 export const dynamic = 'force-dynamic'
 
 interface Props {
-  searchParams: Promise<{ status?: string; q?: string }>
+  searchParams: Promise<{ status?: string; q?: string; page?: string }>
 }
 
 export default async function PagesListPage(props: Props) {
   const params = await props.searchParams
   const db = getDB()
+  const PAGE_SIZE = 20
+  const page = Number(params.page) || 1
+  const offset = (page - 1) * PAGE_SIZE
 
   const conditions = []
   if (params.status && params.status !== 'all') {
@@ -24,18 +28,29 @@ export default async function PagesListPage(props: Props) {
   if (params.q) {
     conditions.push(like(pageTranslations.title, `%${params.q}%`))
   }
-
   const query = db
     .select()
     .from(pages)
     .leftJoin(pageTranslations, eq(pages.id, pageTranslations.pageId))
     .orderBy(desc(pages.updatedAt))
+    .limit(PAGE_SIZE)
+    .offset(offset)
 
   const rows = conditions.length > 0
     ? await query.where(and(...conditions)).all()
     : await query.all()
 
-  // Group translations by page
+  // Count total
+  const countQuery = db
+    .select({ count: sql<number>`count(DISTINCT ${pages.id})` })
+    .from(pages)
+    .leftJoin(pageTranslations, eq(pages.id, pageTranslations.pageId))
+
+  const total = conditions.length > 0
+    ? await countQuery.where(and(...conditions)).get()
+    : await countQuery.get()
+
+  const totalPages = Math.ceil((total?.count ?? 0) / PAGE_SIZE)
   const grouped = new Map<string, PageRecord & { translations: PageTranslationRecord[] }>()
   for (const row of rows) {
     if (!grouped.has(row.pages.id)) {
@@ -166,6 +181,7 @@ export default async function PagesListPage(props: Props) {
           </tbody>
         </table>
       </div>
+      <Pagination currentPage={page} totalPages={totalPages} baseUrl="/admin/pages" />
     </div>
   )
 }

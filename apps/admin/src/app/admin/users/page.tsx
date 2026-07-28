@@ -1,10 +1,18 @@
 import { getDB } from '@/db'
 import { users } from '@/db/schema/auth'
-import { desc } from 'drizzle-orm'
-
-export default async function UsersListPage() {
+import { desc, sql } from 'drizzle-orm'
+import Pagination from '@/components/admin/Pagination'
+export default async function UsersListPage(props: { searchParams: Promise<{ page?: string }> }) {
   const db = getDB()
-  const allUsers = await db.select().from(users).orderBy(desc(users.createdAt)).all()
+  const page = Number((await props.searchParams).page) || 1
+  const PAGE_SIZE = 20
+  const offset = (page - 1) * PAGE_SIZE
+
+  const total = await db.select({ count: sql<number>`count(DISTINCT ${users.id})` }).from(users).get()
+  const totalPages = Math.ceil((total?.count ?? 0) / PAGE_SIZE)
+
+  const allUsers = await db.select().from(users).orderBy(desc(users.createdAt)).limit(PAGE_SIZE).offset(offset).all()
+
 
   return (
     <div>
@@ -37,6 +45,7 @@ export default async function UsersListPage() {
           </tbody>
         </table>
       </div>
+      <Pagination currentPage={page} totalPages={totalPages} baseUrl="/admin/users" />
     </div>
   )
 }

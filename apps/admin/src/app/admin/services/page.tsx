@@ -1,17 +1,21 @@
+import Pagination from '@/components/admin/Pagination'
 import { getDB } from '@/db'
 import { services, serviceTranslations } from '@/db/schema/services'
-import { eq, and, like } from 'drizzle-orm'
+import { eq, and, like, sql } from 'drizzle-orm'
 import Link from 'next/link'
 import type { ServiceTranslation, ServiceWithTranslations } from './types'
 import { ServicesSortableList } from './services-sortable-list'
 
 interface Props {
-  searchParams: Promise<{ status?: string; q?: string }>
+  searchParams: Promise<{ status?: string; q?: string; page?: string }>
 }
 
 export default async function ServicesListPage(props: Props) {
   const params = await props.searchParams
   const db = getDB()
+  const page = Number(params.page) || 1
+  const PAGE_SIZE = 20
+  const offset = (page - 1) * PAGE_SIZE
 
   const conditions = []
   if (params.status && params.status !== 'all') {
@@ -24,6 +28,15 @@ export default async function ServicesListPage(props: Props) {
     ))
   }
 
+  const countQuery = db
+    .select({ count: sql<number>`count(DISTINCT ${services.id})` })
+    .from(services)
+    .leftJoin(serviceTranslations, eq(services.id, serviceTranslations.serviceId))
+
+  const total = conditions.length > 0
+    ? await countQuery.where(and(...conditions)).get()
+    : await countQuery.get()
+  const totalPages = Math.ceil((total?.count ?? 0) / PAGE_SIZE)
   const query = db
     .select()
     .from(services)
@@ -31,8 +44,8 @@ export default async function ServicesListPage(props: Props) {
     .orderBy(services.sortOrder)
 
   const rows = conditions.length > 0
-    ? await query.where(and(...conditions)).all()
-    : await query.all()
+    ? await query.where(and(...conditions)).limit(PAGE_SIZE).offset(offset).all()
+    : await query.limit(PAGE_SIZE).offset(offset).all()
 
   // Group translations by service
   const grouped = new Map<string, ServiceWithTranslations>()
@@ -106,6 +119,9 @@ export default async function ServicesListPage(props: Props) {
 
       {/* Sortable list */}
       <ServicesSortableList items={items} />
+
+      {/* Pagination */}
+      <Pagination currentPage={page} totalPages={totalPages} baseUrl="/admin/services" />
     </div>
   )
 }

@@ -1,12 +1,14 @@
 /* eslint-disable @next/next/no-img-element */
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { Suspense, useState, useCallback, useEffect } from 'react'
+import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { Trash2, Search, X, Upload } from 'lucide-react'
 import Link from 'next/link'
 import { deleteMediaBatch } from '@/lib/actions/media'
 import { useToast, ConfirmDialog } from '@/components/admin'
 import { UploadZone } from '@/components/admin/media/UploadZone'
+import Pagination from '@/components/admin/Pagination'
 
 interface MediaAsset {
   id: string
@@ -20,6 +22,8 @@ interface MediaAsset {
   createdAt: string | null
 }
 
+
+const PAGE_SIZE = 20
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://podvarchan.com'
 
 const mimeIcons: Record<string, string> = {
@@ -44,10 +48,17 @@ function mediaUrl(publicUrl: string | null): string {
   return publicUrl.startsWith('/') ? `${SITE_URL}${publicUrl}` : publicUrl
 }
 
-export default function MediaListPage() {
+function MediaListPageContent() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
+  const page = Number(searchParams.get('page')) || 1
+  const urlQuery = searchParams.get('q') || ''
+
   const [assets, setAssets] = useState<MediaAsset[]>([])
+  const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchInput, setSearchInput] = useState(urlQuery)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [deleting, setDeleting] = useState(false)
   const [deletingSingle, setDeletingSingle] = useState<string | null>(null)
@@ -57,38 +68,47 @@ export default function MediaListPage() {
   const { showToast } = useToast()
 
 
-  const fetchAssets = useCallback(async (q: string) => {
+  const fetchAssets = useCallback(async (q: string, p: number) => {
     setLoading(true)
     try {
-      const url = q ? `/api/admin/media/list?q=${encodeURIComponent(q)}` : '/api/admin/media/list'
-      const res = await fetch(url)
+      const params = new URLSearchParams()
+      if (q) params.set('q', q)
+      if (p > 1) params.set('page', String(p))
+      const res = await fetch(`/api/admin/media/list?${params.toString()}`)
       const data = await res.json()
       setAssets(data.assets ?? [])
+      setTotal(data.total ?? 0)
     } catch {
       setAssets([])
+      setTotal(0)
     } finally {
       setLoading(false)
     }
   }, [])
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { fetchAssets(searchQuery) }, [fetchAssets, searchQuery])
+  useEffect(() => { fetchAssets(urlQuery, page) }, [fetchAssets, urlQuery, page])
 
   // Debounce search
-  const [searchInput, setSearchInput] = useState('')
   useEffect(() => {
-    const timer = setTimeout(() => setSearchQuery(searchInput), 300)
+    const timer = setTimeout(() => {
+      if (searchInput !== urlQuery) {
+        const params = new URLSearchParams()
+        if (searchInput) params.set('q', searchInput)
+        router.replace(`${pathname}?${params.toString()}`)
+      }
+    }, 300)
     return () => clearTimeout(timer)
-  }, [searchInput])
+  }, [searchInput, urlQuery, router, pathname])
 
   // Refresh list when window regains focus after uploads
   useEffect(() => {
     const onFocus = () => {
-      if (assets.length > 0) fetchAssets(searchQuery)
+      if (assets.length > 0) fetchAssets(urlQuery, page)
     }
     window.addEventListener('focus', onFocus)
     return () => window.removeEventListener('focus', onFocus)
-  }, [fetchAssets, searchQuery, assets.length])
+  }, [fetchAssets, urlQuery, page, assets.length])
 
   const toggleSelect = (id: string) => {
     setSelected((prev) => {
@@ -133,7 +153,7 @@ export default function MediaListPage() {
             </button>
           )}
           <span className="text-sm text-zinc-500">
-            {assets.length} {assets.length === 1 ? 'файл' : 'файлів'}
+            {total} {total === 1 ? 'файл' : 'файлів'}
           </span>
         </div>
       </div>
@@ -161,7 +181,7 @@ export default function MediaListPage() {
         {searchInput && (
           <button
             type="button"
-            onClick={() => { setSearchInput(''); setSearchQuery('') }}
+            onClick={() => { setSearchInput(''); router.replace(pathname) }}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
           >
             <X className="h-4 w-4" />
@@ -183,10 +203,10 @@ export default function MediaListPage() {
               ? `Вибрано ${selected.size}`
               : 'Вибрати всі'}
           </label>
-          {searchQuery && (
+          {urlQuery && (
             <button
               type="button"
-              onClick={() => { setSearchInput(''); setSearchQuery('') }}
+              onClick={() => { setSearchInput(''); router.replace(pathname) }}
               className="text-xs text-zinc-500 hover:text-zinc-300"
             >
               × Скинути пошук
@@ -204,7 +224,7 @@ export default function MediaListPage() {
         <div className="rounded-xl border border-dashed border-zinc-800 bg-zinc-900/30 py-16 text-center">
           <Upload className="mx-auto mb-3 h-10 w-10 text-zinc-600" />
           <p className="text-sm text-zinc-500">
-            {searchQuery
+            {urlQuery
               ? 'Нічого не знайдено. Спробуйте інший запит.'
               : 'Медіатека порожня. Перетягніть файли у зону завантаження вище.'}
           </p>
@@ -287,6 +307,8 @@ export default function MediaListPage() {
         </div>
       )}
 
+      <Pagination currentPage={page} totalPages={Math.ceil(total / PAGE_SIZE)} baseUrl="/admin/media" />
+
       {/* Confirm delete selected */}
       <ConfirmDialog
         open={batchConfirmOpen}
@@ -299,7 +321,7 @@ export default function MediaListPage() {
             await deleteMediaBatch(Array.from(selected))
             showToast('success', 'Видалено')
             setSelected(new Set())
-            await fetchAssets(searchQuery)
+            await fetchAssets(urlQuery, page)
           } catch {
             showToast('error', 'Помилка при видаленні. Спробуйте ще раз.')
           } finally {
@@ -324,7 +346,7 @@ export default function MediaListPage() {
             await deleteMediaBatch([id])
             showToast('success', 'Видалено')
             setSelected((prev) => { const n = new Set(prev); n.delete(id); return n })
-            await fetchAssets(searchQuery)
+            await fetchAssets(urlQuery, page)
           } catch {
             showToast('error', 'Помилка при видаленні. Спробуйте ще раз.')
           } finally {
@@ -334,5 +356,17 @@ export default function MediaListPage() {
         onCancel={() => setDeleteTarget(null)}
       />
     </div>
+  )
+}
+
+export default function MediaListPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center py-20">
+        <span className="text-sm text-zinc-500">Завантаження...</span>
+      </div>
+    }>
+      <MediaListPageContent />
+    </Suspense>
   )
 }

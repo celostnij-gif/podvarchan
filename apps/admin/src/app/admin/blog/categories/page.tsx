@@ -2,17 +2,30 @@ import { deleteCategory } from '@/lib/actions/blog'
 import { DeleteButton } from '@/components/admin/DeleteButton'
 import { getDB } from '@/db'
 import { blogCategories, blogCategoryTranslations } from '@/db/schema/blog'
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import Link from 'next/link'
+import Pagination from '@/components/admin/Pagination'
 
-export default async function BlogCategoriesPage() {
+export default async function BlogCategoriesPage(props: { searchParams: Promise<{ page?: string }> }) {
+  const page = Number((await props.searchParams).page) || 1
+  const PAGE_SIZE = 20
+  const offset = (page - 1) * PAGE_SIZE
   const db = getDB()
+
+  const { count: total } = await db
+    .select({ count: sql<number>`count(DISTINCT ${blogCategories.id})` })
+    .from(blogCategories)
+    .leftJoin(blogCategoryTranslations, eq(blogCategories.id, blogCategoryTranslations.categoryId))
+    .get() ?? { count: 0 }
+  const totalPages = Math.ceil((total ?? 0) / PAGE_SIZE)
 
   const rows = await db
     .select()
     .from(blogCategories)
     .leftJoin(blogCategoryTranslations, eq(blogCategories.id, blogCategoryTranslations.categoryId))
     .orderBy(blogCategories.sortOrder)
+    .limit(PAGE_SIZE)
+    .offset(offset)
     .all()
 
   const grouped = new Map<string, { cat: typeof rows[number]['blog_categories']; tr: NonNullable<typeof rows[number]['blog_category_translations']>[] }>()
@@ -92,6 +105,7 @@ export default async function BlogCategoriesPage() {
           </tbody>
         </table>
       </div>
+      <Pagination currentPage={page} totalPages={totalPages} baseUrl="/admin/blog/categories" />
     </div>
   )
 }
