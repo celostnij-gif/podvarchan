@@ -106,6 +106,7 @@ export default function BlogClient({ posts, categories }: Props) {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => handleCategoryClick(null)}
+              aria-pressed={activeCategory === null}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300
                 ${!activeCategory
                   ? 'bg-gold text-bg-base shadow-glow-gold'
@@ -118,6 +119,7 @@ export default function BlogClient({ posts, categories }: Props) {
               <button
                 key={cat.slug}
                 onClick={() => handleCategoryClick(cat.slug)}
+                aria-pressed={activeCategory === cat.slug}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300
                   ${activeCategory === cat.slug
                     ? 'bg-gold text-bg-base shadow-glow-gold'

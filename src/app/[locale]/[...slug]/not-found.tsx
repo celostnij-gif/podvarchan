@@ -1,23 +1,34 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
+import { getLocale } from 'next-intl/server'
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
   alternates: { canonical: null },
 }
 
-export default function CatchAllNotFound() {
+export default async function CatchAllNotFound() {
+  let locale: string
+  try {
+    locale = await getLocale()
+  } catch {
+    locale = 'ru'
+  }
+  const t = await getTranslations({ locale, namespace: 'notFound' })
+  const ct = await getTranslations({ locale, namespace: 'common' })
+
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-bg-base px-gutter">
       <div className="max-w-lg mx-auto text-center">
-        <h1 className="text-[10rem] md:text-[14rem] font-display leading-none text-transparent bg-clip-text bg-gradient-to-b from-gold/15 via-gold/5 to-transparent select-none" aria-hidden="true">
+        <h1 className="text-[10rem] md:text-[14rem] font-display leading-none text-transparent bg-clip-text bg-gradient-to-b from-gold/25 via-gold/10 to-transparent select-none" aria-hidden="true">
           404
         </h1>
         <h2 className="mt-[-2rem] text-3xl md:text-4xl font-display text-gold-premium leading-tight">
-          Page Not Found
+          {t('title')}
         </h2>
         <p className="mt-4 text-base text-text-secondary leading-relaxed">
-          The page you are looking for does not exist or has been moved.
+          {t('description')}
         </p>
         <div className="mt-10">
           <Link
@@ -27,7 +38,7 @@ export default function CatchAllNotFound() {
                        text-gold hover:text-gold-light text-sm font-semibold tracking-wider uppercase
                        transition-all duration-400"
           >
-            <span className="relative z-10">Go Home</span>
+            <span className="relative z-10">{t('cta')}</span>
           </Link>
         </div>
       </div>

@@ -153,7 +153,7 @@ async function loadService(slug: string, locale: string): Promise<ServicePageDat
       return {
         type: 'd1',
         slug: svc.slug,
-        title: buildTitle(seo?.title ?? svc.title, locale),
+        title: seo?.title ?? svc.title,
         shortTitle: svc.shortTitle ?? '',
         description: seo?.description ?? svc.description ?? '',
         metaDescription: seo?.description ?? svc.description ?? '',

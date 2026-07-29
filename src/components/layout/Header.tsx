@@ -106,14 +106,14 @@ function LangSwitcher({ className = '' }: { className?: string }) {
   const pathWithoutLocale = pathname.replace(/^\/(ru|uk)/, '') || '/'
 
   return (
-    <div className={`flex items-center gap-1 ${className}`} role="navigation" aria-label={currentLocale === 'uk' ? 'Вибір мови' : 'Выбор языка'}>
+    <div className={`flex items-center gap-0 ${className}`} role="navigation" aria-label={currentLocale === 'uk' ? 'Вибір мови' : 'Выбор языка'}>
       <Link
         href={pathWithoutLocale}
         locale="ru"
         hrefLang="ru"
         aria-label="Русский язык"
         aria-current={currentLocale === 'ru' ? 'true' : undefined}
-        className={`text-xs font-medium px-2 py-1 rounded transition-colors ${
+        className={`text-xs font-medium px-3 py-2 min-w-[48px] text-center rounded transition-colors ${
           currentLocale === 'ru'
             ? 'text-gold bg-gold/10'
             : 'text-text-muted hover:text-text-primary'
@@ -128,7 +128,7 @@ function LangSwitcher({ className = '' }: { className?: string }) {
         hrefLang="uk"
         aria-label="Українська мова"
         aria-current={currentLocale === 'uk' ? 'true' : undefined}
-        className={`text-xs font-medium px-2 py-1 rounded transition-colors ${
+        className={`text-xs font-medium px-3 py-2 min-w-[48px] text-center rounded transition-colors ${
           currentLocale === 'uk'
             ? 'text-gold bg-gold/10'
             : 'text-text-muted hover:text-text-primary'

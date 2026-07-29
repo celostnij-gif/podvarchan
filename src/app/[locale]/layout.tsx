@@ -113,6 +113,12 @@ export default async function LocaleLayout({
     }
   }
 
+  // Fix UK slugs in nav
+  if (locale === 'uk') {
+    const pricesItem = headerNav.find(i => i.href === '/tseny/')
+    if (pricesItem) pricesItem.href = '/tsiny/'
+  }
+
   // GA ID із Cloudflare Worker env (Server Component runtime)
   // try/catch для безпеки при статичній генерації (build time)
   let gaId: string | undefined
