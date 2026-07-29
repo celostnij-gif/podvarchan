@@ -50,7 +50,7 @@ export function TsenyClient({ schemas, d1Sections: _d1Sections }: TsenyClientPro
           highlighted: content.highlighted || false,
           key: section.key,
         }]
-      } catch (e) {
+      } catch {
         return []
       }
     })
@@ -66,7 +66,7 @@ export function TsenyClient({ schemas, d1Sections: _d1Sections }: TsenyClientPro
           question: question || '',
           answer: answer || '',
         }))
-      } catch (e) {
+      } catch {
         return []
       }
     })

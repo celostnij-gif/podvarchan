@@ -186,8 +186,6 @@ export default function ProblemsSection({ d1Content }: { d1Content?: ProblemsD1 
     ]
   })()
 
-  const headingText = d1Content?.heading || t('problemsTitle', { gold: '' })
-
   return (
     <AnimatedSection as="section" variant="fadeUp" className="relative overflow-hidden" aria-label={t('ariaLabel')}>
       <BackgroundDecorations />

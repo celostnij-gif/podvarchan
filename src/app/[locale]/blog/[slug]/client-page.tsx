@@ -230,14 +230,12 @@ export function ClientBlogPost({ title, body, date, category, categorySlug, auth
           <div className="mt-12 p-6 rounded-xl bg-bg-surface/85 border border-border-base">
             <div className="flex items-start gap-4">
               <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-gold/20 shrink-0">
-                <img
+                <ResponsiveImage
                   src="/images/author-avatar.webp"
                   alt={commonT('authorName')}
                   width={150}
                   height={150}
                   className="object-cover w-full h-full"
-                  loading="lazy"
-                  decoding="async"
                 />
               </div>
               <div>

@@ -17,7 +17,6 @@ export default async function NotFoundPage() {
     locale = 'ru'
   }
   const t = await getTranslations({ locale, namespace: 'notFound' })
-  const ct = await getTranslations({ locale, namespace: 'common' })
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-bg-base px-gutter">

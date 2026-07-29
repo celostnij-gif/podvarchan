@@ -41,6 +41,7 @@ export function ResponsiveImage({
     .join(', ')
 
   return (
+    /* eslint-disable-next-line @next/next/no-img-element */
     <img
       src={src}
       srcSet={srcSet}

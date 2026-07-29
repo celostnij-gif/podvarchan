@@ -8,7 +8,6 @@ import { serviceSchema, faqSchema, speakableSchema } from '@/lib/schema'
 import { getServiceBySlug, getServiceSidebar, getSEOMeta } from '@/lib/db/public'
 import type { ServiceSidebarItem } from '@/lib/db/public'
 import { ClientServicePage } from './client-page'
-import { buildTitle } from '@/lib/seo/metadata'
 
 export const revalidate = 3600
 
