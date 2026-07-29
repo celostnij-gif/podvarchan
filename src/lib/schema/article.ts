@@ -17,7 +17,7 @@ interface ArticleSchemaParams {
 }
 
 /**
- * Генерирует JSON-LD объект Article schema.org для статей блога.
+ * Генерирует JSON-LD объект BlogPosting schema.org для статей блога.
  * Автоматически подключает автора через @id ссылку на Person.
  */
 
@@ -51,7 +51,8 @@ export function articleSchema(params: ArticleSchemaParams): Record<string, unkno
 
   const schema: Record<string, unknown> = {
     '@context': 'https://schema.org',
-    '@type': 'Article',
+    '@type': 'BlogPosting',
+    '@id': `${cleanUrl(SITE.url, locale === 'ru' ? 'ru' : locale ?? '', url)}#article`,
     inLanguage: locale === 'uk' ? 'uk' : 'ru',
     headline,
     description,

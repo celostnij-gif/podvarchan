@@ -6,7 +6,7 @@
 
 export type SchemaType =
   | 'Person'
-  | 'Article'
+  | 'BlogPosting'
   | 'Service'
   | 'ProfessionalService'
   | 'FAQPage'
@@ -16,7 +16,7 @@ export type SchemaType =
 
 const REQUIRED_FIELDS: Record<SchemaType, string[]> = {
   Person: ['@context', '@type', 'name', 'url'],
-  Article: ['@context', '@type', 'headline', 'author', 'datePublished'],
+  BlogPosting: ['@context', '@type', 'headline', 'author', 'datePublished'],
   Service: ['@context', '@type', 'name', 'description', 'provider'],
   ProfessionalService: ['@context', '@type', 'name', 'url'],
   FAQPage: ['@context', '@type', 'mainEntity'],
