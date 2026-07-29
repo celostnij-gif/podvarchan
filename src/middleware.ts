@@ -92,7 +92,8 @@ export default async function middleware(request: NextRequest) {
 
   // Any path containing .html (not just ending in .html) is legacy.
   // Catches /diagnostika.html/blog/x/ and similar bot-invented paths.
-  if (pathname.includes('.html')) {
+  // htmlPath already strips trailing slashes, so /uslugi_uk.html/ also matches the redirect table above.
+  if (htmlPath.includes('.html')) {
     return new Response(null, { status: 410 })
   }
   // ── UK static page slug localization (Russian → Ukrainian) ──

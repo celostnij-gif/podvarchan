@@ -78,7 +78,7 @@ export async function generateMetadata({ params }: Props) {
     title: `${category.name} — ${t('pageTitle')}`,
     description: category.metaDescription,
     keywords: category.keywords,
-    path: `/blog/kategoriya/${rawCat}`,
+    path: `/blog/kategoriya/${canonical}`,
     ukPath,
     locale,
   })

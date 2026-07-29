@@ -19,12 +19,16 @@ export async function generateMetadata({ params }: Props) {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'search' })
 
-  return seoMetadata({
+  const metadata = seoMetadata({
     title: t('metaTitle'),
     description: t('metaDescription'),
     path: '/search',
     locale,
   })
+  return {
+    ...metadata,
+    robots: { index: false, follow: false },
+  }
 }
 
 export default async function SearchPage({ params }: Props) {

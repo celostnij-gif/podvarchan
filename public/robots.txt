@@ -4,9 +4,9 @@ Content-Signal: ai-train=yes, search=yes, ai-input=yes
 
 User-Agent: *
 Allow: /
+Allow: /_next/static/
 
 Disallow: /api/
-Disallow: /_next/
 
 User-Agent: GPTBot
 Allow: /
@@ -31,6 +31,5 @@ Allow: /
 
 User-Agent: CloudflareBrowserRenderingCrawler
 Allow: /
-
 
 Sitemap: https://podvarchan.com/sitemap.xml
