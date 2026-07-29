@@ -1,5 +1,6 @@
 # Podvarchan.com — AI Content Access
 # https://podvarchan.com/
+# Full Markdown description: https://podvarchan.com/llms-full.txt
 
 # Primary content
 Allow: /
@@ -21,3 +22,6 @@ Disallow: /disclaimer/
 
 # AI training preference is declared in robots.txt
 # Content-Signal: ai-train=yes, search=yes, ai-input=yes
+
+# For detailed structured information about this site, see:
+# Full Markdown: /llms-full.txt

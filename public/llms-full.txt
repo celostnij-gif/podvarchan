@@ -1,0 +1,97 @@
+# Podvarchan.com — Гипнотерапия онлайн
+> https://podvarchan.com
+
+## О сайте
+
+Podvarchan.com — сайт сертифицированного гипнотерапевта Вячеслава Подварчана.
+Специализация: работа с тревогой, паническими атаками, самосаботажем, эмоциональным выгоранием, психосоматикой через эриксоновский гипноз онлайн.
+
+**Языки:** русский (ru), украинский (uk)
+**Формат работы:** онлайн (видеосвязь)
+**Первая консультация:** бесплатно
+
+## Информация о специалисте
+
+- **Имя:** Вячеслав Подварчан
+- **Должность:** Психологическая помощь / Гипнотерапевт онлайн
+- **Опыт:** 15+ лет практики
+- **Образование:**
+  - Черкасский национальный университет им. Б. Хмельницкого — Практический психолог (диплом с отличием, 2010)
+  - The University of Kansas, School of Music — Магистр музыкальной терапии (2013)
+  - Shechen Institute of Higher Buddhist Studies — Кхенпо (доктор буддийской философии, 2026)
+- **Сертификаты:**
+  - ABH Certified Hypnotherapist (American Board of Hypnotherapy)
+  - INLPTA Certified Practitioner (НЛП Практик)
+  - TFP — Transference-Focused Psychotherapy (Otto Kernberg, Frank Yeomans)
+- **Контакты:**
+  - Telegram: https://t.me/SLAVKA_VIP
+  - WhatsApp: https://wa.me/380663122069
+  - Email: podvarchan@gmail.com
+- **Социальные сети:**
+  - Instagram: https://www.instagram.com/vip_podvarchan/
+  - Facebook: https://www.facebook.com/SLAVKA10VIP
+  - X (Twitter): https://x.com/PodvarchanVip
+
+## Услуги (гипнотерапия онлайн)
+
+| Услуга | Цена | Страница |
+|--------|------|----------|
+| Гипнотерапия онлайн | 50$ / сессия | /uslugi/gipnoterapiya-onlayn/ |
+| Консультация психолога онлайн | 50$ / сессия | /uslugi/onlajn-konsultaciya-psyhologa/ |
+| Психолог-биоэнергетик | 50$ / сессия | /uslugi/psyholog-bioenergetyk/ |
+| Тревога и панические атаки | 50$ / сессия | /uslugi/trevoga-i-panicheskiye-ataki/ |
+| Работа с подсознанием | 50$ / сессия | /uslugi/rabota-s-podsoznaniem/ |
+| Самосаботаж и блоки | 50$ / сессия | /uslugi/samosabotazh-i-bloki/ |
+| Эмоциональное выгорание | 50$ / сессия | /uslugi/emotsionalnoye-vygoraniye/ |
+| Неуверенность и страх провала | 50$ / сессия | /uslugi/neyverennost-i-strakh-provala/ |
+| Психосоматика | 50$ / сессия | /uslugi/psikhosomatika/ |
+| Личностный кризис | 50$ / сессия | /uslugi/lichnostnyy-krizis/ |
+| Цифровой детокс и гаджетозависимость | 50$ / сессия | /uslugi/tsifrovoy-detoks-i-gadzhet-zavisimost/ |
+| Курс 5 сессий | 210$ (вместо 250$) | /uslugi/gipnoterapiya-onlayn/ |
+| Элитный курс 10 сессий | 400$ (вместо 500$) | /uslugi/gipnoterapiya-onlayn/ |
+
+## Структура сайта
+
+### Основные страницы (RU / UK)
+
+| Страница | RU | UK |
+|----------|----|----|
+| Главная | /ru/ | /uk/ |
+| Услуги | /ru/uslugi/ | /uk/uslugi/ |
+| Об авторе | /ru/ob-avtore/ | /uk/pro-avtora/ |
+| Метод | /ru/metod/ | /uk/metod/ |
+| Блог | /ru/blog/ | /uk/blog/ |
+| FAQ | /ru/faq/ | /uk/faq/ |
+| Цены | /ru/tseny/ | /uk/tsiny/ |
+| Контакты | /ru/kontakty/ | /uk/kontakty/ |
+| Поиск | /ru/search/ | /uk/search/ |
+| Политика конфиденциальности | /ru/politika-konfidentsialnosti/ | /uk/politika-konfidentsialnosti/ |
+| Дисклеймер | /ru/disclaimer/ | /uk/disclaimer/ |
+
+### Блог (категории)
+
+- Тревога и панические атаки — /blog/kategoriya/trevoga/
+- Самосаботаж — /blog/kategoriya/samosabotazh/
+- Эмоциональное выгорание — /blog/kategoriya/vygoraniye/
+- Подсознание — /blog/kategoriya/podsoznanie/
+- Психосоматика — /blog/kategoriya/psikhosomatika/
+- ПТСР — /blog/kategoriya/ptsr/
+- Цифровой детокс — /blog/kategoriya/tsifrovoy-detoks/
+- Музыка и подсознание — /blog/kategoriya/muzyka/
+- Энергия и усталость — /blog/kategoriya/energiya/
+- Неуверенность — /blog/kategoriya/neyverennost/
+
+## Часто задаваемые вопросы
+
+1. **Что такое гипнотерапия?** — Метод психотерапии, использующий гипноз для работы с подсознанием. В трансовом состоянии клиент сохраняет полный контроль.
+2. **Безопасен ли онлайн-гипноз?** — Да. Сессии проходят через защищенное видеосоединение. Клиент полностью контролирует процесс.
+3. **Сколько сессий нужно?** — От 1-2 до 5-10 сессий в зависимости от запроса. Первая сессия — диагностическая, бесплатная.
+4. **Работаете ли с паническими атаками?** — Да, это одно из основных направлений.
+5. **Можно ли потерять контроль?** — Нет. Гипноз — это состояние повышенной фокусировки, а не потери сознания.
+
+## AI / Crawler информация
+
+- robots.txt: https://podvarchan.com/robots.txt
+- Sitemap: https://podvarchan.com/sitemap.xml
+- Schema.org: Person, ProfessionalService, WebSite, Article, FAQPage, BreadcrumbList, Service
+- Content-Signal: ai-train=yes, search=yes, ai-input=yes
