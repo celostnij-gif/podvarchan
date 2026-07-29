@@ -4,6 +4,7 @@ import { useActionState, useState, useEffect } from 'react'
 import { useToast } from '@/components/admin'
 import Link from 'next/link'
 import { createTestimonial, updateTestimonial } from '@/lib/actions/testimonials'
+import { useRouter } from 'next/navigation'
 import { TipTapEditor } from '@/components/admin/editor/TipTapEditor'
 
 interface TestimonialItem {
@@ -33,6 +34,7 @@ interface Props {
 export function TestimonialForm({ testimonial }: Props) {
   const isEdit = !!testimonial
   const { showToast } = useToast()
+  const router = useRouter()
 
   const [state, formAction, pending] = useActionState(
     async (_prev: { error?: string } | null, formData: FormData) => {
@@ -43,9 +45,8 @@ export function TestimonialForm({ testimonial }: Props) {
           await createTestimonial(formData)
         }
         showToast('success', 'Збережено')
-        return null
+        return { saved: true, redirectTo: '/admin/testimonials' }
       } catch (err) {
-        if ((err as any)?.digest === 'NEXT_REDIRECT') throw err
         const msg = err instanceof Error ? err.message : 'Невідома помилка'
         showToast('error', msg)
         return { error: msg }
@@ -53,6 +54,8 @@ export function TestimonialForm({ testimonial }: Props) {
     },
     null,
   )
+
+  useEffect(() => { if (state?.saved) { router.push(state.redirectTo!) } }, [state?.saved, state?.redirectTo, router])
 
   const tr = (locale: string, field: string): string => {
     if (!testimonial) return ''

@@ -1,28 +1,30 @@
 'use client'
 
-import { createPage } from '@/lib/actions/pages'
-import { useActionState } from 'react'
+import { useActionState, useEffect } from 'react'
 import { useToast } from '@/components/admin'
+import { useRouter } from 'next/navigation'
+import { createPage } from '@/lib/actions/pages'
 import Link from 'next/link'
 
 export function PageForm() {
   const { showToast } = useToast()
+  const router = useRouter()
 
   const [state, formAction, isPending] = useActionState(
     async (_prev: { error?: string } | null, formData: FormData) => {
       try {
-        await createPage(formData)
+        const result = await createPage(formData)
         showToast('success', 'Створено')
-        return null
+        return { saved: true, id: result.id }
       } catch (err) {
-        if ((err as any)?.digest === 'NEXT_REDIRECT') throw err
         const msg = err instanceof Error ? err.message : 'Невідома помилка'
-        showToast('error', msg)
         return { error: msg }
       }
     },
     null,
   )
+
+  useEffect(() => { if (state?.saved && state?.id) { router.push('/admin/pages/' + state.id) } }, [state?.saved, state?.id, router])
 
   return (
     <form action={formAction} className="max-w-2xl space-y-6">

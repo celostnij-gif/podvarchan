@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import { useFormStatus } from 'react-dom'
+import { useState, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 
 import { ConfirmDialog } from '@/components/admin'
+import { useToast } from '@/components/admin'
 /**
  * Shared destructive-row "Видалити" button used in list pages (services, categories).
  * `onDelete` is a server-action bound with its id (e.g. `deleteService.bind(null, id)`).
@@ -12,55 +13,46 @@ export function DeleteButton({
   onDelete,
   confirmMessage = 'Видалити?',
   label = 'Видалити',
-  className = 'rounded px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 disabled:opacity-50',
+  className = 'rounded px-2 py-1 text-xs font-medium text-red-600 hover:bg-zinc-800 disabled:opacity-50',
 }: {
-  onDelete: () => void
+  onDelete: () => void | Promise<void>
   confirmMessage?: string
   label?: string
   className?: string
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false)
-  const hiddenRef = useRef<HTMLButtonElement>(null)
-  const shouldSubmit = useRef(false)
+  const [pending, setPending] = useState(false)
+  const router = useRouter()
+  const { showToast } = useToast()
+
+  const handleDelete = useCallback(async () => {
+    setPending(true)
+    try {
+      await onDelete()
+      showToast('success', 'Видалено')
+      router.refresh()
+    } catch {
+      showToast('error', 'Помилка при видаленні')
+    } finally {
+      setPending(false)
+      setConfirmOpen(false)
+    }
+  }, [onDelete, router, showToast])
 
   return (
     <>
-      <form
-        action={onDelete}
-        onSubmit={(e) => {
-          if (shouldSubmit.current) {
-            shouldSubmit.current = false
-            return
-          }
-          e.preventDefault()
-          setConfirmOpen(true)
-        }}
-      >
-        <SubmitButton label={label} className={className} />
-        <button ref={hiddenRef} type="submit" style={{ display: 'none' }} />
-      </form>
+      <button type="button" disabled={pending} onClick={() => setConfirmOpen(true)} className={className}>
+        {pending ? '...' : label}
+      </button>
       <ConfirmDialog
         open={confirmOpen}
         title="Підтвердження"
         message={confirmMessage}
-        confirmLabel="Видалити"
+        confirmLabel={pending ? '...' : 'Видалити'}
         variant="danger"
-        onConfirm={() => {
-          shouldSubmit.current = true
-          hiddenRef.current?.click()
-          setConfirmOpen(false)
-        }}
+        onConfirm={handleDelete}
         onCancel={() => setConfirmOpen(false)}
       />
     </>
-  )
-}
-
-function SubmitButton({ label, className }: { label: string; className: string }) {
-  const { pending } = useFormStatus()
-  return (
-    <button type="submit" disabled={pending} className={className}>
-      {pending ? '...' : label}
-    </button>
   )
 }

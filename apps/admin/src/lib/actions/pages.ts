@@ -2,7 +2,6 @@
 
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { eq, and } from 'drizzle-orm'
 import { pages, pageTranslations, pageSections, pageSectionTranslations, redirectRules, seoMeta } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
@@ -135,7 +134,7 @@ export async function createPage(formData: FormData) {
   await writeAuditLog({ userId, action: 'CREATE', entityType: 'PAGE', entityId: id, after: data })
   revalidatePath('/admin/pages')
   revalidatePath('/admin/home')
-  redirect(`/admin/pages/${id}`)
+  return { success: true, id }
 }
 
 export async function updatePage(id: string, formData: FormData) {
@@ -240,7 +239,6 @@ export async function deletePage(id: string) {
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'PAGE', entityId: id, before: existing })
   revalidateAdmin('/admin/pages', '/admin/home')
   void revalidatePublic({ paths: getPageRevalidatePaths(existing.type) })
-  redirect('/admin/pages')
 }
 
 export async function publishPage(id: string) {

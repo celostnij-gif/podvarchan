@@ -2,7 +2,7 @@
 
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
+
 import { eq, and } from 'drizzle-orm'
 import { services, serviceTranslations, redirectRules, seoMeta } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
@@ -64,10 +64,12 @@ function extractFormTranslations(formData: FormData): unknown[] {
   const translations: unknown[] = []
   for (const locale of locales) {
     const slug = formData.get(`${locale}_slug`)
-    if (!slug) continue
+    const title = formData.get(`${locale}_title`)
+    if (!slug || !title) continue
     translations.push({
-      locale, slug,
-      title: formData.get(`${locale}_title`) ?? '',
+      locale,
+      slug,
+      title,
       shortTitle: formData.get(`${locale}_shortTitle`) ?? '',
       description: formData.get(`${locale}_description`) ?? '',
       contentHtml: formData.get(`${locale}_contentHtml`) ?? '',
@@ -144,7 +146,7 @@ export async function createService(formData: FormData) {
   const ukSlug = data.translations.find((t: { locale: string }) => t.locale === 'uk')?.slug || ''
   revalidateAdmin('/admin/services')
   void revalidatePublic({ paths: getServiceRevalidatePaths(ruSlug, ukSlug, data.featured) })
-  redirect('/admin/services')
+  
 }
 
 export async function updateService(id: string, formData: FormData) {
@@ -262,7 +264,7 @@ export async function updateService(id: string, formData: FormData) {
   const ukSlug = data.translations.find((t: { locale: string }) => t.locale === 'uk')?.slug || ''
   revalidateAdmin('/admin/services', `/admin/services/${id}`)
   void revalidatePublic({ paths: getServiceRevalidatePaths(ruSlug, ukSlug, data.featured) })
-  redirect('/admin/services')
+  
 }
 
 export async function deleteService(id: string) {
@@ -276,7 +278,7 @@ export async function deleteService(id: string) {
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'SERVICE', entityId: id, before: existing })
   revalidateAdmin('/admin/services')
   void revalidatePublic({ paths: ['/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml'], type: 'layout' })
-  redirect('/admin/services')
+  
 }
 
 export async function publishService(id: string) {

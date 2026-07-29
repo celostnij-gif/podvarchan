@@ -3,7 +3,6 @@
 import { useActionState } from 'react'
 import { saveSeoOverride } from '@/lib/actions/seo'
 import { useRouter } from 'next/navigation'
-import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import { useToast } from '@/components/admin'
 
 interface EditFormProps {
@@ -33,7 +32,6 @@ export function SeoEditForm({ entityType, entityId, locale, defaults }: EditForm
         router.refresh()
         return null
       } catch (err) {
-        if (isRedirectError(err)) throw err
         const msg = err instanceof Error ? err.message : 'Сталася помилка'
         showToast('error', msg)
         return { error: msg }

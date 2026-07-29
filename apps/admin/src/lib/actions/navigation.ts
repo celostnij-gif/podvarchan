@@ -2,7 +2,6 @@
 
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { eq, asc } from 'drizzle-orm'
 import { navigationItems } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
@@ -66,7 +65,7 @@ export async function saveNavigationItem(data: FormData) {
   }
   revalidateAdmin('/admin/navigation', '/admin/settings')
   void revalidatePublic({ paths: getHomeRevalidatePaths() })
-  redirect('/admin/navigation')
+
 }
 
 export async function deleteNavigationItem(id: string) {
@@ -78,7 +77,7 @@ export async function deleteNavigationItem(id: string) {
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'NAVIGATION', entityId: id, before: existing })
   revalidateAdmin('/admin/navigation', '/admin/settings')
   void revalidatePublic({ paths: getHomeRevalidatePaths() })
-  redirect('/admin/navigation')
+
 }
 
 export async function toggleNavigationItem(id: string) {

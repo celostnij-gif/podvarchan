@@ -84,3 +84,7 @@ nul
 # editor workspace settings (local LSP server config)
 /.vscode/
 *.zip
+
+# agent harness metadata
+/.agents/
+/.claude/

@@ -2,7 +2,6 @@
 
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { eq, and } from 'drizzle-orm'
 import {
   blogCategories, blogCategoryTranslations,
@@ -94,7 +93,6 @@ export async function createCategory(formData: FormData) {
     '/uk/blog/kategoriya/' + translations.find(t => t.locale === 'uk')?.slug + '/',
     '/sitemap.xml',
   ] })
-  redirect('/admin/blog/categories')
 }
 
 
@@ -131,7 +129,6 @@ export async function updateCategory(id: string, formData: FormData) {
     '/uk/blog/kategoriya/' + data.translations.find(t => t.locale === 'uk')?.slug + '/',
     '/sitemap.xml',
   ] })
-  redirect('/admin/blog/categories')
 }
 
 export async function deleteCategory(id: string) {
@@ -144,7 +141,6 @@ export async function deleteCategory(id: string) {
   revalidateAdmin('/admin/blog/categories')
   // Revalidate blog area (list + category pages affected)
   void revalidatePublic({ paths: ['/ru/blog/', '/uk/blog/', '/sitemap.xml'], type: 'layout' })
-  redirect('/admin/blog/categories')
 }
 
 /* ── Post Actions ── */
@@ -192,7 +188,6 @@ export async function createPost(formData: FormData) {
   const ukSlug = data.translations.find((t: { locale: string }) => t.locale === 'uk')?.slug || ''
   revalidateAdmin('/admin/blog/posts')
   void revalidatePublic({ paths: getBlogPostRevalidatePaths(ruSlug, ukSlug) })
-  redirect('/admin/blog/posts')
 }
 
 export async function updatePost(id: string, formData: FormData) {
@@ -289,7 +284,6 @@ export async function updatePost(id: string, formData: FormData) {
   const ukSlug = data.translations.find((t: { locale: string }) => t.locale === 'uk')?.slug || ''
   revalidateAdmin('/admin/blog/posts', `/admin/blog/posts/${id}`)
   void revalidatePublic({ paths: getBlogPostRevalidatePaths(ruSlug, ukSlug) })
-  redirect('/admin/blog/posts')
 }
 
 export async function deletePost(id: string) {
@@ -301,7 +295,6 @@ export async function deletePost(id: string) {
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'BLOG_POST', entityId: id, before: existing })
   revalidateAdmin('/admin/blog/posts')
   void revalidatePublic({ paths: ['/ru/blog/', '/uk/blog/', '/sitemap.xml'], type: 'layout' })
-  redirect('/admin/blog/posts')
 }
 
 export async function publishPost(id: string) {

@@ -8,6 +8,7 @@ import { TipTapEditor } from '@/components/admin/editor/TipTapEditor'
 import { StructuredListEditor } from '@/components/admin/StructuredListEditor'
 import { slugify } from '@/lib/slugify'
 import { useToast } from '@/components/admin'
+import { useRouter } from 'next/navigation'
 
 interface Props {
   service?: ServiceWithTranslations
@@ -30,6 +31,7 @@ const CATEGORY_OPTIONS: { value: string; label: string }[] = [
 export function ServiceForm({ service }: Props) {
   const isEdit = !!service
   const { showToast } = useToast()
+  const router = useRouter()
 
   const [state, formAction, pending] = useActionState(
     async (_prev: { error?: string } | null, formData: FormData) => {
@@ -40,15 +42,17 @@ export function ServiceForm({ service }: Props) {
           await createService(formData)
         }
         showToast('success', 'Збережено')
-        return null
+        return { saved: true, redirectTo: '/admin/services' }
       } catch (err) {
-        if ((err as any)?.digest === 'NEXT_REDIRECT') throw err
-        showToast('error', err instanceof Error ? err.message : 'Помилка')
-        return { error: err instanceof Error ? err.message : 'Невідома помилка' }
+        const msg = err instanceof Error ? err.message : 'Невідома помилка'
+        showToast('error', msg)
+        return { error: msg }
       }
     },
     null,
   )
+
+  useEffect(() => { if (state?.saved) { router.push(state.redirectTo!) } }, [state?.saved, state?.redirectTo, router])
 
   // Helper to read translation value
   const tr = (locale: string, field: string): string => {

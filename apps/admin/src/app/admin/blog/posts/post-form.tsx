@@ -9,6 +9,7 @@ import { StructuredListEditor } from '@/components/admin/StructuredListEditor'
 import { slugify } from '@/lib/slugify'
 import type { PostWithTranslations } from '../types'
 import { useToast } from '@/components/admin'
+import { useRouter } from 'next/navigation'
 
 interface Props {
   post?: PostWithTranslations
@@ -20,6 +21,7 @@ interface Props {
 export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
   const isEdit = !!post
   const { showToast } = useToast()
+  const router = useRouter()
   const [ruContentHtml, setRuContentHtml] = useState(post?.translations.find(t => t.locale === 'ru')?.contentHtml ?? '')
   const [ruContentJson, setRuContentJson] = useState(post?.translations.find(t => t.locale === 'ru')?.contentJson ?? '')
   const [ukContentHtml, setUkContentHtml] = useState(post?.translations.find(t => t.locale === 'uk')?.contentHtml ?? '')
@@ -76,9 +78,8 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
           await createPost(formData)
         }
         showToast('success', 'Збережено')
-        return null
+        return { saved: true, redirectTo: '/admin/blog/posts' }
       } catch (err) {
-        if ((err as any)?.digest === 'NEXT_REDIRECT') throw err
         const msg = err instanceof Error ? err.message : 'Невідома помилка'
         showToast('error', msg)
         return { error: msg }
@@ -86,6 +87,8 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
     },
     null,
   )
+
+  useEffect(() => { if (state?.saved) { router.push(state.redirectTo!) } }, [state?.saved, state?.redirectTo, router])
 
   const tr = useCallback((locale: string, field: string): string => {
     if (!post) return ''

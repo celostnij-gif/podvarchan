@@ -2,7 +2,6 @@
 
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { eq, and } from 'drizzle-orm'
 import { faqItems, faqItemTranslations } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
@@ -56,7 +55,6 @@ export async function createFaqItem(formData: FormData) {
   await writeAuditLog({ userId, action: 'CREATE', entityType: 'FAQ', entityId: id, after: data })
   revalidateAdmin('/admin/faq')
   void revalidatePublic({ paths: getFaqRevalidatePaths() })
-  redirect('/admin/faq')
 }
 
 export async function updateFaqItem(id: string, formData: FormData) {
@@ -87,7 +85,6 @@ export async function updateFaqItem(id: string, formData: FormData) {
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'FAQ', entityId: id, before: existing, after: data })
   revalidateAdmin('/admin/faq')
   void revalidatePublic({ paths: getFaqRevalidatePaths() })
-  redirect('/admin/faq')
 }
 
 export async function deleteFaqItem(id: string) {
@@ -99,7 +96,6 @@ export async function deleteFaqItem(id: string) {
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'FAQ', entityId: id, before: existing })
   revalidateAdmin('/admin/faq')
   void revalidatePublic({ paths: getFaqRevalidatePaths() })
-  redirect('/admin/faq')
 }
 
 /* ── Reorder (drag-and-drop) ── */

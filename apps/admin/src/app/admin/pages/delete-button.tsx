@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { deletePage } from '@/lib/actions/pages'
-import { ConfirmDialog } from '@/components/admin'
+import { ConfirmDialog, useToast } from '@/components/admin'
 
 interface DeleteButtonProps {
   pageId: string
@@ -11,39 +12,41 @@ interface DeleteButtonProps {
 
 export function DeleteButton({ pageId, pageTitle }: DeleteButtonProps) {
   const [open, setOpen] = useState(false)
-  const submitRef = useRef<HTMLButtonElement>(null)
-  const submittedRef = useRef(false)
+  const [pending, setPending] = useState(false)
+  const router = useRouter()
+  const { showToast } = useToast()
+
+  const handleDelete = useCallback(async () => {
+    setPending(true)
+    try {
+      await deletePage(pageId)
+      showToast('success', 'Видалено')
+      router.push('/admin/pages')
+    } catch {
+      showToast('error', 'Помилка при видаленні')
+    } finally {
+      setPending(false)
+      setOpen(false)
+    }
+  }, [pageId, router, showToast])
 
   return (
     <>
-      <form
-        action={deletePage.bind(null, pageId)}
-        onSubmit={(e) => {
-          if (submittedRef.current) {
-            submittedRef.current = false
-            return
-          }
-          e.preventDefault()
-          setOpen(true)
-        }}
+      <button
+        type="button"
+        disabled={pending}
+        onClick={() => setOpen(true)}
+        className="rounded px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
       >
-        <button
-          type="submit"
-          className="rounded px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
-        >
-          Видалити
-        </button>
-        <button type="submit" ref={submitRef} style={{ display: 'none' }} />
-      </form>
+        {pending ? '...' : 'Видалити'}
+      </button>
       <ConfirmDialog
         open={open}
         title="Видалити сторінку"
         message={`Видалити сторінку «${pageTitle}»?`}
-        onConfirm={() => {
-          setOpen(false)
-          submittedRef.current = true
-          submitRef.current?.click()
-        }}
+        confirmLabel={pending ? '...' : 'Видалити'}
+        variant="danger"
+        onConfirm={handleDelete}
         onCancel={() => setOpen(false)}
       />
     </>

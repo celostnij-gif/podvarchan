@@ -1,57 +1,51 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import { useFormStatus } from 'react-dom'
+import { useState, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { deleteLead } from '@/lib/actions/leads'
-import { ConfirmDialog } from '@/components/admin'
+import { ConfirmDialog, useToast } from '@/components/admin'
 
 interface Props {
   id: string
 }
 
-function SubmitButton() {
-  const { pending } = useFormStatus()
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="rounded px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
-    >
-      {pending ? '...' : 'Видалити'}
-    </button>
-  )
-}
-
 export function DeleteButton({ id }: Props) {
   const [open, setOpen] = useState(false)
-  const submitRef = useRef<HTMLButtonElement>(null)
-  const submittedRef = useRef(false)
+  const [pending, setPending] = useState(false)
+  const router = useRouter()
+  const { showToast } = useToast()
+
+  const handleDelete = useCallback(async () => {
+    setPending(true)
+    try {
+      await deleteLead(id)
+      showToast('success', 'Видалено')
+      router.refresh()
+    } catch {
+      showToast('error', 'Помилка при видаленні')
+    } finally {
+      setPending(false)
+      setOpen(false)
+    }
+  }, [id, router, showToast])
 
   return (
     <>
-      <form
-        action={deleteLead.bind(null, id)}
-        onSubmit={(e) => {
-          if (submittedRef.current) {
-            submittedRef.current = false
-            return
-          }
-          e.preventDefault()
-          setOpen(true)
-        }}
+      <button
+        type="button"
+        disabled={pending}
+        onClick={() => setOpen(true)}
+        className="rounded px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
       >
-        <SubmitButton />
-        <button type="submit" ref={submitRef} style={{ display: 'none' }} />
-      </form>
+        {pending ? '...' : 'Видалити'}
+      </button>
       <ConfirmDialog
         open={open}
         title="Видалити заявку"
         message="Видалити заявку? Це також видалить історію подій."
-        onConfirm={() => {
-          setOpen(false)
-          submittedRef.current = true
-          submitRef.current?.click()
-        }}
+        confirmLabel={pending ? '...' : 'Видалити'}
+        variant="danger"
+        onConfirm={handleDelete}
         onCancel={() => setOpen(false)}
       />
     </>

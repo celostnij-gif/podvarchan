@@ -1,7 +1,6 @@
 'use server'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { eq, asc } from 'drizzle-orm'
 import { redirectRules } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
@@ -59,7 +58,7 @@ export async function saveRedirectRule(data: FormData) {
   }
   revalidatePath('/admin/redirects')
   await syncRedirectRulesToKv()
-  redirect('/admin/redirects')
+  return { success: true }
 }
 
 export async function deleteRedirectRule(id: string) {
@@ -71,7 +70,7 @@ export async function deleteRedirectRule(id: string) {
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'REDIRECT', entityId: id, before: existing })
   revalidatePath('/admin/redirects')
   await syncRedirectRulesToKv()
-  redirect('/admin/redirects')
+  return { success: true }
 }
 
 export async function toggleRedirectRule(id: string) {

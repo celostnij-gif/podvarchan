@@ -2,7 +2,6 @@
 
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { eq, asc } from 'drizzle-orm'
 import { siteSettings, contactChannels } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
@@ -101,7 +100,6 @@ export async function saveContactChannel(data: FormData) {
   }
   revalidatePath('/admin/settings')
   void revalidatePublic({ paths: getHomeRevalidatePaths(), type: 'layout' })
-  redirect('/admin/settings')
 }
 
 export async function deleteContactChannel(id: string) {
@@ -113,7 +111,6 @@ export async function deleteContactChannel(id: string) {
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'CONTACT_CHANNEL', entityId: id, before: existing })
   revalidatePath('/admin/settings')
   void revalidatePublic({ paths: getHomeRevalidatePaths(), type: 'layout' })
-  redirect('/admin/settings')
 }
 
 export async function reorderContactChannels(ids: string[]) {

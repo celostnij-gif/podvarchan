@@ -6,6 +6,7 @@ import { listBlockTemplates, deleteBlockTemplate, saveBlockTemplate } from '@/li
 import { getBlockDefinition } from '@/lib/blocks/registry'
 import { BlockPreview } from '@/lib/blocks/BlockPreview'
 import type { BlockTemplate } from '@/lib/actions/blockTemplates'
+import { ConfirmDialog } from '@/components/admin'
 
 interface BlockLibraryDialogProps {
   open: boolean
@@ -21,6 +22,7 @@ export function BlockLibraryDialog({ open, onClose, onSelectTemplate }: BlockLib
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
   const loadTemplates = useCallback(async () => {
     setLoading(true)
@@ -37,12 +39,21 @@ export function BlockLibraryDialog({ open, onClose, onSelectTemplate }: BlockLib
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { if (open) { loadTemplates(); setSelectedId(null); setSearch('') } }, [open, loadTemplates])
 
-  const handleDelete = useCallback(async (id: string, name: string) => {
-    if (!confirm(`Видалити шаблон "${name}"?`)) return
-    await deleteBlockTemplate(id)
-    setTemplates((prev) => prev.filter((t) => t.id !== id))
-    if (selectedId === id) setSelectedId(null)
-  }, [selectedId])
+  const handleDelete = useCallback((id: string, _name: string) => {
+    setConfirmDeleteId(id)
+  }, [])
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!confirmDeleteId) return
+    await deleteBlockTemplate(confirmDeleteId)
+    setTemplates((prev) => prev.filter((t) => t.id !== confirmDeleteId))
+    setSelectedId((sid) => (sid === confirmDeleteId ? null : sid))
+    setConfirmDeleteId(null)
+  }, [confirmDeleteId])
+
+  const handleCancelDelete = useCallback(() => {
+    setConfirmDeleteId(null)
+  }, [])
 
   const handleSelect = useCallback((tpl: BlockTemplate) => {
     onSelectTemplate({
@@ -61,6 +72,7 @@ export function BlockLibraryDialog({ open, onClose, onSelectTemplate }: BlockLib
     : templates
 
   const selected = templates.find((t) => t.id === selectedId)
+  const deletingTemplate = confirmDeleteId ? templates.find((t) => t.id === confirmDeleteId) : null
 
   if (!open) return null
 
@@ -240,6 +252,14 @@ export function BlockLibraryDialog({ open, onClose, onSelectTemplate }: BlockLib
           </button>
         </div>
       </div>
+      <ConfirmDialog
+        open={!!confirmDeleteId}
+        title="Видалити шаблон"
+        message={deletingTemplate ? `Видалити шаблон "${deletingTemplate.name}"?` : ''}
+        confirmLabel="Видалити"
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
     </div>
   )
 }

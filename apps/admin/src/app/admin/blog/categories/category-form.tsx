@@ -6,6 +6,7 @@ import { createCategory, updateCategory } from '@/lib/actions/blog'
 import type { CategoryWithTranslations } from '../types'
 import { slugify } from '@/lib/slugify'
 import { useToast } from '@/components/admin'
+import { useRouter } from 'next/navigation'
 
 interface Props {
   category?: CategoryWithTranslations
@@ -15,6 +16,7 @@ interface Props {
 export function CategoryForm({ category, services }: Props) {
   const isEdit = !!category
   const { showToast } = useToast()
+  const router = useRouter()
 
   const [state, formAction, pending] = useActionState(
     async (_prev: { error?: string } | null, formData: FormData) => {
@@ -25,9 +27,8 @@ export function CategoryForm({ category, services }: Props) {
           await createCategory(formData)
         }
         showToast('success', 'Збережено')
-        return null
+        return { saved: true, redirectTo: '/admin/blog/categories' }
       } catch (err) {
-        if ((err as any)?.digest === 'NEXT_REDIRECT') throw err
         const msg = err instanceof Error ? err.message : 'Сталася помилка'
         showToast('error', msg)
         return { error: msg }
@@ -35,6 +36,8 @@ export function CategoryForm({ category, services }: Props) {
     },
     null,
   )
+
+  useEffect(() => { if (state?.saved) { router.push(state.redirectTo!) } }, [state?.saved, state?.redirectTo, router])
 
   const tr = (locale: string, field: string): string => {
     if (!category) return ''

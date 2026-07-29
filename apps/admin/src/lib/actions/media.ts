@@ -2,7 +2,6 @@
 
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { eq } from 'drizzle-orm'
 import { mediaAssets } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
@@ -48,7 +47,6 @@ export async function updateMediaMeta(id: string, formData: FormData) {
   }).where(eq(mediaAssets.id, id))
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'MEDIA', entityId: id, before: existing, after: data })
   revalidatePath('/admin/media')
-  redirect('/admin/media')
 }
 
 export async function deleteMedia(id: string) {
@@ -59,7 +57,6 @@ export async function deleteMedia(id: string) {
   await db.delete(mediaAssets).where(eq(mediaAssets.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'MEDIA', entityId: id, before: existing })
   revalidatePath('/admin/media')
-  redirect('/admin/media')
 }
 
 /**

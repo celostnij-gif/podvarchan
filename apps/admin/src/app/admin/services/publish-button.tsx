@@ -1,34 +1,40 @@
 'use client'
 
-import { useFormStatus } from 'react-dom'
+import { useRouter } from 'next/navigation'
 import { publishService } from '@/lib/actions/services'
+import { useToast } from '@/components/admin'
 
 interface Props {
   id: string
   status: string
 }
 
-function SubmitButton({ status }: { status: string }) {
-  const { pending } = useFormStatus()
+export function PublishButton({ id, status }: Props) {
+  const router = useRouter()
+  const { showToast } = useToast()
+  const isPublished = status === 'PUBLISHED'
+
+  async function handleClick() {
+    try {
+      await publishService(id)
+      showToast('success', isPublished ? 'Знято з публікації' : 'Опубліковано')
+      router.refresh()
+    } catch {
+      showToast('error', 'Помилка при зміні статусу')
+    }
+  }
+
   return (
     <button
-      type="submit"
-      disabled={pending}
+      type="button"
+      onClick={handleClick}
       className={`rounded px-2 py-1 text-xs font-medium transition-colors ${
-        status === 'PUBLISHED'
-          ? 'text-yellow-600 hover:bg-yellow-50'
-          : 'text-green-600 hover:bg-green-50'
+        isPublished
+          ? 'text-yellow-600 hover:bg-zinc-800'
+          : 'text-green-600 hover:bg-zinc-800'
       }`}
     >
-      {pending ? '...' : status === 'PUBLISHED' ? 'Зняти' : 'Публікувати'}
+      {isPublished ? 'Зняти' : 'Публікувати'}
     </button>
-  )
-}
-
-export function PublishButton({ id, status }: Props) {
-  return (
-    <form action={publishService.bind(null, id)}>
-      <SubmitButton status={status} />
-    </form>
   )
 }

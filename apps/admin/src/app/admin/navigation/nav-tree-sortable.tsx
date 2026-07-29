@@ -22,6 +22,7 @@ import { GripVertical, ChevronRight, ChevronDown, Plus } from 'lucide-react'
 import { saveNavigationItem, deleteNavigationItem, toggleNavigationItem, reorderNavigationItems } from '@/lib/actions/navigation'
 import { ConfirmDialog } from '@/components/admin'
 import { useToast } from '@/components/admin'
+import { useRouter } from 'next/navigation'
 
 interface NavItemData {
   id: string
@@ -48,6 +49,8 @@ const LOCATIONS = ['HEADER', 'FOOTER', 'MOBILE'] as const
 
 function TreeItem({ node, collapsed, onToggle, onEdit }: { node: FlatNode; collapsed: boolean; onToggle: () => void; onEdit: () => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: node.id })
+  const router = useRouter()
+  const { showToast } = useToast()
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
@@ -58,9 +61,6 @@ function TreeItem({ node, collapsed, onToggle, onEdit }: { node: FlatNode; colla
   }
 
   const hasCollapse = node.depth < 2
-  const [confirmDelete, setConfirmDelete] = useState(false)
-  const confirmedRef = useRef(false)
-  const submitRef = useRef<HTMLButtonElement>(null)
 
   return (
     <div
@@ -102,33 +102,19 @@ function TreeItem({ node, collapsed, onToggle, onEdit }: { node: FlatNode; colla
       <button onClick={onEdit} className="rounded px-1.5 py-0.5 text-xs text-amber-400 hover:bg-zinc-800">
         Ред
       </button>
-      <form
-        action={deleteNavigationItem.bind(null, node.id)}
-        onSubmit={(e) => {
-          if (confirmedRef.current) {
-            confirmedRef.current = false
-            return
+      <button
+        type="button"
+        onClick={async () => {
+          try {
+            await deleteNavigationItem(node.id)
+            showToast('success', 'Видалено')
+            router.refresh()
+          } catch {
+            showToast('error', 'Помилка при видаленні')
           }
-          e.preventDefault()
-          setConfirmDelete(true)
         }}
-        className="inline"
-      >
-        <button type="submit" className="rounded px-1.5 py-0.5 text-xs text-red-500 hover:bg-zinc-800">Дел</button>
-        <button type="submit" ref={submitRef} className="hidden" aria-hidden="true" />
-      </form>
-      <ConfirmDialog
-        open={confirmDelete}
-        title="Видалити пункт"
-        message="Видалити пункт і всі дочірні?"
-        confirmLabel="Видалити"
-        onConfirm={() => {
-          setConfirmDelete(false)
-          confirmedRef.current = true
-          submitRef.current?.click()
-        }}
-        onCancel={() => setConfirmDelete(false)}
-      />
+        className="rounded px-1.5 py-0.5 text-xs text-red-500 hover:bg-zinc-800"
+      >Дел</button>
     </div>
   )
 }

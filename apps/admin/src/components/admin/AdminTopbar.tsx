@@ -16,6 +16,8 @@ const BREADCRUMB_LABELS: Record<string, string> = {
   'admin': 'Адмін-панель',
   'services': 'Послуги',
   'blog': 'Блог',
+  'categories': 'Категорії',
+  'posts': 'Пости',
   'faq': 'FAQ',
   'testimonials': 'Відгуки',
   'pages': 'Сторінки',
@@ -31,6 +33,7 @@ const BREADCRUMB_LABELS: Record<string, string> = {
   'debug-tools': 'Інструменти',
   'home': 'Головна',
   'seo': 'SEO',
+  'new': 'Новий',
 }
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 

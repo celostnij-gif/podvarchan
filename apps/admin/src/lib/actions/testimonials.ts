@@ -2,7 +2,6 @@
 
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { eq, and } from 'drizzle-orm'
 import { testimonials, testimonialTranslations, redirectRules, seoMeta } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
@@ -63,7 +62,6 @@ export async function createTestimonial(formData: FormData) {
   await writeAuditLog({ userId, action: 'CREATE', entityType: 'TESTIMONIAL', entityId: id, after: data })
   revalidateAdmin('/admin/testimonials')
   void revalidatePublic({ paths: getHomeRevalidatePaths() })
-  redirect('/admin/testimonials')
 }
 
 export async function updateTestimonial(id: string, formData: FormData) {
@@ -102,7 +100,6 @@ export async function updateTestimonial(id: string, formData: FormData) {
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'TESTIMONIAL', entityId: id, before: existing, after: data })
   revalidateAdmin('/admin/testimonials')
   void revalidatePublic({ paths: getHomeRevalidatePaths() })
-  redirect('/admin/testimonials')
 }
 
 export async function deleteTestimonial(id: string) {
@@ -114,7 +111,6 @@ export async function deleteTestimonial(id: string) {
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'TESTIMONIAL', entityId: id, before: existing })
   revalidateAdmin('/admin/testimonials')
   void revalidatePublic({ paths: getHomeRevalidatePaths() })
-  redirect('/admin/testimonials')
 }
 
 export async function publishTestimonial(id: string) {

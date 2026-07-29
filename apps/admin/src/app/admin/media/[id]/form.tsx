@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useState } from 'react'
+import { useActionState, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast, ConfirmDialog } from '@/components/admin'
 
@@ -31,15 +31,15 @@ export function MediaEditForm({ asset, onDelete }: Props) {
         const { updateMediaMeta } = await import('@/lib/actions/media')
         await updateMediaMeta(asset.id, formData)
         showToast('success', 'Збережено')
-        router.refresh()
-        return null
+        return { saved: true, redirectTo: '/admin/media' }
       } catch (err) {
-        if ((err as any)?.digest === 'NEXT_REDIRECT') throw err
         return { error: err instanceof Error ? err.message : 'Невідома помилка' }
       }
     },
     null,
   )
+
+  useEffect(() => { if (state?.saved) { router.push(state.redirectTo!) } }, [state?.saved, state?.redirectTo, router])
   async function handleDelete() {
     setConfirmOpen(true)
   }

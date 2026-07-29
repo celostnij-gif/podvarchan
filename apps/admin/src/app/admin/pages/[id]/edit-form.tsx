@@ -2,11 +2,11 @@
 
 import { updatePageMeta, deletePage } from '@/lib/actions/pages'
 import { useActionState, useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { SectionEditor } from './section-editor'
 import { ConfirmDialog, useToast } from '@/components/admin'
 import type { PageTranslationRecord, PageSectionWithTranslations } from '../types'
-import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
 interface EditFormProps {
   page: {
@@ -21,6 +21,7 @@ export function EditPageForm({ page, translations, sections }: EditFormProps) {
   const ru = translations.find((t) => t.locale === 'ru')
   const uk = translations.find((t) => t.locale === 'uk')
   const { showToast } = useToast()
+  const router = useRouter()
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
 
@@ -39,9 +40,8 @@ export function EditPageForm({ page, translations, sections }: EditFormProps) {
       try {
         await updatePageMeta(page.id, formData)
         showToast('success', 'Збережено')
-        return { saved: true }
+        return { saved: true, redirectTo: '/admin/pages' }
       } catch (err) {
-        if (isRedirectError(err)) throw err
         const msg = err instanceof Error ? err.message : 'Невідома помилка'
         showToast('error', msg)
         return { error: msg }
@@ -49,6 +49,8 @@ export function EditPageForm({ page, translations, sections }: EditFormProps) {
     },
     null,
   )
+
+  useEffect(() => { if (state?.saved) { router.push(state.redirectTo!) } }, [state?.saved, state?.redirectTo, router])
   function handleDelete() {
     setConfirmOpen(true)
   }
