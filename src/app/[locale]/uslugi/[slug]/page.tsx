@@ -4,7 +4,7 @@ import { cookies } from 'next/headers'
 import { SERVICES } from '@/constants'
 import { SERVICE_SLUG_UK, resolveServiceSlug } from '@/lib/slugMapping'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
-import { serviceSchema, faqSchema } from '@/lib/schema'
+import { serviceSchema, faqSchema, speakableSchema } from '@/lib/schema'
 import { getServiceBySlug, getServiceSidebar, getSEOMeta } from '@/lib/db/public'
 import type { ServiceSidebarItem } from '@/lib/db/public'
 import { ClientServicePage } from './client-page'
@@ -216,6 +216,7 @@ export default async function ServicePage({ params }: Props) {
       locale,
     })
     const schemas: Record<string, unknown>[] = [schema]
+    schemas.push(speakableSchema('.srv-body p'))
 
     if (data.faqJson) {
       try {
@@ -238,6 +239,7 @@ export default async function ServicePage({ params }: Props) {
   })
 
   const schemas: Record<string, unknown>[] = [schema]
+  schemas.push(speakableSchema('.srv-body p'))
   if (faqs.length > 0) {
     schemas.push(faqSchema(faqs))
   }
