@@ -216,7 +216,7 @@ export default async function ServicePage({ params }: Props) {
       locale,
     })
     const schemas: Record<string, unknown>[] = [schema]
-    schemas.push(speakableSchema('.srv-body p'))
+    schemas.push(speakableSchema('.section-card-body p, .subsection-body p'))
 
     if (data.faqJson) {
       try {
@@ -239,10 +239,8 @@ export default async function ServicePage({ params }: Props) {
   })
 
   const schemas: Record<string, unknown>[] = [schema]
-  schemas.push(speakableSchema('.srv-body p'))
-  if (faqs.length > 0) {
-    schemas.push(faqSchema(faqs))
-  }
+  schemas.push(speakableSchema('.section-card-body p, .subsection-body p'))
+  schemas.push(faqSchema(faqs))
 
   return <ClientServicePage service={service} locale={locale} schemas={schemas} allServices={allServices} />
 }

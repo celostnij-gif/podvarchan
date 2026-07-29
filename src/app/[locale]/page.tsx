@@ -124,6 +124,7 @@ export default async function HomePage({
   if (faqSchemaObj) {
     pageSchemas.push(faqSchemaObj)
   }
+  pageSchemas.push(speakableSchema('#home-content p'))
 
   return (
     <>

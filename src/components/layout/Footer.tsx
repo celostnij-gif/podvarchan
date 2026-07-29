@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/routing'
 import { getServiceSidebar, getBlogCategories, getContactChannels, getSiteSetting } from '@/lib/db/public'
+import VisitorCounter from './VisitorCounter'
 
 
 /* ── Footer Column ── */
@@ -172,6 +173,7 @@ export default async function Footer({ locale }: { locale: string }) {
         {/* Bottom bar */}
         <div className="mt-12 pt-8 border-t border-border-base flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-text-muted">© {new Date().getFullYear()} {t('copyright')}</p>
+          <VisitorCounter />
           <nav className="flex items-center gap-4" aria-label={t('aria.legal')}>
             <Link href="/politika-konfidentsialnosti/"
                   className="text-xs text-text-muted hover:text-gold transition-colors duration-200">
