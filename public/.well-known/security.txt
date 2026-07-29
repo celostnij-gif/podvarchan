@@ -1,0 +1,14 @@
+# Privacy and security policy for podvarchan.com
+# See https://podvarchan.com/privacy for full privacy policy
+
+# Contact: podvarchan@gmail.com (PGP key available on request)
+Contact: mailto:podvarchan@gmail.com
+
+# Encryption: We support encrypted communication via PGP
+Encryption: https://keybase.io/podvarchan/pgp_keys.asc
+
+# Policy: We do not share personal data with third parties except as described in privacy policy
+Policy: https://podvarchan.com/politika-konfidentsialnosti/
+
+# Expires: This file should be reviewed quarterly
+Expires: 2026-10-30T00:00:00+03:00

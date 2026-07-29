@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { getTranslations, getMessages } from 'next-intl/server'
 import { SITE } from '@/constants'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
-import { aggregateRatingSchema } from '@/lib/schema'
+import { aggregateRatingSchema, faqSchema } from '@/lib/schema'
 import type { Testimonial } from '@/types'
 import HomeClient from './home-client'
 import Hero from '@/components/sections/Hero'
@@ -117,7 +117,13 @@ export default async function HomePage({
         result: t.result ?? '',
       })))
     : null
+  const faqSchemaObj = d1Faqs && d1Faqs.length > 0
+    ? faqSchema(d1Faqs.map(f => ({ question: f.question, answer: f.answer ?? '' })))
+    : null
   const pageSchemas: Record<string, unknown>[] = ratingSchema ? [webPageSchema, ratingSchema] : [webPageSchema]
+  if (faqSchemaObj) {
+    pageSchemas.push(faqSchemaObj)
+  }
 
   return (
     <>

@@ -44,6 +44,6 @@
 		"CONTACT_EMAIL": "podvarchan@gmail.com",
 		"AUTH_TRUST_HOST": "true",
 		"REVALIDATE_URL": "https://podvarchan.com/api/revalidate",
-		"AUTH_SECRET": "local-dev-secret-key-podvarchan-2026-42-chars!"
+		// AUTH_SECRET set via `wrangler secret put AUTH_SECRET` — never commit real values
 	}
 }

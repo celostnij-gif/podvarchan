@@ -3,7 +3,7 @@ import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getBlogPost, getAllBlogSlugs, getAllBlogPosts, formatDate } from '@/lib/content'
 import { getBlogPostBySlug, getBlogPostsByCategory, getMediaWithVariants, getSEOMeta } from '@/lib/db/public'
 import type { BlogPostPublic } from '@/lib/db/public'
-import { articleSchema, faqSchema } from '@/lib/schema'
+import { articleSchema, faqSchema, speakableSchema } from '@/lib/schema'
 import { ClientBlogPost } from './client-page'
 import { BLOG_SLUG_UK, resolveBlogSlug } from '@/lib/slugMapping'
 import { COVER_IMAGE_OVERRIDES } from '@/lib/content/cover-images'
@@ -98,7 +98,7 @@ type BlogPageData =
       jsonLd: Record<string, unknown>
       additionalSchemas?: Record<string, unknown>[]
     }
-  | { type: 'fallback'; post: import('@/types').BlogPost; locale: string; relatedPosts: { slug: string; title: string }[]; jsonLd: Record<string, unknown> }
+  | { type: 'fallback'; post: import('@/types').BlogPost; locale: string; relatedPosts: { slug: string; title: string }[]; jsonLd: Record<string, unknown>; fallbackSchemas?: Record<string, unknown>[] }
 async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData | null> {
   try {
     const previewCookie = (await cookies()).get('__preview')?.value
@@ -137,6 +137,7 @@ async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData 
           }
         } catch { /* faqJson parse error — skip */ }
       }
+      schemas.push(speakableSchema('.blog-content p'))
       // Locale-specific cover image from override map (covers posts with RU/UK variants)
       const resolvedSlug = resolveBlogSlug(slug)
       const override = COVER_IMAGE_OVERRIDES[resolvedSlug]
@@ -192,8 +193,9 @@ async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData 
     locale,
     category: clinical ? 'clinical' : undefined,
   })
+  const fallbackSchemas = [speakableSchema('.blog-content p')]
 
-  return { type: 'fallback', post, locale, relatedPosts, jsonLd }
+  return { type: 'fallback', post, locale, relatedPosts, jsonLd, fallbackSchemas }
 }
 
 export default async function BlogPostPage({ params }: Props) {
@@ -224,7 +226,8 @@ export default async function BlogPostPage({ params }: Props) {
   }
 
   const { post } = data
-  return (      <ClientBlogPost
+  return (
+    <ClientBlogPost
       title={post.title}
       body={post.body ?? ''}
       date={formatDate(post.datePublished, locale)}
@@ -237,7 +240,7 @@ export default async function BlogPostPage({ params }: Props) {
       imageAlt={post.imageAlt}
       locale={locale}
       relatedPosts={data.relatedPosts}
-      schemas={[data.jsonLd]}
+      schemas={[data.jsonLd, ...(data.fallbackSchemas ?? [])]}
     />
   )
 }

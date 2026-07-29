@@ -67,10 +67,12 @@ export async function generateMetadata({ params }: Props) {
       return seoMetadata({
         title,
         description,
+        keywords: seo?.keywords ? seo.keywords.split(',').map((k: string) => k.trim()) : undefined,
         path: `/uslugi/${displaySlug}`,
         ukPath,
         type: 'service',
         locale,
+        modifiedTime: svc.updatedAt ?? undefined,
       })
     }
   } catch { /* fallback to messages */ }
@@ -175,7 +177,14 @@ async function loadService(slug: string, locale: string): Promise<ServicePageDat
   // Fallback to messages
   const messages = await getMessages({ locale })
   const servicesData = (messages.servicesData as ServicesMessage[])
-  const service = servicesData.find((s) => s.slug === slug)
+  let service = servicesData.find((s) => s.slug === slug)
+  if (!service) {
+    // UK alias differs from RU — try reverse mapping (S1 fix)
+    const ruSlug = resolveServiceSlug(slug)
+    if (ruSlug !== slug) {
+      service = servicesData.find((s) => s.slug === ruSlug)
+    }
+  }
   if (!service) return null
   const withFaqs = messages as unknown as MessagesWithFaqs
   const faqs = withFaqs.serviceFaqs?.[slug] ?? []

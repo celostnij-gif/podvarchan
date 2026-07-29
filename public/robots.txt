@@ -7,7 +7,8 @@ Allow: /
 Allow: /_next/static/
 
 Disallow: /api/
-
+Disallow: /search/
+Disallow: /api/visitor-stats
 User-Agent: GPTBot
 Allow: /
 

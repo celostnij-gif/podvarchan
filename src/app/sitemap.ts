@@ -57,8 +57,44 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   /* ── 1. Статические страницы ── */
   for (const page of STATIC_PAGES) {
-    const [ru, uk] = makeLocalized(`/${page.slug}`, page.priority, page.changefreq)
-    entries.push(ru, uk)
+    if (page.slug === 'tseny/') {
+      // UK slug differs (tsiny) — generate UK version directly to avoid sitemap 301
+      const ruEntry: MetadataRoute.Sitemap[number] = {
+        url: `${BASE}/ru/tseny/`,
+        lastModified: new Date(),
+        changeFrequency: page.changefreq,
+        priority: page.priority,
+        alternates: { languages: { ru: `${BASE}/ru/tseny/`, uk: `${BASE}/uk/tsiny/`, 'x-default': `${BASE}/ru/tseny/` } },
+      }
+      const ukEntry: MetadataRoute.Sitemap[number] = {
+        url: `${BASE}/uk/tsiny/`,
+        lastModified: new Date(),
+        changeFrequency: page.changefreq,
+        priority: page.priority,
+        alternates: { languages: { ru: `${BASE}/ru/tseny/`, uk: `${BASE}/uk/tsiny/`, 'x-default': `${BASE}/ru/tseny/` } },
+      }
+      entries.push(ruEntry, ukEntry)
+    } else if (page.slug === 'ob-avtore/') {
+      // UK slug differs (pro-avtora) — avoid sitemap 301
+      const ruEntry: MetadataRoute.Sitemap[number] = {
+        url: `${BASE}/ru/ob-avtore/`,
+        lastModified: new Date(),
+        changeFrequency: page.changefreq,
+        priority: page.priority,
+        alternates: { languages: { ru: `${BASE}/ru/ob-avtore/`, uk: `${BASE}/uk/pro-avtora/`, 'x-default': `${BASE}/ru/ob-avtore/` } },
+      }
+      const ukEntry: MetadataRoute.Sitemap[number] = {
+        url: `${BASE}/uk/pro-avtora/`,
+        lastModified: new Date(),
+        changeFrequency: page.changefreq,
+        priority: page.priority,
+        alternates: { languages: { ru: `${BASE}/ru/ob-avtore/`, uk: `${BASE}/uk/pro-avtora/`, 'x-default': `${BASE}/ru/ob-avtore/` } },
+      }
+      entries.push(ruEntry, ukEntry)
+    } else {
+      const [ru, uk] = makeLocalized(`/${page.slug}`, page.priority, page.changefreq)
+      entries.push(ru, uk)
+    }
   }
 
   

@@ -1,0 +1,23 @@
+# Podvarchan.com — AI Content Access
+# https://podvarchan.com/
+
+# Primary content
+Allow: /
+Allow: /ru/
+Allow: /uk/
+Allow: /blog/
+Allow: /uslugi/
+Allow: /ob-avtore/
+Allow: /metod/
+Allow: /faq/
+Allow: /kontakty/
+
+# Disallow API and internal pages
+Disallow: /api/
+Disallow: /search/
+Disallow: /_next/
+Disallow: /politika-konfidentsialnosti/
+Disallow: /disclaimer/
+
+# AI training preference is declared in robots.txt
+# Content-Signal: ai-train=yes, search=yes, ai-input=yes
