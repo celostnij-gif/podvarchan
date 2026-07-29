@@ -30,6 +30,12 @@ Allow: /
 User-Agent: Bytespider
 Allow: /
 
+User-Agent: PerplexityBot
+Allow: /
+
+User-Agent: ChatGPT-User
+Allow: /
+
 User-Agent: CloudflareBrowserRenderingCrawler
 Allow: /
 
