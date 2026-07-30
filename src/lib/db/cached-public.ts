@@ -4,8 +4,8 @@
  * Every page load hits 5–7 D1 queries. This module adds a KV caching layer
  * so repeated requests read from KV (~1–5ms) instead of D1 (~20–80ms each).
  *
- * Cache writes are deferred via ctx.waitUntil() — they don't consume the
- * current request's CPU budget (Free Plan = 10ms limit).
+ * Cache writes are synchronous (KV.put on cache miss). No ctx.waitUntil needed.
+ * The first request after deploy populates the cache; subsequent requests skip D1.
  *
  * Usage in page / layout components:
  *   import { getCachedNavigation } from '@/lib/db/cached-public'

@@ -4,8 +4,10 @@
  * Cloudflare Free Plan CPU limit = 10ms. D1 queries are fast (20–80ms) but
  * a page often runs 5–7 of them → 1.4s TTFB. KV get is ~1–5ms.
  *
- * Cache miss → fetch from D1, schedule KV PUT via ctx.waitUntil() so the
- * write doesn't count toward the current request's CPU budget.
+ * Cache miss → fetch from D1, write to KV synchronously, return result.
+ * No ctx.waitUntil — Server Components in OpenNext don't reliably expose it.
+ * The first request after deploy is still warm (cache + populate), subsequent
+ * requests read from KV and skip D1 entirely.
  *
  * Usage:
  *   const services = await withCache('services:ru', 600, () => getServices('ru'))
@@ -15,18 +17,13 @@ import { getCloudflareContext } from '@opennextjs/cloudflare'
 
 const PREFIX = 'd1c:' // short prefix to keep KV key size minimal
 
-/* ── Minimal ExecutionContext type (avoids @cloudflare/workers-types dep) ── */
-interface Ctx {
-  waitUntil(promise: Promise<unknown>): void
-}
-
 /* ── helpers ── */
 
-function getKvCtx(): { kv: KVNamespace; ctx: Ctx } | null {
+function getKv(): KVNamespace | null {
   try {
-    const { env, ctx } = getCloudflareContext()
+    const { env } = getCloudflareContext()
     const kv = env.KV_BINDING as KVNamespace | undefined
-    if (kv && ctx) return { kv, ctx: ctx as unknown as Ctx }
+    return kv ?? null
   } catch {
     // dev mode (next dev) — no Cloudflare context
   }
@@ -38,8 +35,10 @@ function getKvCtx(): { kv: KVNamespace; ctx: Ctx } | null {
 /**
  * Wraps an async fetchFn with KV cache.
  *
- * 1. Tries KV.get(key). On hit → JSON.parse → return.
- * 2. On miss → calls fetchFn() → schedules async KV.put via ctx.waitUntil() → returns result.
+ * 1. Tries KV.get(key). On hit → JSON.parse → return (fast path).
+ * 2. On miss → calls fetchFn() → sync KV.put → return result.
+ *    The miss path is as expensive as a bare D1 call, but subsequent requests
+ *    hit the KV fast path.
  *
  * TTL is in seconds. Default 300s (5 min).
  */
@@ -48,12 +47,13 @@ export async function withCache<T>(
   ttl: number,
   fetchFn: () => Promise<T>,
 ): Promise<T> {
-  const cache = getKvCtx()
+  const kv = getKv()
+  const fullKey = `${PREFIX}${cacheKey}`
 
   /* Try cache hit */
-  if (cache) {
+  if (kv) {
     try {
-      const raw = await cache.kv.get(`${PREFIX}${cacheKey}`)
+      const raw = await kv.get(fullKey)
       if (raw !== null) {
         return JSON.parse(raw) as T
       }
@@ -65,15 +65,13 @@ export async function withCache<T>(
   /* Cache miss — fetch fresh data */
   const data = await fetchFn()
 
-  /* Schedule async KV write (never blocks the response) */
-  if (cache) {
-    cache.ctx.waitUntil(
-      cache.kv
-        .put(`${PREFIX}${cacheKey}`, JSON.stringify(data), { expirationTtl: ttl })
-        .catch(() => {
-          /* silent — KV write is best-effort */
-        }),
-    )
+  /* Write to KV (sync — no ctx.waitUntil needed) */
+  if (kv) {
+    kv
+      .put(fullKey, JSON.stringify(data), { expirationTtl: ttl })
+      .catch(() => {
+        /* silent — KV write is best-effort */
+      })
   }
 
   return data
@@ -83,17 +81,16 @@ export async function withCache<T>(
  * Invalidate one or more cache keys by prefix.
  *
  * Example: invalidateKeys('nav:') clears d1c:nav:HEADER:ru, d1c:nav:HEADER:uk, etc.
- * Example: invalidateKeys('page:HOME:') clears d1c:page:HOME:ru, d1c:page:HOME:uk.
  */
 export async function invalidateKeys(prefix: string): Promise<void> {
-  const cache = getKvCtx()
-  if (!cache) return
+  const kv = getKv()
+  if (!kv) return
 
   const fullPrefix = `${PREFIX}${prefix}`
   try {
-    const { keys } = await cache.kv.list({ prefix: fullPrefix })
+    const { keys } = await kv.list({ prefix: fullPrefix })
     if (keys.length === 0) return
-    await Promise.all(keys.map((k) => cache!.kv.delete(k.name)))
+    await Promise.all(keys.map((k) => kv.delete(k.name)))
   } catch {
     // best-effort
   }
@@ -101,16 +98,15 @@ export async function invalidateKeys(prefix: string): Promise<void> {
 
 /**
  * Blow away ALL D1 KV cache keys.
- * Called when the revalidation endpoint can't determine a specific entity type.
  */
 export async function invalidateAll(): Promise<void> {
-  const cache = getKvCtx()
-  if (!cache) return
+  const kv = getKv()
+  if (!kv) return
 
   try {
-    const { keys } = await cache.kv.list({ prefix: PREFIX })
+    const { keys } = await kv.list({ prefix: PREFIX })
     if (keys.length === 0) return
-    await Promise.all(keys.map((k) => cache!.kv.delete(k.name)))
+    await Promise.all(keys.map((k) => kv.delete(k.name)))
   } catch {
     // best-effort
   }
