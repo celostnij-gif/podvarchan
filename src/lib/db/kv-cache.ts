@@ -6,8 +6,8 @@
  *
  * Cache miss → fetch from D1, write to KV synchronously, return result.
  * No ctx.waitUntil — Server Components in OpenNext don't reliably expose it.
- * The first request after deploy is still warm (cache + populate), subsequent
- * requests read from KV and skip D1 entirely.
+ * The first request after deploy populates the cache; subsequent requests
+ * read from KV and skip D1 entirely.
  *
  * Usage:
  *   const services = await withCache('services:ru', 600, () => getServices('ru'))
@@ -22,10 +22,10 @@ const PREFIX = 'd1c:' // short prefix to keep KV key size minimal
 function getKv(): KVNamespace | null {
   try {
     const { env } = getCloudflareContext()
-    const kv = env.KV_BINDING as KVNamespace | undefined
+    const kv = env['KV_BINDING'] as KVNamespace | undefined
     return kv ?? null
   } catch {
-    // dev mode (next dev) — no Cloudflare context
+    // dev mode (next dev) — no Cloudflare context, or env without KV_BINDING
   }
   return null
 }
