@@ -114,6 +114,7 @@ export default async function LocaleLayout({
   }
 
   // Fix UK slugs in nav
+  // Fix UK slugs in nav
   if (locale === 'uk') {
     const pricesItem = headerNav.find(i => i.href === '/tseny/')
     if (pricesItem) pricesItem.href = '/tsiny/'
