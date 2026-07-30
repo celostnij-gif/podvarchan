@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/routing'
-import { getServiceSidebar, getBlogCategories, getContactChannels, getSiteSetting } from '@/lib/db/public'
+import { getCachedServiceSidebar, getCachedBlogCategories, getCachedContactChannels, getCachedSiteSetting } from '@/lib/db/cached-public'
 import VisitorCounter from './VisitorCounter'
 
 
@@ -30,10 +30,10 @@ function FooterLink({ href, children }: { href: string; children: ReactNode }) {
 
 export default async function Footer({ locale }: { locale: string }) {
   const t = await getTranslations({ locale, namespace: 'common' })
-  const services = await getServiceSidebar(locale).catch(() => [])
-  const blogCategories = await getBlogCategories(locale).catch(() => [])
-  const contactChannels = await getContactChannels().catch(() => [])
-  const rawEmail = await getSiteSetting('contactEmail').catch(() => null)
+  const services = await getCachedServiceSidebar(locale).catch(() => [])
+  const blogCategories = await getCachedBlogCategories(locale).catch(() => [])
+  const contactChannels = await getCachedContactChannels().catch(() => [])
+  const rawEmail = await getCachedSiteSetting('contactEmail').catch(() => null)
   const contactEmail = typeof rawEmail === 'string' ? rawEmail : 'podvarchan@gmail.com'
 
   return (

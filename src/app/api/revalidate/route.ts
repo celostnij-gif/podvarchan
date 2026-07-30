@@ -1,6 +1,7 @@
 import { revalidatePath } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
 import { env } from '@/env'
+import { invalidateAll } from '@/lib/db/kv-cache'
 
 /**
  * POST /api/revalidate
@@ -46,6 +47,13 @@ export async function POST(request: NextRequest) {
     const useLayout = body.type === 'layout'
     const done: string[] = []
     const errors: string[] = []
+
+    // Clear D1 KV cache — next requests will refetch fresh data
+    try {
+      await invalidateAll()
+    } catch {
+      // best-effort — cache TTL will expire eventually
+    }
 
     for (const p of limited) {
       try {
