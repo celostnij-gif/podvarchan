@@ -18,61 +18,52 @@ const NAV_LABEL_KEYS: Record<string, string> = {
   '/uslugi/': 'nav.services',
   '/blog/': 'nav.blog',
   '/ob-avtore/': 'nav.about',
-  '/pro-avtora/': 'nav.about',
   '/metod/': 'nav.method',
   '/faq/': 'nav.faq',
   '/tseny/': 'nav.prices',
-  '/tsiny/': 'nav.prices',
   '/kontakty/': 'nav.contacts',
   '/search/': 'nav.search',
   '/uslugi/gipnoterapiya-onlayn/': 'nav.gipnoterapiya',
-  '/uslugi/hipnoterapiya-onlayn/': 'nav.gipnoterapiya',
   '/uslugi/trevoga-i-panicheskiye-ataki/': 'nav.trevoga',
-  '/uslugi/trivoga-i-panichni-ataki/': 'nav.trevoga',
   '/uslugi/rabota-s-podsoznaniem/': 'nav.podsoznanie',
-  '/uslugi/robota-z-pidsvidomistyu/': 'nav.podsoznanie',
   '/uslugi/samosabotazh-i-bloki/': 'nav.samosabotazh',
   '/uslugi/emotsionalnoye-vygoraniye/': 'nav.vygoraniye',
-  '/uslugi/emotsiyne-vigorannya/': 'nav.vygoraniye',
   '/uslugi/neyverennost-i-strakh-provala/': 'nav.neyverennost',
-  '/uslugi/nevpevnenist-i-strakh-provala/': 'nav.neyverennost',
-const NAV_ICONS: Record<string, string> = {
+  '/uslugi/psikhosomatika/': 'nav.psikhosomatika',
+  '/uslugi/lichnostnyy-krizis/': 'nav.krizis',
+  '/uslugi/tsifrovoy-detoks-i-gadzhet-zavisimost/': 'nav.tsifrovoy-detoks',
+}
+ 
+ /* ── Nav icon mapping ── */
+ 
+ const NAV_ICONS: Record<string, string> = {
   '/': 'house',
   '/uslugi/': 'book-open',
   '/blog/': 'file-text',
   '/ob-avtore/': 'user',
-  '/pro-avtora/': 'user',
   '/metod/': 'book-open',
   '/faq/': 'help-circle',
   '/tseny/': 'dollar-sign',
-  '/tsiny/': 'dollar-sign',
   '/kontakty/': 'phone',
   '/search/': 'search',
   '/uslugi/gipnoterapiya-onlayn/': 'brain',
-  '/uslugi/hipnoterapiya-onlayn/': 'brain',
   '/uslugi/trevoga-i-panicheskiye-ataki/': 'heart',
-  '/uslugi/trivoga-i-panichni-ataki/': 'heart',
   '/uslugi/rabota-s-podsoznaniem/': 'moon',
-  '/uslugi/robota-z-pidsvidomistyu/': 'moon',
   '/uslugi/samosabotazh-i-bloki/': 'lock',
   '/uslugi/emotsionalnoye-vygoraniye/': 'flame',
-  '/uslugi/tsifroviy-detoks-i-gadzhet-zalezhnist/': 'smartphone',
+  '/uslugi/neyverennost-i-strakh-provala/': 'shield-off',
+  '/uslugi/psikhosomatika/': 'leaf',
+  '/uslugi/lichnostnyy-krizis/': 'compass',
   '/uslugi/tsifrovoy-detoks-i-gadzhet-zavisimost/': 'smartphone',
 }
 
-function stripLocale(href: string): string {
-  return href.replace(/^\/(ru|uk)/, '') || '/'
-}
-
 function getNavLabelKey(href: string): string {
-  const normalized = stripLocale(href)
-  return NAV_LABEL_KEYS[normalized] ?? 'nav.home'
+  return NAV_LABEL_KEYS[href] ?? 'nav.home'
 }
-
-function getNavIcon(href: string): string {
-  const normalized = stripLocale(href)
-  return NAV_ICONS[normalized] ?? 'sparkles'
-}
+ 
+ function getNavIcon(href: string): string {
+   return NAV_ICONS[href] ?? 'sparkles'
+ }
 
 // Mobile menu overlay & panel variants (still need framer-motion for exit animations)
 const mobileOverlay = {
