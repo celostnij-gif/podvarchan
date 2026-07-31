@@ -82,7 +82,7 @@ export default function BlogClient({ posts, categories }: Props) {
               {t('pageTitle')}
             </h1>
 
-            <p className="mt-4 text-lg md:text-xl text-text-secondary max-w-2xl leading-relaxed animate-fade-in-down" style={{ animationDelay: '0.1s' }}>
+            <p className="mt-4 text-lg md:text-xl text-text-secondary max-w-2xl leading-relaxed whitespace-pre-line animate-fade-in-down" style={{ animationDelay: '0.1s' }}>
               {t('pageDescription')}
             </p>
 
