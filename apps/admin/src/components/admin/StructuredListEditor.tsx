@@ -26,7 +26,9 @@ export function StructuredListEditor({ value, onChange, fields, emptyItem, label
 
   const updateItems = (newItems: Record<string, string>[]) => {
     setItems(newItems)
-    onChange(JSON.stringify(newItems))
+    // _key is an internal React key — never persist it into the JSON
+    const clean = newItems.map(({ _key, ...rest }) => rest)
+    onChange(JSON.stringify(clean))
   }
 
   const updateItem = (index: number, key: string, val: string) => {

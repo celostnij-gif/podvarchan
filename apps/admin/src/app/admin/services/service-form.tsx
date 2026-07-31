@@ -26,7 +26,10 @@ const CATEGORY_OPTIONS: { value: string; label: string }[] = [
   { value: 'krizis', label: 'Криза' },
   { value: 'tsifrovoy-detoks', label: 'Цифровий детокс' },
   { value: 'zagalni-zapit', label: 'Загальний запит' },
+  { value: 'emigration', label: 'Еміграція' },
 ]
+
+const ICON_SUGGESTIONS = ['☀️', '⚡', '✨', '🌀', '🌅', '🌊', '🌌', '🌍', '🌙', '🌟', '🌫️', '🌱', '🌿', '👤', '📱', '🔓', '🔮', '🕯️', '🦂', '🦋']
 
 export function ServiceForm({ service }: Props) {
   const isEdit = !!service
@@ -127,8 +130,14 @@ export function ServiceForm({ service }: Props) {
               name="icon"
               defaultValue={service?.icon ?? ''}
               placeholder="🧠"
+              list="icon-suggestions"
               className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
             />
+            <datalist id="icon-suggestions">
+              {ICON_SUGGESTIONS.map((icon) => (
+                <option key={icon} value={icon} />
+              ))}
+            </datalist>
           </div>
           <div>
             <label htmlFor="category" className="block text-sm font-medium text-zinc-300">
