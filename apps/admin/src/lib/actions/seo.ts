@@ -1,4 +1,5 @@
 'use server'
+import { cleanUpdate } from './clean-update'
 
 import { revalidatePath } from 'next/cache'
 import { eq, and } from 'drizzle-orm'
@@ -84,25 +85,24 @@ export async function saveSeoOverride(formData: FormData) {
     .from(seoMeta)
     .where(and(eq(seoMeta.entityType, entityType), eq(seoMeta.entityId, entityId), eq(seoMeta.locale, locale)))
     .get()
-
   if (existing) {
     await db
       .update(seoMeta)
-      .set({
-        title: title || null, description: description || null,
-        keywords: keywords || null, canonicalPath: canonicalPath || null,
-        ogTitle: ogTitle || null, ogDescription: ogDescription || null,
+      .set(cleanUpdate({
+        title, description,
+        keywords, canonicalPath,
+        ogTitle, ogDescription,
         robotsIndex, robotsFollow, updatedAt: ts,
-      })
+      }))
       .where(eq(seoMeta.id, existing.id))
   } else {
-    await db.insert(seoMeta).values({
+    await db.insert(seoMeta).values(cleanUpdate({
       id: crypto.randomUUID(), entityType, entityId, locale,
-      title: title || null, description: description || null,
-      keywords: keywords || null, canonicalPath: canonicalPath || null,
-      ogTitle: ogTitle || null, ogDescription: ogDescription || null,
+      title, description,
+      keywords, canonicalPath,
+      ogTitle, ogDescription,
       robotsIndex, robotsFollow, createdAt: ts, updatedAt: ts,
-    })
+    }))
   }
 
   revalidateAdmin('/admin/seo', `/admin/seo/${entityType}/${entityId}`)

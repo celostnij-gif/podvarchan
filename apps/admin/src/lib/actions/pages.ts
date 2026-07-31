@@ -1,4 +1,5 @@
 'use server'
+import { cleanUpdate } from './clean-update'
 
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
@@ -77,23 +78,23 @@ async function upsertTranslations(
     if (existingTr) {
       await db
         .update(pageTranslations)
-        .set({
+        .set(cleanUpdate({
           slug: t.slug,
-          title: t.title || null,
-          contentJson: t.contentJson || null,
-          excerpt: t.excerpt || null,
-        })
+          title: t.title,
+          contentJson: t.contentJson,
+          excerpt: t.excerpt,
+        }))
         .where(eq(pageTranslations.id, existingTr.id))
     } else {
-      await db.insert(pageTranslations).values({
+      await db.insert(pageTranslations).values(cleanUpdate({
         id: crypto.randomUUID(),
         pageId,
         locale: t.locale,
         slug: t.slug,
-        title: t.title || null,
-        contentJson: t.contentJson || null,
-        excerpt: t.excerpt || null,
-      })
+        title: t.title,
+        contentJson: t.contentJson,
+        excerpt: t.excerpt,
+      }))
     }
   }
 }
@@ -385,12 +386,12 @@ export async function updateHomeContent(formData: FormData) {
     if (existingTr) {
       await db
         .update(pageTranslations)
-        .set({
+        .set(cleanUpdate({
           slug: p.slug,
-          title: p.title || null,
-          excerpt: p.excerpt || null,
+          title: p.title,
+          excerpt: p.excerpt,
           contentJson,
-        })
+        }))
         .where(eq(pageTranslations.id, existingTr.id))
     } else {
       await db.insert(pageTranslations).values({
@@ -549,16 +550,18 @@ async function upsertSectionTranslation(
     )
     .get()
   if (existingTr) {
-    await db
-      .update(pageSectionTranslations)
-      .set({ contentJson: contentJson || null })
-      .where(eq(pageSectionTranslations.id, existingTr.id))
-  } else {
+    if (contentJson) {
+      await db
+        .update(pageSectionTranslations)
+        .set({ contentJson })
+        .where(eq(pageSectionTranslations.id, existingTr.id))
+    }
+  } else if (contentJson) {
     await db.insert(pageSectionTranslations).values({
       id: crypto.randomUUID(),
       sectionId,
       locale,
-      contentJson: contentJson || null,
+      contentJson,
     })
   }
 }

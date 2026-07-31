@@ -1,4 +1,5 @@
 'use server'
+import { cleanUpdate } from './clean-update'
 
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
@@ -45,12 +46,15 @@ export async function createFaqItem(formData: FormData) {
   if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
   const data = parsed.data
   const id = crypto.randomUUID()
-  await db.insert(faqItems).values({ id, group: data.group, sortOrder: data.sortOrder, status: data.status, serviceId: data.serviceId || null })
+  await db.insert(faqItems).values(cleanUpdate({
+    id, group: data.group, sortOrder: data.sortOrder,
+    status: data.status, serviceId: data.serviceId,
+  }))
   for (const t of data.translations) {
-    await db.insert(faqItemTranslations).values({
+    await db.insert(faqItemTranslations).values(cleanUpdate({
       id: crypto.randomUUID(), faqItemId: id, locale: t.locale,
-      question: t.question || null, answer: t.answer || null,
-    })
+      question: t.question, answer: t.answer,
+    }))
   }
   await writeAuditLog({ userId, action: 'CREATE', entityType: 'FAQ', entityId: id, after: data })
   revalidateAdmin('/admin/faq')
@@ -73,13 +77,22 @@ export async function updateFaqItem(id: string, formData: FormData) {
   })
   if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
   const data = parsed.data
-  await db.update(faqItems).set({ group: data.group, sortOrder: data.sortOrder, status: data.status, serviceId: data.serviceId || null }).where(eq(faqItems.id, id))
+  await db.update(faqItems).set(cleanUpdate({
+    group: data.group, sortOrder: data.sortOrder,
+    status: data.status, serviceId: data.serviceId,
+  })).where(eq(faqItems.id, id))
   for (const t of data.translations) {
-    const existingTr = await db.select().from(faqItemTranslations).where(and(eq(faqItemTranslations.faqItemId, id), eq(faqItemTranslations.locale, t.locale))).get()
+    const existingTr = await db.select().from(faqItemTranslations)
+      .where(and(eq(faqItemTranslations.faqItemId, id), eq(faqItemTranslations.locale, t.locale))).get()
     if (existingTr) {
-      await db.update(faqItemTranslations).set({ question: t.question || null, answer: t.answer || null }).where(and(eq(faqItemTranslations.faqItemId, id), eq(faqItemTranslations.locale, t.locale)))
+      await db.update(faqItemTranslations).set(cleanUpdate({
+        question: t.question, answer: t.answer,
+      })).where(and(eq(faqItemTranslations.faqItemId, id), eq(faqItemTranslations.locale, t.locale)))
     } else {
-      await db.insert(faqItemTranslations).values({ id: crypto.randomUUID(), faqItemId: id, locale: t.locale, question: t.question || null, answer: t.answer || null })
+      await db.insert(faqItemTranslations).values(cleanUpdate({
+        id: crypto.randomUUID(), faqItemId: id, locale: t.locale,
+        question: t.question, answer: t.answer,
+      }))
     }
   }
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'FAQ', entityId: id, before: existing, after: data })

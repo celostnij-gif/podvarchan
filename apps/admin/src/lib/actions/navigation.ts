@@ -1,4 +1,5 @@
 'use server'
+import { cleanUpdate } from './clean-update'
 
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
@@ -47,20 +48,19 @@ export async function saveNavigationItem(data: FormData) {
   const item = parsed.data
   if (id) {
     const existing = await db.select().from(navigationItems).where(eq(navigationItems.id, id)).get()
-    if (!existing) throw new Error('Пункт навігації не знайдено')
-    await db.update(navigationItems).set({
-      location: item.location, href: item.href || null,
-      parentId: item.parentId || null, labelRu: item.labelRu || null, labelUk: item.labelUk || null,
+    await db.update(navigationItems).set(cleanUpdate({
+      location: item.location, href: item.href,
+      parentId: item.parentId, labelRu: item.labelRu, labelUk: item.labelUk,
       sortOrder: item.sortOrder, isEnabled: item.isEnabled,
-    }).where(eq(navigationItems.id, id))
+    })).where(eq(navigationItems.id, id))
     await writeAuditLog({ userId, action: 'UPDATE', entityType: 'NAVIGATION', entityId: id, before: existing, after: item })
   } else {
     const newId = crypto.randomUUID()
-    await db.insert(navigationItems).values({
-      id: newId, location: item.location, href: item.href || null,
-      parentId: item.parentId || null, labelRu: item.labelRu || null, labelUk: item.labelUk || null,
+    await db.insert(navigationItems).values(cleanUpdate({
+      id: newId, location: item.location, href: item.href,
+      parentId: item.parentId, labelRu: item.labelRu, labelUk: item.labelUk,
       sortOrder: item.sortOrder, isEnabled: item.isEnabled,
-    })
+    }))
     await writeAuditLog({ userId, action: 'CREATE', entityType: 'NAVIGATION', entityId: newId, after: item })
   }
   revalidateAdmin('/admin/navigation', '/admin/settings')

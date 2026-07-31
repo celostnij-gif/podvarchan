@@ -1,5 +1,6 @@
 'use server'
 
+import { cleanUpdate } from './clean-update'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { eq, and } from 'drizzle-orm'
@@ -80,9 +81,15 @@ export async function createCategory(formData: FormData) {
   const data = parsed.data
   const id = crypto.randomUUID()
   const ts = await now()
-  await db.insert(blogCategories).values({ id, slugBase: data.slugBase, serviceId: data.serviceId || null, sortOrder: data.sortOrder, status: 'PUBLISHED' })
+  await db.insert(blogCategories).values(cleanUpdate({
+    id, slugBase: data.slugBase, serviceId: data.serviceId,
+    sortOrder: data.sortOrder, status: 'PUBLISHED',
+  }))
   for (const t of data.translations) {
-    await db.insert(blogCategoryTranslations).values({ id: crypto.randomUUID(), categoryId: id, locale: t.locale, slug: t.slug, name: t.name || null, description: t.description || null })
+    await db.insert(blogCategoryTranslations).values(cleanUpdate({
+      id: crypto.randomUUID(), categoryId: id, locale: t.locale,
+      slug: t.slug, name: t.name, description: t.description,
+    }))
   }
   await writeAuditLog({ userId, action: 'CREATE', entityType: 'BLOG_CATEGORY', entityId: id, after: data })
   revalidateAdmin('/admin/blog/categories')
@@ -111,13 +118,22 @@ export async function updateCategory(id: string, formData: FormData) {
   })
   if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
   const data = parsed.data
-  await db.update(blogCategories).set({ slugBase: data.slugBase, serviceId: data.serviceId || null, sortOrder: data.sortOrder }).where(eq(blogCategories.id, id))
+  await db.update(blogCategories).set(cleanUpdate({
+    slugBase: data.slugBase, serviceId: data.serviceId,
+    sortOrder: data.sortOrder,
+  })).where(eq(blogCategories.id, id))
   for (const t of data.translations) {
-    const existingTr = await db.select().from(blogCategoryTranslations).where(and(eq(blogCategoryTranslations.categoryId, id), eq(blogCategoryTranslations.locale, t.locale))).get()
+    const existingTr = await db.select().from(blogCategoryTranslations)
+      .where(and(eq(blogCategoryTranslations.categoryId, id), eq(blogCategoryTranslations.locale, t.locale))).get()
     if (existingTr) {
-      await db.update(blogCategoryTranslations).set({ slug: t.slug, name: t.name || null, description: t.description || null }).where(and(eq(blogCategoryTranslations.categoryId, id), eq(blogCategoryTranslations.locale, t.locale)))
+      await db.update(blogCategoryTranslations).set(cleanUpdate({
+        slug: t.slug, name: t.name, description: t.description,
+      })).where(and(eq(blogCategoryTranslations.categoryId, id), eq(blogCategoryTranslations.locale, t.locale)))
     } else {
-      await db.insert(blogCategoryTranslations).values({ id: crypto.randomUUID(), categoryId: id, locale: t.locale, slug: t.slug, name: t.name || null, description: t.description || null })
+      await db.insert(blogCategoryTranslations).values(cleanUpdate({
+        id: crypto.randomUUID(), categoryId: id, locale: t.locale,
+        slug: t.slug, name: t.name, description: t.description,
+      }))
     }
   }
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'BLOG_CATEGORY', entityId: id, before: existing, after: data })
@@ -154,9 +170,12 @@ export async function createPost(formData: FormData) {
   ].filter(t => t.slug)
   const parsed = postSchema.safeParse({
     categoryId: formData.get('categoryId'), authorId: formData.get('authorId'),
-    coverImageId: formData.get('coverImageId'), readingMinutes: formData.get('readingMinutes'),
-    publishedAt: formData.get('publishedAt'), scheduledAt: formData.get('scheduledAt'),
-    status: formData.get('status'), translations,
+    coverImageId: formData.get('coverImageId'),
+    readingMinutes: formData.get('readingMinutes'),
+    publishedAt: formData.get('publishedAt'),
+    scheduledAt: formData.get('scheduledAt'),
+    status: formData.get('status'),
+    translations,
   })
   if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
   const data = parsed.data
@@ -169,19 +188,19 @@ export async function createPost(formData: FormData) {
   }
   const id = crypto.randomUUID()
   const ts = await now()
-  await db.insert(blogPosts).values({
-    id, categoryId: data.categoryId || null, authorId: data.authorId || null,
-    status: data.status, coverImageId: data.coverImageId || null,
-    readingMinutes: data.readingMinutes, publishedAt: data.publishedAt || null,
-    scheduledAt: data.scheduledAt || null, createdAt: ts, updatedAt: ts,
-  })
+  await db.insert(blogPosts).values(cleanUpdate({
+    id, categoryId: data.categoryId, authorId: data.authorId,
+    status: data.status, coverImageId: data.coverImageId,
+    readingMinutes: data.readingMinutes, publishedAt: data.publishedAt,
+    scheduledAt: data.scheduledAt, createdAt: ts, updatedAt: ts,
+  }))
   for (const t of data.translations) {
-    await db.insert(blogPostTranslations).values({
+    await db.insert(blogPostTranslations).values(cleanUpdate({
       id: crypto.randomUUID(), postId: id, locale: t.locale, slug: t.slug,
-      title: t.title || null, excerpt: t.excerpt || null,
-      contentJson: t.contentJson || null, contentHtml: t.contentHtml || null,
-      tableOfContentsJson: t.tableOfContentsJson || null, faqJson: t.faqJson || null,
-    })
+      title: t.title, excerpt: t.excerpt,
+      contentJson: t.contentJson, contentHtml: t.contentHtml,
+      tableOfContentsJson: t.tableOfContentsJson, faqJson: t.faqJson,
+    }))
   }
   await writeAuditLog({ userId, action: 'CREATE', entityType: 'BLOG_POST', entityId: id, after: data })
   const ruSlug = data.translations.find((t: { locale: string }) => t.locale === 'ru')?.slug || ''
@@ -256,27 +275,28 @@ export async function updatePost(id: string, formData: FormData) {
 
 
   const ts = await now()
-  await db.update(blogPosts).set({
-    categoryId: data.categoryId || null, authorId: data.authorId || null,
-    status: data.status, coverImageId: data.coverImageId || null,
-    readingMinutes: data.readingMinutes, publishedAt: data.publishedAt || null,
-    scheduledAt: data.scheduledAt || null, updatedAt: ts,
-  }).where(eq(blogPosts.id, id))
+  await db.update(blogPosts).set(cleanUpdate({
+    categoryId: data.categoryId, authorId: data.authorId,
+    status: data.status, coverImageId: data.coverImageId,
+    readingMinutes: data.readingMinutes, publishedAt: data.publishedAt,
+    scheduledAt: data.scheduledAt, updatedAt: ts,
+  })).where(eq(blogPosts.id, id))
   for (const t of data.translations) {
-    const existingTr = await db.select().from(blogPostTranslations).where(and(eq(blogPostTranslations.postId, id), eq(blogPostTranslations.locale, t.locale))).get()
+    const existingTr = await db.select().from(blogPostTranslations)
+      .where(and(eq(blogPostTranslations.postId, id), eq(blogPostTranslations.locale, t.locale))).get()
     if (existingTr) {
-      await db.update(blogPostTranslations).set({
-        slug: t.slug, title: t.title || null, excerpt: t.excerpt || null,
-        contentJson: t.contentJson || null, contentHtml: t.contentHtml || null,
-        tableOfContentsJson: t.tableOfContentsJson || null, faqJson: t.faqJson || null,
-      }).where(and(eq(blogPostTranslations.postId, id), eq(blogPostTranslations.locale, t.locale)))
+      await db.update(blogPostTranslations).set(cleanUpdate({
+        slug: t.slug, title: t.title, excerpt: t.excerpt,
+        contentJson: t.contentJson, contentHtml: t.contentHtml,
+        tableOfContentsJson: t.tableOfContentsJson, faqJson: t.faqJson,
+      })).where(and(eq(blogPostTranslations.postId, id), eq(blogPostTranslations.locale, t.locale)))
     } else {
-      await db.insert(blogPostTranslations).values({
+      await db.insert(blogPostTranslations).values(cleanUpdate({
         id: crypto.randomUUID(), postId: id, locale: t.locale, slug: t.slug,
-        title: t.title || null, excerpt: t.excerpt || null,
-        contentJson: t.contentJson || null, contentHtml: t.contentHtml || null,
-        tableOfContentsJson: t.tableOfContentsJson || null, faqJson: t.faqJson || null,
-      })
+        title: t.title, excerpt: t.excerpt,
+        contentJson: t.contentJson, contentHtml: t.contentHtml,
+        tableOfContentsJson: t.tableOfContentsJson, faqJson: t.faqJson,
+      }))
     }
   }
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'BLOG_POST', entityId: id, before: existing, after: data })

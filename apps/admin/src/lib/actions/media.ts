@@ -1,4 +1,5 @@
 'use server'
+import { cleanUpdate } from './clean-update'
 
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
@@ -41,10 +42,13 @@ export async function updateMediaMeta(id: string, formData: FormData) {
   })
   if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
   const data = parsed.data
-  await db.update(mediaAssets).set({
-    altRu: data.altRu || null, altUk: data.altUk || null,
-    captionRu: data.captionRu || null, captionUk: data.captionUk || null,
-  }).where(eq(mediaAssets.id, id))
+  const cleaned = cleanUpdate({
+    altRu: data.altRu, altUk: data.altUk,
+    captionRu: data.captionRu, captionUk: data.captionUk,
+  })
+  if (Object.keys(cleaned).length > 0) {
+    await db.update(mediaAssets).set(cleaned).where(eq(mediaAssets.id, id))
+  }
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'MEDIA', entityId: id, before: existing, after: data })
   revalidatePath('/admin/media')
 }

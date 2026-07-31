@@ -1,4 +1,5 @@
 'use server'
+import { cleanUpdate } from './clean-update'
 
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
@@ -122,23 +123,23 @@ export async function createService(formData: FormData) {
     throw new Error(`Послуга з slugBase "${data.slugBase}" вже існує`)
   }
 
-  await db.insert(services).values({
-    id: serviceId, slugBase: data.slugBase, icon: data.icon || null,
-    category: data.category || null, priority: data.priority,
+  await db.insert(services).values(cleanUpdate({
+    id: serviceId, slugBase: data.slugBase, icon: data.icon,
+    category: data.category, priority: data.priority,
     status: data.status, featured: data.featured, sortOrder: data.sortOrder,
     createdAt: ts, updatedAt: ts,
-  })
+  }))
 
   for (const t of data.translations) {
-    await db.insert(serviceTranslations).values({
+    await db.insert(serviceTranslations).values(cleanUpdate({
       id: crypto.randomUUID(), serviceId: serviceId, locale: t.locale,
-      slug: t.slug, title: t.title || null, shortTitle: t.shortTitle || null,
-      description: t.description || null, contentHtml: t.contentHtml || null,
-      heroTitle: t.heroTitle || null, heroSubtitle: t.heroSubtitle || null,
-      symptomsJson: t.symptomsJson || null, processJson: t.processJson || null,
-      benefitsJson: t.benefitsJson || null, faqJson: t.faqJson || null,
-      ctaText: t.ctaText || null,
-    })
+      slug: t.slug, title: t.title, shortTitle: t.shortTitle,
+      description: t.description, contentHtml: t.contentHtml,
+      heroTitle: t.heroTitle, heroSubtitle: t.heroSubtitle,
+      symptomsJson: t.symptomsJson, processJson: t.processJson,
+      benefitsJson: t.benefitsJson, faqJson: t.faqJson,
+      ctaText: t.ctaText,
+    }))
   }
 
   await writeAuditLog({ userId, action: 'CREATE', entityType: 'SERVICE', entityId: serviceId, after: data })
@@ -228,34 +229,37 @@ export async function updateService(id: string, formData: FormData) {
   const ts = await now()
 
   await db.update(services).set({
-    slugBase: data.slugBase, icon: data.icon || null, category: data.category || null,
-    priority: data.priority, status: data.status, featured: data.featured,
-    sortOrder: data.sortOrder, updatedAt: ts,
+    slugBase: data.slugBase, priority: data.priority, status: data.status,
+    featured: data.featured, sortOrder: data.sortOrder, updatedAt: ts,
+    ...(data.icon ? { icon: data.icon } : {}),
+    ...(data.category ? { category: data.category } : {}),
   }).where(eq(services.id, id))
+
+
 
   // Upsert translations
   for (const t of data.translations) {
     const existingTr = await db.select().from(serviceTranslations)
       .where(and(eq(serviceTranslations.serviceId, id), eq(serviceTranslations.locale, t.locale))).get()
     if (existingTr) {
-      await db.update(serviceTranslations).set({
-        slug: t.slug, title: t.title || null, shortTitle: t.shortTitle || null,
-        description: t.description || null, contentHtml: t.contentHtml || null,
-        heroTitle: t.heroTitle || null, heroSubtitle: t.heroSubtitle || null,
-        symptomsJson: t.symptomsJson || null, processJson: t.processJson || null,
-        benefitsJson: t.benefitsJson || null, faqJson: t.faqJson || null,
-        ctaText: t.ctaText || null,
-      }).where(and(eq(serviceTranslations.serviceId, id), eq(serviceTranslations.locale, t.locale)))
+      await db.update(serviceTranslations).set(cleanUpdate({
+        slug: t.slug, title: t.title, shortTitle: t.shortTitle,
+        description: t.description, contentHtml: t.contentHtml,
+        heroTitle: t.heroTitle, heroSubtitle: t.heroSubtitle,
+        symptomsJson: t.symptomsJson, processJson: t.processJson,
+        benefitsJson: t.benefitsJson, faqJson: t.faqJson,
+        ctaText: t.ctaText,
+      })).where(and(eq(serviceTranslations.serviceId, id), eq(serviceTranslations.locale, t.locale)))
     } else {
-      await db.insert(serviceTranslations).values({
+      await db.insert(serviceTranslations).values(cleanUpdate({
         id: crypto.randomUUID(), serviceId: id, locale: t.locale, slug: t.slug,
-        title: t.title || null, shortTitle: t.shortTitle || null,
-        description: t.description || null, contentHtml: t.contentHtml || null,
-        heroTitle: t.heroTitle || null, heroSubtitle: t.heroSubtitle || null,
-        symptomsJson: t.symptomsJson || null, processJson: t.processJson || null,
-        benefitsJson: t.benefitsJson || null, faqJson: t.faqJson || null,
-        ctaText: t.ctaText || null,
-      })
+        title: t.title, shortTitle: t.shortTitle,
+        description: t.description, contentHtml: t.contentHtml,
+        heroTitle: t.heroTitle, heroSubtitle: t.heroSubtitle,
+        symptomsJson: t.symptomsJson, processJson: t.processJson,
+        benefitsJson: t.benefitsJson, faqJson: t.faqJson,
+        ctaText: t.ctaText,
+      }))
     }
   }
 

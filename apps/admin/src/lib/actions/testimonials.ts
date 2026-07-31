@@ -1,4 +1,5 @@
 'use server'
+import { cleanUpdate } from './clean-update'
 
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
@@ -47,17 +48,17 @@ export async function createTestimonial(formData: FormData) {
   const data = parsed.data
   const id = crypto.randomUUID()
   const ts = new Date().toISOString()
-  await db.insert(testimonials).values({
-    id, clientName: data.clientName || null, clientAge: data.clientAge,
-    rating: data.rating, source: data.source || null,
+  await db.insert(testimonials).values(cleanUpdate({
+    id, clientName: data.clientName, clientAge: data.clientAge,
+    rating: data.rating, source: data.source,
     sortOrder: data.sortOrder, status: data.status, consentConfirmed: false,
     createdAt: ts,
-  })
+  }))
   for (const t of data.translations) {
-    await db.insert(testimonialTranslations).values({
+    await db.insert(testimonialTranslations).values(cleanUpdate({
       id: crypto.randomUUID(), testimonialId: id, locale: t.locale,
-      text: t.text || null, problem: t.problem || null, result: t.result || null,
-    })
+      text: t.text, problem: t.problem, result: t.result,
+    }))
   }
   await writeAuditLog({ userId, action: 'CREATE', entityType: 'TESTIMONIAL', entityId: id, after: data })
   revalidateAdmin('/admin/testimonials')
@@ -80,21 +81,23 @@ export async function updateTestimonial(id: string, formData: FormData) {
   })
   if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
   const data = parsed.data
-  await db.update(testimonials).set({
-    clientName: data.clientName || null, clientAge: data.clientAge,
-    rating: data.rating, source: data.source || null,
+  await db.update(testimonials).set(cleanUpdate({
+    clientName: data.clientName, clientAge: data.clientAge,
+    rating: data.rating, source: data.source,
     sortOrder: data.sortOrder, status: data.status,
-  }).where(eq(testimonials.id, id))
+  })).where(eq(testimonials.id, id))
   for (const t of data.translations) {
     const existingTr = await db.select().from(testimonialTranslations)
       .where(and(eq(testimonialTranslations.testimonialId, id), eq(testimonialTranslations.locale, t.locale))).get()
     if (existingTr) {
-      await db.update(testimonialTranslations).set({ text: t.text || null, problem: t.problem || null, result: t.result || null }).where(eq(testimonialTranslations.id, existingTr.id))
+      await db.update(testimonialTranslations).set(cleanUpdate({
+        text: t.text, problem: t.problem, result: t.result,
+      })).where(eq(testimonialTranslations.id, existingTr.id))
     } else {
-      await db.insert(testimonialTranslations).values({
+      await db.insert(testimonialTranslations).values(cleanUpdate({
         id: crypto.randomUUID(), testimonialId: id, locale: t.locale,
-        text: t.text || null, problem: t.problem || null, result: t.result || null,
-      })
+        text: t.text, problem: t.problem, result: t.result,
+      }))
     }
   }
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'TESTIMONIAL', entityId: id, before: existing, after: data })

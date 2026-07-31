@@ -1,4 +1,5 @@
 'use server'
+import { cleanUpdate } from './clean-update'
 
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
@@ -104,11 +105,10 @@ export async function addLeadEvent(leadId: string, formData: FormData) {
 
   const parsed = eventSchema.safeParse({ type: formData.get('type'), note: formData.get('note') ?? '' })
   if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
-
-  await db.insert(leadEvents).values({
+  await db.insert(leadEvents).values(cleanUpdate({
     id: crypto.randomUUID(), leadId, userId: user.id,
-    type: parsed.data.type, note: parsed.data.note || null, createdAt: await now(),
-  })
+    type: parsed.data.type, note: parsed.data.note, createdAt: await now(),
+  }))
   await db.update(contactLeads).set({ updatedAt: await now() }).where(eq(contactLeads.id, leadId))
 
   revalidatePath(`/admin/leads/${leadId}`)

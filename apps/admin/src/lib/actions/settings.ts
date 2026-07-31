@@ -1,4 +1,5 @@
 'use server'
+import { cleanUpdate } from './clean-update'
 
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
@@ -82,20 +83,20 @@ export async function saveContactChannel(data: FormData) {
   const ch = parsed.data
   if (id) {
     const existing = await db.select().from(contactChannels).where(eq(contactChannels.id, id)).get()
-    if (!existing) throw new Error('Канал не знайдено')
-    await db.update(contactChannels).set({
-      type: ch.type as 'TELEGRAM' | 'WHATSAPP' | 'EMAIL' | 'PHONE' | 'CUSTOM', label: ch.label, value: ch.value, url: ch.url || null,
+    await db.update(contactChannels).set(cleanUpdate({
+      type: ch.type as 'TELEGRAM' | 'WHATSAPP' | 'EMAIL' | 'PHONE' | 'CUSTOM',
+      label: ch.label, value: ch.value, url: ch.url,
       sortOrder: ch.sortOrder, isEnabled: ch.isEnabled, isPrimary: ch.isPrimary,
-    }).where(eq(contactChannels.id, id))
+    })).where(eq(contactChannels.id, id))
     await writeAuditLog({ userId, action: 'UPDATE', entityType: 'CONTACT_CHANNEL', entityId: id, before: existing, after: ch })
   } else {
     const newId = crypto.randomUUID()
     const ts = await now()
-    await db.insert(contactChannels).values({
+    await db.insert(contactChannels).values(cleanUpdate({
       id: newId, type: ch.type as 'TELEGRAM' | 'WHATSAPP' | 'EMAIL' | 'PHONE' | 'CUSTOM',
-      label: ch.label, value: ch.value, url: ch.url || null,
+      label: ch.label, value: ch.value, url: ch.url,
       sortOrder: ch.sortOrder, isEnabled: ch.isEnabled, isPrimary: ch.isPrimary,
-    })
+    }))
     await writeAuditLog({ userId, action: 'CREATE', entityType: 'CONTACT_CHANNEL', entityId: newId, after: ch })
   }
   revalidatePath('/admin/settings')
