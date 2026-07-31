@@ -67,7 +67,7 @@ export default function BlogClient({ posts, categories }: Props) {
   return (
     <>
       {/* ────── Hero ────── */}
-      <section className="relative overflow-hidden pt-16 pb-10 md:pt-20 md:pb-14">
+      <section className="relative overflow-hidden pt-16 pb-3 md:pt-20 md:pb-4">
         <div className="relative z-10 w-full max-w-container mx-auto px-gutter text-left">
           <div className="max-w-3xl">
             <HeroBreadcrumbs />
@@ -77,32 +77,31 @@ export default function BlogClient({ posts, categories }: Props) {
                 {commonT('nav.blog')}
               </span>
             </div>
+          </div>
+          <h1 className="mt-4 text-4xl md:text-5xl lg:text-6xl font-display text-gold-premium leading-tight tracking-tight text-center animate-fade-in-down" style={{ animationDelay: '0.05s' }}>
+            {t('pageTitle')}
+          </h1>
 
-            <h1 className="mt-4 text-4xl md:text-5xl lg:text-6xl font-display text-gold-premium leading-tight tracking-tight animate-fade-in-down" style={{ animationDelay: '0.05s' }}>
-              {t('pageTitle')}
-            </h1>
+          <p className="mt-4 text-lg md:text-xl text-text-secondary leading-relaxed whitespace-pre-line text-center animate-fade-in-down" style={{ animationDelay: '0.1s' }}>
+            {t('pageDescription')}
+          </p>
 
-            <p className="mt-4 text-lg md:text-xl text-text-secondary max-w-2xl leading-relaxed whitespace-pre-line animate-fade-in-down" style={{ animationDelay: '0.1s' }}>
-              {t('pageDescription')}
-            </p>
-
-            <div className="mt-6 flex items-center gap-4 text-sm text-text-muted animate-fade-in-down" style={{ animationDelay: '0.15s' }}>
-              <span className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-gold" />
-                {posts.length > 0 && t('totalArticles', { count: posts.length })}
-              </span>
-              <span className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-green" />
-                {t('totalCategories', { count: categories.length })}
-              </span>
-            </div>
+          <div className="mt-6 flex items-center gap-4 text-sm text-text-muted animate-fade-in-down" style={{ animationDelay: '0.15s' }}>
+            <span className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-gold" />
+              {posts.length > 0 && t('totalArticles', { count: posts.length })}
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-green" />
+              {t('totalCategories', { count: categories.length })}
+            </span>
           </div>
         </div>
       </section>
 
       {/* ────── Category Filter ────── */}
       <AnimatedSection as="div" variant="fadeUp">
-        <SectionContainer>
+        <div className="section-container pt-2 pb-2 md:pt-3 md:pb-3">
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => handleCategoryClick(null)}
@@ -130,12 +129,12 @@ export default function BlogClient({ posts, categories }: Props) {
               </button>
             ))}
           </div>
-        </SectionContainer>
+        </div>
       </AnimatedSection>
 
       {/* ────── Posts Grid ────── */}
       {posts.length > 0 && !isEmptyFiltered && (
-        <SectionContainer className="mt-6">
+        <div className="section-container pt-1 pb-10 md:pb-14">
           <div className="space-y-8">
             {/* Featured post */}
             {featuredPost && !activeCategory && (
@@ -187,7 +186,7 @@ export default function BlogClient({ posts, categories }: Props) {
               </>
             )}
           </div>
-        </SectionContainer>
+        </div>
       )}
 
       {/* ────── Empty state ────── */}
