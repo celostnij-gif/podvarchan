@@ -310,38 +310,6 @@ function main() {
     })
   }
 
-  // ── BLOG POSTS (sample) ──
-  emit(`\n-- BLOG_POSTS (sample)`)
-  type Post = [string, string, string, string, string, string, string, number]
-  const posts: Post[] = [
-    ['bp-01', 'chto-takoe-gipnoterapiya', 'gipnoterapiya', 'Что такое гипнотерапия', 'Що таке гіпнотерапія', 'Подробный разбор метода: как работает гипнотерапия.', 'Детальний розбір методу: як працює гіпнотерапія.', 8],
-    ['bp-02', 'kak-rabotaet-gipnoz', 'gipnoterapiya', 'Как работает гипноз', 'Як працює гіпноз', 'Научный взгляд на гипноз и транс.', 'Науковий погляд на гіпноз та транс.', 10],
-    ['bp-03', 'trevoga-prichiny-i-simptomy', 'trevoga', 'Тревога: причины и симптомы', 'Тривога: причини та симптоми', 'Откуда берётся тревога и как она проявляется.', 'Звідки береться тривога і як вона проявляється.', 7],
-    ['bp-04', 'kak-spravitsya-s-trevogoy', 'trevoga', 'Как справиться с тревогой', 'Як впоратися з тривогою', 'Практические советы по работе с тревогой.', 'Практичні поради з роботи з тривогою.', 6],
-    ['bp-05', 'panicheskiye-ataki-chto-delat', 'trevoga', 'Панические атаки: что делать', 'Панічні атаки: що робити', 'Что происходит во время панической атаки.', 'Що відбувається під час панічної атаки.', 5],
-    ['bp-06', 'chto-takoe-samosabotazh', 'samosabotazh', 'Что такое самосаботаж', 'Що таке самосаботаж', 'Механизмы самосаботажа.', 'Механізми самосаботажу.', 7],
-  ]
-  for (const [id, slug, catSlug, tRu, tUk, exRu, exUk] of posts) {
-    const catId = CAT[catSlug as keyof typeof CAT]
-    upsert('blog_posts', id, {
-      category_id: `'${catId}'`, author_id: 'NULL', status: "'PUBLISHED'",
-      cover_image_id: 'NULL', reading_minutes: '0',
-      published_at: `'${ts()}'`, scheduled_at: 'NULL',
-      created_at: `'${ts()}'`, updated_at: `'${ts()}'`,
-    })
-    upsert('blog_post_translations', `${id}-ru`, {
-      post_id: `'${id}'`, locale: "'ru'", slug: `'${slug}'`,
-      title: `'${esc(tRu)}'`, excerpt: `'${esc(exRu)}'`,
-      content_json: 'NULL', content_html: `'<p>${esc(exRu)}</p>'`,
-      table_of_contents_json: 'NULL', faq_json: 'NULL', seo_meta_id: 'NULL',
-    })
-    upsert('blog_post_translations', `${id}-uk`, {
-      post_id: `'${id}'`, locale: "'uk'", slug: `'${slug}'`,
-      title: `'${esc(tUk)}'`, excerpt: `'${esc(exUk)}'`,
-      content_json: 'NULL', content_html: `'<p>${esc(exUk)}</p>'`,
-      table_of_contents_json: 'NULL', faq_json: 'NULL', seo_meta_id: 'NULL',
-    })
-  }
 
   // ── FAQ ──
   emit(`\n-- FAQ_ITEMS`)
@@ -453,25 +421,6 @@ function main() {
       entity_type: "'blog_category'", entity_id: `'${id}'`, locale: "'uk'",
       title: `'${esc(nUk)}'`, description: `'${esc(dUk)}'`,
       keywords: "'категорія блогу'", canonical_path: 'NULL',
-      og_title: 'NULL', og_description: 'NULL', og_image_id: 'NULL',
-      robots_index: '1', robots_follow: '1', schema_type: 'NULL',
-      created_at: `'${ts()}'`, updated_at: `'${ts()}'`,
-    })
-  }
-  for (const [id, , , tRu, tUk] of posts) {
-    const short = id.slice(0, 8)
-    upsert('seo_meta', `seo-post-${short}-ru`, {
-      entity_type: "'blog_post'", entity_id: `'${id}'`, locale: "'ru'",
-      title: `'${esc(tRu)}'`, description: `'${esc(tRu)}'`,
-      keywords: "'статья, блог'", canonical_path: 'NULL',
-      og_title: 'NULL', og_description: 'NULL', og_image_id: 'NULL',
-      robots_index: '1', robots_follow: '1', schema_type: 'NULL',
-      created_at: `'${ts()}'`, updated_at: `'${ts()}'`,
-    })
-    upsert('seo_meta', `seo-post-${short}-uk`, {
-      entity_type: "'blog_post'", entity_id: `'${id}'`, locale: "'uk'",
-      title: `'${esc(tUk)}'`, description: `'${esc(tUk)}'`,
-      keywords: "'стаття, блог'", canonical_path: 'NULL',
       og_title: 'NULL', og_description: 'NULL', og_image_id: 'NULL',
       robots_index: '1', robots_follow: '1', schema_type: 'NULL',
       created_at: `'${ts()}'`, updated_at: `'${ts()}'`,
