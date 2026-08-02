@@ -4,19 +4,16 @@ import { motion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/routing'
 import { AnimatedSection, AnimatedText, SectionContainer, FaqAccordion, PageHero } from '@/components/ui'
-import { useRegisterSchemas } from '@/providers/BreadcrumbsProvider'
 import type { PageSectionPublic } from '@/lib/db/public'
 
 interface TsenyClientProps {
-  schemas?: Record<string, unknown>[]
   d1Sections?: PageSectionPublic[]
 }
 
-export function TsenyClient({ schemas, d1Sections: _d1Sections }: TsenyClientProps) {
+export function TsenyClient({ d1Sections: _d1Sections }: TsenyClientProps) {
   const t = useTranslations('tseny')
   const commonT = useTranslations('common')
   const d1Sections = _d1Sections ?? []
-  useRegisterSchemas(schemas ?? [])
 
   // D1 hero section: overlay text if present
   const heroSection = d1Sections.find((s) => s.key === 'hero' && s.type === 'hero')
@@ -29,7 +26,6 @@ export function TsenyClient({ schemas, d1Sections: _d1Sections }: TsenyClientPro
       if (parsed.subtitle) heroSubtitle = parsed.subtitle
     } catch { /* fallback to messages */ }
   }
-  useRegisterSchemas(schemas ?? [])
 
   // Extract pricing cards from D1 services-grid sections
   const servicesSections = d1Sections.filter(s => s.type === 'services-grid' && s.key)

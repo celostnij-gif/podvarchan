@@ -11,7 +11,7 @@ interface BreadcrumbsContextValue {
   items: BreadcrumbItem[]
   setItems: (items: BreadcrumbItem[]) => void
   schemas: Record<string, unknown>[]
-  setSchemas: (schemas: Record<string, unknown>[]) => void
+  setSchemas: (schemas: Record<string, unknown>[] | ((prev: Record<string, unknown>[]) => Record<string, unknown>[])) => void
 }
 
 /* ── Context ── */
@@ -53,7 +53,7 @@ export function useRegisteredSchemas(): Record<string, unknown>[] {
 /* ── Hook for setting breadcrumbs from a page component ── */
 
 export function useSetBreadcrumbs(items: BreadcrumbItem[]): void {
-  const { items: currentItems, schemas: currentSchemas, setItems, setSchemas } = useContext(BreadcrumbsContext)
+  const { items: currentItems, setItems, setSchemas } = useContext(BreadcrumbsContext)
   const locale = useLocale()
 
   useEffect(() => {
@@ -65,19 +65,8 @@ export function useSetBreadcrumbs(items: BreadcrumbItem[]): void {
       // Auto-register BreadcrumbList schema with updated breadcrumbs
       const schemaItems = items.map(i => ({ name: i.label, url: i.href ?? '/' }))
       const bcSchema = breadcrumbSchema({ items: schemaItems, locale })
-      const nonBreadcrumb = currentSchemas.filter(s => s['@type'] !== 'BreadcrumbList')
-      setSchemas([...nonBreadcrumb, bcSchema])
+      setSchemas((prev: Record<string, unknown>[]) => [...prev.filter(s => s['@type'] !== 'BreadcrumbList'), bcSchema])
     }
   })
 }
 
-export function useRegisterSchemas(newSchemas: Record<string, unknown>[]): void {
-  const { schemas: currentSchemas, setSchemas } = useContext(BreadcrumbsContext)
-
-  const currentStr = JSON.stringify(currentSchemas)
-  const nextStr = JSON.stringify(newSchemas)
-
-  if (nextStr !== currentStr) {
-    setSchemas(newSchemas)
-  }
-}

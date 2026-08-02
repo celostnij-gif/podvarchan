@@ -226,7 +226,14 @@ export default async function ServicePage({ params }: Props) {
       } catch { /* faqJson optional */ }
     }
 
-    return <ClientServicePage service={data} locale={locale} schemas={schemas} />
+    return (
+      <>
+        {schemas.map((s, i) => (
+          <script key={`ld-${i}`} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
+        ))}
+        <ClientServicePage service={data} locale={locale} allServices={undefined} />
+      </>
+    )
   }
 
   const { service, faqs, allServices } = data
@@ -241,5 +248,12 @@ export default async function ServicePage({ params }: Props) {
   schemas.push(speakableSchema('.section-card-body p, .subsection-body p'))
   schemas.push(faqSchema(faqs))
 
-  return <ClientServicePage service={service} locale={locale} schemas={schemas} allServices={allServices} />
+  return (
+    <>
+      {schemas.map((s, i) => (
+        <script key={`ld-${i}`} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
+      ))}
+      <ClientServicePage service={service} locale={locale} allServices={allServices} />
+    </>
+  )
 }

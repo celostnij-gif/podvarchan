@@ -128,10 +128,12 @@ export default async function HomePage({
 
   return (
     <>
+      {pageSchemas.map((s, i) => (
+        <script key={`ld-${i}`} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
+      ))}
       <Hero t={t} commonT={commonT} d1={d1Hero} />
       <HomeClient
         locale={locale}
-        schemas={pageSchemas}
         d1Testimonials={d1Testimonials}
         d1Faqs={d1Faqs}
         d1Sections={d1Home?.sections ?? []}

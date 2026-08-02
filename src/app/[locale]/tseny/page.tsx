@@ -83,5 +83,10 @@ export default async function TsenyPage({
     d1Page = await getPageByType('PRICING', locale, previewCookie)
   } catch { /* D1 unavailable */ }
 
-  return <TsenyClient schemas={[offerSchema]} d1Sections={d1Page?.sections ?? []} />
+  return (
+    <>
+      <script type="application/ld+json" key="ld-tseny" dangerouslySetInnerHTML={{ __html: JSON.stringify(offerSchema) }} />
+      <TsenyClient d1Sections={d1Page?.sections ?? []} />
+    </>
+  )
 }

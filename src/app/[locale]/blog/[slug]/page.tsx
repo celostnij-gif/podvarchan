@@ -207,40 +207,48 @@ export default async function BlogPostPage({ params }: Props) {
   if (data.type === 'd1') {
     const allSchemas = [data.jsonLd, ...(data.additionalSchemas ?? [])]
     return (
-      <ClientBlogPost
-        title={data.title}
-        body={data.body}
-        date={data.date}
-        category={data.category}
-        categorySlug={data.categorySlug}
-        readingTime={data.readingTime}
-        slug={data.slug}
-        image={data.image}
-        imageAlt={data.imageAlt}
-        imageVariants={data.imageVariants}
-        locale={locale}
-        relatedPosts={data.relatedPosts}
-        schemas={allSchemas}
-      />
+      <>
+        {allSchemas.map((s, i) => (
+          <script key={`ld-${i}`} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
+        ))}
+        <ClientBlogPost
+          title={data.title}
+          body={data.body}
+          date={data.date}
+          category={data.category}
+          categorySlug={data.categorySlug}
+          readingTime={data.readingTime}
+          slug={data.slug}
+          image={data.image}
+          imageAlt={data.imageAlt}
+          imageVariants={data.imageVariants}
+          locale={locale}
+          relatedPosts={data.relatedPosts}
+        />
+      </>
     )
   }
 
   const { post } = data
   return (
-    <ClientBlogPost
-      title={post.title}
-      body={post.body ?? ''}
-      date={formatDate(post.datePublished, locale)}
-      category={post.categoryName}
-      categorySlug={post.categorySlug}
-      author={post.author}
-      readingTime={post.readingTime}
-      slug={slug}
-      image={post.image}
-      imageAlt={post.imageAlt}
-      locale={locale}
-      relatedPosts={data.relatedPosts}
-      schemas={[data.jsonLd, ...(data.fallbackSchemas ?? [])]}
-    />
+    <>
+      {[data.jsonLd, ...(data.fallbackSchemas ?? [])].map((s, i) => (
+        <script key={`ld-${i}`} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
+      ))}
+      <ClientBlogPost
+        title={post.title}
+        body={post.body ?? ''}
+        date={formatDate(post.datePublished, locale)}
+        category={post.categoryName}
+        categorySlug={post.categorySlug}
+        author={post.author}
+        readingTime={post.readingTime}
+        slug={slug}
+        image={post.image}
+        imageAlt={post.imageAlt}
+        locale={locale}
+        relatedPosts={data.relatedPosts}
+      />
+    </>
   )
 }

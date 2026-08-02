@@ -53,6 +53,11 @@ export default async function FaqPage({
   }
 
   const schema = faqSchema(faqItems)
-
-  return <ClientFaqPage items={faqItems} schemas={[schema]} />
+  
+  return (
+    <>
+      <script type="application/ld+json" key="ld-faq" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <ClientFaqPage items={faqItems} />
+    </>
+  )
 }

@@ -166,6 +166,7 @@ export function practiceSchema(locale: string = 'ru'): Record<string, unknown> {
       ? 'Онлайн-гіпнотерапія: робота з тривогою, панічними атаками, самосаботажем та підсвідомістю.'
       : 'Онлайн-гипнотерапия: работа с тревогой, паническими атаками, самосаботажем и подсознанием.',
     url: SITE.url,
+    sameAs: AUTHOR.sameAs,
     logo: `${SITE.url}/logo.webp`,
     image: `${SITE.url}${SITE.defaultOgImage}`,
     telephone: '+380663122069',

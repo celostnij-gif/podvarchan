@@ -159,19 +159,6 @@ export default async function LocaleLayout({
         },
       },
     },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
-      // Static fallback breadcrumb — страницы переопределяют его через BreadcrumbsProvider
-      '@id': `${SITE.url}/${locale}/#breadcrumb-fallback`,
-      inLanguage: locale === 'uk' ? 'uk' : 'ru',
-      itemListElement: [{
-        '@type': 'ListItem',
-        position: 1,
-        name: t('siteName'),
-        url: `${SITE.url}/${locale}/`,
-      }],
-    },
   ]
 
   return (
