@@ -4,6 +4,7 @@ import { SITE } from '@/constants'
 import { getPageByType, getSEOMeta } from '@/lib/db/public'
 import { cookies } from 'next/headers'
 import { TsenyClient } from './client-page'
+import { GlobalSchemas } from '@/components/GlobalSchemas'
 export const revalidate = 3600
 
 export async function generateMetadata({
@@ -86,6 +87,7 @@ export default async function TsenyPage({
   return (
     <>
       <script type="application/ld+json" key="ld-tseny" dangerouslySetInnerHTML={{ __html: JSON.stringify(offerSchema) }} />
+      <GlobalSchemas locale={locale} />
       <TsenyClient d1Sections={d1Page?.sections ?? []} />
     </>
   )

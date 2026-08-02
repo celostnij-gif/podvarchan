@@ -3,6 +3,7 @@ import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getPageByType, getSEOMeta, getContactChannels } from '@/lib/db/public'
 import { cookies } from 'next/headers'
 import KontaktyClient from './client-page'
+import { GlobalSchemas } from '@/components/GlobalSchemas'
 export const revalidate = 3600
 
 type Props = {
@@ -48,5 +49,10 @@ export default async function KontaktyPage({
     ])
   } catch { /* D1 unavailable */ }
 
-  return <KontaktyClient d1Channels={d1Channels} d1Sections={d1Page?.sections ?? []} />
+  return (
+    <>
+      <GlobalSchemas locale={locale} />
+      <KontaktyClient d1Channels={d1Channels} d1Sections={d1Page?.sections ?? []} />
+    </>
+  )
 }

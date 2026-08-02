@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { MetadataPage } from '@/components/seo/metadata-page'
+import { GlobalSchemas } from '@/components/GlobalSchemas'
 
 export async function generateMetadata({
   params,
@@ -28,14 +29,17 @@ export default async function DisclaimerPage({
   const commonT = await getTranslations({ locale, namespace: 'common' })
 
   return (
-    <MetadataPage
-      title={t('pageTitle')}
-      content={t('content')}
-      breadcrumbItems={[
-        { label: commonT('nav.home'), href: '/' },
-        { label: t('pageTitle') },
-      ]}
-      clean
-    />
+    <>
+      <GlobalSchemas locale={locale} />
+      <MetadataPage
+        title={t('pageTitle')}
+        content={t('content')}
+        breadcrumbItems={[
+          { label: commonT('nav.home'), href: '/' },
+          { label: t('pageTitle') },
+        ]}
+        clean
+      />
+    </>
   )
 }

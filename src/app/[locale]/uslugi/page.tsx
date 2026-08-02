@@ -3,6 +3,7 @@ import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getServiceSidebar } from '@/lib/db/public'
 import { UslugiClient } from './page-client'
 import type { ServiceSidebarItem } from '@/lib/db/public'
+import { GlobalSchemas } from '@/components/GlobalSchemas'
 
 export const revalidate = 3600
 
@@ -59,5 +60,10 @@ export default async function UslugiPage({
     // D1 unavailable — client will show empty state (fallback via messages in future)
   }
 
-  return <UslugiClient services={services} />
+  return (
+    <>
+      <GlobalSchemas locale={locale} />
+      <UslugiClient services={services} />
+    </>
+  )
 }

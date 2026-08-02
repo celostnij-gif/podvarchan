@@ -2,6 +2,7 @@ import { getTranslations, getMessages } from 'next-intl/server'
 import { getAllBlogPostMetas } from '@/lib/content-metas'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { ClientSearchPage } from './client-page'
+import { GlobalSchemas } from '@/components/GlobalSchemas'
 
 interface ServiceData {
   slug: string
@@ -39,19 +40,22 @@ export default async function SearchPage({ params }: Props) {
   const blogPosts = getAllBlogPostMetas(locale)
 
   return (
-    <ClientSearchPage
-      locale={locale}
-      blogPosts={blogPosts}
-      services={servicesData}
-      translations={{
-        heading: t('heading'),
-        placeholder: t('placeholder'),
-        noResults: t('noResults'),
-        blogHeading: t('blogHeading'),
-        servicesHeading: t('servicesHeading'),
-        readingTime: t('readingTime'),
-        minutes: t('minutes'),
-      }}
-    />
+    <>
+      <GlobalSchemas locale={locale} />
+      <ClientSearchPage
+        locale={locale}
+        blogPosts={blogPosts}
+        services={servicesData}
+        translations={{
+          heading: t('heading'),
+          placeholder: t('placeholder'),
+          noResults: t('noResults'),
+          blogHeading: t('blogHeading'),
+          servicesHeading: t('servicesHeading'),
+          readingTime: t('readingTime'),
+          minutes: t('minutes'),
+        }}
+      />
+    </>
   )
 }

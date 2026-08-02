@@ -8,6 +8,7 @@ import { ClientBlogCategory } from './client-page'
 import { CATEGORY_SLUG_UK, resolveCategorySlug } from '@/lib/slugMapping'
 import type { BlogPostPublic } from '@/lib/db/public'
 import type { BlogPost } from '@/types'
+import { GlobalSchemas } from '@/components/GlobalSchemas'
 
 export const dynamicParams = true
 
@@ -152,5 +153,10 @@ export default async function BlogCategoryPage({ params }: Props) {
     // D1 unavailable — client shows empty state
   }
 
-  return <ClientBlogCategory category={category} posts={posts} locale={locale} />
+  return (
+    <>
+      <GlobalSchemas locale={locale} />
+      <ClientBlogCategory category={category} posts={posts} locale={locale} />
+    </>
+  )
 }

@@ -3,6 +3,7 @@ import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getPageByType, getSEOMeta } from '@/lib/db/public'
 import { cookies } from 'next/headers'
 import MetodClient from './client-page'
+import { GlobalSchemas } from '@/components/GlobalSchemas'
 export const revalidate = 3600
 
 type Props = {
@@ -44,5 +45,10 @@ export default async function MetodPage({
     d1Page = await getPageByType('METHOD', locale, previewCookie)
   } catch { /* D1 unavailable */ }
 
-  return <MetodClient d1Sections={d1Page?.sections ?? []} />
+  return (
+    <>
+      <GlobalSchemas locale={locale} />
+      <MetodClient d1Sections={d1Page?.sections ?? []} />
+    </>
+  )
 }
