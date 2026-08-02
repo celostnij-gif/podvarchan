@@ -6,7 +6,6 @@ import { faqSchema } from '@/lib/schema'
 import { getFAQs } from '@/lib/db/public'
 import { ClientFaqPage } from './client-page'
 import type { FAQItem } from '@/types'
-
 export const revalidate = 3600
 
 export async function generateMetadata({
@@ -34,10 +33,9 @@ export default async function FaqPage({
   // Try D1 first, fallback to messages
   let faqItems: FAQItem[] = []
   const previewCookie = (await cookies()).get('__preview')?.value
-  const locale = (await _params).locale
 
   try {
-    const d1Items = await getFAQs(locale, undefined, previewCookie)
+    const d1Items = await getFAQs((await _params).locale, undefined, previewCookie)
     if (d1Items.length > 0) {
       faqItems = d1Items.map((item) => ({
         question: item.question,
@@ -55,12 +53,6 @@ export default async function FaqPage({
   }
 
   const schema = faqSchema(faqItems)
-  
-  return (
-    <>
-      
-      <script type="application/ld+json" key="ld-faq" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
-      <ClientFaqPage items={faqItems} />
-    </>
-  )
+
+  return <ClientFaqPage items={faqItems} schemas={[schema]} />
 }

@@ -3,7 +3,6 @@ import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getPageByType, getSEOMeta } from '@/lib/db/public'
 import { cookies } from 'next/headers'
 import { ClientAboutPage } from './client-page'
-
 export const revalidate = 3600
 
 export async function generateMetadata({
@@ -49,10 +48,5 @@ export default async function AboutPage({
     d1Page = await getPageByType('ABOUT', locale, previewCookie)
   } catch { /* D1 unavailable */ }
 
-  return (
-    <>
-      
-      <ClientAboutPage d1Sections={d1Page?.sections ?? []} />
-    </>
-  )
+  return <ClientAboutPage d1Sections={d1Page?.sections ?? []} />
 }

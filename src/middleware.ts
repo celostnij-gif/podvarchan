@@ -174,6 +174,7 @@ export default async function middleware(request: NextRequest) {
     pathname === '/robots.txt' ||
     pathname === '/sitemap.xml' ||
     pathname === '/favicon.ico' ||
+    pathname.startsWith('/images/') ||
     pathname.includes('.')
   ) {
     return intlMiddleware(request)

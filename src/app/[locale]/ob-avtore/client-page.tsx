@@ -95,7 +95,7 @@ export function ClientAboutPage({ d1Sections }: { d1Sections?: PageSectionPublic
               <div className="md:col-span-2 flex justify-center md:justify-start animate-fade-in-down">
                 <div className="relative w-56 h-56 md:w-72 md:h-72 rounded-2xl overflow-hidden border-2 border-gold/20 shadow-glow-gold">
                   <Image
-                    src="/api/media/images/about.webp"
+                    src="/images/about.webp"
                     alt={t('heroFullName')}
                     fill
                     className="object-cover"
@@ -278,7 +278,7 @@ export function ClientAboutPage({ d1Sections }: { d1Sections?: PageSectionPublic
             >
               <div className="relative rounded-2xl overflow-hidden border-2 border-gold/20 shadow-glow-gold">
                 <Image
-                  src="/api/media/images/author-family.webp"
+                  src="/images/author-family.webp"
                   alt={t('familyPhotoAlt')}
                   width={800}
                   height={533}

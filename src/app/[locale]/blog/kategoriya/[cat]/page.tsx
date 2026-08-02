@@ -9,7 +9,6 @@ import { CATEGORY_SLUG_UK, resolveCategorySlug } from '@/lib/slugMapping'
 import type { BlogPostPublic } from '@/lib/db/public'
 import type { BlogPost } from '@/types'
 
-
 export const dynamicParams = true
 
 interface BlogCategoryMeta {
@@ -153,10 +152,5 @@ export default async function BlogCategoryPage({ params }: Props) {
     // D1 unavailable — client shows empty state
   }
 
-  return (
-    <>
-      
-      <ClientBlogCategory category={category} posts={posts} locale={locale} />
-    </>
-  )
+  return <ClientBlogCategory category={category} posts={posts} locale={locale} />
 }

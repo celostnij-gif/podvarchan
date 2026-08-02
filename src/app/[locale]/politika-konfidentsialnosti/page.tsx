@@ -2,7 +2,6 @@ import { getTranslations } from 'next-intl/server'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { MetadataPage } from '@/components/seo/metadata-page'
 
-
 export async function generateMetadata({
   params,
 }: {
@@ -29,17 +28,14 @@ export default async function PrivacyPage({
   const commonT = await getTranslations({ locale, namespace: 'common' })
 
   return (
-    <>
-      
-      <MetadataPage
-        title={t('pageTitle')}
-        content={t('content')}
-        breadcrumbItems={[
-          { label: commonT('nav.home'), href: '/' },
-          { label: t('pageTitle') },
-        ]}
-        clean
-      />
-    </>
+    <MetadataPage
+      title={t('pageTitle')}
+      content={t('content')}
+      breadcrumbItems={[
+        { label: commonT('nav.home'), href: '/' },
+        { label: t('pageTitle') },
+      ]}
+      clean
+    />
   )
 }

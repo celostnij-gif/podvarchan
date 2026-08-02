@@ -4,7 +4,6 @@ import { getServiceSidebar } from '@/lib/db/public'
 import { UslugiClient } from './page-client'
 import type { ServiceSidebarItem } from '@/lib/db/public'
 
-
 export const revalidate = 3600
 
 export async function generateMetadata({
@@ -60,10 +59,5 @@ export default async function UslugiPage({
     // D1 unavailable — client will show empty state (fallback via messages in future)
   }
 
-  return (
-    <>
-      
-      <UslugiClient services={services} />
-    </>
-  )
+  return <UslugiClient services={services} />
 }

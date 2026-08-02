@@ -4,7 +4,6 @@ import { SITE } from '@/constants'
 import { getPageByType, getSEOMeta } from '@/lib/db/public'
 import { cookies } from 'next/headers'
 import { TsenyClient } from './client-page'
-
 export const revalidate = 3600
 
 export async function generateMetadata({
@@ -84,11 +83,5 @@ export default async function TsenyPage({
     d1Page = await getPageByType('PRICING', locale, previewCookie)
   } catch { /* D1 unavailable */ }
 
-  return (
-    <>
-      <script type="application/ld+json" key="ld-tseny" dangerouslySetInnerHTML={{ __html: JSON.stringify(offerSchema) }} />
-      
-      <TsenyClient d1Sections={d1Page?.sections ?? []} />
-    </>
-  )
+  return <TsenyClient schemas={[offerSchema]} d1Sections={d1Page?.sections ?? []} />
 }

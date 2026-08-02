@@ -6,7 +6,7 @@ export const SITE = {
   fullName: 'Podvarchan.com — гипнотерапия онлайн',
   url: 'https://podvarchan.com',
   locale: 'ru_RU',
-  defaultOgImage: '/api/media/images/og-default.webp',
+  defaultOgImage: '/images/og-default.webp',
   themeColor: '#0A0A12',
   authorName: 'Вячеслав Подварчан',
   authorTitle: 'Психологическая помощь',
@@ -153,7 +153,7 @@ export const AUTHOR = {
   familyName: 'Подварчан',
   jobTitle: 'Психологическая помощь',
   description: 'Помогаю освободиться от тревоги, внутренних блоков и самосаботажа через работу с подсознанием, голосом и индивидуальными музыкальными программами. Сертифицированный гипнотерапевт (ABH), практик НЛП (INLPTA), магистр музыкальной терапии (The University of Kansas).',
-  image: '/api/media/images/about.webp',
+  image: '/images/about.webp',
   url: '/ob-avtore/',
   sameAs: [
     'https://t.me/SLAVKA_VIP',

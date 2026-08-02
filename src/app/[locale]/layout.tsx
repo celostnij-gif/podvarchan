@@ -129,7 +129,7 @@ export default async function LocaleLayout({
     gaId = process.env.NEXT_PUBLIC_GA_ID
   }
 
-  /* ── JSON-LD Schema (global: Person, ProfessionalService, WebSite) ── */
+  /* ── JSON-LD Schema ── */
   const jsonLdSchemas = [
     personSchema({ jobTitle: t('authorTitle'), locale }),
     practiceSchema(locale),
@@ -155,21 +155,32 @@ export default async function LocaleLayout({
         url: SITE.url,
         logo: {
           '@type': 'ImageObject',
-          url: `${SITE.url}/api/media/logo.webp`,
+          url: `${SITE.url}/logo.webp`,
         },
       },
     },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      // Static fallback breadcrumb — страницы переопределяют его через BreadcrumbsProvider
+      '@id': `${SITE.url}/${locale}/#breadcrumb-fallback`,
+      inLanguage: locale === 'uk' ? 'uk' : 'ru',
+      itemListElement: [{
+        '@type': 'ListItem',
+        position: 1,
+        name: t('siteName'),
+        url: `${SITE.url}/${locale}/`,
+      }],
+    },
   ]
-
 
   return (
 
     <NextIntlClientProvider locale={locale} messages={messages}>
-
-      {/* JSON-LD Schema (global) */}
+      {/* JSON-LD Schema */}
       {jsonLdSchemas.map((schema, index) => (
         <script
-          key={`ld-global-${index}`}
+          key={index}
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
         />

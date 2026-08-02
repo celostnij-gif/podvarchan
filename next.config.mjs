@@ -15,20 +15,10 @@ const nextConfig = {
   },
 
 
-  /**
-   * Image optimization: DISABLED.
-   *
-   * The OpenNext Cloudflare optimizer fetches relative upstream URLs from the
-   * ASSETS binding only — /api/media/* (R2-backed app route) is not an asset,
-   * so every /_next/image?url=%2Fapi%2Fmedia%2F... request 404s
-   * ("upstream response is invalid"). The worker also has no IMAGES binding,
-   * so the optimizer was a passthrough anyway.
-   *
-   * With unoptimized: true, next/image renders a plain <img src="/api/media/...">
-   * which the browser fetches directly (200, CDN-cached, immutable).
-   */
+  /** Image optimization */
   images: {
-    unoptimized: true,
+    formats: ['image/avif', 'image/webp'],
+    deviceSizes: [375, 640, 750, 828, 1080, 1200, 1920],
   },
 
   /** Security headers */
@@ -65,6 +55,12 @@ const nextConfig = {
             'interest-cohort=()',
           ].join(', '),
         },
+      ],
+    },
+    {
+      source: '/images/(.*)',
+      headers: [
+        { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
       ],
     },
     {

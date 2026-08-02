@@ -9,7 +9,6 @@ import { getServiceBySlug, getServiceSidebar, getSEOMeta } from '@/lib/db/public
 import type { ServiceSidebarItem } from '@/lib/db/public'
 import { ClientServicePage } from './client-page'
 
-
 export const revalidate = 3600
 
 interface ServiceFaqEntry {
@@ -227,15 +226,7 @@ export default async function ServicePage({ params }: Props) {
       } catch { /* faqJson optional */ }
     }
 
-    return (
-      <>
-        
-        {schemas.map((s, i) => (
-          <script key={`ld-${i}`} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
-        ))}
-        <ClientServicePage service={data} locale={locale} allServices={undefined} />
-      </>
-    )
+    return <ClientServicePage service={data} locale={locale} schemas={schemas} />
   }
 
   const { service, faqs, allServices } = data
@@ -250,13 +241,5 @@ export default async function ServicePage({ params }: Props) {
   schemas.push(speakableSchema('.section-card-body p, .subsection-body p'))
   schemas.push(faqSchema(faqs))
 
-  return (
-    <>
-        
-      {schemas.map((s, i) => (
-        <script key={`ld-${i}`} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
-      ))}
-      <ClientServicePage service={service} locale={locale} allServices={allServices} />
-    </>
-  )
+  return <ClientServicePage service={service} locale={locale} schemas={schemas} allServices={allServices} />
 }

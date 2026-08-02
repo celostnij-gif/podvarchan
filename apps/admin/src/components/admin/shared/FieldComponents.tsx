@@ -100,7 +100,7 @@ export function ImageField({ label, value, onChange, placeholder }: FieldProps) 
         <input
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder ?? '/api/media/...'}
+          placeholder={placeholder ?? '/api/media/... або /images/...'}
           className="flex-1 rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500
                      focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30 font-mono"
         />

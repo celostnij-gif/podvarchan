@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl'
 import { useMessages } from 'next-intl'
 import { motion } from 'framer-motion'
 import { AnimatedText, AnimatedSection, SectionContainer, Button, ScrollProgress } from '@/components/ui'
-import { useSetBreadcrumbs } from '@/providers/BreadcrumbsProvider'
+import { useSetBreadcrumbs, useRegisterSchemas } from '@/providers/BreadcrumbsProvider'
 import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 import { Link } from '@/i18n/routing'
 import ServiceCTA from '@/components/blog/ServiceCTA'
@@ -31,6 +31,7 @@ interface Props {
   imageVariants?: { width: number; url: string }[]
   locale: string
   relatedPosts: RelatedPost[]
+  schemas?: Record<string, unknown>[]
 }
 
 const heroContainer = {
@@ -45,11 +46,12 @@ const heroFadeUp = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.1, 0, 1] as const } },
 }
 
-export function ClientBlogPost({ title, body, date, category, categorySlug, author, readingTime, slug: _slug, image, imageAlt, imageVariants, locale: _locale, relatedPosts }: Props) {
+export function ClientBlogPost({ title, body, date, category, categorySlug, author, readingTime, slug: _slug, image, imageAlt, imageVariants, locale: _locale, relatedPosts, schemas }: Props) {
   const t = useTranslations('blog')
   const commonT = useTranslations('common')
   const messages = useMessages()
 
+  useRegisterSchemas(schemas ?? [])
 
   useSetBreadcrumbs([
     { label: commonT('nav.home'), href: '/' },
@@ -229,7 +231,7 @@ export function ClientBlogPost({ title, body, date, category, categorySlug, auth
             <div className="flex items-start gap-4">
               <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-gold/20 shrink-0">
                 <ResponsiveImage
-                  src="/api/media/images/author-avatar.webp"
+                  src="/images/author-avatar.webp"
                   alt={commonT('authorName')}
                   width={150}
                   height={150}
