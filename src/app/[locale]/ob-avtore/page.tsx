@@ -3,7 +3,7 @@ import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getPageByType, getSEOMeta } from '@/lib/db/public'
 import { cookies } from 'next/headers'
 import { ClientAboutPage } from './client-page'
-import { GlobalSchemas } from '@/components/GlobalSchemas'
+
 export const revalidate = 3600
 
 export async function generateMetadata({
@@ -51,7 +51,7 @@ export default async function AboutPage({
 
   return (
     <>
-      <GlobalSchemas locale={locale} />
+      
       <ClientAboutPage d1Sections={d1Page?.sections ?? []} />
     </>
   )

@@ -5,7 +5,7 @@ import { getBlogPost } from '@/lib/content'
 import BlogClient from './page-client'
 import type { BlogPostPublic, BlogCategoryPublic } from '@/lib/db/public'
 import type { BlogPostItem, BlogCategoryItem } from './page-client'
-import { GlobalSchemas } from '@/components/GlobalSchemas'
+
 
 export const revalidate = 3600
 
@@ -104,7 +104,7 @@ export default async function BlogPage({
 
   return (
     <>
-      <GlobalSchemas locale={locale} />
+      
       <BlogClient posts={posts} categories={categories} />
     </>
   )

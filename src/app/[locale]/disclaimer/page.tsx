@@ -1,7 +1,7 @@
 import { getTranslations } from 'next-intl/server'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { MetadataPage } from '@/components/seo/metadata-page'
-import { GlobalSchemas } from '@/components/GlobalSchemas'
+
 
 export async function generateMetadata({
   params,
@@ -30,7 +30,7 @@ export default async function DisclaimerPage({
 
   return (
     <>
-      <GlobalSchemas locale={locale} />
+      
       <MetadataPage
         title={t('pageTitle')}
         content={t('content')}

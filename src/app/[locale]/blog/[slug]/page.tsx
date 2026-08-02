@@ -8,7 +8,7 @@ import { ClientBlogPost } from './client-page'
 import { BLOG_SLUG_UK, resolveBlogSlug } from '@/lib/slugMapping'
 import { COVER_IMAGE_OVERRIDES } from '@/lib/content/cover-images'
 import { cookies } from 'next/headers'
-import { GlobalSchemas } from '@/components/GlobalSchemas'
+
 
 /**
  * Определяет, является ли статья клинической (YMYL) для добавления reviewedBy.
@@ -209,7 +209,7 @@ export default async function BlogPostPage({ params }: Props) {
     const allSchemas = [data.jsonLd, ...(data.additionalSchemas ?? [])]
     return (
       <>
-        <GlobalSchemas locale={locale} />
+        
         {allSchemas.map((s, i) => (
           <script key={`ld-${i}`} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
         ))}
@@ -234,7 +234,7 @@ export default async function BlogPostPage({ params }: Props) {
   const { post } = data
   return (
     <>
-      <GlobalSchemas locale={locale} />
+      
       {[data.jsonLd, ...(data.fallbackSchemas ?? [])].map((s, i) => (
         <script key={`ld-${i}`} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
       ))}

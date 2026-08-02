@@ -8,7 +8,7 @@ import { serviceSchema, faqSchema, speakableSchema } from '@/lib/schema'
 import { getServiceBySlug, getServiceSidebar, getSEOMeta } from '@/lib/db/public'
 import type { ServiceSidebarItem } from '@/lib/db/public'
 import { ClientServicePage } from './client-page'
-import { GlobalSchemas } from '@/components/GlobalSchemas'
+
 
 export const revalidate = 3600
 
@@ -229,7 +229,7 @@ export default async function ServicePage({ params }: Props) {
 
     return (
       <>
-        <GlobalSchemas locale={locale} />
+        
         {schemas.map((s, i) => (
           <script key={`ld-${i}`} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
         ))}
@@ -252,7 +252,7 @@ export default async function ServicePage({ params }: Props) {
 
   return (
     <>
-        <GlobalSchemas locale={locale} />
+        
       {schemas.map((s, i) => (
         <script key={`ld-${i}`} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
       ))}

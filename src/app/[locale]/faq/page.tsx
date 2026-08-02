@@ -6,7 +6,7 @@ import { faqSchema } from '@/lib/schema'
 import { getFAQs } from '@/lib/db/public'
 import { ClientFaqPage } from './client-page'
 import type { FAQItem } from '@/types'
-import { GlobalSchemas } from '@/components/GlobalSchemas'
+
 export const revalidate = 3600
 
 export async function generateMetadata({
@@ -58,7 +58,7 @@ export default async function FaqPage({
   
   return (
     <>
-      <GlobalSchemas locale={locale} />
+      
       <script type="application/ld+json" key="ld-faq" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
       <ClientFaqPage items={faqItems} />
     </>
