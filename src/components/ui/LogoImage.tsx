@@ -32,25 +32,25 @@ export function LogoImage({ className = '', priority = false }: LogoImageProps) 
   }
 
   const srcSetAvif = [
-    '/images/logo/logo-32.avif 32w',
-    '/images/logo/logo-48.avif 48w',
-    '/images/logo/logo-64.avif 64w',
-    '/images/logo/logo-96.avif 96w',
-    '/images/logo/logo-128.avif 128w',
-    '/images/logo/logo-192.avif 192w',
+    '/api/media/images/logo/logo-32.avif 32w',
+    '/api/media/images/logo/logo-48.avif 48w',
+    '/api/media/images/logo/logo-64.avif 64w',
+    '/api/media/images/logo/logo-96.avif 96w',
+    '/api/media/images/logo/logo-128.avif 128w',
+    '/api/media/images/logo/logo-192.avif 192w',
   ].join(', ')
 
   const srcSetWebp = [
-    '/images/logo/logo-32.webp 32w',
-    '/images/logo/logo-48.webp 48w',
-    '/images/logo/logo-64.webp 64w',
-    '/images/logo/logo-96.webp 96w',
-    '/images/logo/logo-128.webp 128w',
-    '/images/logo/logo-192.webp 192w',
+    '/api/media/images/logo/logo-32.webp 32w',
+    '/api/media/images/logo/logo-48.webp 48w',
+    '/api/media/images/logo/logo-64.webp 64w',
+    '/api/media/images/logo/logo-96.webp 96w',
+    '/api/media/images/logo/logo-128.webp 128w',
+    '/api/media/images/logo/logo-192.webp 192w',
   ].join(', ')
 
   const imgProps: ImgHTMLAttributes<HTMLImageElement> = {
-    src: '/images/logo/logo-192.webp',
+    src: '/api/media/images/logo/logo-192.webp',
     alt: '',
     width: 36,
     height: 36,

@@ -42,7 +42,7 @@ export async function GlobalSchemas({ locale }: { locale: string }) {
         url: SITE.url,
         logo: {
           '@type': 'ImageObject',
-          url: `${SITE.url}/logo.webp`,
+          url: `${SITE.url}/api/media/logo.webp`,
         },
       },
     },

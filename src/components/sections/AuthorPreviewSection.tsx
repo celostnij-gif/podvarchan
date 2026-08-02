@@ -52,7 +52,7 @@ export default function AuthorPreviewSection({ d1Content }: { d1Content?: Author
                             bg-gradient-to-br from-gold/10 to-gold/5 border border-gold/10
                             shadow-[0_0_30px_rgba(201,169,110,0.08)]">
               <Image
-                src="/images/author/preview-320.webp"
+                src="/api/media/images/author/preview-320.webp"
                 alt={t('photoAlt')}
                 className="w-full h-full object-cover"
                 loading="lazy"

@@ -170,7 +170,7 @@ export function PostForm({ post, categories, coverImageResolvedUrl }: Props) {
                   type="text"
                   value={coverImageUrl}
                   onChange={(e) => { setCoverImageUrl(e.target.value); setCoverImageIdState(e.target.value); setHasUnsavedChanges(true) }}
-                  placeholder="/api/media/... або /images/..."
+                  placeholder="/api/media/..."
                   className="mt-2 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
                 />
               </details>

@@ -21,7 +21,7 @@ export default function HeroParallaxBackground() {
     >
       <div className="relative w-full h-full">
         <Image
-          src="/images/hero-bg.webp"
+          src="/api/media/images/hero-bg.webp"
           alt={locale === 'uk' ? 'Спокійна атмосфера онлайн-сесії гіпнотерапії' : 'Спокойная атмосфера онлайн-сессии гипнотерапии'}
           fill
           className="object-cover object-center"

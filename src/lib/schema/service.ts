@@ -167,7 +167,7 @@ export function practiceSchema(locale: string = 'ru'): Record<string, unknown> {
       : 'Онлайн-гипнотерапия: работа с тревогой, паническими атаками, самосаботажем и подсознанием.',
     url: SITE.url,
     sameAs: AUTHOR.sameAs,
-    logo: `${SITE.url}/logo.webp`,
+    logo: `${SITE.url}/api/media/logo.webp`,
     image: `${SITE.url}${SITE.defaultOgImage}`,
     telephone: '+380663122069',
     email: 'podvarchan@gmail.com',

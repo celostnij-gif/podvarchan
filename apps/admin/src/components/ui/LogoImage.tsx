@@ -42,25 +42,25 @@ export function LogoImage({ className = '', priority = false }: LogoImageProps) 
   }
 
   const srcSetAvif = [
-    url('/images/logo/logo-32.avif') + ' 32w',
-    url('/images/logo/logo-48.avif') + ' 48w',
-    url('/images/logo/logo-64.avif') + ' 64w',
-    url('/images/logo/logo-96.avif') + ' 96w',
-    url('/images/logo/logo-128.avif') + ' 128w',
-    url('/images/logo/logo-192.avif') + ' 192w',
+    url('/api/media/images/logo/logo-32.avif') + ' 32w',
+    url('/api/media/images/logo/logo-48.avif') + ' 48w',
+    url('/api/media/images/logo/logo-64.avif') + ' 64w',
+    url('/api/media/images/logo/logo-96.avif') + ' 96w',
+    url('/api/media/images/logo/logo-128.avif') + ' 128w',
+    url('/api/media/images/logo/logo-192.avif') + ' 192w',
   ].join(', ')
 
   const srcSetWebp = [
-    url('/images/logo/logo-32.webp') + ' 32w',
-    url('/images/logo/logo-48.webp') + ' 48w',
-    url('/images/logo/logo-64.webp') + ' 64w',
-    url('/images/logo/logo-96.webp') + ' 96w',
-    url('/images/logo/logo-128.webp') + ' 128w',
-    url('/images/logo/logo-192.webp') + ' 192w',
+    url('/api/media/images/logo/logo-32.webp') + ' 32w',
+    url('/api/media/images/logo/logo-48.webp') + ' 48w',
+    url('/api/media/images/logo/logo-64.webp') + ' 64w',
+    url('/api/media/images/logo/logo-96.webp') + ' 96w',
+    url('/api/media/images/logo/logo-128.webp') + ' 128w',
+    url('/api/media/images/logo/logo-192.webp') + ' 192w',
   ].join(', ')
 
   const imgProps: ImgHTMLAttributes<HTMLImageElement> = {
-    src: url('/images/logo/logo-192.webp'),
+    src: url('/api/media/images/logo/logo-192.webp'),
     alt: '',
     width: 36,
     height: 36,

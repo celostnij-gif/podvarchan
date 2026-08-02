@@ -35,7 +35,7 @@ function HeroBackgroundImage() {
       {/* Image — positioned on the right side */}
       <motion.div style={{ y: shouldReduceAnimations ? 0 : imgY }} className="absolute inset-y-0 right-0 w-full lg:w-[60%]">
         <Image
-          src="/images/metod-hero.webp"
+          src="/api/media/images/metod-hero.webp"
           alt=""
           fill
           className="object-cover"
