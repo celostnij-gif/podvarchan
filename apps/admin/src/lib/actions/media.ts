@@ -9,13 +9,14 @@ import { getCurrentUser } from '@/lib/auth/session'
 import { canEditContent } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
-import { revalidatePublic } from '@/lib/revalidate'
+import { revalidatePublic, cacheKeyPrefixes } from '@/lib/revalidate'
 
 /** Media is referenced across blog/services/pages/testimonials — broad layout revalidate. */
 function revalidateMediaArea(): void {
   void revalidatePublic({
     paths: ['/ru/', '/uk/', '/ru/blog/', '/uk/blog/', '/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml'],
     type: 'layout',
+    prefixes: [cacheKeyPrefixes.media],
   })
 }
 

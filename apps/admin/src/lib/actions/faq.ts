@@ -9,7 +9,7 @@ import { getCurrentUser } from '@/lib/auth/session'
 import { canEditContent } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
-import { revalidatePublic, revalidateAdmin, getFaqRevalidatePaths } from '@/lib/revalidate'
+import { revalidatePublic, revalidateAdmin, getFaqRevalidatePaths, cacheKeyPrefixes } from '@/lib/revalidate'
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
@@ -58,7 +58,7 @@ export async function createFaqItem(formData: FormData) {
   }
   await writeAuditLog({ userId, action: 'CREATE', entityType: 'FAQ', entityId: id, after: data })
   revalidateAdmin('/admin/faq')
-  void revalidatePublic({ paths: getFaqRevalidatePaths() })
+  void revalidatePublic({ paths: getFaqRevalidatePaths(), prefixes: [cacheKeyPrefixes.faq] })
 }
 
 export async function updateFaqItem(id: string, formData: FormData) {
@@ -97,7 +97,7 @@ export async function updateFaqItem(id: string, formData: FormData) {
   }
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'FAQ', entityId: id, before: existing, after: data })
   revalidateAdmin('/admin/faq')
-  void revalidatePublic({ paths: getFaqRevalidatePaths() })
+  void revalidatePublic({ paths: getFaqRevalidatePaths(), prefixes: [cacheKeyPrefixes.faq] })
 }
 
 export async function deleteFaqItem(id: string) {
@@ -108,7 +108,7 @@ export async function deleteFaqItem(id: string) {
   await db.delete(faqItems).where(eq(faqItems.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'FAQ', entityId: id, before: existing })
   revalidateAdmin('/admin/faq')
-  void revalidatePublic({ paths: getFaqRevalidatePaths() })
+  void revalidatePublic({ paths: getFaqRevalidatePaths(), prefixes: [cacheKeyPrefixes.faq] })
 }
 
 /* ── Reorder (drag-and-drop) ── */
@@ -119,7 +119,7 @@ export async function reorderFaqItems(orderedIds: string[]) {
     await db.update(faqItems).set({ sortOrder: i }).where(eq(faqItems.id, orderedIds[i]))
   }
   revalidateAdmin('/admin/faq')
-  void revalidatePublic({ paths: getFaqRevalidatePaths() })
+  void revalidatePublic({ paths: getFaqRevalidatePaths(), prefixes: [cacheKeyPrefixes.faq] })
 }
 
 /* ── Backward-compatible aliases (old form imports use these names) ── */

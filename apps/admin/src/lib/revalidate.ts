@@ -1,4 +1,5 @@
 import { revalidatePath } from 'next/cache'
+import { cacheKeys, cacheKeyPrefixes } from '@podvarchan/shared'
 
 /**
  * Cross-worker public cache invalidation + admin-local revalidate.
@@ -7,10 +8,15 @@ import { revalidatePath } from 'next/cache'
  * Public paths → POST https://podvarchan.com/api/revalidate/
  * Admin paths  → revalidatePath in-process.
  *
- * See AGENTS.md §4 (invalidation contract) — path map lives in this file.
+ * See AGENTS.md §4 (invalidation contract) — path map lives in this file, the
+ * logical cache-key map lives in packages/shared/src/cache-keys.ts (single
+ * source of truth shared with the public worker's read side).
  */
 
 export type RevalidateType = 'page' | 'layout'
+
+export { cacheKeys, cacheKeyPrefixes }
+
 
 /** Ensure trailing slash (site uses trailingSlash: true). */
 function withTrailingSlash(path: string): string {
@@ -63,6 +69,10 @@ function unique(paths: string[]): string[] {
 export async function revalidatePublic(input: {
   paths: string[]
   type?: RevalidateType
+  /** Exact logical CONTENT_CACHE_KV keys (cacheKeys.*) to delete — targeted invalidation. */
+  keys?: string[]
+  /** Scoped entity-family prefixes (cacheKeyPrefixes.*) to wipe. */
+  prefixes?: string[]
 }): Promise<void> {
   try {
     const secret = process.env.REVALIDATE_SECRET
@@ -78,7 +88,10 @@ export async function revalidatePublic(input: {
     }
 
     const expanded = unique(input.paths.flatMap(expandLocalePaths))
-    if (expanded.length === 0) return
+    if (expanded.length === 0 && !input.keys?.length && !input.prefixes?.length) return
+
+    const keys = unique(input.keys ?? []).slice(0, 40)
+    const prefixes = unique(input.prefixes ?? []).slice(0, 40)
 
     const res = await fetch(`${base}/api/revalidate/`, {
       method: 'POST',
@@ -87,6 +100,8 @@ export async function revalidatePublic(input: {
         secret,
         paths: expanded,
         type: input.type ?? 'page',
+        ...(keys.length ? { keys } : {}),
+        ...(prefixes.length ? { prefixes } : {}),
       }),
     })
 
@@ -226,4 +241,76 @@ const PAGE_TYPE_ROUTES: Record<string, string> = {
 export function getPageRevalidatePaths(type: string): string[] {
   const route = PAGE_TYPE_ROUTES[type] || '/'
   return [`/ru${route}`.replace(/\/+/g, '/'), `/uk${route}`.replace(/\/+/g, '/')]
+}
+
+/* ── Cache-key collectors (AGENTS.md §4 targeted invalidation) ──
+ * Logical keys are built with cacheKeys.* from packages/shared/src/cache-keys.ts —
+ * the SAME builders the public worker uses for reads, so invalidation can
+ * never drift from the read side. Pass the result as `keys` to revalidatePublic. */
+
+/** Blog post: detail + lists + categories (old/new slugs/cats from caller) + SEO. */
+export function getBlogPostCacheKeys(
+  ruSlug: string,
+  ukSlug: string,
+  ruCat?: string,
+  ukCat?: string,
+  postId?: string,
+): string[] {
+  const keys = [
+    cacheKeys.blogPost(ruSlug, 'ru'),
+    cacheKeys.blogPost(ukSlug, 'uk'),
+    cacheKeys.blogList('ru'),
+    cacheKeys.blogList('uk'),
+    cacheKeys.blogCats('ru'),
+    cacheKeys.blogCats('uk'),
+  ]
+  if (ruCat) keys.push(cacheKeys.blogCatPosts(ruCat, 'ru'))
+  if (ukCat) keys.push(cacheKeys.blogCatPosts(ukCat, 'uk'))
+  if (postId) {
+    keys.push(cacheKeys.seo('blog_post', postId, 'ru'), cacheKeys.seo('blog_post', postId, 'uk'))
+  }
+  return keys
+}
+
+/** Service: detail + lists + sidebar + SEO (+ home if featured). */
+export function getServiceCacheKeys(
+  ruSlug: string,
+  ukSlug: string,
+  serviceId?: string,
+  featured?: boolean,
+): string[] {
+  const keys = [
+    cacheKeys.service(ruSlug, 'ru'),
+    cacheKeys.service(ukSlug, 'uk'),
+    cacheKeys.servicesList('ru'),
+    cacheKeys.servicesList('uk'),
+    cacheKeys.servicesSidebar('ru'),
+    cacheKeys.servicesSidebar('uk'),
+  ]
+  if (serviceId) {
+    keys.push(cacheKeys.seo('service', serviceId, 'ru'), cacheKeys.seo('service', serviceId, 'uk'))
+  }
+  if (featured) {
+    keys.push(cacheKeys.page('HOME', 'ru'), cacheKeys.page('HOME', 'uk'))
+  }
+  return keys
+}
+
+/** Page: both locales for a page type. */
+export function getPageCacheKeys(type: string): string[] {
+  return [cacheKeys.page(type, 'ru'), cacheKeys.page(type, 'uk')]
+}
+
+/** Home page + its SEO meta (both locales). */
+export function getHomeCacheKeys(homeId?: string): string[] {
+  const keys = [cacheKeys.page('HOME', 'ru'), cacheKeys.page('HOME', 'uk')]
+  if (homeId) {
+    keys.push(cacheKeys.seo('page', homeId, 'ru'), cacheKeys.seo('page', homeId, 'uk'))
+  }
+  return keys
+}
+
+/** Testimonials (home blocks, both locales). */
+export function getTestimonialsCacheKeys(): string[] {
+  return [cacheKeys.testimonials('ru'), cacheKeys.testimonials('uk')]
 }

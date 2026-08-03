@@ -9,7 +9,7 @@ import { canEditContent } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
 import { runSeoAudit } from '@/lib/seo/audit'
-import { revalidatePublic, revalidateAdmin, getHomeRevalidatePaths } from '@/lib/revalidate'
+import { revalidatePublic, revalidateAdmin, getHomeRevalidatePaths, cacheKeys } from '@/lib/revalidate'
 import type { SeoUrlRow } from '@/lib/seo/audit'
 
 async function requireEdit(): Promise<string> {
@@ -67,7 +67,13 @@ export async function bulkUpdateSeo(formData: FormData) {
       paths.push(...getHomeRevalidatePaths())
     }
   }
-  if (paths.length > 0) void revalidatePublic({ paths, type: 'layout' })
+  if (paths.length > 0) {
+    void revalidatePublic({
+      paths,
+      type: 'layout',
+      keys: ids.map((i) => cacheKeys.seo(i.entityType, i.entityId, i.locale)),
+    })
+  }
 }
 
 /* ── Audit (SEO audit table) ── */
@@ -121,11 +127,22 @@ export async function saveSeoOverride(formData: FormData) {
 
   revalidateAdmin('/admin/seo', `/admin/seo/${entityType}/${entityId}`)
   if (entityType.startsWith('service')) {
-    void revalidatePublic({ paths: ['/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml'], type: 'layout' })
+    void revalidatePublic({
+      paths: ['/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml'],
+      type: 'layout',
+      keys: [cacheKeys.seo(entityType, entityId, locale)],
+    })
   } else if (entityType.startsWith('blog')) {
-    void revalidatePublic({ paths: ['/ru/blog/', '/uk/blog/', '/sitemap.xml'], type: 'layout' })
+    void revalidatePublic({
+      paths: ['/ru/blog/', '/uk/blog/', '/sitemap.xml'],
+      type: 'layout',
+      keys: [cacheKeys.seo(entityType, entityId, locale)],
+    })
   } else if (entityType === 'page') {
-    void revalidatePublic({ paths: getHomeRevalidatePaths() })
+    void revalidatePublic({
+      paths: getHomeRevalidatePaths(),
+      keys: [cacheKeys.seo(entityType, entityId, locale)],
+    })
   }
 
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'SEO_META', entityId, after: { title, description, keywords } })

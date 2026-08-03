@@ -10,7 +10,7 @@ import { getCurrentUser } from '@/lib/auth/session'
 import { canEditContent, canDelete, canPublish } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
-import { revalidatePublic, revalidateAdmin, getServiceRevalidatePaths } from '@/lib/revalidate'
+import { revalidatePublic, revalidateAdmin, getServiceRevalidatePaths, getServiceCacheKeys, cacheKeys } from '@/lib/revalidate'
 import { syncRedirectRulesToKv } from './redirects'
 import { requirePublish, assertBilingual, assertMetaPresent } from './ymyl'
 
@@ -146,7 +146,10 @@ export async function createService(formData: FormData) {
   const ruSlug = data.translations.find((t: { locale: string }) => t.locale === 'ru')?.slug || ''
   const ukSlug = data.translations.find((t: { locale: string }) => t.locale === 'uk')?.slug || ''
   revalidateAdmin('/admin/services')
-  void revalidatePublic({ paths: getServiceRevalidatePaths(ruSlug, ukSlug, data.featured) })
+  void revalidatePublic({
+    paths: getServiceRevalidatePaths(ruSlug, ukSlug, data.featured),
+    keys: getServiceCacheKeys(ruSlug, ukSlug, serviceId, data.featured),
+  })
   
 }
 
@@ -266,8 +269,22 @@ export async function updateService(id: string, formData: FormData) {
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'SERVICE', entityId: id, before: existing, after: data })
   const ruSlug = data.translations.find((t: { locale: string }) => t.locale === 'ru')?.slug || ''
   const ukSlug = data.translations.find((t: { locale: string }) => t.locale === 'uk')?.slug || ''
+  const oldTrs = await db
+    .select()
+    .from(serviceTranslations)
+    .where(eq(serviceTranslations.serviceId, id))
+    .all()
+  const oldRuSlug = oldTrs.find((t) => t.locale === 'ru')?.slug || ''
+  const oldUkSlug = oldTrs.find((t) => t.locale === 'uk')?.slug || ''
   revalidateAdmin('/admin/services', `/admin/services/${id}`)
-  void revalidatePublic({ paths: getServiceRevalidatePaths(ruSlug, ukSlug, data.featured) })
+  void revalidatePublic({
+    paths: getServiceRevalidatePaths(ruSlug, ukSlug, data.featured || existing.featured),
+    keys: [
+      ...getServiceCacheKeys(ruSlug, ukSlug, id, data.featured || existing.featured),
+      ...(oldRuSlug && oldRuSlug !== ruSlug ? [cacheKeys.service(oldRuSlug, 'ru')] : []),
+      ...(oldUkSlug && oldUkSlug !== ukSlug ? [cacheKeys.service(oldUkSlug, 'uk')] : []),
+    ],
+  })
   
 }
 
@@ -280,9 +297,19 @@ export async function deleteService(id: string) {
 
   await db.delete(services).where(eq(services.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'SERVICE', entityId: id, before: existing })
+  const delTrs = await db
+    .select()
+    .from(serviceTranslations)
+    .where(eq(serviceTranslations.serviceId, id))
+    .all()
+  const ruSlug = delTrs.find((t) => t.locale === 'ru')?.slug || ''
+  const ukSlug = delTrs.find((t) => t.locale === 'uk')?.slug || ''
   revalidateAdmin('/admin/services')
-  void revalidatePublic({ paths: ['/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml'], type: 'layout' })
-  
+  void revalidatePublic({
+    paths: ['/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml'],
+    type: 'layout',
+    keys: getServiceCacheKeys(ruSlug, ukSlug, id, existing.featured),
+  })
 }
 
 export async function publishService(id: string) {
@@ -325,7 +352,18 @@ export async function publishService(id: string) {
     entityType: 'SERVICE', entityId: id, after: { status: newStatus },
   })
   revalidateAdmin('/admin/services')
-  void revalidatePublic({ paths: ['/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml'], type: 'layout' })
+  const pubTrs = await db
+    .select()
+    .from(serviceTranslations)
+    .where(eq(serviceTranslations.serviceId, id))
+    .all()
+  const ruSlug = pubTrs.find((t) => t.locale === 'ru')?.slug || ''
+  const ukSlug = pubTrs.find((t) => t.locale === 'uk')?.slug || ''
+  void revalidatePublic({
+    paths: ['/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml'],
+    type: 'layout',
+    keys: getServiceCacheKeys(ruSlug, ukSlug, id, existing.featured),
+  })
 }
 
 /* ── Reorder (drag-and-drop) ── */
@@ -336,5 +374,9 @@ export async function reorderServices(orderedIds: string[]) {
     await db.update(services).set({ sortOrder: i }).where(eq(services.id, orderedIds[i]))
   }
   revalidateAdmin('/admin/services')
-  void revalidatePublic({ paths: ['/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml'], type: 'layout' })
+  void revalidatePublic({
+    paths: ['/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml'],
+    type: 'layout',
+    keys: [cacheKeys.servicesList('ru'), cacheKeys.servicesList('uk'), cacheKeys.servicesSidebar('ru'), cacheKeys.servicesSidebar('uk')],
+  })
 }

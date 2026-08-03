@@ -84,6 +84,7 @@ interface __BaseEnv_CloudflareEnv {
 	RATE_LIMIT_KV?: KVNamespace;
 	MEDIA_R2_BUCKET?: R2Bucket;
 	NEXT_INC_CACHE_R2_BUCKET?: R2Bucket;
+	CONTENT_CACHE_R2?: R2Bucket;
 	DB: D1Database;
 }
 

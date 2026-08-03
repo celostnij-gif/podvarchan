@@ -9,7 +9,8 @@ import { getCurrentUser } from '@/lib/auth/session'
 import { canEditContent, canDelete, canPublish } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
-import { revalidatePublic, revalidateAdmin, getPageRevalidatePaths, getHomeRevalidatePaths } from '@/lib/revalidate'
+import { revalidatePublic, revalidateAdmin, getPageRevalidatePaths, getHomeRevalidatePaths, getPageCacheKeys, getHomeCacheKeys } from '@/lib/revalidate'
+import type { ActionDb } from './db'
 import { syncRedirectRulesToKv } from './redirects'
 import { requirePublish, assertBilingual, assertMetaPresent } from './ymyl'
 
@@ -27,6 +28,12 @@ async function requireDelete(): Promise<string> {
 
 function now(): string {
   return new Date().toISOString()
+}
+
+/** Resolve the page type for a section's parent page (for targeted cache keys). */
+async function getPageTypeByPageId(db: ActionDb, pageId: string): Promise<string> {
+  const page = await db.select().from(pages).where(eq(pages.id, pageId)).get()
+  return page?.type ?? 'CUSTOM'
 }
 
 const PAGE_TYPES = [
@@ -222,7 +229,7 @@ export async function updatePage(id: string, formData: FormData) {
     after: data,
   })
   revalidateAdmin('/admin/pages', `/admin/pages/${id}`, '/admin/home')
-  void revalidatePublic({ paths: getPageRevalidatePaths(existing.type) })
+  void revalidatePublic({ paths: getPageRevalidatePaths(existing.type), keys: [...getPageCacheKeys(existing.type), ...getPageCacheKeys(data.type)] })
 }
 
 /** Primary save from edit form (meta + translations). */
@@ -239,7 +246,7 @@ export async function deletePage(id: string) {
   await db.delete(pages).where(eq(pages.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'PAGE', entityId: id, before: existing })
   revalidateAdmin('/admin/pages', '/admin/home')
-  void revalidatePublic({ paths: getPageRevalidatePaths(existing.type) })
+  void revalidatePublic({ paths: getPageRevalidatePaths(existing.type), keys: getPageCacheKeys(existing.type) })
 }
 
 export async function publishPage(id: string) {
@@ -293,7 +300,7 @@ export async function publishPage(id: string) {
     after: { status: newStatus },
   })
   revalidateAdmin('/admin/pages', `/admin/pages/${id}`, '/admin/home')
-  void revalidatePublic({ paths: getPageRevalidatePaths(existing.type) })
+  void revalidatePublic({ paths: getPageRevalidatePaths(existing.type), keys: getPageCacheKeys(existing.type) })
 }
 const homeContentSchema = z.object({
   ru_slug: z.string().min(1).default('/'),
@@ -414,7 +421,7 @@ export async function updateHomeContent(formData: FormData) {
     after: { type: 'HOME', ...d },
   })
   revalidateAdmin('/admin/home', '/admin/pages', `/admin/pages/${home.id}`)
-  void revalidatePublic({ paths: getHomeRevalidatePaths() })
+  void revalidatePublic({ paths: getHomeRevalidatePaths(), keys: getHomeCacheKeys(home.id) })
 }
 
 /* ── Section schemas ── */
@@ -477,8 +484,8 @@ export async function addSection(pageId: string, formData: FormData): Promise<{ 
     entityId: sectionId,
     after: { pageId, key, type },
   })
-  revalidateAdmin(`/admin/pages/${pageId}`, '/admin/home')
-  void revalidatePublic({ paths: getHomeRevalidatePaths() })
+  const sectionPageType = await getPageTypeByPageId(db, pageId)
+  void revalidatePublic({ paths: getPageRevalidatePaths(sectionPageType), keys: getPageCacheKeys(sectionPageType) })
 
   return { sectionId }
 }
@@ -532,12 +539,12 @@ export async function updateSectionContent(sectionId: string, formData: FormData
     before: existing,
     after: { key, type: typeRaw },
   })
-  revalidateAdmin(`/admin/pages/${existing.pageId}`, '/admin/pages', '/admin/home')
-  void revalidatePublic({ paths: getHomeRevalidatePaths() })
+  const sectionPageType = await getPageTypeByPageId(db, existing.pageId)
+  void revalidatePublic({ paths: getPageRevalidatePaths(sectionPageType), keys: getPageCacheKeys(sectionPageType) })
 }
 
 async function upsertSectionTranslation(
-  db: Awaited<ReturnType<typeof getActionDb>>,
+  db: ActionDb,
   sectionId: string,
   locale: 'ru' | 'uk',
   contentJson: string,
@@ -580,8 +587,8 @@ export async function toggleSection(sectionId: string, enabled: boolean) {
     before: existing,
     after: { enabled },
   })
-  revalidateAdmin(`/admin/pages/${existing.pageId}`, '/admin/home')
-  void revalidatePublic({ paths: getHomeRevalidatePaths() })
+  const sectionPageType = await getPageTypeByPageId(db, existing.pageId)
+  void revalidatePublic({ paths: getPageRevalidatePaths(sectionPageType), keys: getPageCacheKeys(sectionPageType) })
 }
 
 export async function reorderSections(pageId: string, orderedIds: string[]) {
@@ -600,6 +607,8 @@ export async function reorderSections(pageId: string, orderedIds: string[]) {
     entityId: pageId,
     after: { orderedIds },
   })
+  const sectionPageType = await getPageTypeByPageId(db, pageId)
+  void revalidatePublic({ paths: getPageRevalidatePaths(sectionPageType), keys: getPageCacheKeys(sectionPageType) })
   revalidatePath(`/admin/pages/${pageId}`)
   revalidatePath('/admin/home')
 }
@@ -617,6 +626,6 @@ export async function deleteSection(sectionId: string) {
     entityId: sectionId,
     before: existing,
   })
-  revalidateAdmin(`/admin/pages/${existing.pageId}`, '/admin/home')
-  void revalidatePublic({ paths: getHomeRevalidatePaths() })
+  const sectionPageType = await getPageTypeByPageId(db, existing.pageId)
+  void revalidatePublic({ paths: getPageRevalidatePaths(sectionPageType), keys: getPageCacheKeys(sectionPageType) })
 }
