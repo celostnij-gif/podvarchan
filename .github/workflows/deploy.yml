@@ -29,7 +29,7 @@ jobs:
         run: npm run lint
 
       - name: Build site
-        run: npx opennextjs-cloudflare build
+        run: npx opennextjs-cloudflare build && node scripts/patch-opennext-cache-headers.mjs
         env:
           NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
           NEXT_PUBLIC_GA_ID: ${{ secrets.NEXT_PUBLIC_GA_ID }}

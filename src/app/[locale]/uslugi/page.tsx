@@ -4,7 +4,7 @@ import { getServiceSidebar } from '@/lib/db/public'
 import { UslugiClient } from './page-client'
 import type { ServiceSidebarItem } from '@/lib/db/public'
 
-export const revalidate = 3600
+export const revalidate = 604800
 
 export async function generateMetadata({
   params,

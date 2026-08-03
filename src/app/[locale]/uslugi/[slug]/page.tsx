@@ -9,7 +9,7 @@ import { getServiceBySlug, getServiceSidebar, getSEOMeta } from '@/lib/db/public
 import type { ServiceSidebarItem } from '@/lib/db/public'
 import { ClientServicePage } from './client-page'
 
-export const revalidate = 3600
+export const revalidate = 604800
 
 interface ServiceFaqEntry {
   question: string

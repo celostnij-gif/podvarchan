@@ -6,7 +6,7 @@ import BlogClient from './page-client'
 import type { BlogPostPublic, BlogCategoryPublic } from '@/lib/db/public'
 import type { BlogPostItem, BlogCategoryItem } from './page-client'
 
-export const revalidate = 3600
+export const revalidate = 86400
 
 export async function generateMetadata({
   params,

@@ -6,7 +6,7 @@ import { faqSchema } from '@/lib/schema'
 import { getFAQs } from '@/lib/db/public'
 import { ClientFaqPage } from './client-page'
 import type { FAQItem } from '@/types'
-export const revalidate = 3600
+export const revalidate = 604800
 
 export async function generateMetadata({
   params,
