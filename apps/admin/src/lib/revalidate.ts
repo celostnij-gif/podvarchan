@@ -7,7 +7,7 @@ import { revalidatePath } from 'next/cache'
  * Public paths → POST https://podvarchan.com/api/revalidate/
  * Admin paths  → revalidatePath in-process.
  *
- * See TEMP/REVALIDATE_MAP.md and AGENT.md §8.
+ * See AGENTS.md §4 (invalidation contract) — path map lives in this file.
  */
 
 export type RevalidateType = 'page' | 'layout'
@@ -164,7 +164,7 @@ export async function revalidateHomeArea(): Promise<void> {
 }
 
 
-/* ── Path builders per REVALIDATE_MAP ── */
+/* ── Path builders (AGENTS.md §4 invalidation map) ── */
 
 /** Blog post: detail + list + category + sitemap */
 export function getBlogPostRevalidatePaths(

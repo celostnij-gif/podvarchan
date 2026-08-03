@@ -9,6 +9,15 @@ import { getCurrentUser } from '@/lib/auth/session'
 import { canEditContent } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
+import { revalidatePublic } from '@/lib/revalidate'
+
+/** Media is referenced across blog/services/pages/testimonials — broad layout revalidate. */
+function revalidateMediaArea(): void {
+  void revalidatePublic({
+    paths: ['/ru/', '/uk/', '/ru/blog/', '/uk/blog/', '/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml'],
+    type: 'layout',
+  })
+}
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
@@ -51,6 +60,7 @@ export async function updateMediaMeta(id: string, formData: FormData) {
   }
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'MEDIA', entityId: id, before: existing, after: data })
   revalidatePath('/admin/media')
+  revalidateMediaArea()
 }
 
 export async function deleteMedia(id: string) {
@@ -61,6 +71,7 @@ export async function deleteMedia(id: string) {
   await db.delete(mediaAssets).where(eq(mediaAssets.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'MEDIA', entityId: id, before: existing })
   revalidatePath('/admin/media')
+  revalidateMediaArea()
 }
 
 /**
@@ -80,5 +91,6 @@ export async function deleteMediaBatch(ids: string[]): Promise<{ deleted: number
     deleted++
   }
   revalidatePath('/admin/media')
+  revalidateMediaArea()
   return { deleted, errors }
 }

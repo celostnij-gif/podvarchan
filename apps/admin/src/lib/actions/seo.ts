@@ -54,6 +54,20 @@ export async function bulkUpdateSeo(formData: FormData) {
   }
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'SEO_META', entityId: 'bulk', after: { ids } })
   revalidatePath('/admin/seo')
+
+  // SEO overrides feed generateMetadata on live pages — invalidate affected areas
+  const types = new Set(ids.map((i) => i.entityType))
+  const paths: string[] = []
+  for (const t of types) {
+    if (t.startsWith('service')) {
+      paths.push('/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml')
+    } else if (t.startsWith('blog')) {
+      paths.push('/ru/blog/', '/uk/blog/', '/sitemap.xml')
+    } else if (t === 'page') {
+      paths.push(...getHomeRevalidatePaths())
+    }
+  }
+  if (paths.length > 0) void revalidatePublic({ paths, type: 'layout' })
 }
 
 /* ── Audit (SEO audit table) ── */

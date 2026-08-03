@@ -79,7 +79,7 @@ interface __BaseEnv_CloudflareEnv {
 	NEXT_PUBLIC_TURNSTILE_SITE_KEY: string;
 	CONTACT_EMAIL: string;
 	WORKER_SELF_REFERENCE: Fetcher /* podvarchan */;
-	KV_BINDING?: KVNamespace;
+	CONTENT_CACHE_KV?: KVNamespace;
 	RATE_LIMIT_KV?: KVNamespace;
 	MEDIA_R2_BUCKET: R2Bucket;
 	DB: D1Database;

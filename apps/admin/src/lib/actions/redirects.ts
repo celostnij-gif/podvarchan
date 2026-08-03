@@ -101,7 +101,7 @@ export async function syncRedirectRulesToKv() {
       map[r.fromPath] = { to: r.toPath, code: r.statusCode }
     }
     const { env } = getCloudflareContext()
-    const kv = env.KV_BINDING as KVNamespace
+    const kv = env.CONTENT_CACHE_KV as KVNamespace
     await kv.put('redirect_rules', JSON.stringify(map))
   } catch (err) {
     console.error('syncRedirectRulesToKv failed:', String(err))

@@ -31,6 +31,13 @@ const nextConfig = {
         { key: 'X-XSS-Protection', value: '1; mode=block' },
         { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
         { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
+        /* AI/GEO readiness — AGENTS.md §6: keep the exact value */
+        { key: 'Content-Signal', value: 'ai-train=yes, search=yes, ai-input=yes' },
+        { key: 'X-Content-Type-Options', value: 'nosniff' },
+        { key: 'X-Frame-Options', value: 'DENY' },
+        { key: 'X-XSS-Protection', value: '1; mode=block' },
+        { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+        { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
         {
           key: 'Content-Security-Policy',
           value: [
@@ -81,8 +88,11 @@ const nextConfig = {
         { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
       ],
     },
-    /* ── CDN cache for HTML pages (7 days CDN, 30d stale-while-revalidate) ── */
+    /* ── CDN cache for HTML pages (AGENTS.md §3 matrix) ── */
     /* Middleware Cache-Control doesn't propagate to page responses in Cloudflare Workers */
+    /* Order matters: later rules override earlier ones for the same header key. */
+
+    /* Home / Services / FAQ / About / Method / Pricing / Contacts / Privacy / Disclaimer */
     {
       source: '/:locale(ru|uk)/:path*',
       headers: [
@@ -90,6 +100,60 @@ const nextConfig = {
           key: 'Cache-Control',
           value: 'public, s-maxage=604800, stale-while-revalidate=2592000, stale-if-error=604800',
         },
+      ],
+    },
+    /* Blog (list/post/category) — fresher than evergreen pages */
+    {
+      source: '/:locale(ru|uk)/blog/:path*',
+      headers: [
+        {
+          key: 'Cache-Control',
+          value: 'public, s-maxage=86400, stale-while-revalidate=604800, stale-if-error=604800',
+        },
+      ],
+    },
+    /* sitemap / robots / llms — short edge TTL (freshness matters for crawlers) */
+    {
+      source: '/sitemap.xml',
+      headers: [
+        {
+          key: 'Cache-Control',
+          value: 'public, s-maxage=3600, stale-while-revalidate=86400, stale-if-error=604800',
+        },
+      ],
+    },
+    {
+      source: '/robots.txt',
+      headers: [
+        {
+          key: 'Cache-Control',
+          value: 'public, s-maxage=3600, stale-while-revalidate=86400, stale-if-error=604800',
+        },
+      ],
+    },
+    {
+      source: '/llms.txt',
+      headers: [
+        {
+          key: 'Cache-Control',
+          value: 'public, s-maxage=3600, stale-while-revalidate=86400, stale-if-error=604800',
+        },
+      ],
+    },
+    {
+      source: '/llms-full.txt',
+      headers: [
+        {
+          key: 'Cache-Control',
+          value: 'public, s-maxage=3600, stale-while-revalidate=86400, stale-if-error=604800',
+        },
+      ],
+    },
+    /* Preview — never cache at the edge (draft content must be fresh) */
+    {
+      source: '/api/preview/:path*',
+      headers: [
+        { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
       ],
     },
   ],

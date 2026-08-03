@@ -166,6 +166,7 @@ export async function ensureHomeBlueprint(): Promise<{ created: number }> {
   })
 
   revalidateAdmin('/admin/home')
+  void revalidatePublic({ paths: getHomeRevalidatePaths() })
 
   return { created }
 }
