@@ -31,6 +31,7 @@ interface R2Object {
   size: number
   httpMetadata?: { contentType?: string }
   customMetadata?: Record<string, string>
+  json(): Promise<unknown>
 }
 
 /* ── Minimal DurableObjectNamespace type (avoids @cloudflare/workers-types dep) ── */
@@ -79,7 +80,7 @@ interface __BaseEnv_CloudflareEnv {
 	NEXT_PUBLIC_TURNSTILE_SITE_KEY: string;
 	CONTACT_EMAIL: string;
 	WORKER_SELF_REFERENCE: Fetcher /* podvarchan */;
-	KV_BINDING?: KVNamespace;
+	CONTENT_CACHE_KV?: KVNamespace;
 	RATE_LIMIT_KV?: KVNamespace;
 	MEDIA_R2_BUCKET?: R2Bucket;
 	NEXT_INC_CACHE_R2_BUCKET?: R2Bucket;

@@ -21,7 +21,7 @@ async function readKvRedirectRules(): Promise<Record<string, { to: string; code:
   if (_kvRulesCache && Date.now() - _kvRulesFetched < KV_CACHE_TTL) return _kvRulesCache
   try {
     const { env } = getCloudflareContext()
-    const kv = env.KV_BINDING as KVNamespace | undefined
+    const kv = env.CONTENT_CACHE_KV as KVNamespace | undefined
     if (!kv || typeof kv.get !== 'function') return null
     const raw = await kv.get('redirect_rules')
     _kvRulesCache = raw ? JSON.parse(raw) : null
