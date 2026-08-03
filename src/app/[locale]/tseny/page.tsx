@@ -4,7 +4,7 @@ import { SITE } from '@/constants'
 import { getPageByType, getSEOMeta } from '@/lib/db/public'
 import { cookies } from 'next/headers'
 import { TsenyClient } from './client-page'
-export const revalidate = 3600
+export const revalidate = 604800
 
 export async function generateMetadata({
   params,

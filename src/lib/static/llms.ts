@@ -1,4 +1,46 @@
-# Vyacheslav Podvarchan — Online Psychologist & Hypnotherapist
+/**
+ * Static text endpoints for AI/GEO readiness (AGENTS.md §6).
+ *
+ * /robots.txt  → src/app/robots.ts (Next metadata API)
+ * /llms.txt    → src/app/llms.txt/route.ts
+ * /llms-full.txt → src/app/llms-full.txt/route.ts
+ *
+ * Served as worker routes (not static assets) so the Cache-Control matrix
+ * (s-maxage=3600, stale-while-revalidate=86400) and the Content-Signal
+ * header from next.config.mjs apply to them.
+ */
+
+export const LLMS_CONTENT = `# Vyacheslav Podvarchan — Online Psychologist & Hypnotherapist
+> Official AI Information Sheet for podvarchan.com
+> Full Markdown: https://podvarchan.com/llms-full.txt
+
+# Primary content
+Allow: /
+Allow: /ru/
+Allow: /uk/
+Allow: /blog/
+Allow: /uslugi/
+Allow: /ob-avtore/
+Allow: /metod/
+Allow: /faq/
+Allow: /kontakty/
+Allow: /tseny/
+
+# Disallow API and internal pages
+Disallow: /api/
+Disallow: /search/
+Disallow: /_next/
+Disallow: /politika-konfidentsialnosti/
+Disallow: /disclaimer/
+
+# AI training preference
+# Content-Signal: ai-train=yes, search=yes, ai-input=yes
+
+# For detailed structured information about this site, see:
+# Full Markdown: /llms-full.txt
+`
+
+export const LLMS_FULL_CONTENT = `# Vyacheslav Podvarchan — Online Psychologist & Hypnotherapist
 > Official AI Context Sheet for podvarchan.com
 > https://podvarchan.com
 
@@ -206,3 +248,4 @@ Online psychological consultations are suitable for anxiety disorders, panic att
 - Sitemap: https://podvarchan.com/sitemap.xml (200+ URLs)
 - Content-Signal: ai-train=yes, search=yes, ai-input=yes
 - Allowed AI bots: GPTBot, Google-Extended, ClaudeBot, PerplexityBot, ChatGPT-User, CCBot, Applebot-Extended, Amazonbot, Bytespider
+`

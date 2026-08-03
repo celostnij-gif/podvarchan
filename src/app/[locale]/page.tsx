@@ -9,7 +9,7 @@ import Hero from '@/components/sections/Hero'
 import { getPageByType, getTestimonials, getFAQs } from '@/lib/db/public'
 import { cookies } from 'next/headers'
 import { parseZoneContent, type HeroContent } from '@/lib/home/blueprint'
-export const revalidate = 3600
+export const revalidate = 604800
 
 /* ── Metadata ── */
 

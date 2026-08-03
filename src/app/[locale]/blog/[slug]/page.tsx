@@ -21,7 +21,7 @@ function isClinicalArticle(categorySlug: string | null | undefined, slug: string
   return false
 }
 
-export const revalidate = 3600
+export const revalidate = 86400
 
 interface Props {
   params: Promise<{ slug: string; locale: string }>
