@@ -24,9 +24,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-
       - name: ESLint check
         run: npm run lint
+
+      - name: TypeScript check (site)
+        run: npx tsc --noEmit
+        env:
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          NEXT_PUBLIC_GA_ID: ${{ secrets.NEXT_PUBLIC_GA_ID }}
+          NEXTJS_ENV: production
 
       - name: Build site
         run: npx opennextjs-cloudflare build && node scripts/patch-opennext-cache-headers.mjs
@@ -38,6 +44,9 @@ jobs:
           CONTACT_EMAIL: ${{ secrets.CONTACT_EMAIL }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_DATABASE_ID: ${{ secrets.CLOUDFLARE_DATABASE_ID }}
+
+      - name: Bundle size gate (site)
+        run: node scripts/check-bundle-size.mjs --path .open-next/server-functions/default/handler.mjs --warn 2621440 --fail 3040870
 
       - name: IndexNow ping
         run: |
@@ -56,6 +65,24 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy
+
+      - name: Verify headers after deploy (site)
+        run: |
+          for u in "https://podvarchan.com/ru/" "https://podvarchan.com/ru/blog/" "https://podvarchan.com/sitemap.xml" "https://podvarchan.com/robots.txt" "https://podvarchan.com/llms.txt" "https://podvarchan.com/api/preview/"; do
+            h=$(curl -s -o /dev/null -D - -H "Cache-Control: no-cache" "$u")
+            code=$(printf '%s\n' "$h" | head -1 | awk '{print $2}')
+            printf '%s\n' "$h" | grep -qiE "^content-signal: ai-train=yes, search=yes, ai-input=yes" || { echo "FAIL: content-signal missing on $u"; exit 1; }
+            if [[ "$u" == *"/api/preview/"* ]]; then
+              printf '%s\n' "$h" | grep -qiE "^cache-control:.*no-store" || { echo "FAIL: preview not no-store on $u"; exit 1; }
+            else
+              printf '%s\n' "$h" | grep -qiE "^cache-control:.*stale-while-revalidate=" || { echo "FAIL: SWR missing on $u"; exit 1; }
+              printf '%s\n' "$h" | grep -qiE "^cache-control:.*stale-if-error=" || { echo "FAIL: stale-if-error missing on $u"; exit 1; }
+            fi
+            echo "OK $code $u"
+          done
+
+      - name: SEO regression
+        run: bash scripts/seo-regression.sh https://podvarchan.com
 
   deploy-admin:
     name: Admin (admin.podvarchan.com)
@@ -100,11 +127,9 @@ jobs:
 
       - name: Invalidation coverage check
         run: node scripts/check-invalidation-coverage.mjs
+
       - name: Bundle size gate (admin)
-        # Same ~3 MiB gzip platform ceiling as the public worker; 1.8/2.5 MiB
-        # leaves realistic headroom for admin UI growth (current ~1.42 MiB)
-        # without alerting on every PR. 1.5/2.0 MiB proved too tight (~5%).
-        run: node scripts/check-bundle-size.mjs --path apps/admin/.open-next/server-functions/default/apps/admin/handler.mjs --warn 1887436 --fail 2621440
+        run: node scripts/check-bundle-size.mjs --path apps/admin/.open-next/server-functions/default/apps/admin/handler.mjs --warn 1572864 --fail 2097152
 
       - name: Deploy admin to Cloudflare
         uses: cloudflare/wrangler-action@v4
@@ -119,4 +144,3 @@ jobs:
           code=$(curl -s -o /dev/null -w "%{http_code}" -H "Cache-Control: no-cache" https://admin.podvarchan.com/)
           echo "admin.podvarchan.com -> $code"
           [[ "$code" != "000" ]] || { echo "FAIL: admin unreachable"; exit 1; }
-

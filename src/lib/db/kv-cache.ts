@@ -13,9 +13,15 @@
  *
  * KV namespace: CONTENT_CACHE_KV (dedicated; RATE_LIMIT_KV is a separate
  * namespace used only by src/lib/rateLimit.ts — never mix purposes).
+ * R2: CONTENT_CACHE_R2 (dedicated bucket — NOT the OpenNext ISR bucket).
+ *
+ * Logical keys (cacheKeys.* from @podvarchan/shared) are namespaced here
+ * with the `d1c:` prefix. Invalidation is targeted: exact logical keys or a
+ * scoped entity-family prefix (see invalidateExact / invalidateKeys) — never
+ * a full namespace wipe (AGENTS.md §4).
  *
  * Usage:
- *   const services = await withCache('services:list:ru', 21600, () => getServicesUncached('ru'))
+ *   const services = await withCache(cacheKeys.servicesList('ru'), 21600, () => getServicesUncached('ru'))
  */
 
 import { getCloudflareContext } from '@opennextjs/cloudflare'
@@ -34,7 +40,7 @@ function getBindings(): CacheBindings | null {
     const { env, ctx } = getCloudflareContext()
     return {
       kv: env['CONTENT_CACHE_KV'] as KVNamespace | undefined,
-      r2: env['NEXT_INC_CACHE_R2_BUCKET'] as R2Bucket | undefined,
+      r2: env['CONTENT_CACHE_R2'] as R2Bucket | undefined,
       waitUntil: ctx?.waitUntil?.bind(ctx),
     }
   } catch {
@@ -42,23 +48,6 @@ function getBindings(): CacheBindings | null {
   }
   return null
 }
-
-/**
- * Deterministic short hash for cache keys that may exceed KV's 512-byte key
- * limit (long id lists, full URLs).
- */
-function shortKey(input: string): string {
-  let h1 = 0x811c9dc5
-  let h2 = 0x01000193
-  for (let i = 0; i < input.length; i++) {
-    const c = input.charCodeAt(i)
-    h1 = Math.imul(h1 ^ c, 0x01000193) >>> 0
-    h2 = (Math.imul(h2, 33) + c) >>> 0
-  }
-  return h1.toString(16).padStart(8, '0') + h2.toString(16).padStart(8, '0')
-}
-
-export { shortKey }
 
 /**
  * Wraps an async fetchFn with KV cache + R2 durable fallback.
@@ -135,7 +124,25 @@ export async function withCache<T>(
 }
 
 /**
- * Invalidate one or more cache keys by prefix.
+ * Delete exact logical cache keys (1 KV delete per key — no list()).
+ * Keys are namespaced with the `d1c:` prefix here; pass logical keys
+ * (cacheKeys.* output) from the caller.
+ */
+export async function invalidateExact(logicalKeys: string[]): Promise<void> {
+  const kv = getBindings()?.kv
+  if (!kv) return
+
+  const unique = [...new Set(logicalKeys.filter((k): k is string => typeof k === 'string' && k.length > 0))]
+  if (unique.length === 0) return
+  try {
+    await Promise.all(unique.map((k) => kv.delete(`${PREFIX}${k}`)))
+  } catch {
+    // best-effort
+  }
+}
+
+/**
+ * Invalidate cache keys by logical prefix (scoped wipe of one entity family).
  *
  * Example: invalidateKeys('nav:') clears d1c:nav:HEADER:ru, d1c:nav:HEADER:uk, etc.
  */
@@ -146,22 +153,6 @@ export async function invalidateKeys(prefix: string): Promise<void> {
   const fullPrefix = `${PREFIX}${prefix}`
   try {
     const { keys } = await kv.list({ prefix: fullPrefix })
-    if (keys.length === 0) return
-    await Promise.all(keys.map((k) => kv.delete(k.name)))
-  } catch {
-    // best-effort
-  }
-}
-
-/**
- * Blow away ALL D1 KV cache keys.
- */
-export async function invalidateAll(): Promise<void> {
-  const kv = getBindings()?.kv
-  if (!kv) return
-
-  try {
-    const { keys } = await kv.list({ prefix: PREFIX })
     if (keys.length === 0) return
     await Promise.all(keys.map((k) => kv.delete(k.name)))
   } catch {

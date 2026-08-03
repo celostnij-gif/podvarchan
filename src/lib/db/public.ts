@@ -26,7 +26,8 @@ import {
   contactChannels,
   siteSettings,
 } from '@/db/schema/settings'
-import { withCache, shortKey } from './kv-cache'
+import { withCache } from './kv-cache'
+import { cacheKeys } from '@podvarchan/shared'
 
 /* ── TTLs (seconds) — AGENTS.md §3 cache matrix ── */
 const TTL_NAV = 86400 // navigation_items
@@ -203,7 +204,7 @@ async function getServicesUncached(locale: string): Promise<ServicePublic[]> {
   return rows.map(mapServiceRow)
 }
 export function getServices(locale: string): Promise<ServicePublic[]> {
-  return withCache(`services:list:${locale}`, TTL_SERVICES, () => getServicesUncached(locale))
+  return withCache(cacheKeys.servicesList(locale), TTL_SERVICES, () => getServicesUncached(locale))
 }
 // ─── Service Sidebar (lightweight — only 5 fields for listing/sidebar) ───
 
@@ -239,7 +240,7 @@ async function getServiceSidebarUncached(locale: string): Promise<ServiceSidebar
   return rows.map((r) => ({ ...r, title: r.title ?? '' }))
 }
 export function getServiceSidebar(locale: string): Promise<ServiceSidebarItem[]> {
-  return withCache(`services:sidebar:${locale}`, TTL_SERVICES, () => getServiceSidebarUncached(locale))
+  return withCache(cacheKeys.servicesSidebar(locale), TTL_SERVICES, () => getServiceSidebarUncached(locale))
 }
 
 /** Single service by translation slug — no full-table scan. */
@@ -275,7 +276,7 @@ export function getServiceBySlug(
 ): Promise<ServicePublic | null> {
   // Preview mode must never read from cache — DRAFT content stays uncached
   if (previewCookie) return getServiceBySlugUncached(slug, locale, previewCookie)
-  return withCache(`service:${slug}:${locale}`, TTL_SERVICES, () => getServiceBySlugUncached(slug, locale))
+  return withCache(cacheKeys.service(slug, locale), TTL_SERVICES, () => getServiceBySlugUncached(slug, locale))
 }
 
 // ─── Blog categories ───
@@ -310,7 +311,7 @@ async function getBlogCategoriesUncached(
   }))
 }
 export function getBlogCategories(locale: string): Promise<BlogCategoryPublic[]> {
-  return withCache(`blog-cats:${locale}`, TTL_BLOG_CATS, () => getBlogCategoriesUncached(locale))
+  return withCache(cacheKeys.blogCats(locale), TTL_BLOG_CATS, () => getBlogCategoriesUncached(locale))
 }
 
 // ─── Blog posts ───
@@ -391,7 +392,7 @@ async function getBlogPostsUncached(locale: string): Promise<BlogPostPublic[]> {
   )
 }
 export function getBlogPosts(locale: string): Promise<BlogPostPublic[]> {
-  return withCache(`blog:list:${locale}`, TTL_BLOG, () => getBlogPostsUncached(locale))
+  return withCache(cacheKeys.blogList(locale), TTL_BLOG, () => getBlogPostsUncached(locale))
 }
 
 /** Single post by translation slug — includes contentHtml. */
@@ -448,7 +449,7 @@ export function getBlogPostBySlug(
   previewCookie?: string,
 ): Promise<BlogPostPublic | null> {
   if (previewCookie) return getBlogPostBySlugUncached(slug, locale, previewCookie)
-  return withCache(`blog:${slug}:${locale}`, TTL_BLOG, () => getBlogPostBySlugUncached(slug, locale))
+  return withCache(cacheKeys.blogPost(slug, locale), TTL_BLOG, () => getBlogPostBySlugUncached(slug, locale))
 }
 
 /** Posts in a category by category translation slug — list shape (no HTML body). */
@@ -502,7 +503,7 @@ export function getBlogPostsByCategory(
   categorySlug: string,
   locale: string,
 ): Promise<BlogPostPublic[]> {
-  return withCache(`blog-cat:${categorySlug}:${locale}`, TTL_BLOG, () => getBlogPostsByCategoryUncached(categorySlug, locale))
+  return withCache(cacheKeys.blogCatPosts(categorySlug, locale), TTL_BLOG, () => getBlogPostsByCategoryUncached(categorySlug, locale))
 }
 
 /** Extract first <img src="..."> from HTML content. */
@@ -537,7 +538,7 @@ async function getBlogFirstImageUrlsUncached(ids: string[]): Promise<Map<string,
 }
 export async function getBlogFirstImageUrls(ids: string[]): Promise<Map<string, string | null>> {
   if (ids.length === 0) return new Map()
-  const key = `blog:images:${shortKey([...ids].sort().join(','))}`
+  const key = cacheKeys.blogFirstImages([...ids].sort().join(','))
   const cached = await withCache<Record<string, string | null>>(key, TTL_BLOG, async () => {
     const m = await getBlogFirstImageUrlsUncached(ids)
     return Object.fromEntries(m)
@@ -635,7 +636,7 @@ export function getPageByType(
   previewCookie?: string,
 ): Promise<PagePublic | null> {
   if (previewCookie) return getPageByTypeUncached(type, locale, previewCookie)
-  return withCache(`page:${type}:${locale}`, TTL_PAGE, () => getPageByTypeUncached(type, locale))
+  return withCache(cacheKeys.page(type, locale), TTL_PAGE, () => getPageByTypeUncached(type, locale))
 }
 
 // ─── FAQ ───
@@ -690,7 +691,7 @@ export function getFAQs(
   previewCookie?: string | null,
 ): Promise<FAQPublic[]> {
   if (previewCookie) return getFAQsUncached(locale, group, previewCookie)
-  return withCache(`faq:${group ?? 'all'}:${locale}`, TTL_FAQ, () => getFAQsUncached(locale, group))
+  return withCache(cacheKeys.faq(group, locale), TTL_FAQ, () => getFAQsUncached(locale, group))
 }
 
 // ─── SEO ───
@@ -727,7 +728,7 @@ export function getSEOMeta(
   locale: string,
 ): Promise<SEOMetaPublic | null> {
   const ttl = entityType === 'blog_post' ? TTL_BLOG : TTL_PAGE
-  return withCache(`seo:${entityType}:${entityId}:${locale}`, ttl, () => getSEOMetaUncached(entityType, entityId, locale))
+  return withCache(cacheKeys.seo(entityType, entityId, locale), ttl, () => getSEOMetaUncached(entityType, entityId, locale))
 }
 
 // ─── Media ───
@@ -752,7 +753,7 @@ async function getMediaPublicUrlUncached(idOrUrl: string): Promise<string | null
   return row?.publicUrl ?? null
 }
 export function getMediaPublicUrl(idOrUrl: string): Promise<string | null> {
-  return withCache(`media:url:${shortKey(idOrUrl)}`, TTL_MEDIA, () => getMediaPublicUrlUncached(idOrUrl))
+  return withCache(cacheKeys.mediaUrl(idOrUrl), TTL_MEDIA, () => getMediaPublicUrlUncached(idOrUrl))
 }
 
 /**
@@ -788,7 +789,7 @@ async function getMediaWithVariantsUncached(idOrUrl: string): Promise<MediaWithV
   return result
 }
 export function getMediaWithVariants(idOrUrl: string): Promise<MediaWithVariants | null> {
-  return withCache(`media:variants:${shortKey(idOrUrl)}`, TTL_MEDIA, () => getMediaWithVariantsUncached(idOrUrl))
+  return withCache(cacheKeys.mediaVariants(idOrUrl), TTL_MEDIA, () => getMediaWithVariantsUncached(idOrUrl))
 }
 
 
@@ -850,7 +851,7 @@ export function getTestimonials(
   previewCookie?: string | null,
 ): Promise<TestimonialPublic[]> {
   if (previewCookie) return getTestimonialsUncached(locale, previewCookie)
-  return withCache(`testimonials:all:${locale}`, TTL_TESTIMONIALS, () => getTestimonialsUncached(locale))
+  return withCache(cacheKeys.testimonials(locale), TTL_TESTIMONIALS, () => getTestimonialsUncached(locale))
 }
 
 // ─── Navigation ───
@@ -898,7 +899,7 @@ export function getNavigation(
   location: 'HEADER' | 'FOOTER' | 'MOBILE',
   locale: string,
 ): Promise<NavItemPublic[]> {
-  return withCache(`nav:${location}:${locale}`, TTL_NAV, () => getNavigationUncached(location, locale))
+  return withCache(cacheKeys.nav(location, locale), TTL_NAV, () => getNavigationUncached(location, locale))
 }
 
 // ─── Contact Channels ───
@@ -924,7 +925,7 @@ async function getContactChannelsUncached(): Promise<ContactChannelPublic[]> {
 
 }
 export function getContactChannels(): Promise<ContactChannelPublic[]> {
-  return withCache('contacts:all', TTL_CONTACTS, () => getContactChannelsUncached())
+  return withCache(cacheKeys.contacts(), TTL_CONTACTS, () => getContactChannelsUncached())
 }
 
 // ─── Site Settings ───
@@ -948,5 +949,5 @@ async function getSiteSettingUncached(key: string): Promise<unknown | null> {
   }
 }
 export function getSiteSetting(key: string): Promise<unknown | null> {
-  return withCache(`settings:${key}`, TTL_SETTINGS, () => getSiteSettingUncached(key))
+  return withCache(cacheKeys.settings(key), TTL_SETTINGS, () => getSiteSettingUncached(key))
 }
