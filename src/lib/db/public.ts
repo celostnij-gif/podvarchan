@@ -417,6 +417,45 @@ export function getBlogPosts(locale: string): Promise<BlogPostPublic[]> {
   return withCache(cacheKeys.blogList(locale), TTL_BLOG, () => getBlogPostsUncached(locale))
 }
 
+/** Sitemap-only minimal fields (id/slug/updatedAt/publishedAt) — the full
+ * blog:list carries faqJson/excerpt/title needed for the /blog page but not
+ * for sitemap; parsing ~50 KB per locale on every sitemap render was part of
+ * the 1102 failure. Own cache key (blog:list:lite) — invalidation via the
+ * blog:list keys' callers already covers it (getBlogPostCacheKeys). */
+export type BlogPostLite = {
+  id: string
+  slug: string
+  updatedAt: string | null
+  publishedAt: string | null
+}
+
+async function getBlogPostsLiteUncached(locale: string): Promise<BlogPostLite[]> {
+  const db = getDB()
+  const loc = locale as 'ru' | 'uk'
+  return db
+    .select({
+      id: blogPosts.id,
+      slug: blogPostTranslations.slug,
+      updatedAt: blogPosts.updatedAt,
+      publishedAt: blogPosts.publishedAt,
+    })
+    .from(blogPosts)
+    .innerJoin(blogPostTranslations, eq(blogPosts.id, blogPostTranslations.postId))
+    .where(
+      and(
+        eq(blogPosts.status, 'PUBLISHED'),
+        eq(blogPostTranslations.locale, loc),
+      ),
+    )
+    .orderBy(desc(blogPosts.publishedAt))
+    .limit(LIMIT_BLOG_POSTS)
+    .all()
+}
+
+export function getBlogPostsLite(locale: string): Promise<BlogPostLite[]> {
+  return withCache(cacheKeys.blogListLite(locale), TTL_BLOG, () => getBlogPostsLiteUncached(locale))
+}
+
 /** Single post by translation slug — includes contentHtml. */
 async function getBlogPostBySlugUncached(
   slug: string,

@@ -273,6 +273,11 @@ export function getBlogPostCacheKeys(
     cacheKeys.blogPost(ukSlug, 'uk'),
     cacheKeys.blogList('ru'),
     cacheKeys.blogList('uk'),
+    // Sitemap XML is rebuilt from the lite list (blog:list:lite) — a post
+    // mutation must invalidate it too, or the map keeps stale slugs/dates
+    // until the 1 h TTL expires (see src/lib/sitemap.ts).
+    cacheKeys.blogListLite('ru'),
+    cacheKeys.blogListLite('uk'),
     cacheKeys.blogCats('ru'),
     cacheKeys.blogCats('uk'),
   ]
