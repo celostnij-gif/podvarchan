@@ -127,9 +127,11 @@ jobs:
 
       - name: Invalidation coverage check
         run: node scripts/check-invalidation-coverage.mjs
-
       - name: Bundle size gate (admin)
-        run: node scripts/check-bundle-size.mjs --path apps/admin/.open-next/server-functions/default/apps/admin/handler.mjs --warn 1572864 --fail 2097152
+        # Same ~3 MiB gzip platform ceiling as the public worker; 1.8/2.5 MiB
+        # leaves realistic headroom for admin UI growth (current ~1.42 MiB)
+        # without alerting on every PR. 1.5/2.0 MiB proved too tight (~5%).
+        run: node scripts/check-bundle-size.mjs --path apps/admin/.open-next/server-functions/default/apps/admin/handler.mjs --warn 1887436 --fail 2621440
 
       - name: Deploy admin to Cloudflare
         uses: cloudflare/wrangler-action@v4

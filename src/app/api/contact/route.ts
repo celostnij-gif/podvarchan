@@ -121,7 +121,9 @@ export async function POST(request: NextRequest) {
         updatedAt: ts,
       })
     } catch (err) {
-      console.error('[Contact API] Failed to persist lead', err)
+      // Uniform, grep-able marker — search worker logs for CONTACT_LEAD_WRITE_FAILED
+      // to detect silent lead loss during D1 degradation (see TEMP report).
+      console.error('[CONTACT_LEAD_WRITE_FAILED]', JSON.stringify({ name, email, error: String(err) }))
     }
 
     // ── Send notification to owner ──
@@ -139,7 +141,7 @@ export async function POST(request: NextRequest) {
           createdAt: new Date().toISOString(),
         })
       } catch (err) {
-        console.error('[Contact API] Failed to persist lead event', err)
+        console.error('[CONTACT_LEAD_EVENT_WRITE_FAILED]', JSON.stringify({ leadId, error: String(err) }))
       }
     }
 
@@ -163,7 +165,7 @@ export async function POST(request: NextRequest) {
       { status: 200 },
     )
   } catch {
-    console.error('[Contact API] Unexpected error')
+    console.error('[CONTACT_API_UNEXPECTED]')
     return NextResponse.json(
       { error: 'Произошла ошибка. Попробуйте позже или напишите в Telegram.', field: 'form' },
       { status: 500 },
