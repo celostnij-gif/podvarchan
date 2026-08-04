@@ -267,7 +267,12 @@ export function getBlogPostCacheKeys(
   if (ruCat) keys.push(cacheKeys.blogCatPosts(ruCat, 'ru'))
   if (ukCat) keys.push(cacheKeys.blogCatPosts(ukCat, 'uk'))
   if (postId) {
-    keys.push(cacheKeys.seo('blog_post', postId, 'ru'), cacheKeys.seo('blog_post', postId, 'uk'))
+    keys.push(
+      cacheKeys.seo('blog_post', postId, 'ru'),
+      cacheKeys.seo('blog_post', postId, 'uk'),
+      cacheKeys.blogPostById(postId, 'ru'),
+      cacheKeys.blogPostById(postId, 'uk'),
+    )
   }
   return keys
 }
@@ -288,7 +293,12 @@ export function getServiceCacheKeys(
     cacheKeys.servicesSidebar('uk'),
   ]
   if (serviceId) {
-    keys.push(cacheKeys.seo('service', serviceId, 'ru'), cacheKeys.seo('service', serviceId, 'uk'))
+    keys.push(
+      cacheKeys.seo('service', serviceId, 'ru'),
+      cacheKeys.seo('service', serviceId, 'uk'),
+      cacheKeys.serviceById(serviceId, 'ru'),
+      cacheKeys.serviceById(serviceId, 'uk'),
+    )
   }
   if (featured) {
     keys.push(cacheKeys.page('HOME', 'ru'), cacheKeys.page('HOME', 'uk'))

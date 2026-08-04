@@ -6,12 +6,13 @@ import { getBlogPostsByCategory, getBlogCategories, getMediaPublicUrl, getBlogFi
 import { getBlogPost } from '@/lib/content'
 import { ClientBlogCategory } from './client-page'
 import { CATEGORY_SLUG_UK, resolveCategorySlug } from '@/lib/slugMapping'
-import type { BlogPostPublic } from '@/lib/db/public'
+import type { BlogPostPublic, BlogCategoryPublic } from '@/lib/db/public'
 import type { BlogPost } from '@/types'
 
 export const dynamicParams = true
 
 interface BlogCategoryMeta {
+  id?: string
   slug: string
   name: string
   description: string
@@ -30,6 +31,7 @@ async function resolveCategoryMeta(
     const found = cats.find((c) => c.slug === rawCat || c.slug === canonical)
     if (found) {
       return {
+        id: found.id,
         slug: rawCat,
         name: found.name ?? rawCat,
         description: found.description ?? '',
@@ -70,15 +72,21 @@ export async function generateMetadata({ params }: Props) {
   if (!category) return {}
   const t = await getTranslations({ locale, namespace: 'blog' })
 
-  const canonical = resolveCategorySlug(rawCat)
-  const ukCat = CATEGORY_SLUG_UK[canonical]
-  const ukPath = ukCat ? `/blog/kategoriya/${ukCat}` : undefined
+  // D1-truth slug pairing by category id (constants map is incomplete vs D1)
+  const ruCats = await getBlogCategories('ru').catch(() => [])
+  const ukCats = await getBlogCategories('uk').catch(() => [])
+  const slugById = (list: BlogCategoryPublic[], id?: string) =>
+    id ? list.find((c) => c.id === id)?.slug : undefined
+  const canonical = slugById(ruCats, category.id) ?? resolveCategorySlug(rawCat)
+  const ukSlug = slugById(ukCats, category.id) ?? CATEGORY_SLUG_UK[canonical]
+  const ukPath = ukSlug ? `/blog/kategoriya/${ukSlug}` : undefined
 
   return seoMetadata({
     title: `${category.name} — ${t('pageTitle')}`,
     description: category.metaDescription,
     keywords: category.keywords,
     path: `/blog/kategoriya/${canonical}`,
+    ruPath: `/blog/kategoriya/${canonical}`,
     ukPath,
     locale,
   })
