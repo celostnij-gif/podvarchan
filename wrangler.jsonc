@@ -6,6 +6,12 @@
 		"nodejs_compat",
 		"global_fetch_strictly_public"
 	],
+	"triggers": [
+		// Warm the sitemap XML cache before its 1 h TTL expires, so a user
+		// request never hits the cold-render path (incident 1102). See
+		// wrangler/worker.ts scheduled handler.
+		{ "crons": ["*/50 * * * *"] }
+	],
 
 	"assets": {
 		"binding": "ASSETS",

@@ -91,6 +91,8 @@ const nextConfig = {
     /* ── CDN cache for HTML pages (AGENTS.md §3 matrix) ── */
     /* Middleware Cache-Control doesn't propagate to page responses in Cloudflare Workers */
     /* Order matters: later rules override earlier ones for the same header key. */
+    /* SOURCE OF TRUTH: src/lib/cache/cache-control-matrix.ts — next.config.mjs
+       cannot import TypeScript; keep these values in sync manually. */
 
     /* Home / Services / FAQ / About / Method / Pricing / Contacts / Privacy / Disclaimer */
     {

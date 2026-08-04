@@ -72,6 +72,22 @@ export async function POST(request: NextRequest) {
       // best-effort — cache TTL will expire eventually
     }
 
+    // Sitemap XML is cached as a whole (sitemap:xml, see src/lib/sitemap.ts) —
+    // when the map itself is invalidated, delete KV+R2 and warm the fresh XML
+    // in the background so the first request is a KV hit, never a heavy render.
+    if (paths.includes('/sitemap.xml')) {
+      try {
+        const { env: cfEnv, ctx } = await import('@opennextjs/cloudflare').then((m) =>
+          m.getCloudflareContext(),
+        )
+        const { invalidateSitemapXml, warmSitemapXml } = await import('@/lib/sitemap')
+        await invalidateSitemapXml(cfEnv)
+        ctx?.waitUntil?.(warmSitemapXml(cfEnv).catch(() => {}))
+      } catch {
+        // best-effort — CDN SWR (86400 s) covers the gap; next render repopulates
+      }
+    }
+
     for (const p of paths) {
       try {
         if (useLayout) {
