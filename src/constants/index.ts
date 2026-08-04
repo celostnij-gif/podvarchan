@@ -3,7 +3,7 @@ import type { Service, BlogCategory, NavItem } from '@/types'
 
 export const SITE = {
   name: 'Podvarchan.com',
-  fullName: 'Podvarchan.com — гипнотерапия онлайн',
+  fullName: 'Podvarchan.com — психологическая помощь и гипнотерапия онлайн',
   url: 'https://podvarchan.com',
   locale: 'ru_RU',
   defaultOgImage: '/images/og-default.webp',
