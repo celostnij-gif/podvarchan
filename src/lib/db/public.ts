@@ -278,6 +278,28 @@ export function getServiceBySlug(
   if (previewCookie) return getServiceBySlugUncached(slug, locale, previewCookie)
   return withCache(cacheKeys.service(slug, locale), TTL_SERVICES, () => getServiceBySlugUncached(slug, locale))
 }
+/** Paired-locale lookup by id — for correct hreflang alternates when slugs differ across locales. */
+async function getServiceByIdUncached(id: string, locale: string): Promise<ServicePublic | null> {
+  const db = getDB()
+  const loc = locale as 'ru' | 'uk'
+  const row = await db
+    .select()
+    .from(services)
+    .innerJoin(serviceTranslations, eq(services.id, serviceTranslations.serviceId))
+    .where(
+      and(
+        eq(services.status, 'PUBLISHED'),
+        eq(serviceTranslations.locale, loc),
+        eq(services.id, id),
+      ),
+    )
+    .get()
+
+  return row ? mapServiceRow(row) : null
+}
+export function getServiceById(id: string, locale: string): Promise<ServicePublic | null> {
+  return withCache(cacheKeys.serviceById(id, locale), TTL_SERVICES, () => getServiceByIdUncached(id, locale))
+}
 
 // ─── Blog categories ───
 
@@ -450,6 +472,47 @@ export function getBlogPostBySlug(
 ): Promise<BlogPostPublic | null> {
   if (previewCookie) return getBlogPostBySlugUncached(slug, locale, previewCookie)
   return withCache(cacheKeys.blogPost(slug, locale), TTL_BLOG, () => getBlogPostBySlugUncached(slug, locale))
+}
+/** Paired-locale lookup by post id — for correct hreflang alternates when slugs differ across locales. */
+async function getBlogPostByIdUncached(id: string, locale: string): Promise<BlogPostPublic | null> {
+  const db = getDB()
+  const loc = locale as 'ru' | 'uk'
+  const row = await db
+    .select({
+      blog_posts: blogPosts,
+      blog_post_translations: blogPostTranslations,
+      blog_categories: blogCategories,
+      blog_category_translations: blogCategoryTranslations,
+    })
+    .from(blogPosts)
+    .innerJoin(blogPostTranslations, eq(blogPosts.id, blogPostTranslations.postId))
+    .leftJoin(blogCategories, eq(blogPosts.categoryId, blogCategories.id))
+    .leftJoin(
+      blogCategoryTranslations,
+      and(
+        eq(blogCategories.id, blogCategoryTranslations.categoryId),
+        eq(blogCategoryTranslations.locale, loc),
+      ),
+    )
+    .where(
+      and(
+        eq(blogPosts.status, 'PUBLISHED'),
+        eq(blogPostTranslations.locale, loc),
+        eq(blogPosts.id, id),
+      ),
+    )
+    .get()
+
+  if (!row) return null
+  return mapBlogDetailRow({
+    blog_posts: row.blog_posts,
+    blog_post_translations: row.blog_post_translations,
+    blog_categories: row.blog_categories,
+    blog_category_translations: row.blog_category_translations,
+  })
+}
+export function getBlogPostById(id: string, locale: string): Promise<BlogPostPublic | null> {
+  return withCache(cacheKeys.blogPostById(id, locale), TTL_BLOG, () => getBlogPostByIdUncached(id, locale))
 }
 
 /** Posts in a category by category translation slug — list shape (no HTML body). */

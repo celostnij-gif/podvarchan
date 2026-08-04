@@ -64,7 +64,6 @@ export const BLOG_SLUG_UK: Record<string, string> = {
   'psikhosomatika-boli-v-shee': 'psihosomatika-bolyu-v-shiyi',
   'psikhosomatika-davleniya': 'psihosomatika-tisku',
   'ptsr-u-veteranov-simptomy-i-pomoshch': 'ptsr-u-veteraniv-oznaky-i-dopomoha',
-  'trevoga-polnyy-putevoditel': 'trivoga-povniy-putivnik',
 
   /* ── 8 new SEO blog posts ── */
   'chto-takoe-eriksonovskiy-gipnoz': 'shcho-take-eriksonivskiy-gipnoz',
@@ -75,6 +74,9 @@ export const BLOG_SLUG_UK: Record<string, string> = {
   'odinochestvo-v-emigracii': 'samotnist-v-emigraciyi',
   'postoyannaya-trevoga-bez-prichiny': 'postiyna-trivoga-bez-prichini',
   'trevoga-posle-pereezda': 'trivoga-pislya-pereyizdu',
+  'kak-prodolet-tevijnost-i-vernut-kontrol': 'yak-podolati-trivozhnist-ta-vidnoviti-kontrol',
+  'postoyannaya-trevoga-posle-vojny': 'postiina-tryvoha-pislia-viiny',
+  'ptsr-simptomy-i-pomoshch': 'ptsr-symptomy-ta-dopomoha',
 }
 
 /* ── Blog Categories ── */
@@ -88,8 +90,10 @@ export const CATEGORY_SLUG_UK: Record<string, string> = {
   'tsifrovoy-detoks': 'tsifroviy-detoks',
   'vygoraniye': 'vigorannya',
   'krizis': 'kriza',
-  'zagalni-zapit': 'zagalni-zapit',
   'ptsr': 'ptsr',
+  'emigraciya': 'emigraciya',
+  'trevoga-i-panichni-ataki': 'trevoga-i-panichni-ataki',
+  'o-gipnoterapii': 'pro-gipnoterapiyu',
 }
 
 /* ── Reverse mappings (UK → RU) ── */

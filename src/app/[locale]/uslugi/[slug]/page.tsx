@@ -5,7 +5,7 @@ import { SERVICES } from '@/constants'
 import { SERVICE_SLUG_UK, resolveServiceSlug } from '@/lib/slugMapping'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { serviceSchema, faqSchema, speakableSchema } from '@/lib/schema'
-import { getServiceBySlug, getServiceSidebar, getSEOMeta } from '@/lib/db/public'
+import { getServiceBySlug, getServiceById, getServiceSidebar, getSEOMeta } from '@/lib/db/public'
 import type { ServiceSidebarItem } from '@/lib/db/public'
 import { ClientServicePage } from './client-page'
 
@@ -61,14 +61,17 @@ export async function generateMetadata({ params }: Props) {
       const seo = svc.id ? await getSEOMeta('service', svc.id, locale) : null
       const title = seo?.title ?? svc.title
       const description = seo?.description ?? svc.description ?? ''
-      const ukSlug = SERVICE_SLUG_UK[resolvedSlug]
+      const ukSibling = await getServiceById(svc.id, 'uk').catch(() => null)
+      const ruSibling = locale === 'uk' ? await getServiceById(svc.id, 'ru').catch(() => null) : null
+      const ukSlug = ukSibling?.slug ?? SERVICE_SLUG_UK[resolvedSlug]
       const ukPath = ukSlug ? `/uslugi/${ukSlug}` : undefined
+      const ruPathSlug = ruSibling?.slug ?? resolvedSlug
       return seoMetadata({
         title,
         description,
         keywords: seo?.keywords ? seo.keywords.split(',').map((k: string) => k.trim()) : undefined,
         path: `/uslugi/${displaySlug}`,
-        ruPath: `/uslugi/${resolvedSlug}`,
+        ruPath: `/uslugi/${ruPathSlug}`,
         ukPath,
         type: 'service',
         locale,
