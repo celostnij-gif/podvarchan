@@ -210,7 +210,32 @@ export default async function middleware(request: NextRequest) {
     }
   }
 
+  // P1-C: Garbage "locale" segments (bot scanners: /wp-includes/…,
+  // /.env.txt/…, /credentials.json/…) — reject 404 cheaply BEFORE
+  // intlMiddleware renders the [locale] layout with a junk locale (each render
+  // writes a NEW KV key + D1 query per unique path; unbounded cardinality,
+  // same failure family as incident 1102). Known bare sections without a
+  // locale prefix keep their intlMiddleware 308 → /ru|uk/ redirect.
+  // Short public cache for the 404 so even a leaked miss doesn't live on the
+  // edge for a week (the /:locale(ru|uk)/:path* s-maxage=604800 rule does not
+  // match these paths, but be explicit anyway).
+  const KNOWN_BARE_SECTIONS = new Set([
+    'blog', 'uslugi', 'ob-avtore', 'pro-avtora', 'metod', 'faq', 'kontakty',
+    'politika-konfidentsialnosti', 'disclaimer', 'tseny', 'tsiny', 'search',
+  ])
+  const firstSegment = pathname.split('/').filter(Boolean)[0]
+  if (
+    firstSegment &&
+    firstSegment !== 'ru' &&
+    firstSegment !== 'uk' &&
+    !KNOWN_BARE_SECTIONS.has(firstSegment)
+  ) {
+    return new Response(null, { status: 404, headers: { 'Cache-Control': 'public, max-age=300' } })
+  }
+
   const response = intlMiddleware(request)
+
+
 
   // Fix 307/302 → 308 for all locale detection redirects (SEO: permanent, method-preserving)
   if (response.status === 307 || response.status === 302) {

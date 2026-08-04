@@ -25,7 +25,7 @@ interface PersonSchemaParams {
  * ```tsx
  * <script
  *   type="application/ld+json"
- *   dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema()) }}
+ *   dangerouslySetInnerHTML={{ __html: renderJsonLd(personSchema()) }}
  * />
  * ```
  */

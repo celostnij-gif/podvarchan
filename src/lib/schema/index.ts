@@ -11,3 +11,4 @@ export { faqSchema } from './faq'
 
 export { aggregateRatingSchema } from './review'
 export { speakableSchema } from './speakable'
+export { cleanUrl, renderJsonLd } from './utils'
