@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import { cookies } from 'next/headers'
 import dynamic from 'next/dynamic'
 import { NextIntlClientProvider } from 'next-intl'
@@ -45,6 +46,12 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>
 }): Promise<Metadata> {
   const { locale } = await params
+  // P1: dynamicParams=false is not enforced by the OpenNext runtime for
+  // paths excluded from the middleware matcher (e.g. /credentials.json/,
+  // /.env.txt/ — file extensions). Render would run getNavigation /
+  // getBlogCategories with an unbounded-cardinality locale and write junk
+  // KV keys. Reject here instead.
+  if (locale !== 'ru' && locale !== 'uk') notFound()
   const t = await getTranslations({ locale, namespace: 'common' })
   // Preview mode: add noindex so Google doesn't index DRAFT content
   let robots: Metadata['robots'] = undefined
@@ -102,6 +109,9 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
+  // P1: same guard as generateMetadata — must run before getNavigation /
+  // getBlogCategories below (junk locales must never hit KV/D1).
+  if (locale !== 'ru' && locale !== 'uk') notFound()
   const messages = await getMessages()
   const t = await getTranslations({ locale, namespace: 'common' })
   const headerNav: NavItem[] = (await getNavigation('HEADER', locale).catch(() => [])).map((n) => ({
