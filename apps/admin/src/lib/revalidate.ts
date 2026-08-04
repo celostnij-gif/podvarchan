@@ -1,5 +1,6 @@
 import { revalidatePath } from 'next/cache'
 import { cacheKeys, cacheKeyPrefixes } from '@podvarchan/shared'
+import { buildRevalidateBatches, REVALIDATE_BATCH_LIMIT } from './revalidate-chunks'
 
 /**
  * Cross-worker public cache invalidation + admin-local revalidate.
@@ -88,25 +89,36 @@ export async function revalidatePublic(input: {
     }
 
     const expanded = unique(input.paths.flatMap(expandLocalePaths))
-    if (expanded.length === 0 && !input.keys?.length && !input.prefixes?.length) return
+    const keys = unique(input.keys ?? [])
+    const prefixes = unique(input.prefixes ?? [])
+    if (expanded.length === 0 && keys.length === 0 && prefixes.length === 0) return
 
-    const keys = unique(input.keys ?? []).slice(0, 40)
-    const prefixes = unique(input.prefixes ?? []).slice(0, 40)
+    // The public /api/revalidate handler caps each array per request — split
+    // oversized key sets into sequential batches instead of truncating, so a
+    // bulk mutation never silently leaves part of the cache stale.
+    const batches = buildRevalidateBatches(
+      { paths: expanded, keys, prefixes },
+      REVALIDATE_BATCH_LIMIT,
+    )
 
-    const res = await fetch(`${base}/api/revalidate/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    for (const batch of batches) {
+      const body: Record<string, unknown> = {
         secret,
-        paths: expanded,
         type: input.type ?? 'page',
-        ...(keys.length ? { keys } : {}),
-        ...(prefixes.length ? { prefixes } : {}),
-      }),
-    })
+      }
+      if (batch.paths.length) body.paths = batch.paths
+      if (batch.keys.length) body.keys = batch.keys
+      if (batch.prefixes.length) body.prefixes = batch.prefixes
 
-    if (!res.ok) {
-      console.error(`[revalidatePublic] failed ${res.status}`, expanded.join(', '))
+      const res = await fetch(`${base}/api/revalidate/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+
+      if (!res.ok) {
+        console.error(`[revalidatePublic] failed ${res.status}`, batch.paths.join(', '))
+      }
     }
   } catch (err) {
     console.error('[revalidatePublic] fetch error:', err)

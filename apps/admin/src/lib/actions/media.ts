@@ -9,14 +9,25 @@ import { getCurrentUser } from '@/lib/auth/session'
 import { canEditContent } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
-import { revalidatePublic, cacheKeyPrefixes } from '@/lib/revalidate'
+import { revalidatePublic, cacheKeys } from '@/lib/revalidate'
 
-/** Media is referenced across blog/services/pages/testimonials — broad layout revalidate. */
-function revalidateMediaArea(): void {
+/**
+ * Media is referenced across blog/services/pages/testimonials — broad layout
+ * revalidate. Cache keys are invalidated TARGETED per asset id: every public
+ * read goes through getMediaPublicUrl/getMediaWithVariants with the media id
+ * (coverImageId etc.), and cacheKeys.mediaUrl/mediaVariants hash that same id
+ * — so a wipe of the whole `media:` family (159 assets × 2 keys) would be a
+ * needless cache stampede. Keep the wipe only where hashes are unknowable.
+ */
+function revalidateMediaArea(ids: string[]): void {
+  const keys: string[] = []
+  for (const id of ids) {
+    keys.push(cacheKeys.mediaUrl(id), cacheKeys.mediaVariants(id))
+  }
   void revalidatePublic({
     paths: ['/ru/', '/uk/', '/ru/blog/', '/uk/blog/', '/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml'],
     type: 'layout',
-    prefixes: [cacheKeyPrefixes.media],
+    keys,
   })
 }
 
@@ -61,7 +72,7 @@ export async function updateMediaMeta(id: string, formData: FormData) {
   }
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'MEDIA', entityId: id, before: existing, after: data })
   revalidatePath('/admin/media')
-  revalidateMediaArea()
+  revalidateMediaArea([id])
 }
 
 export async function deleteMedia(id: string) {
@@ -72,7 +83,7 @@ export async function deleteMedia(id: string) {
   await db.delete(mediaAssets).where(eq(mediaAssets.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'MEDIA', entityId: id, before: existing })
   revalidatePath('/admin/media')
-  revalidateMediaArea()
+  revalidateMediaArea([id])
 }
 
 /**
@@ -92,6 +103,6 @@ export async function deleteMediaBatch(ids: string[]): Promise<{ deleted: number
     deleted++
   }
   revalidatePath('/admin/media')
-  revalidateMediaArea()
+  revalidateMediaArea(ids)
   return { deleted, errors }
 }
