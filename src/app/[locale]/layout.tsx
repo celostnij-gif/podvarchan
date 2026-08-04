@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, getTranslations } from 'next-intl/server'
 import { SITE, MAIN_NAV } from '@/constants'
-import { personSchema, practiceSchema } from '@/lib/schema'
+import { personSchema, practiceSchema, renderJsonLd } from '@/lib/schema'
 import { buildCanonical } from '@/lib/seo/metadata'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
@@ -29,6 +29,13 @@ import { PageSchemaRenderer } from './schema-and-breadcrumbs'
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }))
 }
+
+// Only ru/uk are valid locales. dynamicParams=false makes Next return 404 for
+// anything else (bot-scanner paths like /credentials.json/, /.env.txt/,
+// /wp-includes/…) WITHOUT executing this layout — no getNavigation /
+// getBlogCategories calls, so no junk KV keys or D1 queries per unique path
+// (unbounded cardinality — see incident 1102 analysis and middleware P1-C).
+export const dynamicParams = false
 
 /* ── Metadata ── */
 
@@ -182,7 +189,7 @@ export default async function LocaleLayout({
         <script
           key={index}
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+          dangerouslySetInnerHTML={{ __html: renderJsonLd(schema) }}
         />
       ))}
 

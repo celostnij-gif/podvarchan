@@ -2,6 +2,7 @@
 
 import { useBreadcrumbs } from '@/providers/BreadcrumbsProvider'
 import { Link } from '@/i18n/routing'
+import { renderJsonLd } from '@/lib/schema'
 
 /**
  * HeroBreadcrumbs — хлебные крошки внутри hero секции.
@@ -29,7 +30,7 @@ export default function HeroBreadcrumbs() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(jsonLd) }}
       />
       <nav className="pt-5 mb-5" aria-label="Breadcrumb">
         <div className="flex items-center gap-2 text-xs text-text-muted">

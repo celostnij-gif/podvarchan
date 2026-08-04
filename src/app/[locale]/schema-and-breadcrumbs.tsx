@@ -1,6 +1,7 @@
 'use client'
 
 import { useRegisteredSchemas } from '@/providers/BreadcrumbsProvider'
+import { renderJsonLd } from '@/lib/schema'
 
 /* ── PageSchemaRenderer — рендерит page-specific JSON-LD схемы из контекста ── */
 
@@ -14,7 +15,7 @@ function PageSchemaRenderer() {
         <script
           key={`page-schema-${index}`}
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+          dangerouslySetInnerHTML={{ __html: renderJsonLd(schema) }}
         />
       ))}
     </>
