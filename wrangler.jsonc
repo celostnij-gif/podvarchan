@@ -49,8 +49,11 @@
 		"NEXT_PUBLIC_GA_ID": "G-42W6951F8L",
 		"NEXT_PUBLIC_TURNSTILE_SITE_KEY": "0x4AAAAAADYZ2z3RysEsBoQu",
 		"CONTACT_EMAIL": "podvarchan@gmail.com",
-		"AUTH_TRUST_HOST": "true",
 		"REVALIDATE_URL": "https://podvarchan.com/api/revalidate",
+		// Zone ID of podvarchan.com — global CDN purge of Cache API entries
+		// (P0-2). CACHE_PURGE_API_TOKEN set via `wrangler secret put
+		// CACHE_PURGE_API_TOKEN` — never commit real values.
+		"CACHE_PURGE_ZONE_ID": "9ed1252ab93408d37152d76b4c8aea72",
 		// AUTH_SECRET set via `wrangler secret put AUTH_SECRET` — never commit real values
 	}
 }

@@ -1,3 +1,8 @@
+/* ── Cloudflare extension: `caches.default` (Workers global cache, P0-2) ── */
+interface CacheStorage {
+	default: Cache;
+}
+
 /* ── Minimal KVNamespace type (avoiding @cloudflare/workers-types dep) ── */
 interface KVNamespace {
   get(key: string, options?: { type: 'text' }): Promise<string | null>
@@ -79,6 +84,7 @@ interface __BaseEnv_CloudflareEnv {
 	NEXT_PUBLIC_GA_ID: string;
 	NEXT_PUBLIC_TURNSTILE_SITE_KEY: string;
 	CONTACT_EMAIL: string;
+	CACHE_PURGE_ZONE_ID: string;
 	WORKER_SELF_REFERENCE: Fetcher /* podvarchan */;
 	CONTENT_CACHE_KV?: KVNamespace;
 	RATE_LIMIT_KV?: KVNamespace;
@@ -92,7 +98,9 @@ interface __BaseEnv_CloudflareEnv {
 interface CloudflareSecrets {
 	RESEND_API_KEY: string;
 	TURNSTILE_SECRET_KEY: string;
+	CACHE_PURGE_API_TOKEN: string;
 }
+
 
 declare namespace Cloudflare {
 	interface Env extends __BaseEnv_CloudflareEnv, CloudflareSecrets {}
