@@ -1,6 +1,7 @@
 import { revalidatePath } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
 import { env } from '@/env'
+import { cdnTagForPath } from '@/lib/cdn-cache'
 import { invalidateExact, invalidateKeys } from '@/lib/db/kv-cache'
 
 /**
@@ -99,6 +100,38 @@ export async function POST(request: NextRequest) {
       } catch {
         errors.push(p)
       }
+    }
+
+    // CDN edge cache purge (P0-2, 2026-08-05): the OpenNext wrapper (see
+    // open-next.config.ts) stores cacheable GETs in `caches.default` keyed by
+    // URL. `cache.delete` clears only the data center this request lands in —
+    // when CACHE_PURGE_API_TOKEN / CACHE_PURGE_ZONE_ID are configured, the same
+    // entries are also purged globally by Cache-Tag (_N_T_<path>).
+    try {
+      const baseUrl = env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '')
+      const cdnPaths = paths.map((p) => `${baseUrl}${p.startsWith('/') ? p : `/${p}`}`)
+      await Promise.allSettled(cdnPaths.map((url) => caches.default.delete(new Request(url)).catch(() => false)))
+
+      const purgeToken = process.env.CACHE_PURGE_API_TOKEN
+      const purgeZoneId = process.env.CACHE_PURGE_ZONE_ID
+      if (purgeToken && purgeZoneId) {
+        const tags = [...new Set(paths.map((p) => cdnTagForPath(p)))]
+        // Purge API limit: 30 tags per request.
+        for (let i = 0; i < tags.length; i += 30) {
+          await fetch(`https://api.cloudflare.com/client/v4/zones/${purgeZoneId}/purge_cache`, {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${purgeToken}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ tags: tags.slice(i, i + 30) }),
+          }).catch(() => {
+            // best-effort — local purge + TTL cover the gap
+          })
+        }
+      }
+    } catch {
+      // best-effort — local purge + TTL cover the gap
     }
 
     return NextResponse.json({
