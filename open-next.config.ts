@@ -1,9 +1,11 @@
 import { defineCloudflareConfig } from "@opennextjs/cloudflare";
 import r2IncrementalCache from "@opennextjs/cloudflare/overrides/incremental-cache/r2-incremental-cache";
 import {
+  STATIC_ASSET_CACHE_CONTROL,
   cdnTagForPath,
   isCacheableResponse,
   isHtmlNavigationRequest,
+  isStaticAssetPath,
 } from "./src/lib/cdn-cache";
 
 /**
@@ -21,7 +23,11 @@ import {
  *     explicit `s-maxage`, per the AGENTS.md §3 TTL matrix) under the request
  *     URL — the client still receives the original response (incl. Set-Cookie);
  *  3. tags every stored copy with `_N_T_<path>` (OpenNext's tag format) so
- *     /api/revalidate can purge globally via the purge API.
+ *     /api/revalidate can purge globally via the purge API;
+ *  4. normalizes Cache-Control for static assets — next.config.mjs headers()
+ *     rules never reach file-server responses on Workers (the App Router
+ *     default `max-age=0, must-revalidate` wins), so browsers would otherwise
+ *     revalidate every asset on every load.
  *
  * RSC / router-prefetch requests are never cached and never served from cache
  * (their HTML twin is keyed by the same URL).
@@ -47,6 +53,7 @@ const edgeCacheWrapper = () => ({
       ctx: { waitUntil: (promise: Promise<unknown>) => void },
       abortSignal?: AbortSignal
     ): Promise<Response> => {
+      const url = new URL(request.url);
       const isNavigation = isHtmlNavigationRequest(request);
 
       if (isNavigation) {
@@ -60,12 +67,21 @@ const edgeCacheWrapper = () => ({
 
       const response = await baseHandler(request, env, ctx, abortSignal);
 
+      // Static assets: next.config.mjs headers() rules never reach file-server
+      // responses on Workers (the App Router default `max-age=0,
+      // must-revalidate` wins), so normalize here — this wrapper's response is
+      // the one the edge serves. Mirrors next.config.mjs /images, /_next/static,
+      // /fonts sources.
+      if (isStaticAssetPath(url.pathname)) {
+        response.headers.set("cache-control", STATIC_ASSET_CACHE_CONTROL);
+      }
+
       if (isNavigation && isCacheableResponse(response)) {
         try {
           const toCache = response.clone();
           const headers = new Headers(toCache.headers);
           headers.delete("set-cookie");
-          headers.set("cache-tag", cdnTagForPath(new URL(request.url).pathname));
+          headers.set("cache-tag", cdnTagForPath(url.pathname));
           const copy = new Response(toCache.body, {
             status: toCache.status,
             statusText: toCache.statusText,
