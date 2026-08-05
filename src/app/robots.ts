@@ -29,7 +29,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: ['/', '/_next/static/'],
-        disallow: ['/api/', '/search/', '/api/visitor-stats'],
+        disallow: ['/api/', '/search/'],
       },
       ...AI_BOTS.map((userAgent) => ({
         userAgent,
