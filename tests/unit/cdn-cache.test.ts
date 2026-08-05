@@ -1,9 +1,11 @@
 import { describe, it, expect } from 'vitest'
 import {
   CACHE_TAG_PREFIX,
+  STATIC_ASSET_CACHE_CONTROL,
   cdnTagForPath,
   isCacheableResponse,
   isHtmlNavigationRequest,
+  isStaticAssetPath,
 } from '../../src/lib/cdn-cache'
 
 describe('isHtmlNavigationRequest', () => {
@@ -86,5 +88,24 @@ describe('cdnTagForPath', () => {
     expect(cdnTagForPath('/ru/')).toBe(`${CACHE_TAG_PREFIX}/ru/`)
     expect(cdnTagForPath('ru/')).toBe(`${CACHE_TAG_PREFIX}/ru/`)
     expect(cdnTagForPath('/sitemap.xml')).toBe(`${CACHE_TAG_PREFIX}/sitemap.xml`)
+  })
+})
+
+describe('isStaticAssetPath', () => {
+  it('matches the next.config.mjs static sources', () => {
+    expect(isStaticAssetPath('/_next/static/css/5e775a0cce619b10.css')).toBe(true)
+    expect(isStaticAssetPath('/images/logo/logo-192.webp')).toBe(true)
+    expect(isStaticAssetPath('/fonts/inter-var.woff2')).toBe(true)
+  })
+
+  it('rejects pages, api and media', () => {
+    expect(isStaticAssetPath('/ru/')).toBe(false)
+    expect(isStaticAssetPath('/api/preview/')).toBe(false)
+    expect(isStaticAssetPath('/media/photo.webp')).toBe(false)
+    expect(isStaticAssetPath('/images')).toBe(false)
+  })
+
+  it('exposes the immutable cache-control constant', () => {
+    expect(STATIC_ASSET_CACHE_CONTROL).toBe('public, max-age=31536000, immutable')
   })
 })

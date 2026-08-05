@@ -57,3 +57,21 @@ export function cdnTagForPath(path: string): string {
   const normalized = path.startsWith('/') ? path : `/${path}`
   return `${CACHE_TAG_PREFIX}${normalized}`
 }
+
+/**
+ * Cache-Control for static assets. next.config.mjs headers() rules do not
+ * reach file-server responses on Cloudflare Workers (the App Router file
+ * server's default `public, max-age=0, must-revalidate` wins), so the wrapper
+ * normalizes these paths itself. Mirrors the next.config.mjs sources
+ * (/images/(.*), /_next/static/(.*), /fonts/(.*)) — keep in sync.
+ */
+export const STATIC_ASSET_CACHE_CONTROL = 'public, max-age=31536000, immutable'
+
+/** True for the static asset paths that get STATIC_ASSET_CACHE_CONTROL. */
+export function isStaticAssetPath(pathname: string): boolean {
+  return (
+    pathname.startsWith('/_next/static/') ||
+    pathname.startsWith('/images/') ||
+    pathname.startsWith('/fonts/')
+  )
+}
