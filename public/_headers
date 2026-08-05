@@ -1,0 +1,11 @@
+# https://developers.cloudflare.com/workers/static-assets/headers
+# https://opennext.js.org/cloudflare/caching#static-assets-caching
+# Static assets are served by the ASSETS binding before the worker handler, so
+# next.config.mjs headers() and the OpenNext cache wrapper never see them.
+# Mirrors the next.config.mjs sources (/images, /_next/static, /fonts).
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable
+/images/*
+  Cache-Control: public, max-age=31536000, immutable
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
