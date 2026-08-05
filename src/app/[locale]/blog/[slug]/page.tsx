@@ -1,7 +1,7 @@
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getBlogPost, getAllBlogSlugs, getAllBlogPosts, formatDate } from '@/lib/content'
-import { getBlogPostBySlug, getBlogPostById, getBlogPostsByCategory, getMediaWithVariants, getSEOMeta } from '@/lib/db/public'
+import { getBlogPostBySlug, getBlogPostById, getBlogPostsByCategory, getMediaWithVariants, getSEOMeta, resolvePublishedBlogSlug } from '@/lib/db/public'
 import type { BlogPostPublic } from '@/lib/db/public'
 import { articleSchema, faqSchema, speakableSchema } from '@/lib/schema'
 import { ClientBlogPost } from './client-page'
@@ -207,7 +207,15 @@ export default async function BlogPostPage({ params }: Props) {
   const { slug: rawSlug, locale } = await params
   const slug = rawSlug
   const data = await loadBlogPost(slug, locale)
-  if (!data) notFound()
+  if (!data) {
+    // Cross-locale slug swap (lang switcher on admin content): 301 to the
+    // correct locale URL instead of a hard 404.
+    const resolved = await resolvePublishedBlogSlug(slug).catch(() => null)
+    if (resolved && resolved.locale !== locale) {
+      permanentRedirect(`/${resolved.locale}/blog/${resolved.slug}/`)
+    }
+    notFound()
+  }
 
   if (data.type === 'd1') {
     const allSchemas = [data.jsonLd, ...(data.additionalSchemas ?? [])]

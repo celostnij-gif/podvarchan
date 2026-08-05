@@ -1,8 +1,8 @@
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { BLOG_CATEGORIES } from '@/constants'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
-import { getBlogPostsByCategory, getBlogCategories, getMediaPublicUrl, getBlogFirstImageUrls } from '@/lib/db/public'
+import { getBlogPostsByCategory, getBlogCategories, getMediaPublicUrl, getBlogFirstImageUrls, resolvePublishedCategorySlug } from '@/lib/db/public'
 import { getBlogPost } from '@/lib/content'
 import { ClientBlogCategory } from './client-page'
 import { CATEGORY_SLUG_UK, resolveCategorySlug } from '@/lib/slugMapping'
@@ -113,7 +113,15 @@ function mapPost(p: BlogPostPublic, image?: string, imageAlt?: string): Omit<Blo
 export default async function BlogCategoryPage({ params }: Props) {
   const { cat: rawCat, locale } = await params
   const category = await resolveCategoryMeta(rawCat, locale)
-  if (!category) notFound()
+  if (!category) {
+    // Cross-locale slug swap (lang switcher on admin content): 301 to the
+    // correct locale URL instead of a hard 404.
+    const resolved = await resolvePublishedCategorySlug(rawCat).catch(() => null)
+    if (resolved && resolved.locale !== locale) {
+      permanentRedirect(`/${resolved.locale}/blog/kategoriya/${resolved.slug}/`)
+    }
+    notFound()
+  }
 
   let posts: Omit<BlogPost, 'body'>[] = []
 

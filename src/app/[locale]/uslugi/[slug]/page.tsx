@@ -1,11 +1,11 @@
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import { getMessages } from 'next-intl/server'
 import { cookies } from 'next/headers'
 import { SERVICES } from '@/constants'
 import { SERVICE_SLUG_UK, resolveServiceSlug } from '@/lib/slugMapping'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { serviceSchema, faqSchema, speakableSchema } from '@/lib/schema'
-import { getServiceBySlug, getServiceById, getServiceSidebar, getSEOMeta } from '@/lib/db/public'
+import { getServiceBySlug, getServiceById, getServiceSidebar, getSEOMeta, resolvePublishedServiceSlug } from '@/lib/db/public'
 import type { ServiceSidebarItem } from '@/lib/db/public'
 import { ClientServicePage } from './client-page'
 
@@ -210,7 +210,15 @@ export default async function ServicePage({ params }: Props) {
   // For RU locale, resolveServiceSlug is a no-op (already RU slug).
   const slug = locale === 'uk' ? rawSlug : resolveServiceSlug(rawSlug)
   const data = await loadService(slug, locale)
-  if (!data) notFound()
+  if (!data) {
+    // Cross-locale slug swap (lang switcher on admin content): 301 to the
+    // correct locale URL instead of a hard 404.
+    const resolved = await resolvePublishedServiceSlug(slug).catch(() => null)
+    if (resolved && resolved.locale !== locale) {
+      permanentRedirect(`/${resolved.locale}/uslugi/${resolved.slug}/`)
+    }
+    notFound()
+  }
 
   if (data.type === 'd1') {
     const schema = serviceSchema({

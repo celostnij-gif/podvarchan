@@ -107,11 +107,30 @@ function LangSwitcher({ className = '' }: { className?: string }) {
   const currentLocale = pathname.startsWith('/uk') ? 'uk' : 'ru'
   const pathWithoutLocale = pathname.replace(/^\/(ru|uk)/, '') || '/'
 
+  // The server-rendered <link rel="alternate" hreflang="ru|uk"> already carries
+  // the correct cross-locale URL (incl. translated slugs) for the current page.
+  // Use it when present — a bare prefix swap would 404 for admin content whose
+  // slugs differ across locales. Fall back to the prefix swap on pages without
+  // hreflang (e.g. 404 pages).
+  const [altHrefs, setAltHrefs] = useState<{ ru?: string; uk?: string }>({})
+  useEffect(() => {
+    const links = document.querySelectorAll<HTMLLinkElement>('link[rel="alternate"][hreflang]')
+    const found: { ru?: string; uk?: string } = {}
+    for (const link of links) {
+      const lang = link.getAttribute('hreflang')
+      if ((lang === 'ru' || lang === 'uk') && link.href) found[lang] = link.href
+    }
+    // Snapshot server-rendered hreflang URLs into state; runs only on
+    // mount/navigation (pathname change), so the setState is bounded.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setAltHrefs(found)
+  }, [pathname])
+
   return (
     <div className={`flex items-center gap-0 ${className}`} role="navigation" aria-label={currentLocale === 'uk' ? 'Вибір мови' : 'Выбор языка'}>
       <Link
-        href={pathWithoutLocale}
-        locale="ru"
+        href={altHrefs.ru ?? pathWithoutLocale}
+        locale={altHrefs.ru ? undefined : 'ru'}
         hrefLang="ru"
         aria-label="Русский язык"
         aria-current={currentLocale === 'ru' ? 'true' : undefined}
@@ -125,8 +144,8 @@ function LangSwitcher({ className = '' }: { className?: string }) {
       </Link>
       <span className="text-border-light text-xs" aria-hidden="true">|</span>
       <Link
-        href={pathWithoutLocale}
-        locale="uk"
+        href={altHrefs.uk ?? pathWithoutLocale}
+        locale={altHrefs.uk ? undefined : 'uk'}
         hrefLang="uk"
         aria-label="Українська мова"
         aria-current={currentLocale === 'uk' ? 'true' : undefined}
