@@ -10,34 +10,25 @@
  * header from next.config.mjs apply to them.
  */
 
-export const LLMS_CONTENT = `# Vyacheslav Podvarchan — Online Psychologist & Hypnotherapist
-> Official AI Information Sheet for podvarchan.com
-> Full Markdown: https://podvarchan.com/llms-full.txt
+export const LLMS_CONTENT = `# Vyacheslav Podvarchan — психолог и гипнотерапевт онлайн
+> Официальный AI-информационный лист сайта podvarchan.com.
+> Онлайн-гипнотерапия тревоги, панических атак, фобий, выгорания, психосоматики. Консультации на русском и украинском.
+> Полный Markdown: https://podvarchan.com/llms-full.txt
 
-# Primary content
-Allow: /
-Allow: /ru/
-Allow: /uk/
-Allow: /blog/
-Allow: /uslugi/
-Allow: /ob-avtore/
-Allow: /metod/
-Allow: /faq/
-Allow: /kontakty/
-Allow: /tseny/
+## Main pages
+- [Главная](https://podvarchan.com/ru/): практикующий психолог и гипнотерапевт онлайн, 15+ лет практики, 2000+ клиентов
+- [Услуги](https://podvarchan.com/ru/uslugi/): эриксоновский гипноз, регрессивная гипнотерапия, работа с тревогой и паникой, самосаботажем, психосоматикой
+- [Об авторе](https://podvarchan.com/ru/ob-avtore/): Вячеслав Подварчан — образование, сертификаты (ABH, INLPTA, TFP), авторский метод
+- [Авторский метод](https://podvarchan.com/ru/metod/): как работает гипнотерапия и почему она безопасна
+- [Блог](https://podvarchan.com/ru/blog/): статьи о тревоге, панике, самосаботаже, выгорании, психосоматике
+- [FAQ](https://podvarchan.com/ru/faq/): частые вопросы о консультациях и формате работы
+- [Цены](https://podvarchan.com/ru/tseny/): диагностическая сессия — бесплатно, разовая консультация — 50$, курс — 210$, индивидуальная программа — 400$
+- [Контакты](https://podvarchan.com/ru/kontakty/): запись на консультацию (Telegram, WhatsApp, форма на сайте)
 
-# Disallow API and internal pages
-Disallow: /api/
-Disallow: /search/
-Disallow: /_next/
-Disallow: /politika-konfidentsialnosti/
-Disallow: /disclaimer/
+## Details
+Консультации онлайн (Zoom, Google Meet, Telegram), на русском и украинском, для взрослых (18+). Длительность сессии — 50–60 минут. Первая диагностическая сессия бесплатна. Онлайн-формат — для клиентов по всему миру.
 
-# AI training preference
-# Content-Signal: ai-train=yes, search=yes, ai-input=yes
-
-# For detailed structured information about this site, see:
-# Full Markdown: /llms-full.txt
+Полный контекст (образование, сертификаты, методики, направления работы): https://podvarchan.com/llms-full.txt
 `
 
 export const LLMS_FULL_CONTENT = `# Vyacheslav Podvarchan — Online Psychologist & Hypnotherapist

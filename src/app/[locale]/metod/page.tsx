@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: Props) {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'pages.metod' })
 
-  let seoTitle = t('heading')
+  let seoTitle = t.has('metaTitle') ? t('metaTitle') : t('heading')
   let seoDescription = t('heroSubtitle')
   try {
     const previewCookie = (await cookies()).get('__preview')?.value
