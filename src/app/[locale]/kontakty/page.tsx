@@ -13,14 +13,18 @@ export async function generateMetadata({ params }: Props) {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'contacts' })
 
-  let seoTitle = t.has('metaTitle') ? t('metaTitle') : t('pageTitle')
+  // D1 seo_meta может перекрыть сообщения, но только если админ реально
+  // кастомизировал title (не равен дефолту из messages) — иначе stale-значения
+  // («Контакты») блокируют утверждённые короткие metaTitle (Phase 4).
+  const defaultTitle = t.has('metaTitle') ? t('metaTitle') : t('pageTitle')
+  let seoTitle = defaultTitle
   let seoDescription = t('pageDescription')
   try {
     const previewCookie = (await cookies()).get('__preview')?.value
     const page = await getPageByType('CONTACTS', locale, previewCookie)
     if (page?.id) {
       const seo = await getSEOMeta('page', page.id, locale).catch(() => null)
-      if (seo?.title) seoTitle = seo.title
+      if (seo?.title && seo.title !== t('pageTitle')) seoTitle = seo.title
       if (seo?.description) seoDescription = seo.description
     }
   } catch { /* D1 unavailable */ }
