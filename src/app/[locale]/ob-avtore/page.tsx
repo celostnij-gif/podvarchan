@@ -3,6 +3,8 @@ import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getPageByType, getSEOMeta } from '@/lib/db/public'
 import { cookies } from 'next/headers'
 import { ClientAboutPage } from './client-page'
+import { JsonLd } from '@/components/JsonLd'
+import { SITE, AUTHOR } from '@/constants'
 export const revalidate = 604800
 
 export async function generateMetadata({
@@ -48,5 +50,22 @@ export default async function AboutPage({
     d1Page = await getPageByType('ABOUT', locale, previewCookie)
   } catch { /* D1 unavailable */ }
 
-  return <ClientAboutPage d1Sections={d1Page?.sections ?? []} />
+  // HP-4: единственный CreativeWork, рендерится только здесь (не в global
+  // layout) — фактологически подтверждён (диплом Music Therapy в credentials),
+  // без выдуманных названий произведений. @id ссылается на Person из layout.
+  const creativeWork: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'CreativeWork',
+    name: locale === 'uk' ? 'Авторські музичні програми для гіпнотерапії' : 'Авторские музыкальные программы для гипнотерапии',
+    creator: { '@id': `${SITE.url}${AUTHOR.url}#person` },
+    genre: 'MusicTherapy',
+    inLanguage: locale === 'uk' ? 'uk' : 'ru',
+  }
+
+  return (
+    <>
+      <JsonLd schema={creativeWork} />
+      <ClientAboutPage d1Sections={d1Page?.sections ?? []} />
+    </>
+  )
 }

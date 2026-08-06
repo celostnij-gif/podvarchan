@@ -51,6 +51,7 @@ export function personSchema(params: PersonSchemaParams = {}): Record<string, un
         'Обмежувальні переконання',
         'Емоційне вигорання',
         'Особистісна криза',
+        'Музична терапія',
         'Пробудологія',
       ]
     : [
@@ -64,6 +65,7 @@ export function personSchema(params: PersonSchemaParams = {}): Record<string, un
         'Ограничивающие убеждения',
         'Эмоциональное выгорание',
         'Личностный кризис',
+        'Музыкальная терапия',
         'Пробудология',
       ]
 
