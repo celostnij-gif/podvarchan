@@ -5,7 +5,7 @@ import {
   getPublishedBlogCategories,
   getAllBlogPosts,
 } from '@/lib/content'
-import { getBlogPostsLite } from '@/lib/db/public'
+import { getBlogPostsLite, getPageLastmods, getCategoryLastmods } from '@/lib/db/public'
 import { SERVICE_SLUG_UK, BLOG_SLUG_UK, CATEGORY_SLUG_UK } from '@/lib/slugMapping'
 
 const BASE = SITE.url
@@ -61,19 +61,6 @@ function addPair(
 function buildEntries(): Promise<SitemapEntry[]> {
   const entries: SitemapEntry[] = []
 
-  /* ── 1. Статические страницы (tseny/tsiny и ob-avtore/pro-avtora — разные UK-слэги) ── */
-  for (const page of STATIC_PAGES) {
-    const ruUrl = `${BASE}/ru/${page.slug}`
-    if (page.slug === 'tseny/') {
-      addPair(entries, ruUrl, `${BASE}/uk/tsiny/`, page.priority, page.changefreq)
-    } else if (page.slug === 'ob-avtore/') {
-      addPair(entries, ruUrl, `${BASE}/uk/pro-avtora/`, page.priority, page.changefreq)
-    } else {
-      addPair(entries, ruUrl, `${BASE}/uk/${page.slug}`, page.priority, page.changefreq)
-    }
-  }
-
-  /* ── 2. Услуги — D1 (свежие данные, пары по id) + fallback на константы ── */
   return Promise.all([
     getPublishedServices('ru').catch(() => null),
     getPublishedServices('uk').catch(() => null),
@@ -81,7 +68,50 @@ function buildEntries(): Promise<SitemapEntry[]> {
     getBlogPostsLite('uk').catch(() => null),
     getPublishedBlogCategories('ru').catch(() => null),
     getPublishedBlogCategories('uk').catch(() => null),
-  ]).then(([ruServices, ukServices, ruPosts, ukPosts, ruCats, ukCats]) => {
+    getPageLastmods().catch(() => null),
+    getCategoryLastmods().catch(() => null),
+  ]).then(([ruServices, ukServices, ruPosts, ukPosts, ruCats, ukCats, pageLastmods, catLastmods]) => {
+    /* ── 1. Статические страницы (tseny/tsiny и ob-avtore/pro-avtora — разные UK-слэги) ── */
+    const pageMods = pageLastmods ?? {}
+    const catMods = catLastmods ?? {}
+    // Index pages (uslugi/, blog/) carry the freshest item revision as their
+    // lastmod — already in memory from the lite getters, no extra queries.
+    const maxServiceMod = ruServices?.reduce<Date | undefined>(
+      (max, s) => (s.updatedAt && (!max || s.updatedAt > max) ? s.updatedAt : max),
+      undefined,
+    )
+    const maxPostMod = ruPosts?.reduce((max, p) => (p.updatedAt && (!max || p.updatedAt > max) ? p.updatedAt : max), '') ?? ''
+    const PAGE_TYPE_BY_SLUG: Record<string, string> = {
+      '': 'HOME',
+      'ob-avtore/': 'ABOUT',
+      'metod/': 'METHOD',
+      'faq/': 'FAQ',
+      'kontakty/': 'CONTACTS',
+      'politika-konfidentsialnosti/': 'PRIVACY',
+      'disclaimer/': 'DISCLAIMER',
+      'tseny/': 'PRICING',
+    }
+    for (const page of STATIC_PAGES) {
+      const ruUrl = `${BASE}/ru/${page.slug}`
+      let lastMod: Date | undefined
+      if (page.slug === 'uslugi/') {
+        lastMod = maxServiceMod
+      } else if (page.slug === 'blog/') {
+        lastMod = maxPostMod ? new Date(maxPostMod) : undefined
+      } else {
+        const type = PAGE_TYPE_BY_SLUG[page.slug]
+        const mod = type ? pageMods[type] : undefined
+        lastMod = mod ? new Date(mod) : undefined
+      }
+      if (page.slug === 'tseny/') {
+        addPair(entries, ruUrl, `${BASE}/uk/tsiny/`, page.priority, page.changefreq, lastMod)
+      } else if (page.slug === 'ob-avtore/') {
+        addPair(entries, ruUrl, `${BASE}/uk/pro-avtora/`, page.priority, page.changefreq, lastMod)
+      } else {
+        addPair(entries, ruUrl, `${BASE}/uk/${page.slug}`, page.priority, page.changefreq, lastMod)
+      }
+    }
+
     if (ruServices && ruServices.length > 0) {
       const ukList = ukServices ?? []
       for (const ru of ruServices) {
@@ -148,9 +178,18 @@ function buildEntries(): Promise<SitemapEntry[]> {
           `${BASE}/uk/blog/kategoriya/${uk?.translation.slug ?? ru.translation.slug}/`,
           0.6,
           'weekly',
+          catMods[ru.id] ? new Date(catMods[ru.id]) : undefined,
         )
       }
     } else {
+      // No D1: derive category lastmod from the fallback post constants in
+      // memory (max dateModified/datePublished per categorySlug).
+      const maxPostDateByCat: Record<string, Date> = {}
+      for (const post of getAllBlogPosts()) {
+        const d = new Date(post.dateModified ?? post.datePublished)
+        const cur = maxPostDateByCat[post.categorySlug]
+        if (!cur || d > cur) maxPostDateByCat[post.categorySlug] = d
+      }
       for (const cat of BLOG_CATEGORIES) {
         addPair(
           entries,
@@ -158,6 +197,7 @@ function buildEntries(): Promise<SitemapEntry[]> {
           `${BASE}/uk/blog/kategoriya/${CATEGORY_SLUG_UK[cat.slug] ?? cat.slug}/`,
           0.6,
           'weekly',
+          maxPostDateByCat[cat.slug],
         )
       }
     }
