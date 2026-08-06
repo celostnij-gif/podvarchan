@@ -21,7 +21,7 @@ export function serviceSchema(params: ServiceSchemaParams): Record<string, unkno
     url,
     image,
     providerName,
-    areaServed = ['RU', 'UA'],
+    areaServed = ['Worldwide'],
     locale,
   } = params
   const effectiveProviderName = providerName ?? (locale === 'uk' ? AUTHOR.nameUk : AUTHOR.name)
@@ -179,8 +179,7 @@ export function practiceSchema(locale: string = 'ru'): Record<string, unknown> {
       addressCountry: 'UA',
     },
     areaServed: [
-      { '@type': 'Country', name: 'UA' },
-      { '@type': 'Country', name: 'RU' },
+      { '@type': 'Country', name: 'Worldwide' },
     ],
     priceRange,
     offers,
