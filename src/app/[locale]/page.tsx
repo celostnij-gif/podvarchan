@@ -4,6 +4,7 @@ import { SITE } from '@/constants'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { aggregateRatingSchema, faqSchema, speakableSchema } from '@/lib/schema'
 import type { Testimonial } from '@/types'
+import { JsonLd } from '@/components/JsonLd'
 import HomeClient from './home-client'
 import Hero from '@/components/sections/Hero'
 import { getPageByType, getTestimonials, getFAQs } from '@/lib/db/public'
@@ -129,9 +130,11 @@ export default async function HomePage({
   return (
     <>
       <Hero t={t} commonT={commonT} d1={d1Hero} />
+      {pageSchemas.map((schema, i) => (
+        <JsonLd key={i} schema={schema} />
+      ))}
       <HomeClient
         locale={locale}
-        schemas={pageSchemas}
         d1Testimonials={d1Testimonials}
         d1Faqs={d1Faqs}
         d1Sections={d1Home?.sections ?? []}

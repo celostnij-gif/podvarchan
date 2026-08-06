@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { faqSchema } from '@/lib/schema'
 import { getFAQs } from '@/lib/db/public'
+import { JsonLd } from '@/components/JsonLd'
 import { ClientFaqPage } from './client-page'
 import type { FAQItem } from '@/types'
 export const revalidate = 604800
@@ -54,5 +55,10 @@ export default async function FaqPage({
 
   const schema = faqSchema(faqItems)
 
-  return <ClientFaqPage items={faqItems} schemas={[schema]} />
+  return (
+    <>
+      <JsonLd schema={schema} />
+      <ClientFaqPage items={faqItems} />
+    </>
+  )
 }

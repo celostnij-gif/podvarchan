@@ -71,13 +71,3 @@ export function useSetBreadcrumbs(items: BreadcrumbItem[]): void {
   })
 }
 
-export function useRegisterSchemas(newSchemas: Record<string, unknown>[]): void {
-  const { schemas: currentSchemas, setSchemas } = useContext(BreadcrumbsContext)
-
-  const currentStr = JSON.stringify(currentSchemas)
-  const nextStr = JSON.stringify(newSchemas)
-
-  if (nextStr !== currentStr) {
-    setSchemas(newSchemas)
-  }
-}

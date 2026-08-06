@@ -3,16 +3,13 @@
 import { useTranslations } from 'next-intl'
 import { AnimatedText, SectionContainer, PageHero, FaqAccordion } from '@/components/ui'
 import type { FAQItem } from '@/types'
-import { useRegisterSchemas } from '@/providers/BreadcrumbsProvider'
 import { Link } from '@/i18n/routing'
 
 interface Props {
   items: FAQItem[]
-  schemas?: Record<string, unknown>[]
 }
 
-export function ClientFaqPage({ items, schemas }: Props) {
-  useRegisterSchemas(schemas ?? [])
+export function ClientFaqPage({ items }: Props) {
   const t = useTranslations('faq')
   const commonT = useTranslations('common')
 
