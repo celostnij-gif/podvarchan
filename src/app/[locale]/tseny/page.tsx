@@ -1,7 +1,7 @@
 import { getTranslations } from 'next-intl/server'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { SITE } from '@/constants'
-import { getPageByType, getPageSeoMeta } from '@/lib/db/public'
+import { getPageByType, getPageSeoMeta, getPricingPlans, type PricingPlanPublic } from '@/lib/db/public'
 import { cookies } from 'next/headers'
 import { TsenyClient } from './client-page'
 export const revalidate = 604800
@@ -28,14 +28,25 @@ export async function generateMetadata({
 
 async function getOfferSchema(locale: string) {
   const t = await getTranslations({ locale, namespace: 'tseny' })
+  const plans = await getPricingPlans(locale).catch(() => null)
+  const priceValidUntil = new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0]
 
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'Product',
-    '@id': `${SITE.url}/tseny/#product`,
-    name: t('metaTitle'),
-    description: t('metaDescription'),
-    offers: [
+  let offers: Record<string, unknown>[]
+  if (plans && plans.length > 0) {
+    // Цены из D1 (pricing_plans) — единый источник прайса.
+    offers = plans.map((plan) => ({
+      '@type': 'Offer',
+      name: plan.title,
+      description: plan.description ?? plan.subtitle ?? undefined,
+      price: String(plan.price),
+      priceCurrency: plan.currency,
+      availability: 'https://schema.org/InStock',
+      url: `${SITE.url}/${locale}/kontakty/`,
+      priceValidUntil,
+    }))
+  } else {
+    // Fallback: D1 недоступен — константные позиции из messages.
+    offers = [
       {
         '@type': 'Offer',
         name: t('freeConsultationTitle'),
@@ -44,7 +55,7 @@ async function getOfferSchema(locale: string) {
         priceCurrency: 'USD',
         availability: 'https://schema.org/InStock',
         url: `${SITE.url}/${locale}/kontakty/`,
-        priceValidUntil: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+        priceValidUntil,
       },
       {
         '@type': 'Offer',
@@ -54,12 +65,20 @@ async function getOfferSchema(locale: string) {
         priceCurrency: 'USD',
         availability: 'https://schema.org/InStock',
         url: `${SITE.url}/${locale}/kontakty/`,
-        priceValidUntil: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+        priceValidUntil,
       },
-    ],
+    ]
+  }
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    '@id': `${SITE.url}/tseny/#product`,
+    name: t('metaTitle'),
+    description: t('metaDescription'),
+    offers,
   }
 }
-
 export default async function TsenyPage({
   params,
 }: {
@@ -67,11 +86,12 @@ export default async function TsenyPage({
 }) {
   const { locale } = await params
   const offerSchema = await getOfferSchema(locale)
+  const pricingPlans = await getPricingPlans(locale).catch(() => [])
   let d1Page: Awaited<ReturnType<typeof getPageByType>> | null = null
   const previewCookie = (await cookies()).get('__preview')?.value
   try {
     d1Page = await getPageByType('PRICING', locale, previewCookie)
   } catch { /* D1 unavailable */ }
 
-  return <TsenyClient schemas={[offerSchema]} d1Sections={d1Page?.sections ?? []} />
+  return <TsenyClient schemas={[offerSchema]} pricingPlans={pricingPlans} d1Sections={d1Page?.sections ?? []} />
 }

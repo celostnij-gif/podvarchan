@@ -164,6 +164,42 @@ check_meta "$BASE/uk/politika-konfidentsialnosti" "uk privacy"
 check_meta "$BASE/ru/search" "ru search"
 check_meta "$BASE/uk/search" "uk search"
 
+# ── 10. JSON-LD pricing: offers/priceRange построены из pricing_plans (D1) ──
+echo "--- JSON-LD pricing (D1 pricing_plans: 0/50/210/400) ---"
+check_pricing_schema() {
+  local url="$1" label="$2" tmp html code prices pr
+  tmp=$(mktemp)
+  code=$(curl -sL --max-time 15 -w "%{http_code}" -o "$tmp" "$url" || echo "000")
+  html=$(<"$tmp")
+  rm -f "$tmp"
+  if [[ "$code" != "200" ]]; then
+    echo "  ❌ $label HTTP $code (want 200)"
+    FAIL=$((FAIL + 1)); RESULTS+=("$label HTTP $code")
+    return
+  fi
+  prices=$(printf '%s\n' "$html" | grep -o '"price":"[0-9]*"' | sort -u | tr '\n' ' ')
+  for want in '"price":"0"' '"price":"50"' '"price":"210"' '"price":"400"'; do
+    if ! printf '%s' "$prices" | grep -qF "$want"; then
+      echo "  ❌ $label JSON-LD lacks $want (got: $prices)"
+      FAIL=$((FAIL + 1)); RESULTS+=("$label missing $want")
+      return
+    fi
+  done
+  pr=$(printf '%s\n' "$html" | grep -o '"priceRange":"[^"]*"' | head -1)
+  if ! printf '%s' "$pr" | grep -q '400\$'; then
+    echo "  ❌ $label priceRange malformed: $pr"
+    FAIL=$((FAIL + 1)); RESULTS+=("$label priceRange")
+    return
+  fi
+  echo "  ✅ $label pricing ($prices| $pr)"
+  PASS=$((PASS + 1))
+}
+
+check_pricing_schema "$BASE/ru" "ru home"
+check_pricing_schema "$BASE/uk" "uk home"
+check_pricing_schema "$BASE/ru/tseny" "ru prices"
+check_pricing_schema "$BASE/uk/tsiny" "uk prices"
+
 echo
 echo "============================================"
 echo "  Result: $PASS passed, $FAIL failed"
