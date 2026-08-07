@@ -33,9 +33,6 @@ export const cacheKeys = {
   blogList: (locale: string) => `blog:list:${locale}`,
   /** Sitemap-only lightweight list (id/slug/updatedAt/publishedAt, no faqJson/excerpt). */
   blogListLite: (locale: string) => `blog:list:lite:${locale}`,
-  /** Sitemap lastmod aggregates (HP-5): page type → max updated_at, category id → max post updated_at. */
-  sitemapPageLastmods: () => 'sitemap:pages-lastmod',
-  sitemapCatLastmods: () => 'sitemap:cat-lastmod',
   blogPost: (slug: string, locale: string) => `blog:${slug}:${locale}`,
   blogPostById: (id: string, locale: string) => `blog:id:${id}:${locale}`,
   blogCatPosts: (catSlug: string, locale: string) => `blog-cat:${catSlug}:${locale}`,

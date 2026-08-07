@@ -7,7 +7,6 @@ import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { serviceSchema, faqSchema, speakableSchema } from '@/lib/schema'
 import { getServiceBySlug, getServiceById, getServiceSidebar, getSEOMeta, resolvePublishedServiceSlug } from '@/lib/db/public'
 import type { ServiceSidebarItem } from '@/lib/db/public'
-import { JsonLd } from '@/components/JsonLd'
 import { ClientServicePage } from './client-page'
 
 export const revalidate = 604800
@@ -239,14 +238,8 @@ export default async function ServicePage({ params }: Props) {
         }
       } catch { /* faqJson optional */ }
     }
-    return (
-      <>
-        {schemas.map((schema, i) => (
-          <JsonLd key={i} schema={schema} />
-        ))}
-        <ClientServicePage service={data} locale={locale} />
-      </>
-    )
+
+    return <ClientServicePage service={data} locale={locale} schemas={schemas} />
   }
 
   const { service, faqs, allServices } = data
@@ -261,12 +254,5 @@ export default async function ServicePage({ params }: Props) {
   schemas.push(speakableSchema('.section-card-body p, .subsection-body p'))
   schemas.push(faqSchema(faqs))
 
-  return (
-    <>
-      {schemas.map((schema, i) => (
-        <JsonLd key={i} schema={schema} />
-      ))}
-      <ClientServicePage service={service} locale={locale} allServices={allServices} />
-    </>
-  )
+  return <ClientServicePage service={service} locale={locale} schemas={schemas} allServices={allServices} />
 }

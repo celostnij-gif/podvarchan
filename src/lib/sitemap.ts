@@ -5,7 +5,7 @@ import {
   getPublishedBlogCategories,
   getAllBlogPosts,
 } from '@/lib/content'
-import { getBlogPostsLite, getPageLastmods, getCategoryLastmods } from '@/lib/db/public'
+import { getBlogPostsLite } from '@/lib/db/public'
 import { SERVICE_SLUG_UK, BLOG_SLUG_UK, CATEGORY_SLUG_UK } from '@/lib/slugMapping'
 
 const BASE = SITE.url
@@ -45,22 +45,6 @@ interface SitemapEntry {
   alternates: { ru: string; uk: string; 'x-default': string }
 }
 
-/**
- * Tolerant date parser for sitemap lastmods. Prod D1 has mixed formats in
- * `pages.updated_at`: ISO strings ("2026-07-23T17:42:38.457Z") AND epoch-millis
- * stored as text ("1780991377955"). `new Date()` on the numeric text yields
- * Invalid Date, whose `toISOString()` throws — taking the whole sitemap rebuild
- * down to the stale R2 snapshot. Never let a data quirk 1102/500 the build.
- */
-function parseDate(value: string | Date | undefined | null): Date | undefined {
-  if (value == null) return undefined
-  const d = value instanceof Date ? value : new Date(value)
-  if (!Number.isNaN(d.getTime())) return d
-  const n = typeof value === 'string' && /^\d{10,13}$/.test(value) ? Number(value) : NaN
-  if (!Number.isNaN(n)) return new Date(n)
-  return undefined
-}
-
 function addPair(
   entries: SitemapEntry[],
   ruUrl: string,
@@ -77,6 +61,19 @@ function addPair(
 function buildEntries(): Promise<SitemapEntry[]> {
   const entries: SitemapEntry[] = []
 
+  /* ── 1. Статические страницы (tseny/tsiny и ob-avtore/pro-avtora — разные UK-слэги) ── */
+  for (const page of STATIC_PAGES) {
+    const ruUrl = `${BASE}/ru/${page.slug}`
+    if (page.slug === 'tseny/') {
+      addPair(entries, ruUrl, `${BASE}/uk/tsiny/`, page.priority, page.changefreq)
+    } else if (page.slug === 'ob-avtore/') {
+      addPair(entries, ruUrl, `${BASE}/uk/pro-avtora/`, page.priority, page.changefreq)
+    } else {
+      addPair(entries, ruUrl, `${BASE}/uk/${page.slug}`, page.priority, page.changefreq)
+    }
+  }
+
+  /* ── 2. Услуги — D1 (свежие данные, пары по id) + fallback на константы ── */
   return Promise.all([
     getPublishedServices('ru').catch(() => null),
     getPublishedServices('uk').catch(() => null),
@@ -84,49 +81,7 @@ function buildEntries(): Promise<SitemapEntry[]> {
     getBlogPostsLite('uk').catch(() => null),
     getPublishedBlogCategories('ru').catch(() => null),
     getPublishedBlogCategories('uk').catch(() => null),
-    getPageLastmods().catch(() => null),
-    getCategoryLastmods().catch(() => null),
-  ]).then(([ruServices, ukServices, ruPosts, ukPosts, ruCats, ukCats, pageLastmods, catLastmods]) => {
-    /* ── 1. Статические страницы (tseny/tsiny и ob-avtore/pro-avtora — разные UK-слэги) ── */
-    const pageMods = pageLastmods ?? {}
-    const catMods = catLastmods ?? {}
-    // Index pages (uslugi/, blog/) carry the freshest item revision as their
-    // lastmod — already in memory from the lite getters, no extra queries.
-    const maxServiceMod = ruServices?.reduce<Date | undefined>(
-      (max, s) => (s.updatedAt && (!max || s.updatedAt > max) ? s.updatedAt : max),
-      undefined,
-    )
-    const maxPostMod = ruPosts?.reduce((max, p) => (p.updatedAt && (!max || p.updatedAt > max) ? p.updatedAt : max), '') ?? ''
-    const PAGE_TYPE_BY_SLUG: Record<string, string> = {
-      '': 'HOME',
-      'ob-avtore/': 'ABOUT',
-      'metod/': 'METHOD',
-      'faq/': 'FAQ',
-      'kontakty/': 'CONTACTS',
-      'politika-konfidentsialnosti/': 'PRIVACY',
-      'disclaimer/': 'DISCLAIMER',
-      'tseny/': 'PRICING',
-    }
-    for (const page of STATIC_PAGES) {
-      const ruUrl = `${BASE}/ru/${page.slug}`
-      let lastMod: Date | undefined
-      if (page.slug === 'uslugi/') {
-        lastMod = maxServiceMod
-      } else if (page.slug === 'blog/') {
-        lastMod = parseDate(maxPostMod)
-      } else {
-        const type = PAGE_TYPE_BY_SLUG[page.slug]
-        lastMod = parseDate(type ? pageMods[type] : undefined)
-      }
-      if (page.slug === 'tseny/') {
-        addPair(entries, ruUrl, `${BASE}/uk/tsiny/`, page.priority, page.changefreq, lastMod)
-      } else if (page.slug === 'ob-avtore/') {
-        addPair(entries, ruUrl, `${BASE}/uk/pro-avtora/`, page.priority, page.changefreq, lastMod)
-      } else {
-        addPair(entries, ruUrl, `${BASE}/uk/${page.slug}`, page.priority, page.changefreq, lastMod)
-      }
-    }
-
+  ]).then(([ruServices, ukServices, ruPosts, ukPosts, ruCats, ukCats]) => {
     if (ruServices && ruServices.length > 0) {
       const ukList = ukServices ?? []
       for (const ru of ruServices) {
@@ -193,18 +148,9 @@ function buildEntries(): Promise<SitemapEntry[]> {
           `${BASE}/uk/blog/kategoriya/${uk?.translation.slug ?? ru.translation.slug}/`,
           0.6,
           'weekly',
-          parseDate(catMods[ru.id]),
         )
       }
     } else {
-      // No D1: derive category lastmod from the fallback post constants in
-      // memory (max dateModified/datePublished per categorySlug).
-      const maxPostDateByCat: Record<string, Date> = {}
-      for (const post of getAllBlogPosts()) {
-        const d = new Date(post.dateModified ?? post.datePublished)
-        const cur = maxPostDateByCat[post.categorySlug]
-        if (!cur || d > cur) maxPostDateByCat[post.categorySlug] = d
-      }
       for (const cat of BLOG_CATEGORIES) {
         addPair(
           entries,
@@ -212,7 +158,6 @@ function buildEntries(): Promise<SitemapEntry[]> {
           `${BASE}/uk/blog/kategoriya/${CATEGORY_SLUG_UK[cat.slug] ?? cat.slug}/`,
           0.6,
           'weekly',
-          maxPostDateByCat[cat.slug],
         )
       }
     }

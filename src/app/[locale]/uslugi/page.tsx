@@ -15,7 +15,7 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: 'services' })
 
   return seoMetadata({
-    title: t.has('metaTitle') ? t('metaTitle') : t('pageTitle'),
+    title: t('pageTitle'),
     description: t('pageDescription'),
     path: '/uslugi',
     locale,

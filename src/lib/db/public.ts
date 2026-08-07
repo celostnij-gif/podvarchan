@@ -6,7 +6,7 @@
  *
  * Free plan: keep each cache-miss path to 1–3 cheap queries (see AGENT.md §2).
  */
-import { eq, and, desc, inArray, sql, isNotNull } from 'drizzle-orm'
+import { eq, and, desc, inArray } from 'drizzle-orm'
 import { canPreview, canPreviewList } from '@/lib/preview'
 import { getDB } from '@/db'
 import { services, serviceTranslations } from '@/db/schema/services'
@@ -350,58 +350,6 @@ async function getBlogCategoriesUncached(
 }
 export function getBlogCategories(locale: string): Promise<BlogCategoryPublic[]> {
   return withCache(cacheKeys.blogCats(locale), TTL_BLOG_CATS, () => getBlogCategoriesUncached(locale))
-}
-
-// ─── Sitemap lastmod aggregates (HP-5) ───
-// blog_categories has no updated_at column; the freshest honest per-category
-// signal is the latest PUBLISHED post update. pages.updated_at is the row
-// revision for static page types. One lightweight aggregate query each, cached
-// via withCache (AGENTS.md §3) with a TTL aligned to the sitemap XML itself.
-
-const TTL_SITEMAP_LASTMODS = 3600
-
-async function getPageLastmodsUncached(): Promise<Record<string, string>> {
-  const db = getDB()
-  const rows = await db
-    .select({
-      type: pages.type,
-      lastmod: sql<string>`max(${pages.updatedAt})`,
-    })
-    .from(pages)
-    .where(eq(pages.status, 'PUBLISHED'))
-    .groupBy(pages.type)
-    .all()
-  const map: Record<string, string> = {}
-  for (const row of rows) {
-    if (row.lastmod) map[row.type] = row.lastmod
-  }
-  return map
-}
-
-export function getPageLastmods(): Promise<Record<string, string>> {
-  return withCache(cacheKeys.sitemapPageLastmods(), TTL_SITEMAP_LASTMODS, getPageLastmodsUncached)
-}
-
-async function getCategoryLastmodsUncached(): Promise<Record<string, string>> {
-  const db = getDB()
-  const rows = await db
-    .select({
-      categoryId: blogPosts.categoryId,
-      lastmod: sql<string>`max(${blogPosts.updatedAt})`,
-    })
-    .from(blogPosts)
-    .where(and(eq(blogPosts.status, 'PUBLISHED'), isNotNull(blogPosts.categoryId)))
-    .groupBy(blogPosts.categoryId)
-    .all()
-  const map: Record<string, string> = {}
-  for (const row of rows) {
-    if (row.categoryId && row.lastmod) map[row.categoryId] = row.lastmod
-  }
-  return map
-}
-
-export function getCategoryLastmods(): Promise<Record<string, string>> {
-  return withCache(cacheKeys.sitemapCatLastmods(), TTL_SITEMAP_LASTMODS, getCategoryLastmodsUncached)
 }
 
 

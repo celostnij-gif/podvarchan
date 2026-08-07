@@ -4,7 +4,6 @@ import { getBlogPost, getAllBlogSlugs, getAllBlogPosts, formatDate } from '@/lib
 import { getBlogPostBySlug, getBlogPostById, getBlogPostsByCategory, getMediaWithVariants, getSEOMeta, resolvePublishedBlogSlug } from '@/lib/db/public'
 import type { BlogPostPublic } from '@/lib/db/public'
 import { articleSchema, faqSchema, speakableSchema } from '@/lib/schema'
-import { JsonLd } from '@/components/JsonLd'
 import { ClientBlogPost } from './client-page'
 import { BLOG_SLUG_UK, resolveBlogSlug } from '@/lib/slugMapping'
 import { COVER_IMAGE_OVERRIDES } from '@/lib/content/cover-images'
@@ -221,48 +220,40 @@ export default async function BlogPostPage({ params }: Props) {
   if (data.type === 'd1') {
     const allSchemas = [data.jsonLd, ...(data.additionalSchemas ?? [])]
     return (
-      <>
-        {allSchemas.map((schema, i) => (
-          <JsonLd key={i} schema={schema} />
-        ))}
-        <ClientBlogPost
-          title={data.title}
-          body={data.body}
-          date={data.date}
-          category={data.category}
-          categorySlug={data.categorySlug}
-          readingTime={data.readingTime}
-          slug={data.slug}
-          image={data.image}
-          imageAlt={data.imageAlt}
-          imageVariants={data.imageVariants}
-          locale={locale}
-          relatedPosts={data.relatedPosts}
-        />
-      </>
+      <ClientBlogPost
+        title={data.title}
+        body={data.body}
+        date={data.date}
+        category={data.category}
+        categorySlug={data.categorySlug}
+        readingTime={data.readingTime}
+        slug={data.slug}
+        image={data.image}
+        imageAlt={data.imageAlt}
+        imageVariants={data.imageVariants}
+        locale={locale}
+        relatedPosts={data.relatedPosts}
+        schemas={allSchemas}
+      />
     )
   }
 
   const { post } = data
   return (
-    <>
-      {[data.jsonLd, ...(data.fallbackSchemas ?? [])].map((schema, i) => (
-        <JsonLd key={i} schema={schema} />
-      ))}
-      <ClientBlogPost
-        title={post.title}
-        body={post.body ?? ''}
-        date={formatDate(post.datePublished, locale)}
-        category={post.categoryName}
-        categorySlug={post.categorySlug}
-        author={post.author}
-        readingTime={post.readingTime}
-        slug={slug}
-        image={post.image}
-        imageAlt={post.imageAlt}
-        locale={locale}
-        relatedPosts={data.relatedPosts}
-      />
-    </>
+    <ClientBlogPost
+      title={post.title}
+      body={post.body ?? ''}
+      date={formatDate(post.datePublished, locale)}
+      category={post.categoryName}
+      categorySlug={post.categorySlug}
+      author={post.author}
+      readingTime={post.readingTime}
+      slug={slug}
+      image={post.image}
+      imageAlt={post.imageAlt}
+      locale={locale}
+      relatedPosts={data.relatedPosts}
+      schemas={[data.jsonLd, ...(data.fallbackSchemas ?? [])]}
+    />
   )
 }

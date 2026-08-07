@@ -28,12 +28,11 @@ const BRAND: Record<string, string> = {
   uk: "В'ячеслав Подварчан",
 }
 
-/** Truncate to last word boundary before maxLen — no ellipsis (GEO plan §4.1D:
- *  «…» в <title> ломает сниппет; режем по границе слова без многоточия). */
+/** Truncate to last word boundary before maxLen */
 function truncateAtWord(text: string, maxLen: number): string {
   if (text.length <= maxLen) return text
   const cut = text.lastIndexOf(' ', maxLen - 1)
-  return cut > 0 ? text.slice(0, cut) : text.slice(0, maxLen)
+  return cut > 0 ? text.slice(0, cut) + '…' : text.slice(0, maxLen - 1) + '…'
 }
 
 /**

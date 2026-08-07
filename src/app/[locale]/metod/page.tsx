@@ -13,18 +13,14 @@ export async function generateMetadata({ params }: Props) {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'pages.metod' })
 
-  // D1 seo_meta перекрывает messages только при реальной кастомизации админом
-  // (title ≠ дефолт) — stale-значения («Авторский метод») не блокируют
-  // утверждённый короткий metaTitle (Phase 4).
-  const defaultTitle = t.has('metaTitle') ? t('metaTitle') : t('heading')
-  let seoTitle = defaultTitle
+  let seoTitle = t('heading')
   let seoDescription = t('heroSubtitle')
   try {
     const previewCookie = (await cookies()).get('__preview')?.value
     const page = await getPageByType('METHOD', locale, previewCookie)
     if (page?.id) {
       const seo = await getSEOMeta('page', page.id, locale).catch(() => null)
-      if (seo?.title && seo.title !== t('heading')) seoTitle = seo.title
+      if (seo?.title) seoTitle = seo.title
       if (seo?.description) seoDescription = seo.description
     }
   } catch { /* D1 unavailable */ }

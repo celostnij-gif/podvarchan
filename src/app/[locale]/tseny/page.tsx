@@ -3,7 +3,6 @@ import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { SITE } from '@/constants'
 import { getPageByType, getSEOMeta } from '@/lib/db/public'
 import { cookies } from 'next/headers'
-import { JsonLd } from '@/components/JsonLd'
 import { TsenyClient } from './client-page'
 export const revalidate = 604800
 
@@ -84,10 +83,5 @@ export default async function TsenyPage({
     d1Page = await getPageByType('PRICING', locale, previewCookie)
   } catch { /* D1 unavailable */ }
 
-  return (
-    <>
-      <JsonLd schema={offerSchema} />
-      <TsenyClient d1Sections={d1Page?.sections ?? []} />
-    </>
-  )
+  return <TsenyClient schemas={[offerSchema]} d1Sections={d1Page?.sections ?? []} />
 }
