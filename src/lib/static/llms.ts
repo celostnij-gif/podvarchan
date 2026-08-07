@@ -40,7 +40,7 @@ Disallow: /disclaimer/
 # Full Markdown: /llms-full.txt
 `
 
-export const LLMS_FULL_CONTENT = `# Vyacheslav Podvarchan — Online Psychologist & Hypnotherapist
+export const LLMS_FULL_PREFIX = `# Vyacheslav Podvarchan — Online Psychologist & Hypnotherapist
 > Official AI Context Sheet for podvarchan.com
 > https://podvarchan.com
 
@@ -144,6 +144,8 @@ The therapist does not work with symptoms — he helps find and remove their roo
 
 ## Services & Pricing
 
+`
+export const LLMS_FULL_FALLBACK_PRICING = `
 | Service | Price | Page |
 |---------|-------|------|
 | Hypnotherapy Online (1 session) | $50 | /uslugi/gipnoterapiya-onlayn/ |
@@ -169,6 +171,8 @@ The therapist does not work with symptoms — he helps find and remove their roo
 | Elite Course 10 sessions | $400 ($500 value) | /uslugi/gipnoterapiya-onlayn/ |
 | Russian-speaking psychologist for emigrants | from $50 | /uslugi/russkoyazychnyy-psiholog-onlayn/ |
 | Russian-speaking psychologist in Germany | from $50 | /uslugi/russkoyazychnyy-psiholog-germaniya/ |
+`
+export const LLMS_FULL_SUFFIX = `
 
 ## Site Structure
 
@@ -249,3 +253,35 @@ Online psychological consultations are suitable for anxiety disorders, panic att
 - Content-Signal: ai-train=yes, search=yes, ai-input=yes
 - Allowed AI bots: GPTBot, Google-Extended, ClaudeBot, PerplexityBot, ChatGPT-User, CCBot, Applebot-Extended, Amazonbot, Bytespider
 `
+
+
+/** Тип из D1 — только для типов, рантайм-импорта нет (type-only). */
+import type { PricingPlanPublic } from '@/lib/db/public'
+
+const PLAN_LABELS: Record<string, string> = {
+  free: 'Diagnostic Consultation (15 min)',
+  single: 'Single Session (50-60 min)',
+  premium: 'Premium Course (5 sessions)',
+  elite: 'Elite Course (10 sessions)',
+}
+
+/**
+ * Таблица цен для llms-full.txt — ЕДИНЫЙ источник: pricing_plans (D1),
+ * тот же геттер, что JSON-LD и /tseny (план v3, Фаза 5).
+ * При недоступности D1 — историческая таблица-фолбэк.
+ */
+export function buildPricingTable(plans: PricingPlanPublic[] | null | undefined): string {
+  if (!plans || plans.length === 0) return LLMS_FULL_FALLBACK_PRICING
+  const rows: string[] = [
+    '| Plan | Price | Old price | Page |',
+    '|------|-------|-----------|------|',
+  ]
+  for (const p of plans) {
+    const price = p.price === 0 ? 'Free' : '$' + String(p.price)
+    const old = p.oldPrice != null ? '$' + String(p.oldPrice) : '—'
+    const label = PLAN_LABELS[p.key] ?? p.title
+    rows.push('| ' + label + ' | ' + price + ' | ' + old + ' | /ru/tseny/ |')
+  }
+  return rows.join('\n') + '\n'
+}
+
