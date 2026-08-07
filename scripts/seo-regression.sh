@@ -200,6 +200,32 @@ check_pricing_schema "$BASE/uk" "uk home"
 check_pricing_schema "$BASE/ru/tseny" "ru prices"
 check_pricing_schema "$BASE/uk/tsiny" "uk prices"
 
+# ── 11. llms-full.txt: цены из pricing_plans (D1), не хардкод ──
+echo "--- llms-full.txt pricing (D1 pricing_plans) ---"
+check_llms_pricing() {
+  local url="$1" label="$2" tmp html code
+  tmp=$(mktemp)
+  code=$(curl -sL --max-time 15 -w "%{http_code}" -o "$tmp" "$url" || echo "000")
+  html=$(<"$tmp")
+  rm -f "$tmp"
+  if [[ "$code" != "200" ]]; then
+    echo "  ❌ $label HTTP $code (want 200)"
+    FAIL=$((FAIL + 1)); RESULTS+=("$label HTTP $code")
+    return
+  fi
+  for want in '| $0' '| Free |' '| $210 |' '| $400 |' '| $50 |'; do
+    if ! printf '%s' "$html" | grep -qF "$want"; then
+      echo "  ❌ $label llms-full lacks pricing row ($want)"
+      FAIL=$((FAIL + 1)); RESULTS+=("$label missing $want")
+      return
+    fi
+  done
+  echo "  ✅ $label llms-full pricing from D1"
+  PASS=$((PASS + 1))
+}
+
+check_llms_pricing "$BASE/llms-full.txt" "llms-full"
+
 echo
 echo "============================================"
 echo "  Result: $PASS passed, $FAIL failed"
