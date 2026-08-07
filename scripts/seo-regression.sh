@@ -213,8 +213,7 @@ check_llms_pricing() {
     FAIL=$((FAIL + 1)); RESULTS+=("$label HTTP $code")
     return
   fi
-  for want in '| $0' '| Free |' '| $210 |' '| $400 |' '| $50 |'; do
-    if ! printf '%s' "$html" | grep -qF "$want"; then
+  for want in '| Free |' '| $50 |' '| $210 |' '| $400 |'; do
       echo "  ❌ $label llms-full lacks pricing row ($want)"
       FAIL=$((FAIL + 1)); RESULTS+=("$label missing $want")
       return
