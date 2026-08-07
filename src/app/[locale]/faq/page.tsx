@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { faqSchema } from '@/lib/schema'
-import { getFAQs } from '@/lib/db/public'
+import { getFAQs, getPageSeoMeta } from '@/lib/db/public'
 import { ClientFaqPage } from './client-page'
 import type { FAQItem } from '@/types'
 export const revalidate = 604800
@@ -15,10 +15,12 @@ export async function generateMetadata({
 }) {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'faq' })
+  const previewCookie = (await cookies()).get('__preview')?.value
+  const seo = await getPageSeoMeta('FAQ', locale, previewCookie).catch(() => null)
 
   return seoMetadata({
-    title: t('metaTitle'),
-    description: t('metaDescription'),
+    title: seo?.title ?? t('metaTitle'),
+    description: seo?.description ?? t('metaDescription'),
     path: '/faq',
     keywords: ['гипнотерапия вопросы', 'онлайн гипноз безопасность', 'сколько сессий гипноза', 'FAQ гипнотерапевт'],
     locale,

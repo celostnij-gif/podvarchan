@@ -798,6 +798,23 @@ export function getFAQs(
 
 // ─── SEO ───
 
+/**
+ * Deterministic pick among duplicate seo_meta rows for the same
+ * (entity_type, entity_id, locale): oldest created_at wins.
+ * Guards against non-deterministic .get() while legacy duplicates exist;
+ * after cleanup (plan v3 phase 1b) there should be a single row, but the
+ * deterministic pick stays as a regression net.
+ */
+export function pickSeoMetaWinner<T extends { createdAt: string | null }>(
+  rows: readonly T[],
+): T | null {
+  let best: T | null = null
+  for (const row of rows) {
+    if (best === null || (row.createdAt ?? '') < (best.createdAt ?? '')) best = row
+  }
+  return best
+}
+
 async function getSEOMetaUncached(
   entityType: string,
   entityId: string,
@@ -805,7 +822,7 @@ async function getSEOMetaUncached(
 ): Promise<SEOMetaPublic | null> {
   const db = getDB()
   const loc = locale as 'ru' | 'uk'
-  const row = await db
+  const rows = await db
     .select()
     .from(seoMeta)
     .where(
@@ -815,8 +832,9 @@ async function getSEOMetaUncached(
         eq(seoMeta.locale, loc),
       ),
     )
-    .get()
+    .all()
 
+  const row = pickSeoMetaWinner(rows)
   if (!row) return null
   return {
     title: row.title,
@@ -831,6 +849,23 @@ export function getSEOMeta(
 ): Promise<SEOMetaPublic | null> {
   const ttl = entityType === 'blog_post' ? TTL_BLOG : TTL_PAGE
   return withCache(cacheKeys.seo(entityType, entityId, locale), ttl, () => getSEOMetaUncached(entityType, entityId, locale))
+}
+
+/**
+ * Resolve SEO metadata for a static page type (HOME, METHOD, …) through the
+ * page's own id: getPageByType → getSEOMeta. Both reads go through withCache
+ * (KV → R2 → D1, AGENTS.md §3). Returns null when the page type has no row
+ * (e.g. SERVICES/BLOG are not in `pages`) or D1 is unavailable — callers keep
+ * the messages fallback.
+ */
+export async function getPageSeoMeta(
+  pageType: Parameters<typeof getPageByType>[0],
+  locale: string,
+  previewCookie?: string,
+): Promise<SEOMetaPublic | null> {
+  const page = await getPageByType(pageType, locale, previewCookie)
+  if (!page?.id) return null
+  return getSEOMeta('page', page.id, locale)
 }
 
 // ─── Media ───
