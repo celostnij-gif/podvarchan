@@ -6,7 +6,7 @@
  *
  * Free plan: keep each cache-miss path to 1–3 cheap queries (see AGENT.md §2).
  */
-import { eq, and, desc, inArray } from 'drizzle-orm'
+import { eq, and, desc, inArray, isNotNull } from 'drizzle-orm'
 import { canPreview, canPreviewList } from '@/lib/preview'
 import { getDB } from '@/db'
 import { services, serviceTranslations } from '@/db/schema/services'
@@ -28,6 +28,7 @@ import {
 } from '@/db/schema/settings'
 import { pricingPlans, pricingPlanTranslations } from '@/db/schema/pricing'
 import { withCache } from './kv-cache'
+import { parseDate } from '@/lib/dates'
 import { cacheKeys } from '@podvarchan/shared'
 
 /* ── TTLs (seconds) — AGENTS.md §3 cache matrix ── */
@@ -267,6 +268,56 @@ async function getPricingPlansUncached(locale: string): Promise<PricingPlanPubli
 }
 export function getPricingPlans(locale: string): Promise<PricingPlanPublic[]> {
   return withCache(cacheKeys.pricingList(locale), TTL_SERVICES, () => getPricingPlansUncached(locale))
+}
+
+// ─── Sitemap lastmods (max updated_at по типам страниц и категориям блога) ───
+
+/**
+ * Max updated_at по каждой странице (pages.type), только PUBLISHED.
+ * Возвращает Map type → Date (ISO и epoch-millis нормализуются через parseDate —
+ * исторический mixed-формат в pages.updated_at).
+ */
+async function getPageLastmodsUncached(): Promise<Map<string, Date>> {
+  const db = getDB()
+  const rows = await db
+    .select({ type: pages.type, updatedAt: pages.updatedAt })
+    .from(pages)
+    .where(eq(pages.status, 'PUBLISHED'))
+    .all()
+  const result = new Map<string, Date>()
+  for (const row of rows) {
+    const d = parseDate(row.updatedAt)
+    if (!d) continue
+    const current = result.get(row.type)
+    if (!current || d.getTime() > current.getTime()) result.set(row.type, d)
+  }
+  return result
+}
+export function getPageLastmods(): Promise<Map<string, Date>> {
+  return withCache(cacheKeys.sitemapPageLastmods, TTL_BLOG, () => getPageLastmodsUncached())
+}
+
+/**
+ * Max updated_at опубликованных постов по category_id — lastmod категорий блога.
+ */
+async function getCategoryLastmodsUncached(): Promise<Map<string, Date>> {
+  const db = getDB()
+  const rows = await db
+    .select({ categoryId: blogPosts.categoryId, updatedAt: blogPosts.updatedAt })
+    .from(blogPosts)
+    .where(and(eq(blogPosts.status, 'PUBLISHED'), isNotNull(blogPosts.categoryId)))
+    .all()
+  const result = new Map<string, Date>()
+  for (const row of rows) {
+    const d = parseDate(row.updatedAt)
+    if (!d || !row.categoryId) continue
+    const current = result.get(row.categoryId)
+    if (!current || d.getTime() > current.getTime()) result.set(row.categoryId, d)
+  }
+  return result
+}
+export function getCategoryLastmods(): Promise<Map<string, Date>> {
+  return withCache(cacheKeys.sitemapCatLastmods, TTL_BLOG, () => getCategoryLastmodsUncached())
 }
 // ─── Service Sidebar (lightweight — only 5 fields for listing/sidebar) ───
 
