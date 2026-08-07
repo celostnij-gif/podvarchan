@@ -29,6 +29,7 @@ export const cacheKeys = {
   servicesSidebar: (locale: string) => `services:sidebar:${locale}`,
   service: (slug: string, locale: string) => `service:${slug}:${locale}`,
   serviceById: (id: string, locale: string) => `service:id:${id}:${locale}`,
+  pricingList: (locale: string) => `pricing:list:${locale}`,
   blogCats: (locale: string) => `blog-cats:${locale}`,
   blogList: (locale: string) => `blog:list:${locale}`,
   /** Sitemap-only lightweight list (id/slug/updatedAt/publishedAt, no faqJson/excerpt). */

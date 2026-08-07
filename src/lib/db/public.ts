@@ -26,6 +26,7 @@ import {
   contactChannels,
   siteSettings,
 } from '@/db/schema/settings'
+import { pricingPlans, pricingPlanTranslations } from '@/db/schema/pricing'
 import { withCache } from './kv-cache'
 import { cacheKeys } from '@podvarchan/shared'
 
@@ -205,6 +206,67 @@ async function getServicesUncached(locale: string): Promise<ServicePublic[]> {
 }
 export function getServices(locale: string): Promise<ServicePublic[]> {
   return withCache(cacheKeys.servicesList(locale), TTL_SERVICES, () => getServicesUncached(locale))
+}
+// ─── Pricing plans (прайс /tseny — единый источник цен для JSON-LD и llms.txt) ───
+
+export interface PricingPlanPublic {
+  id: string
+  key: string
+  price: number
+  oldPrice: number | null
+  currency: string
+  title: string
+  subtitle: string | null
+  description: string | null
+  badge: string | null
+  note: string | null
+  features: string[]
+}
+
+export function mapPricingRow(r: {
+  pricing_plans: typeof pricingPlans.$inferSelect
+  pricing_plan_translations: typeof pricingPlanTranslations.$inferSelect
+}): PricingPlanPublic {
+  let features: string[] = []
+  if (r.pricing_plan_translations.featuresJson) {
+    try {
+      const parsed: unknown = JSON.parse(r.pricing_plan_translations.featuresJson)
+      if (Array.isArray(parsed)) features = parsed.filter((f): f is string => typeof f === 'string')
+    } catch { /* malformed — keep empty */ }
+  }
+  return {
+    id: r.pricing_plans.id,
+    key: r.pricing_plans.key,
+    price: r.pricing_plans.price,
+    oldPrice: r.pricing_plans.oldPrice,
+    currency: r.pricing_plans.currency,
+    title: r.pricing_plan_translations.title,
+    subtitle: r.pricing_plan_translations.subtitle,
+    description: r.pricing_plan_translations.description,
+    badge: r.pricing_plan_translations.badge,
+    note: r.pricing_plan_translations.note,
+    features,
+  }
+}
+
+async function getPricingPlansUncached(locale: string): Promise<PricingPlanPublic[]> {
+  const db = getDB()
+  const loc = locale as 'ru' | 'uk'
+  const rows = await db
+    .select()
+    .from(pricingPlans)
+    .innerJoin(pricingPlanTranslations, eq(pricingPlans.id, pricingPlanTranslations.planId))
+    .where(
+      and(eq(pricingPlans.status, 'PUBLISHED'), eq(pricingPlanTranslations.locale, loc)),
+    )
+    .orderBy(pricingPlans.sortOrder)
+    .limit(20)
+    .all()
+
+  return rows.map(mapPricingRow)
+}
+export function getPricingPlans(locale: string): Promise<PricingPlanPublic[]> {
+  return withCache(cacheKeys.pricingList(locale), TTL_SERVICES, () => getPricingPlansUncached(locale))
 }
 // ─── Service Sidebar (lightweight — only 5 fields for listing/sidebar) ───
 

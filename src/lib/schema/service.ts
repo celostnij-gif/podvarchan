@@ -1,4 +1,6 @@
+import { getTranslations } from 'next-intl/server'
 import { SITE, AUTHOR } from '@/constants'
+import { getPricingPlans } from '@/lib/db/public'
 import { cleanUrl } from './utils'
 interface ServiceSchemaParams {
   name: string
@@ -81,80 +83,85 @@ export function serviceSchema(params: ServiceSchemaParams): Record<string, unkno
  *
  * Используется на главной и всех страницах как базовый E-E-A-T сигнал.
  */
-export function practiceSchema(locale: string = 'ru'): Record<string, unknown> {
+export async function practiceSchema(locale: string = 'ru'): Promise<Record<string, unknown>> {
   const isUk = locale === 'uk'
-  const priceRange = isUk ? 'Безкоштовно – 400$' : 'Бесплатно – 400$'
+  const pricesPath = isUk ? '/uk/tsiny/' : '/ru/tseny/'
+  const pricesUrl = `${SITE.url}${pricesPath}`
 
-  const offers = [
-    {
+  // Цены — из D1 (pricing_plans). При недоступности D1 — прежний fallback-прайс.
+  const plans = await getPricingPlans(locale).catch(() => null)
+
+  let priceRange = isUk ? 'Безкоштовно – 400$' : 'Бесплатно – 400$'
+  let offers: Record<string, unknown>[]
+
+  if (plans && plans.length > 0) {
+    const t = await getTranslations({ locale, namespace: 'tseny' })
+    const freeLabel = t('freeConsultationPrice') // «Бесплатно» / «Безкоштовно»
+    const prices = plans.map((p) => p.price)
+    const min = Math.min(...prices)
+    const max = Math.max(...prices)
+    priceRange = min === 0 ? `${freeLabel} – ${max}$` : `${min}$ – ${max}$`
+    offers = plans.map((plan) => ({
       '@type': 'Offer',
-      name: isUk ? 'Гіпнотерапія онлайн' : 'Гипнотерапия онлайн',
-      url: `${SITE.url}/uslugi/gipnoterapiya-onlayn/`,
-      price: '50',
-      priceCurrency: 'USD',
+      name: plan.title,
+      url: pricesUrl,
+      price: String(plan.price),
+      priceCurrency: plan.currency,
       priceValidUntil: '2027-12-31',
-      availability: 'https://schema.org/OnlineOnly',
-      description: isUk
-        ? 'Індивідуальна сесія гіпнотерапії — 50$. Курс із 5 сесій — 210$ (замість 250$).'
-        : 'Индивидуальная сессия гипнотерапии — 50$. Курс из 5 сессий — 210$ (вместо 250$).',
+      availability: 'https://schema.org/InStock',
+      description: plan.description ?? plan.subtitle ?? undefined,
       itemOffered: {
         '@type': 'Service',
+        name: plan.title,
+        url: pricesUrl,
+      },
+    }))
+  } else {
+    // Fallback: D1 недоступен — константный прайс (историческое поведение).
+    const serviceNames: Array<{ name: string; url: string; desc: string }> = [
+      {
         name: isUk ? 'Гіпнотерапія онлайн' : 'Гипнотерапия онлайн',
         url: `${SITE.url}/uslugi/gipnoterapiya-onlayn/`,
+        desc: isUk
+          ? 'Індивідуальна сесія гіпнотерапії — 50$. Курс із 5 сесій — 210$ (замість 250$).'
+          : 'Индивидуальная сессия гипнотерапии — 50$. Курс из 5 сессий — 210$ (вместо 250$).',
       },
-    },
-    {
-      '@type': 'Offer',
-      name: isUk ? 'Консультація психолога онлайн' : 'Консультация психолога онлайн',
-      url: `${SITE.url}/uslugi/onlajn-konsultaciya-psyhologa/`,
-      price: '50',
-      priceCurrency: 'USD',
-      priceValidUntil: '2027-12-31',
-      availability: 'https://schema.org/OnlineOnly',
-      description: isUk
-        ? 'Індивідуальна консультація психолога — 50$.'
-        : 'Индивидуальная консультация психолога — 50$.',
-      itemOffered: {
-        '@type': 'Service',
+      {
         name: isUk ? 'Консультація психолога онлайн' : 'Консультация психолога онлайн',
         url: `${SITE.url}/uslugi/onlajn-konsultaciya-psyhologa/`,
+        desc: isUk
+          ? 'Індивідуальна консультація психолога — 50$.'
+          : 'Индивидуальная консультация психолога — 50$.',
       },
-    },
-    {
-      '@type': 'Offer',
-      name: isUk ? 'Робота з підсвідомістю' : 'Работа с подсознанием',
-      url: `${SITE.url}/uslugi/rabota-s-podsoznaniem/`,
-      price: '50',
-      priceCurrency: 'USD',
-      priceValidUntil: '2027-12-31',
-      availability: 'https://schema.org/OnlineOnly',
-      description: isUk
-        ? 'Сесія роботи з підсвідомістю — 50$.'
-        : 'Сессия работы с подсознанием — 50$.',
-      itemOffered: {
-        '@type': 'Service',
+      {
         name: isUk ? 'Робота з підсвідомістю' : 'Работа с подсознанием',
         url: `${SITE.url}/uslugi/rabota-s-podsoznaniem/`,
+        desc: isUk ? 'Сесія роботи з підсвідомістю — 50$.' : 'Сессия работы с подсознанием — 50$.',
       },
-    },
-    {
+      {
+        name: isUk ? 'Елітний курс (10 сесій)' : 'Элитный курс (10 сессий)',
+        url: `${SITE.url}/uslugi/gipnoterapiya-onlayn/`,
+        desc: isUk
+          ? 'Повний курс із 10 сесій — 400$ (замість 500$). Індивідуальний план.'
+          : 'Полный курс из 10 сессий — 400$ (вместо 500$). Индивидуальный план.',
+      },
+    ]
+    offers = serviceNames.map((s) => ({
       '@type': 'Offer',
-      name: isUk ? 'Елітний курс (10 сесій)' : 'Элитный курс (10 сессий)',
-      url: `${SITE.url}/uslugi/gipnoterapiya-onlayn/`,
-      price: '400',
+      name: s.name,
+      url: s.url,
+      price: s.name.includes('Елітний') || s.name.includes('Элитный') ? '400' : '50',
       priceCurrency: 'USD',
       priceValidUntil: '2027-12-31',
       availability: 'https://schema.org/OnlineOnly',
-      description: isUk
-        ? 'Повний курс із 10 сесій — 400$ (замість 500$). Індивідуальний план.'
-        : 'Полный курс из 10 сессий — 400$ (вместо 500$). Индивидуальный план.',
+      description: s.desc,
       itemOffered: {
         '@type': 'Service',
-        name: isUk ? 'Гіпнотерапія онлайн (10 сесій)' : 'Гипнотерапия онлайн (10 сессий)',
-        url: `${SITE.url}/uslugi/gipnoterapiya-onlayn/`,
+        name: s.name,
+        url: s.url,
       },
-    },
-  ]
+    }))
+  }
 
   return {
     '@context': 'https://schema.org',
