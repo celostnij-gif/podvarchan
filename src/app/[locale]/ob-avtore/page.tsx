@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
-import { getPageByType, getSEOMeta } from '@/lib/db/public'
+import { getPageByType, getPageSeoMeta } from '@/lib/db/public'
 import { cookies } from 'next/headers'
 import { ClientAboutPage } from './client-page'
 export const revalidate = 604800
@@ -12,22 +12,12 @@ export async function generateMetadata({
 }) {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'about' })
-
-  let seoTitle = t('metaTitle')
-  let seoDescription = t('metaDescription')
-  try {
-    const previewCookie = (await cookies()).get('__preview')?.value
-    const page = await getPageByType('ABOUT', locale, previewCookie)
-    if (page?.id) {
-      const seo = await getSEOMeta('page', page.id, locale).catch(() => null)
-      if (seo?.title) seoTitle = seo.title
-      if (seo?.description) seoDescription = seo.description
-    }
-  } catch { /* D1 unavailable */ }
+  const previewCookie = (await cookies()).get('__preview')?.value
+  const seo = await getPageSeoMeta('ABOUT', locale, previewCookie).catch(() => null)
 
   return seoMetadata({
-    title: seoTitle,
-    description: seoDescription,
+    title: seo?.title ?? t('metaTitle'),
+    description: seo?.description ?? t('metaDescription'),
     path: '/ob-avtore',
     ukPath: '/pro-avtora',
     keywords: ['гипнотерапевт онлайн', 'Вячеслав Подварчан', 'гипнотерапия', 'психолог гипнотерапевт'],

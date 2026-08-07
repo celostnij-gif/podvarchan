@@ -103,6 +103,67 @@ echo "--- 404 ---"
 check_url "$BASE/ru/etoy-stranitsy-ne-sushchestvuet" "200or308"
 check_url "$BASE/uk/neisnuyucha-storinka" "200or308"
 
+# ── 9. SEO meta sanity: title/description present, no i18n key literals ──
+echo "--- SEO meta (static pages RU/UK) ---"
+check_meta() {
+  local url="$1"
+  local label="$2"
+  local tmp html title desc code tlen dlen
+  tmp=$(mktemp)
+  code=$(curl -sL --max-time 15 -w "%{http_code}" -o "$tmp" "$url" || echo "000")
+  html=$(<"$tmp")
+  rm -f "$tmp"
+  title=$(printf '%s\n' "$html" | grep -o '<title>[^<]*</title>' | head -1 | sed -E 's/^<title>//; s#</title>$##')
+  desc=$(printf '%s\n' "$html" | grep -o '<meta name="description" content="[^"]*"' | head -1 | sed -E 's/.*content="//; s/"$//')
+  tlen=${#title}
+  dlen=${#desc}
+  if [[ "$code" != "200" ]]; then
+    echo "  ❌ $label HTTP $code (want 200)"
+    FAIL=$((FAIL + 1)); RESULTS+=("$label HTTP $code")
+    return
+  fi
+  if [[ $tlen -lt 15 || $tlen -gt 70 ]]; then
+    echo "  ❌ $label <title> length $tlen (want 15-70): $title"
+    FAIL=$((FAIL + 1)); RESULTS+=("$label title length $tlen")
+    return
+  fi
+  if [[ $dlen -lt 40 || $dlen -gt 220 ]]; then
+    echo "  ❌ $label meta description length $dlen (want 40-220): $desc"
+    FAIL=$((FAIL + 1)); RESULTS+=("$label desc length $dlen")
+    return
+  fi
+  if printf '%s %s\n' "$title" "$desc" | grep -qE 'pageTitle|pageDescription|metaTitle|metaDescription|heroSubtitle|heading'; then
+    echo "  ❌ $label i18n key literal leaked into meta: $title | $desc"
+    FAIL=$((FAIL + 1)); RESULTS+=("$label i18n literal")
+    return
+  fi
+  echo "  ✅ $label title($tlen) desc($dlen)"
+  PASS=$((PASS + 1))
+}
+
+check_meta "$BASE/ru" "ru home"
+check_meta "$BASE/uk" "uk home"
+check_meta "$BASE/ru/uslugi" "ru services"
+check_meta "$BASE/uk/uslugi" "uk services"
+check_meta "$BASE/ru/blog" "ru blog list"
+check_meta "$BASE/uk/blog" "uk blog list"
+check_meta "$BASE/ru/faq" "ru faq"
+check_meta "$BASE/uk/faq" "uk faq"
+check_meta "$BASE/ru/tseny" "ru prices"
+check_meta "$BASE/uk/tsiny" "uk prices"
+check_meta "$BASE/ru/kontakty" "ru contacts"
+check_meta "$BASE/uk/kontakty" "uk contacts"
+check_meta "$BASE/ru/metod" "ru method"
+check_meta "$BASE/uk/metod" "uk method"
+check_meta "$BASE/ru/ob-avtore" "ru about"
+check_meta "$BASE/uk/pro-avtora" "uk about"
+check_meta "$BASE/ru/disclaimer" "ru disclaimer"
+check_meta "$BASE/uk/disclaimer" "uk disclaimer"
+check_meta "$BASE/ru/politika-konfidentsialnosti" "ru privacy"
+check_meta "$BASE/uk/politika-konfidentsialnosti" "uk privacy"
+check_meta "$BASE/ru/search" "ru search"
+check_meta "$BASE/uk/search" "uk search"
+
 echo
 echo "============================================"
 echo "  Result: $PASS passed, $FAIL failed"
