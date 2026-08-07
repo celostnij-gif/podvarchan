@@ -45,6 +45,22 @@ interface SitemapEntry {
   alternates: { ru: string; uk: string; 'x-default': string }
 }
 
+/**
+ * Tolerant date parser for sitemap lastmods. Prod D1 has mixed formats in
+ * `pages.updated_at`: ISO strings ("2026-07-23T17:42:38.457Z") AND epoch-millis
+ * stored as text ("1780991377955"). `new Date()` on the numeric text yields
+ * Invalid Date, whose `toISOString()` throws — taking the whole sitemap rebuild
+ * down to the stale R2 snapshot. Never let a data quirk 1102/500 the build.
+ */
+function parseDate(value: string | Date | undefined | null): Date | undefined {
+  if (value == null) return undefined
+  const d = value instanceof Date ? value : new Date(value)
+  if (!Number.isNaN(d.getTime())) return d
+  const n = typeof value === 'string' && /^\d{10,13}$/.test(value) ? Number(value) : NaN
+  if (!Number.isNaN(n)) return new Date(n)
+  return undefined
+}
+
 function addPair(
   entries: SitemapEntry[],
   ruUrl: string,
@@ -97,11 +113,10 @@ function buildEntries(): Promise<SitemapEntry[]> {
       if (page.slug === 'uslugi/') {
         lastMod = maxServiceMod
       } else if (page.slug === 'blog/') {
-        lastMod = maxPostMod ? new Date(maxPostMod) : undefined
+        lastMod = parseDate(maxPostMod)
       } else {
         const type = PAGE_TYPE_BY_SLUG[page.slug]
-        const mod = type ? pageMods[type] : undefined
-        lastMod = mod ? new Date(mod) : undefined
+        lastMod = parseDate(type ? pageMods[type] : undefined)
       }
       if (page.slug === 'tseny/') {
         addPair(entries, ruUrl, `${BASE}/uk/tsiny/`, page.priority, page.changefreq, lastMod)
@@ -178,7 +193,7 @@ function buildEntries(): Promise<SitemapEntry[]> {
           `${BASE}/uk/blog/kategoriya/${uk?.translation.slug ?? ru.translation.slug}/`,
           0.6,
           'weekly',
-          catMods[ru.id] ? new Date(catMods[ru.id]) : undefined,
+          parseDate(catMods[ru.id]),
         )
       }
     } else {
