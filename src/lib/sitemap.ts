@@ -183,6 +183,26 @@ async function buildEntries(): Promise<SitemapEntry[]> {
       }
     }
 
+    /* ── 5. Индексы uslugi/ и blog/ — max updated_at из lite-геттеров (нет в pages) ── */
+    const maxServiceMod = ruServices?.reduce<Date | undefined>((best, s) => {
+      if (s.updatedAt && (!best || s.updatedAt.getTime() > best.getTime())) return s.updatedAt
+      return best
+    }, undefined)
+    const maxPostMod = ruPosts?.reduce<Date | undefined>((best, p) => {
+      const d = p.updatedAt ? new Date(p.updatedAt) : p.publishedAt ? new Date(p.publishedAt) : undefined
+      if (d && (!best || d.getTime() > best.getTime())) return d
+      return best
+    }, undefined)
+    if (maxServiceMod || maxPostMod) {
+      for (const e of entries) {
+        if (e.url === `${BASE}/ru/uslugi/` || e.url === `${BASE}/uk/uslugi/`) {
+          if (maxServiceMod) e.lastModified = maxServiceMod
+        } else if (e.url === `${BASE}/ru/blog/` || e.url === `${BASE}/uk/blog/`) {
+          if (maxPostMod) e.lastModified = maxPostMod
+        }
+      }
+    }
+
     return entries
   })
 }
