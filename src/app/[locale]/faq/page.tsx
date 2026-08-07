@@ -1,5 +1,6 @@
 import { getTranslations, getMessages } from 'next-intl/server'
 import { cookies } from 'next/headers'
+import { GlobalJsonLd } from '@/components/GlobalJsonLd'
 
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { faqSchema } from '@/lib/schema'
@@ -56,5 +57,10 @@ export default async function FaqPage({
 
   const schema = faqSchema(faqItems)
 
-  return <ClientFaqPage items={faqItems} schemas={[schema]} />
+  return (
+    <>
+      <GlobalJsonLd locale={(await _params).locale} />
+      <ClientFaqPage items={faqItems} schemas={[schema]} />
+    </>
+  )
 }

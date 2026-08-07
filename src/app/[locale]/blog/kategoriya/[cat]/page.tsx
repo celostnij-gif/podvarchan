@@ -1,5 +1,6 @@
 import { notFound, permanentRedirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
+import { GlobalJsonLd } from '@/components/GlobalJsonLd'
 import { BLOG_CATEGORIES } from '@/constants'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getBlogPostsByCategory, getBlogCategories, getMediaPublicUrl, getBlogFirstImageUrls, resolvePublishedCategorySlug } from '@/lib/db/public'
@@ -168,5 +169,10 @@ export default async function BlogCategoryPage({ params }: Props) {
     // D1 unavailable — client shows empty state
   }
 
-  return <ClientBlogCategory category={category} posts={posts} locale={locale} />
+  return (
+    <>
+      <GlobalJsonLd locale={locale} />
+      <ClientBlogCategory category={category} posts={posts} locale={locale} />
+    </>
+  )
 }

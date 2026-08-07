@@ -8,6 +8,7 @@ import { ClientBlogPost } from './client-page'
 import { BLOG_SLUG_UK, resolveBlogSlug } from '@/lib/slugMapping'
 import { COVER_IMAGE_OVERRIDES } from '@/lib/content/cover-images'
 import { cookies } from 'next/headers'
+import { GlobalJsonLd } from '@/components/GlobalJsonLd'
 
 /**
  * Определяет, является ли статья клинической (YMYL) для добавления reviewedBy.
@@ -220,8 +221,9 @@ export default async function BlogPostPage({ params }: Props) {
   if (data.type === 'd1') {
     const allSchemas = [data.jsonLd, ...(data.additionalSchemas ?? [])]
     return (
-      <ClientBlogPost
-        title={data.title}
+      <>
+        <GlobalJsonLd locale={locale} />
+        <ClientBlogPost title={data.title}
         body={data.body}
         date={data.date}
         category={data.category}
@@ -233,15 +235,16 @@ export default async function BlogPostPage({ params }: Props) {
         imageVariants={data.imageVariants}
         locale={locale}
         relatedPosts={data.relatedPosts}
-        schemas={allSchemas}
-      />
+        schemas={allSchemas} />
+      </>
     )
   }
 
   const { post } = data
   return (
-    <ClientBlogPost
-      title={post.title}
+    <>
+      <GlobalJsonLd locale={locale} />
+      <ClientBlogPost title={post.title}
       body={post.body ?? ''}
       date={formatDate(post.datePublished, locale)}
       category={post.categoryName}
@@ -253,7 +256,7 @@ export default async function BlogPostPage({ params }: Props) {
       imageAlt={post.imageAlt}
       locale={locale}
       relatedPosts={data.relatedPosts}
-      schemas={[data.jsonLd, ...(data.fallbackSchemas ?? [])]}
-    />
+      schemas={[data.jsonLd, ...(data.fallbackSchemas ?? [])]} />
+    </>
   )
 }

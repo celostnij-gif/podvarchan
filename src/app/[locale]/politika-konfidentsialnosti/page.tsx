@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server'
+import { GlobalJsonLd } from '@/components/GlobalJsonLd'
 import { cookies } from 'next/headers'
 import { getPageSeoMeta } from '@/lib/db/public'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
@@ -32,14 +33,15 @@ export default async function PrivacyPage({
   const commonT = await getTranslations({ locale, namespace: 'common' })
 
   return (
-    <MetadataPage
-      title={t('pageTitle')}
+    <>
+      <GlobalJsonLd locale={locale} />
+      <MetadataPage title={t('pageTitle')}
       content={t('content')}
       breadcrumbItems={[
         { label: commonT('nav.home'), href: '/' },
         { label: t('pageTitle') },
       ]}
-      clean
-    />
+      clean />
+    </>
   )
 }

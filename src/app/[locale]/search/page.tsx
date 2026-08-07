@@ -1,4 +1,5 @@
 import { getTranslations, getMessages } from 'next-intl/server'
+import { GlobalJsonLd } from '@/components/GlobalJsonLd'
 import { getAllBlogPostMetas } from '@/lib/content-metas'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { ClientSearchPage } from './client-page'
@@ -39,8 +40,9 @@ export default async function SearchPage({ params }: Props) {
   const blogPosts = getAllBlogPostMetas(locale)
 
   return (
-    <ClientSearchPage
-      locale={locale}
+    <>
+      <GlobalJsonLd locale={locale} />
+      <ClientSearchPage locale={locale}
       blogPosts={blogPosts}
       services={servicesData}
       translations={{
@@ -51,7 +53,7 @@ export default async function SearchPage({ params }: Props) {
         servicesHeading: t('servicesHeading'),
         readingTime: t('readingTime'),
         minutes: t('minutes'),
-      }}
-    />
+      }} />
+    </>
   )
 }

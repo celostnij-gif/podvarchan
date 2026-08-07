@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server'
+import { GlobalJsonLd } from '@/components/GlobalJsonLd'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getPageByType, getPageSeoMeta } from '@/lib/db/public'
 import { cookies } from 'next/headers'
@@ -34,5 +35,10 @@ export default async function MetodPage({
     d1Page = await getPageByType('METHOD', locale, previewCookie)
   } catch { /* D1 unavailable */ }
 
-  return <MetodClient d1Sections={d1Page?.sections ?? []} />
+  return (
+    <>
+      <GlobalJsonLd locale={locale} />
+      <MetodClient d1Sections={d1Page?.sections ?? []} />
+    </>
+  )
 }

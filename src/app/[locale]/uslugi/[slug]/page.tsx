@@ -1,5 +1,6 @@
 import { notFound, permanentRedirect } from 'next/navigation'
 import { getMessages } from 'next-intl/server'
+import { GlobalJsonLd } from '@/components/GlobalJsonLd'
 import { cookies } from 'next/headers'
 import { SERVICES } from '@/constants'
 import { SERVICE_SLUG_UK, resolveServiceSlug } from '@/lib/slugMapping'
@@ -239,7 +240,12 @@ export default async function ServicePage({ params }: Props) {
       } catch { /* faqJson optional */ }
     }
 
-    return <ClientServicePage service={data} locale={locale} schemas={schemas} />
+    return (
+      <>
+        <GlobalJsonLd locale={locale} />
+        <ClientServicePage service={data} locale={locale} schemas={schemas} />
+      </>
+    )
   }
 
   const { service, faqs, allServices } = data
@@ -254,5 +260,10 @@ export default async function ServicePage({ params }: Props) {
   schemas.push(speakableSchema('.section-card-body p, .subsection-body p'))
   schemas.push(faqSchema(faqs))
 
-  return <ClientServicePage service={service} locale={locale} schemas={schemas} allServices={allServices} />
+  return (
+    <>
+      <GlobalJsonLd locale={locale} />
+      <ClientServicePage service={service} locale={locale} schemas={schemas} allServices={allServices} />
+    </>
+  )
 }

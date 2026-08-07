@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server'
+import { GlobalJsonLd } from '@/components/GlobalJsonLd'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getBlogPosts, getBlogCategories, getMediaPublicUrl, getBlogFirstImageUrls } from '@/lib/db/public'
 import { getBlogPost } from '@/lib/content'
@@ -101,5 +102,10 @@ export default async function BlogPage({
     // D1 unavailable — fallback to empty, client shows empty state
   }
 
-  return <BlogClient posts={posts} categories={categories} />
+  return (
+    <>
+      <GlobalJsonLd locale={locale} />
+      <BlogClient posts={posts} categories={categories} />
+    </>
+  )
 }

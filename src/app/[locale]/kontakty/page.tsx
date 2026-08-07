@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server'
+import { GlobalJsonLd } from '@/components/GlobalJsonLd'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getPageByType, getPageSeoMeta, getContactChannels } from '@/lib/db/public'
 import { cookies } from 'next/headers'
@@ -39,5 +40,10 @@ export default async function KontaktyPage({
     ])
   } catch { /* D1 unavailable */ }
 
-  return <KontaktyClient d1Channels={d1Channels} d1Sections={d1Page?.sections ?? []} />
+  return (
+    <>
+      <GlobalJsonLd locale={locale} />
+      <KontaktyClient d1Channels={d1Channels} d1Sections={d1Page?.sections ?? []} />
+    </>
+  )
 }
