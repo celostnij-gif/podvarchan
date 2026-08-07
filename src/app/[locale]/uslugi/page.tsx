@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server'
+import { GlobalJsonLd } from '@/components/GlobalJsonLd'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getServiceSidebar } from '@/lib/db/public'
 import { UslugiClient } from './page-client'
@@ -59,5 +60,10 @@ export default async function UslugiPage({
     // D1 unavailable — client will show empty state (fallback via messages in future)
   }
 
-  return <UslugiClient services={services} />
+  return (
+    <>
+      <GlobalJsonLd locale={locale} />
+      <UslugiClient services={services} />
+    </>
+  )
 }

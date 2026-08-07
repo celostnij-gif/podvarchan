@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server'
+import { GlobalJsonLd } from '@/components/GlobalJsonLd'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { SITE } from '@/constants'
 import { getPageByType, getPageSeoMeta, getPricingPlans, type PricingPlanPublic } from '@/lib/db/public'
@@ -93,5 +94,10 @@ export default async function TsenyPage({
     d1Page = await getPageByType('PRICING', locale, previewCookie)
   } catch { /* D1 unavailable */ }
 
-  return <TsenyClient schemas={[offerSchema]} pricingPlans={pricingPlans} d1Sections={d1Page?.sections ?? []} />
+  return (
+    <>
+      <GlobalJsonLd locale={locale} />
+      <TsenyClient schemas={[offerSchema]} pricingPlans={pricingPlans} d1Sections={d1Page?.sections ?? []} />
+    </>
+  )
 }

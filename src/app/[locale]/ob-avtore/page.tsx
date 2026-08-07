@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server'
+import { GlobalJsonLd } from '@/components/GlobalJsonLd'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getPageByType, getPageSeoMeta } from '@/lib/db/public'
 import { cookies } from 'next/headers'
@@ -38,5 +39,10 @@ export default async function AboutPage({
     d1Page = await getPageByType('ABOUT', locale, previewCookie)
   } catch { /* D1 unavailable */ }
 
-  return <ClientAboutPage d1Sections={d1Page?.sections ?? []} />
+  return (
+    <>
+      <GlobalJsonLd locale={locale} />
+      <ClientAboutPage d1Sections={d1Page?.sections ?? []} />
+    </>
+  )
 }

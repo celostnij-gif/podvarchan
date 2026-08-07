@@ -5,7 +5,6 @@ import dynamic from 'next/dynamic'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, getTranslations } from 'next-intl/server'
 import { SITE, MAIN_NAV } from '@/constants'
-import { personSchema, practiceSchema, renderJsonLd } from '@/lib/schema'
 import { buildCanonical } from '@/lib/seo/metadata'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
@@ -146,62 +145,10 @@ export default async function LocaleLayout({
     gaId = process.env.NEXT_PUBLIC_GA_ID
   }
 
-  /* ── JSON-LD Schema ── */
-  const jsonLdSchemas = [
-    personSchema({ jobTitle: t('authorTitle'), locale }),
-    await practiceSchema(locale),
-    {
-      '@context': 'https://schema.org',
-      '@type': 'WebSite',
-      '@id': `${SITE.url}/#website`,
-      url: SITE.url,
-      name: SITE.fullName,
-      description: SITE.fullName,
-      inLanguage: locale === 'uk' ? 'uk' : 'ru',
-      potentialAction: {
-        '@type': 'SearchAction',
-        target: {
-          '@type': 'EntryPoint',
-          urlTemplate: `${SITE.url}/${locale}/search?q={search_term_string}`,
-        },
-        'query-input': 'required name=search_term_string',
-      },
-      publisher: {
-        '@type': 'Organization',
-        name: SITE.fullName,
-        url: SITE.url,
-        logo: {
-          '@type': 'ImageObject',
-          url: `${SITE.url}/logo.webp`,
-        },
-      },
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
-      // Static fallback breadcrumb — страницы переопределяют его через BreadcrumbsProvider
-      '@id': `${SITE.url}/${locale}/#breadcrumb-fallback`,
-      inLanguage: locale === 'uk' ? 'uk' : 'ru',
-      itemListElement: [{
-        '@type': 'ListItem',
-        position: 1,
-        name: t('siteName'),
-        url: `${SITE.url}/${locale}/`,
-      }],
-    },
-  ]
-
   return (
 
     <NextIntlClientProvider locale={locale} messages={messages}>
-      {/* JSON-LD Schema */}
-      {jsonLdSchemas.map((schema, index) => (
-        <script
-          key={index}
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: renderJsonLd(schema) }}
-        />
-      ))}
+
 
       {/* Skip-to-content link */}
       <a

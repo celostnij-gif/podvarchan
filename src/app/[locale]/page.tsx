@@ -3,6 +3,7 @@ import { getTranslations, getMessages } from 'next-intl/server'
 import { SITE } from '@/constants'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { aggregateRatingSchema, faqSchema, speakableSchema } from '@/lib/schema'
+import { GlobalJsonLd } from '@/components/GlobalJsonLd'
 import type { Testimonial } from '@/types'
 import HomeClient from './home-client'
 import Hero from '@/components/sections/Hero'
@@ -128,6 +129,7 @@ export default async function HomePage({
 
   return (
     <>
+      <GlobalJsonLd locale={locale} breadcrumb />
       <Hero t={t} commonT={commonT} d1={d1Hero} />
       <HomeClient
         locale={locale}
