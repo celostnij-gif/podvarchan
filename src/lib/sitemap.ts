@@ -5,7 +5,7 @@ import {
   getPublishedBlogCategories,
   getAllBlogPosts,
 } from '@/lib/content'
-import { getBlogPostsLite } from '@/lib/db/public'
+import { getBlogPostsLite, getPageLastmods, getCategoryLastmods } from '@/lib/db/public'
 import { SERVICE_SLUG_UK, BLOG_SLUG_UK, CATEGORY_SLUG_UK } from '@/lib/slugMapping'
 
 const BASE = SITE.url
@@ -58,18 +58,38 @@ function addPair(
   entries.push({ url: ukUrl, alternates, priority, changeFrequency, lastModified })
 }
 
-function buildEntries(): Promise<SitemapEntry[]> {
+async function buildEntries(): Promise<SitemapEntry[]> {
   const entries: SitemapEntry[] = []
+
+  /* lastmod для статики (pages.type) и категорий (max updated_at постов) —
+     отдельные лёгкие KV-ключи, TTL 3600 (план v3, Фаза 4). */
+  const [pageMods, catMods] = await Promise.all([
+    getPageLastmods().catch(() => new Map<string, Date>()),
+    getCategoryLastmods().catch(() => new Map<string, Date>()),
+  ])
+
+  const PAGE_TYPE_BY_SLUG: Record<string, string> = {
+    '': 'HOME',
+    'ob-avtore': 'ABOUT',
+    'metod': 'METHOD',
+    'faq': 'FAQ',
+    'kontakty': 'CONTACTS',
+    'politika-konfidentsialnosti': 'PRIVACY',
+    'disclaimer': 'DISCLAIMER',
+    'tseny': 'PRICING',
+  }
 
   /* ── 1. Статические страницы (tseny/tsiny и ob-avtore/pro-avtora — разные UK-слэги) ── */
   for (const page of STATIC_PAGES) {
     const ruUrl = `${BASE}/ru/${page.slug}`
+    const type = PAGE_TYPE_BY_SLUG[page.slug.replace(/\/$/, '')]
+    const lastmod = type ? pageMods.get(type) : undefined
     if (page.slug === 'tseny/') {
-      addPair(entries, ruUrl, `${BASE}/uk/tsiny/`, page.priority, page.changefreq)
+      addPair(entries, ruUrl, `${BASE}/uk/tsiny/`, page.priority, page.changefreq, lastmod)
     } else if (page.slug === 'ob-avtore/') {
-      addPair(entries, ruUrl, `${BASE}/uk/pro-avtora/`, page.priority, page.changefreq)
+      addPair(entries, ruUrl, `${BASE}/uk/pro-avtora/`, page.priority, page.changefreq, lastmod)
     } else {
-      addPair(entries, ruUrl, `${BASE}/uk/${page.slug}`, page.priority, page.changefreq)
+      addPair(entries, ruUrl, `${BASE}/uk/${page.slug}`, page.priority, page.changefreq, lastmod)
     }
   }
 
@@ -148,6 +168,7 @@ function buildEntries(): Promise<SitemapEntry[]> {
           `${BASE}/uk/blog/kategoriya/${uk?.translation.slug ?? ru.translation.slug}/`,
           0.6,
           'weekly',
+          catMods.get(ru.id),
         )
       }
     } else {

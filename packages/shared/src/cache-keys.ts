@@ -46,6 +46,8 @@ export const cacheKeys = {
   mediaVariants: (idOrUrl: string) => `media:variants:${hashKey(idOrUrl)}`,
   testimonials: (locale: string) => `testimonials:all:${locale}`,
   nav: (location: string, locale: string) => `nav:${location}:${locale}`,
+  sitemapPageLastmods: 'sitemap:page-lastmods',
+  sitemapCatLastmods: 'sitemap:cat-lastmods',
   contacts: () => 'contacts:all',
   settings: (key: string) => `settings:${key}`,
 }
