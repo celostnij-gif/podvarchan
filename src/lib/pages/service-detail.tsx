@@ -20,8 +20,6 @@ import { ClientServicePage } from '@/app/[locale]/uslugi/[slug]/client-page'
  */
 export type ServiceCatalog = 'uslugi' | 'poslugy'
 
-export const SERVICE_DETAIL_REVALIDATE = 604800
-
 export interface ServiceDetailProps {
   params: Promise<{ slug: string; locale: string }>
   catalog: ServiceCatalog

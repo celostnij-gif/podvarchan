@@ -1,11 +1,11 @@
 import {
-  SERVICE_DETAIL_REVALIDATE,
   ServiceDetailPage,
   generateServiceDetailMetadata,
   generateServiceStaticParams,
 } from '@/lib/pages/service-detail'
 
-export const revalidate = SERVICE_DETAIL_REVALIDATE
+// Next statically analyzes `revalidate` — must be a literal, not an imported const
+export const revalidate = 604800
 
 export { generateServiceStaticParams as generateStaticParams }
 
