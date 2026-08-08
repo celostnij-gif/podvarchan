@@ -96,6 +96,13 @@ export default async function middleware(request: NextRequest) {
   if (htmlPath.includes('.html')) {
     return new Response(null, { status: 410 })
   }
+  // Legacy UK service route redirects directly to its canonical localized path.
+  if (pathname === '/uk/uslugi' || pathname.startsWith('/uk/uslugi/')) {
+    const suffix = pathname.slice('/uk/uslugi'.length).replace(/^\/+|\/+$/g, '')
+    const target = suffix ? `/uk/poslugy/${suffix}/` : '/uk/poslugy/'
+    return NextResponse.redirect(new URL(target, request.url), 301)
+  }
+
   // ── UK static page slug localization (Russian → Ukrainian) ──
   if (pathname === '/uk/tseny/' || pathname === '/uk/tseny') {
     return NextResponse.redirect(new URL('/uk/tsiny/', request.url), 301)
@@ -191,8 +198,6 @@ export default async function middleware(request: NextRequest) {
 
   // ── Corrected UK slug redirects (301 from old misspelled slugs) ───
   const correctedUkSlugs: Record<string, string> = {
-    '/uk/uslugi/nevnennist-i-strah-nevdachi/': '/uk/uslugi/nevpevnenist-i-strakh-provala/',
-    '/uk/uslugi/nabyadlivi-dumki/': '/uk/uslugi/navyazlyvi-dumky/',
     '/uk/poslugy/nevnennist-i-strah-nevdachi/': '/uk/poslugy/nevpevnenist-i-strakh-provala/',
     '/uk/poslugy/nabyadlivi-dumki/': '/uk/poslugy/navyazlyvi-dumky/',
     '/uk/blog/nevnennist-yak-podolati/': '/uk/blog/nevpevnenist-yak-podolati/',
@@ -201,14 +206,6 @@ export default async function middleware(request: NextRequest) {
   }
   if (correctedUkSlugs[pathname]) {
     return NextResponse.redirect(new URL(correctedUkSlugs[pathname], request.url), 301)
-  }
-
-  // ── UK services section localization: /uk/uslugi/* → /uk/poslugy/* (301) ──
-  // Runs AFTER the UK-slug redirects above so a legacy RU slug first resolves
-  // to its UK slug, then the whole section moves to the Ukrainian catalog.
-  if (/^\/uk\/uslugi(?=\/|$)/.test(pathname)) {
-    const rest = pathname.slice('/uk/uslugi'.length) // '' | '/' | '/slug/'
-    return NextResponse.redirect(new URL(`/uk/poslugy${rest || '/'}`, request.url), 301)
   }
 
   // ── RU services section localization: /ru/poslugy/* → /ru/uslugi/* (301) ──
@@ -305,7 +302,7 @@ export const config = {
 //
 // 5. /ua/ → /uk/ → 301, then UK services section moves to poslugy:
 //    curl -sI https://podvarchan.com/ua/uslugi/
-//    → HTTP/2 301 → Location: /uk/uslugi/ → 301 → Location: /uk/poslugy/
+//    → HTTP/2 301 → Location: /uk/poslugy/
 // 6. Legacy UK services section → 301 to Ukrainian catalog (2026-08-08):
 //    curl -sI https://podvarchan.com/uk/uslugi/
 //    → HTTP/2 301 → Location: /uk/poslugy/
