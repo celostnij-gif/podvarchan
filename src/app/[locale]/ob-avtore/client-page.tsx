@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, useScroll, useTransform } from 'framer-motion'
-import { useTranslations, useMessages } from 'next-intl'
+import { useTranslations, useMessages, useLocale } from 'next-intl'
 import Image from 'next/image'
 import { AnimatedText, AnimatedSection, SectionContainer, TiltCard, childVariants, DiplomaShowcase } from '@/components/ui'
 import { useSetBreadcrumbs } from '@/providers/BreadcrumbsProvider'
@@ -38,6 +38,8 @@ function HeroBackgroundParallax() {
 /* ── Component ── */
 
 export function ClientAboutPage({ d1Sections }: { d1Sections?: PageSectionPublic[] } = {}) {
+  const locale = useLocale()
+  const catalog = locale === 'uk' ? 'poslugy' : 'uslugi'
   const t = useTranslations('pages.about')
   const commonT = useTranslations('common')
 
@@ -235,7 +237,7 @@ export function ClientAboutPage({ d1Sections }: { d1Sections?: PageSectionPublic
                       return (
                         <Link
                           key={svc.slug}
-                          href={`/uslugi/${svc.slug}/`}
+                          href={`/${catalog}/${svc.slug}/`}
                           className="flex items-center gap-3 p-3 rounded-lg bg-bg-elevated/50 border border-border-base
                                      hover:border-gold/30 hover:bg-bg-elevated transition-all duration-300 group"
                         >

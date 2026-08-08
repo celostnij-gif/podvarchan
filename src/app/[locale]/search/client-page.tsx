@@ -43,7 +43,8 @@ function highlightMatch(text: string, query: string): React.ReactNode {
   )
 }
 
-export function ClientSearchPage({ locale: _locale, blogPosts, services, translations }: Props) {
+export function ClientSearchPage({ locale, blogPosts, services, translations }: Props) {
+  const catalog = locale === 'uk' ? 'poslugy' : 'uslugi'
   const t = useTranslations('search')
   const commonT = useTranslations('common')
   const [query, setQuery] = useState('')
@@ -168,7 +169,7 @@ export function ClientSearchPage({ locale: _locale, blogPosts, services, transla
                     {filteredServices.slice(0, 10).map((svc) => (
                       <Link
                         key={svc.slug}
-                        href={`/uslugi/${svc.slug}/`}
+                        href={`/${catalog}/${svc.slug}/`}
                         className="block p-4 rounded-xl bg-bg-base border border-border-base
                                    hover:border-gold/30 hover:bg-gold/[0.02] transition-all duration-300 group"
                       >

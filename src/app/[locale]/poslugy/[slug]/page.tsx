@@ -12,9 +12,9 @@ export { generateServiceStaticParams as generateStaticParams }
 type PageProps = { params: Promise<{ slug: string; locale: string }> }
 
 export async function generateMetadata({ params }: PageProps) {
-  return generateServiceDetailMetadata({ params, catalog: 'uslugi' })
+  return generateServiceDetailMetadata({ params, catalog: 'poslugy' })
 }
 
 export default function Page({ params }: PageProps) {
-  return <ServiceDetailPage params={params} catalog="uslugi" />
+  return <ServiceDetailPage params={params} catalog="poslugy" />
 }

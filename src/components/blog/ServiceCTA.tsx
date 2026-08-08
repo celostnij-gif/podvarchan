@@ -1,6 +1,7 @@
 'use client'
 
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
+import { SERVICE_SLUG_UK } from '@/lib/slugMapping'
 import { Link } from '@/i18n/routing'
 
 interface ServiceCTAProps {
@@ -24,7 +25,11 @@ export default function ServiceCTA({
   headline,
   description,
 }: ServiceCTAProps) {
-  const t = useTranslations('pages.blog')
+  const locale = useLocale()
+  const catalog = locale === 'uk' ? 'poslugy' : 'uslugi'
+  const slug = locale === 'uk' ? (SERVICE_SLUG_UK[serviceSlug] ?? serviceSlug) : serviceSlug
+  const t = useTranslations('blog')
+
 
   return (
     <div className="relative mt-12 p-6 md:p-8 rounded-2xl border-l-4 border-gold
@@ -47,7 +52,7 @@ export default function ServiceCTA({
 
       <div className="mt-5">
         <Link
-          href={`/uslugi/${serviceSlug}/`}
+          href={`/${catalog}/${slug}/`}
           className="group inline-flex items-center gap-2 text-sm font-medium text-green-light
                      hover:text-green transition-colors duration-200"
         >

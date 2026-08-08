@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { Link } from '@/i18n/routing'
 import { SERVICE_ICONS } from '@/constants'
 import { ServiceIcon } from '@/components/ui/Icons'
@@ -37,6 +37,8 @@ const cardUp = (i: number) => ({
 /* ── Service Card ── */
 
 function ServiceCard({ service, index }: { service: ServiceItem; index: number }) {
+  const locale = useLocale()
+  const catalog = locale === 'uk' ? 'poslugy' : 'uslugi'
   const accentColors = [
     { border: 'group-hover:border-gold/30', glow: 'group-hover:shadow-glow-gold', badge: 'bg-gold/10 text-gold' },
     { border: 'group-hover:border-green/30', glow: 'group-hover:shadow-glow-green', badge: 'bg-green/10 text-green-light' },
@@ -52,7 +54,7 @@ function ServiceCard({ service, index }: { service: ServiceItem; index: number }
     >
       <TiltCard tiltDegree={4} scale={1.02} glowOpacity={0.08} className="h-full rounded-2xl">
       <Link
-        href={`/uslugi/${service.slug}/`}
+        href={`/${catalog}/${service.slug}/`}
         className={`group relative block p-6 md:p-7 h-full
                     border border-border-base
                     hover:bg-bg-elevated ${color.border} ${color.glow}

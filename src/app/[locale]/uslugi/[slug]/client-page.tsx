@@ -1,6 +1,6 @@
 'use client'
 
-import { useTranslations, useMessages } from 'next-intl'
+import { useLocale, useTranslations, useMessages } from 'next-intl'
 import { Link } from '@/i18n/routing'
 import { useSetBreadcrumbs, useRegisterSchemas } from '@/providers/BreadcrumbsProvider'
 import SuitableForSection from '@/components/sections/SuitableForSection'
@@ -99,11 +99,12 @@ const faqItem = (i: number) => ({
 /* ── Hero Section ── */
 
 function HeroSection({ service }: { service: ServiceData }) {
+  const locale = useLocale()
   const commonT = useTranslations('common')
   const t = useTranslations('serviceSection')
   useSetBreadcrumbs([
     { label: commonT('nav.home'), href: '/' },
-    { label: commonT('nav.services'), href: '/uslugi/' },
+    { label: commonT('nav.services'), href: locale === 'uk' ? '/poslugy/' : '/uslugi/' },
     { label: service.shortTitle },
   ])
 
@@ -415,6 +416,7 @@ function CTASection({ service }: { service: ServiceData }) {
 
 /* ── Related Services Section ── */
 function RelatedServicesSection({ service, allServices }: { service: ServiceData; allServices: ServiceData[] }) {
+  const locale = useLocale()
   const t = useTranslations('serviceSection')
   const relatedSlugs = RELATED_SERVICES[service.slug] || []
   const related = allServices.filter(s => relatedSlugs.includes(s.slug)).slice(0, 3)
@@ -439,7 +441,7 @@ function RelatedServicesSection({ service, allServices }: { service: ServiceData
             >
               <TiltCard tiltDegree={4} scale={1.015} className="rounded-xl h-full">
                 <Link
-                  href={`/uslugi/${item.slug}/`}
+                  href={`/${locale === 'uk' ? 'poslugy' : 'uslugi'}/${item.slug}/`}
                   className="group block p-6 border border-border-base h-full
                              hover:bg-bg-elevated hover:border-gold/30 hover:-translate-y-0.5
                              hover:shadow-glow-gold transition-all duration-400 rounded-xl"

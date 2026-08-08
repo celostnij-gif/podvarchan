@@ -60,12 +60,13 @@ const NAV_LABEL_KEYS: Record<string, string> = {
 }
 
 function getNavLabelKey(href: string): string {
-  return NAV_LABEL_KEYS[href] ?? 'nav.home'
+  // UK services catalog is /poslugy/ (2026-08-08); labels are keyed by /uslugi/
+  return NAV_LABEL_KEYS[href.replace(/^\/poslugy\//, '/uslugi/')] ?? 'nav.home'
 }
- 
- function getNavIcon(href: string): string {
-   return NAV_ICONS[href] ?? 'sparkles'
- }
+
+function getNavIcon(href: string): string {
+  return NAV_ICONS[href.replace(/^\/poslugy\//, '/uslugi/')] ?? 'sparkles'
+}
 
 // Mobile menu overlay & panel variants (still need framer-motion for exit animations)
 const mobileOverlay = {
@@ -384,7 +385,7 @@ function DesktopDropdown({ item, pathname, t }: { item: NavItem; pathname: strin
                 )
               })}
               <Link
-                href="/uslugi/"
+                href={pathname.startsWith('/uk') ? '/poslugy/' : '/uslugi/'}
                 className="group flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
                            text-gold hover:bg-gold/[0.06]"
               >

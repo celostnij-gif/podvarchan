@@ -103,11 +103,11 @@ export default async function Footer({ locale }: { locale: string }) {
           {/* Services */}
           <FooterColumn title={t('footerServices')}>
             {services.slice(0, 5).map((s) => (
-              <FooterLink key={s.slug} href={`/uslugi/${s.slug}/`}>
+              <FooterLink key={s.slug} href={`/${locale === 'uk' ? 'poslugy' : 'uslugi'}/${s.slug}/`}>
                 {s.shortTitle ?? s.title ?? s.slug}
               </FooterLink>
             ))}
-            <FooterLink href="/uslugi/">{t('footerAllServices')} <span aria-hidden="true">→</span></FooterLink>
+            <FooterLink href={locale === 'uk' ? '/poslugy/' : '/uslugi/'}>{t('footerAllServices')} <span aria-hidden="true">→</span></FooterLink>
           </FooterColumn>
 
           {/* Blog */}

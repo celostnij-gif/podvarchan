@@ -153,7 +153,7 @@ export async function revalidateSitePath(path: string): Promise<void> {
 
 /**
  * Layout revalidate for a section root (invalidates children under segment).
- * Prefer for list areas: /blog, /uslugi, /faq, /
+ * Prefer for list areas: /blog, /uslugi, /poslugy, /faq, /
  */
 export async function revalidateSiteLayout(path: string): Promise<void> {
   if (path.startsWith('/admin')) {
@@ -174,7 +174,7 @@ export async function revalidateBlogArea(): Promise<void> {
 /** Services area + home (featured) + sitemap. */
 export async function revalidateServicesArea(): Promise<void> {
   await revalidatePublic({
-    paths: ['/uslugi', '/', '/sitemap.xml'],
+    paths: ['/uslugi', '/uk/poslugy', '/', '/sitemap.xml'],
     type: 'layout',
   })
 }
@@ -225,9 +225,9 @@ export function getServiceRevalidatePaths(
 ): string[] {
   const paths = [
     `/ru/uslugi/${ruSlug}/`,
-    `/uk/uslugi/${ukSlug}/`,
+    `/uk/poslugy/${ukSlug}/`,
     '/ru/uslugi/',
-    '/uk/uslugi/',
+    '/uk/poslugy/',
     '/sitemap.xml',
   ]
   if (featured) paths.push('/ru/', '/uk/')
