@@ -75,7 +75,9 @@ export async function withCache<T>(
           // Stale negative-cache entry ('null' written by an older build).
           // Drop it and treat as a miss — a 404 must never outlive the
           // publish that fixes it (P0 follow-up, 2026-08-08).
-          b.kv.delete(fullKey).catch(() => {})
+          const deletion = b.kv.delete(fullKey).catch(() => {})
+          if (b.waitUntil) b.waitUntil(deletion)
+          else await deletion
         } else {
           return JSON.parse(raw) as T
         }
@@ -111,13 +113,15 @@ export async function withCache<T>(
     return data
   }
 
-  /* Write to KV (sync — no ctx.waitUntil needed) */
+  /* Pin best-effort KV writes to the Worker lifecycle. */
   if (b?.kv) {
-    b.kv
+    const write = b.kv
       .put(fullKey, serialized, { expirationTtl: ttl })
       .catch(() => {
         /* silent — KV write is best-effort */
       })
+    if (b.waitUntil) b.waitUntil(write)
+    else await write
   }
 
   /* Mirror durable copy to R2 (fire-and-forget via ctx.waitUntil when available) */
