@@ -69,7 +69,7 @@ function extractTranslations(formData: FormData): z.infer<typeof translationSche
 /** Инвалидация прайса: страницы цен (обе локали) + агрегаты с ценами (llms). */
 async function revalidatePricing(): Promise<void> {
   revalidateAdmin('/admin/pricing')
-  void revalidatePublic({
+  await revalidatePublic({
     paths: ['/ru/tseny/', '/uk/tsiny/', '/llms.txt', '/llms-full.txt'],
     keys: [cacheKeys.pricingList('ru'), cacheKeys.pricingList('uk')],
   })

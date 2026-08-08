@@ -39,7 +39,7 @@ export async function updateSiteSetting(key: string, valueJson: string) {
   }
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'SETTING', entityId: key, before: existing, after: { valueJson } })
   revalidatePath('/admin/settings')
-  void revalidatePublic({ paths: getHomeRevalidatePaths(), type: 'layout', keys: [cacheKeys.settings(key)] })
+  await revalidatePublic({ paths: getHomeRevalidatePaths(), type: 'layout', keys: [cacheKeys.settings(key)] })
 }
 
 export async function deleteSiteSetting(key: string) {
@@ -50,7 +50,7 @@ export async function deleteSiteSetting(key: string) {
   await db.delete(siteSettings).where(eq(siteSettings.key, key))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'SETTING', entityId: key, before: existing })
   revalidatePath('/admin/settings')
-  void revalidatePublic({ paths: getHomeRevalidatePaths(), type: 'layout', keys: [cacheKeys.settings(key)] })
+  await revalidatePublic({ paths: getHomeRevalidatePaths(), type: 'layout', keys: [cacheKeys.settings(key)] })
 }
 
 /* ── Contact Channels ── */
@@ -100,7 +100,7 @@ export async function saveContactChannel(data: FormData) {
     await writeAuditLog({ userId, action: 'CREATE', entityType: 'CONTACT_CHANNEL', entityId: newId, after: ch })
   }
   revalidatePath('/admin/settings')
-  void revalidatePublic({ paths: getHomeRevalidatePaths(), type: 'layout', keys: [cacheKeys.contacts()] })
+  await revalidatePublic({ paths: getHomeRevalidatePaths(), type: 'layout', keys: [cacheKeys.contacts()] })
 }
 
 export async function deleteContactChannel(id: string) {
@@ -111,7 +111,7 @@ export async function deleteContactChannel(id: string) {
   await db.delete(contactChannels).where(eq(contactChannels.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'CONTACT_CHANNEL', entityId: id, before: existing })
   revalidatePath('/admin/settings')
-  void revalidatePublic({ paths: getHomeRevalidatePaths(), type: 'layout', keys: [cacheKeys.contacts()] })
+  await revalidatePublic({ paths: getHomeRevalidatePaths(), type: 'layout', keys: [cacheKeys.contacts()] })
 }
 
 export async function reorderContactChannels(ids: string[]) {
@@ -122,5 +122,5 @@ export async function reorderContactChannels(ids: string[]) {
   }
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'CONTACT_CHANNEL', entityId: 'batch', after: { order: ids } })
   revalidatePath('/admin/settings')
-  void revalidatePublic({ paths: getHomeRevalidatePaths(), type: 'layout', keys: [cacheKeys.contacts()] })
+  await revalidatePublic({ paths: getHomeRevalidatePaths(), type: 'layout', keys: [cacheKeys.contacts()] })
 }

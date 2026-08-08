@@ -68,7 +68,7 @@ export async function bulkUpdateSeo(formData: FormData) {
     }
   }
   if (paths.length > 0) {
-    void revalidatePublic({
+    await revalidatePublic({
       paths,
       type: 'layout',
       keys: ids.map((i) => cacheKeys.seo(i.entityType, i.entityId, i.locale)),
@@ -127,19 +127,19 @@ export async function saveSeoOverride(formData: FormData) {
 
   revalidateAdmin('/admin/seo', `/admin/seo/${entityType}/${entityId}`)
   if (entityType.startsWith('service')) {
-    void revalidatePublic({
+    await revalidatePublic({
       paths: ['/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml'],
       type: 'layout',
       keys: [cacheKeys.seo(entityType, entityId, locale)],
     })
   } else if (entityType.startsWith('blog')) {
-    void revalidatePublic({
+    await revalidatePublic({
       paths: ['/ru/blog/', '/uk/blog/', '/sitemap.xml'],
       type: 'layout',
       keys: [cacheKeys.seo(entityType, entityId, locale)],
     })
   } else if (entityType === 'page') {
-    void revalidatePublic({
+    await revalidatePublic({
       paths: getHomeRevalidatePaths(),
       keys: [cacheKeys.seo(entityType, entityId, locale)],
     })

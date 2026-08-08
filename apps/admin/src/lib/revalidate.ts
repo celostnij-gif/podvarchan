@@ -65,7 +65,12 @@ function unique(paths: string[]): string[] {
 }
 
 /**
- * Fire-and-forget POST to public worker. Never throws to callers.
+ * POST to the public worker after a content mutation (cross-worker).
+ * Never throws to callers.
+ *
+ * Callers MUST `await` this: server actions terminate when the response is
+ * sent, so a fire-and-forget promise never completes the fetch — this was
+ * the root cause of stale public cache after publish/update (P0, 2026-08-08).
  */
 export async function revalidatePublic(input: {
   paths: string[]

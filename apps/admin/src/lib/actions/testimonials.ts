@@ -62,7 +62,7 @@ export async function createTestimonial(formData: FormData) {
   }
   await writeAuditLog({ userId, action: 'CREATE', entityType: 'TESTIMONIAL', entityId: id, after: data })
   revalidateAdmin('/admin/testimonials')
-  void revalidatePublic({ paths: getHomeRevalidatePaths(), keys: getTestimonialsCacheKeys() })
+  await revalidatePublic({ paths: getHomeRevalidatePaths(), keys: getTestimonialsCacheKeys() })
 }
 
 export async function updateTestimonial(id: string, formData: FormData) {
@@ -102,7 +102,7 @@ export async function updateTestimonial(id: string, formData: FormData) {
   }
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'TESTIMONIAL', entityId: id, before: existing, after: data })
   revalidateAdmin('/admin/testimonials')
-  void revalidatePublic({ paths: getHomeRevalidatePaths(), keys: getTestimonialsCacheKeys() })
+  await revalidatePublic({ paths: getHomeRevalidatePaths(), keys: getTestimonialsCacheKeys() })
 }
 
 export async function deleteTestimonial(id: string) {
@@ -113,7 +113,7 @@ export async function deleteTestimonial(id: string) {
   await db.delete(testimonials).where(eq(testimonials.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'TESTIMONIAL', entityId: id, before: existing })
   revalidateAdmin('/admin/testimonials')
-  void revalidatePublic({ paths: getHomeRevalidatePaths(), keys: getTestimonialsCacheKeys() })
+  await revalidatePublic({ paths: getHomeRevalidatePaths(), keys: getTestimonialsCacheKeys() })
 }
 
 export async function publishTestimonial(id: string) {
@@ -149,7 +149,7 @@ export async function publishTestimonial(id: string) {
     entityType: 'TESTIMONIAL', entityId: id, after: { status: newStatus },
   })
   revalidateAdmin('/admin/testimonials')
-  void revalidatePublic({ paths: getHomeRevalidatePaths(), keys: getTestimonialsCacheKeys() })
+  await revalidatePublic({ paths: getHomeRevalidatePaths(), keys: getTestimonialsCacheKeys() })
 }
 
 /* ── Reorder (drag-and-drop) ── */
@@ -160,5 +160,5 @@ export async function reorderTestimonials(orderedIds: string[]) {
     await db.update(testimonials).set({ sortOrder: i }).where(eq(testimonials.id, orderedIds[i]))
   }
   revalidateAdmin('/admin/testimonials')
-  void revalidatePublic({ paths: getHomeRevalidatePaths(), keys: getTestimonialsCacheKeys() })
+  await revalidatePublic({ paths: getHomeRevalidatePaths(), keys: getTestimonialsCacheKeys() })
 }

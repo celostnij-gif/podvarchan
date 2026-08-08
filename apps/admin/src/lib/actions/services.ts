@@ -146,7 +146,7 @@ export async function createService(formData: FormData) {
   const ruSlug = data.translations.find((t: { locale: string }) => t.locale === 'ru')?.slug || ''
   const ukSlug = data.translations.find((t: { locale: string }) => t.locale === 'uk')?.slug || ''
   revalidateAdmin('/admin/services')
-  void revalidatePublic({
+  await revalidatePublic({
     paths: getServiceRevalidatePaths(ruSlug, ukSlug, data.featured),
     keys: getServiceCacheKeys(ruSlug, ukSlug, serviceId, data.featured),
   })
@@ -277,7 +277,7 @@ export async function updateService(id: string, formData: FormData) {
   const oldRuSlug = oldTrs.find((t) => t.locale === 'ru')?.slug || ''
   const oldUkSlug = oldTrs.find((t) => t.locale === 'uk')?.slug || ''
   revalidateAdmin('/admin/services', `/admin/services/${id}`)
-  void revalidatePublic({
+  await revalidatePublic({
     paths: getServiceRevalidatePaths(ruSlug, ukSlug, data.featured || existing.featured),
     keys: [
       ...getServiceCacheKeys(ruSlug, ukSlug, id, data.featured || existing.featured),
@@ -305,7 +305,7 @@ export async function deleteService(id: string) {
   const ruSlug = delTrs.find((t) => t.locale === 'ru')?.slug || ''
   const ukSlug = delTrs.find((t) => t.locale === 'uk')?.slug || ''
   revalidateAdmin('/admin/services')
-  void revalidatePublic({
+  await revalidatePublic({
     paths: ['/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml'],
     type: 'layout',
     keys: getServiceCacheKeys(ruSlug, ukSlug, id, existing.featured),
@@ -359,7 +359,7 @@ export async function publishService(id: string) {
     .all()
   const ruSlug = pubTrs.find((t) => t.locale === 'ru')?.slug || ''
   const ukSlug = pubTrs.find((t) => t.locale === 'uk')?.slug || ''
-  void revalidatePublic({
+  await revalidatePublic({
     paths: ['/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml'],
     type: 'layout',
     keys: getServiceCacheKeys(ruSlug, ukSlug, id, existing.featured),
@@ -374,7 +374,7 @@ export async function reorderServices(orderedIds: string[]) {
     await db.update(services).set({ sortOrder: i }).where(eq(services.id, orderedIds[i]))
   }
   revalidateAdmin('/admin/services')
-  void revalidatePublic({
+  await revalidatePublic({
     paths: ['/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml'],
     type: 'layout',
     keys: [cacheKeys.servicesList('ru'), cacheKeys.servicesList('uk'), cacheKeys.servicesSidebar('ru'), cacheKeys.servicesSidebar('uk')],

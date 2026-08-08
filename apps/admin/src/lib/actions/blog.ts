@@ -111,7 +111,7 @@ export async function createCategory(formData: FormData) {
   revalidateAdmin('/admin/blog/categories')
   const ruCatSlug = data.translations.find((t) => t.locale === 'ru')?.slug
   const ukCatSlug = data.translations.find((t) => t.locale === 'uk')?.slug
-  void revalidatePublic({
+  await revalidatePublic({
     paths: [
       '/ru/blog/',
       '/uk/blog/',
@@ -173,7 +173,7 @@ export async function updateCategory(id: string, formData: FormData) {
   const ukCatSlug = data.translations.find((t) => t.locale === 'uk')?.slug
   const oldRuCat = oldCatTrs.find((t) => t.locale === 'ru')?.slug
   const oldUkCat = oldCatTrs.find((t) => t.locale === 'uk')?.slug
-  void revalidatePublic({
+  await revalidatePublic({
     paths: [
       '/ru/blog/',
       '/uk/blog/',
@@ -201,7 +201,7 @@ export async function deleteCategory(id: string) {
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'BLOG_CATEGORY', entityId: id, before: existing })
   revalidateAdmin('/admin/blog/categories')
   // Revalidate blog area (list + category pages affected)
-  void revalidatePublic({
+  await revalidatePublic({
     paths: ['/ru/blog/', '/uk/blog/', '/sitemap.xml'],
     type: 'layout',
     keys: [cacheKeys.blogCats('ru'), cacheKeys.blogCats('uk')],
@@ -257,7 +257,7 @@ export async function createPost(formData: FormData) {
   const ukSlug = data.translations.find((t: { locale: string }) => t.locale === 'uk')?.slug || ''
   const cats = await getCategorySlugs(db, data.categoryId)
   revalidateAdmin('/admin/blog/posts')
-  void revalidatePublic({
+  await revalidatePublic({
     paths: getBlogPostRevalidatePaths(ruSlug, ukSlug, cats.ru, cats.uk),
     keys: getBlogPostCacheKeys(ruSlug, ukSlug, cats.ru, cats.uk, id),
     prefixes: [cacheKeyPrefixes.blogImages],
@@ -367,7 +367,7 @@ export async function updatePost(id: string, formData: FormData) {
   const oldUkSlug = oldTrs.find((t) => t.locale === 'uk')?.slug || ''
   const newCats = await getCategorySlugs(db, data.categoryId)
   const oldCats = await getCategorySlugs(db, existing.categoryId)
-  void revalidatePublic({
+  await revalidatePublic({
     paths: getBlogPostRevalidatePaths(ruSlug, ukSlug, newCats.ru, newCats.uk),
     keys: [
       ...getBlogPostCacheKeys(ruSlug, ukSlug, newCats.ru, newCats.uk, id),
@@ -396,7 +396,7 @@ export async function deletePost(id: string) {
   const ruSlug = trs.find((t) => t.locale === 'ru')?.slug || ''
   const ukSlug = trs.find((t) => t.locale === 'uk')?.slug || ''
   const cats = await getCategorySlugs(db, existing.categoryId)
-  void revalidatePublic({
+  await revalidatePublic({
     paths: ['/ru/blog/', '/uk/blog/', '/sitemap.xml'],
     type: 'layout',
     keys: getBlogPostCacheKeys(ruSlug, ukSlug, cats.ru, cats.uk, id),
@@ -454,7 +454,7 @@ export async function publishPost(id: string) {
   const ruSlug = trs.find((t) => t.locale === 'ru')?.slug || ''
   const ukSlug = trs.find((t) => t.locale === 'uk')?.slug || ''
   const cats = await getCategorySlugs(db, existing.categoryId)
-  void revalidatePublic({
+  await revalidatePublic({
     paths: ['/ru/blog/', '/uk/blog/', '/sitemap.xml'],
     type: 'layout',
     keys: getBlogPostCacheKeys(ruSlug, ukSlug, cats.ru, cats.uk, id),

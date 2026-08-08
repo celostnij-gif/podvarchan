@@ -229,7 +229,7 @@ export async function updatePage(id: string, formData: FormData) {
     after: data,
   })
   revalidateAdmin('/admin/pages', `/admin/pages/${id}`, '/admin/home')
-  void revalidatePublic({ paths: getPageRevalidatePaths(existing.type), keys: [...getPageCacheKeys(existing.type), ...getPageCacheKeys(data.type)] })
+  await revalidatePublic({ paths: getPageRevalidatePaths(existing.type), keys: [...getPageCacheKeys(existing.type), ...getPageCacheKeys(data.type)] })
 }
 
 /** Primary save from edit form (meta + translations). */
@@ -246,7 +246,7 @@ export async function deletePage(id: string) {
   await db.delete(pages).where(eq(pages.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'PAGE', entityId: id, before: existing })
   revalidateAdmin('/admin/pages', '/admin/home')
-  void revalidatePublic({ paths: getPageRevalidatePaths(existing.type), keys: getPageCacheKeys(existing.type) })
+  await revalidatePublic({ paths: getPageRevalidatePaths(existing.type), keys: getPageCacheKeys(existing.type) })
 }
 
 export async function publishPage(id: string) {
@@ -300,7 +300,7 @@ export async function publishPage(id: string) {
     after: { status: newStatus },
   })
   revalidateAdmin('/admin/pages', `/admin/pages/${id}`, '/admin/home')
-  void revalidatePublic({ paths: getPageRevalidatePaths(existing.type), keys: getPageCacheKeys(existing.type) })
+  await revalidatePublic({ paths: getPageRevalidatePaths(existing.type), keys: getPageCacheKeys(existing.type) })
 }
 const homeContentSchema = z.object({
   ru_slug: z.string().min(1).default('/'),
@@ -421,7 +421,7 @@ export async function updateHomeContent(formData: FormData) {
     after: { type: 'HOME', ...d },
   })
   revalidateAdmin('/admin/home', '/admin/pages', `/admin/pages/${home.id}`)
-  void revalidatePublic({ paths: getHomeRevalidatePaths(), keys: getHomeCacheKeys(home.id) })
+  await revalidatePublic({ paths: getHomeRevalidatePaths(), keys: getHomeCacheKeys(home.id) })
 }
 
 /* ── Section schemas ── */
@@ -485,7 +485,7 @@ export async function addSection(pageId: string, formData: FormData): Promise<{ 
     after: { pageId, key, type },
   })
   const sectionPageType = await getPageTypeByPageId(db, pageId)
-  void revalidatePublic({ paths: getPageRevalidatePaths(sectionPageType), keys: getPageCacheKeys(sectionPageType) })
+  await revalidatePublic({ paths: getPageRevalidatePaths(sectionPageType), keys: getPageCacheKeys(sectionPageType) })
 
   return { sectionId }
 }
@@ -540,7 +540,7 @@ export async function updateSectionContent(sectionId: string, formData: FormData
     after: { key, type: typeRaw },
   })
   const sectionPageType = await getPageTypeByPageId(db, existing.pageId)
-  void revalidatePublic({ paths: getPageRevalidatePaths(sectionPageType), keys: getPageCacheKeys(sectionPageType) })
+  await revalidatePublic({ paths: getPageRevalidatePaths(sectionPageType), keys: getPageCacheKeys(sectionPageType) })
 }
 
 async function upsertSectionTranslation(
@@ -588,7 +588,7 @@ export async function toggleSection(sectionId: string, enabled: boolean) {
     after: { enabled },
   })
   const sectionPageType = await getPageTypeByPageId(db, existing.pageId)
-  void revalidatePublic({ paths: getPageRevalidatePaths(sectionPageType), keys: getPageCacheKeys(sectionPageType) })
+  await revalidatePublic({ paths: getPageRevalidatePaths(sectionPageType), keys: getPageCacheKeys(sectionPageType) })
 }
 
 export async function reorderSections(pageId: string, orderedIds: string[]) {
@@ -608,7 +608,7 @@ export async function reorderSections(pageId: string, orderedIds: string[]) {
     after: { orderedIds },
   })
   const sectionPageType = await getPageTypeByPageId(db, pageId)
-  void revalidatePublic({ paths: getPageRevalidatePaths(sectionPageType), keys: getPageCacheKeys(sectionPageType) })
+  await revalidatePublic({ paths: getPageRevalidatePaths(sectionPageType), keys: getPageCacheKeys(sectionPageType) })
   revalidatePath(`/admin/pages/${pageId}`)
   revalidatePath('/admin/home')
 }
@@ -627,5 +627,5 @@ export async function deleteSection(sectionId: string) {
     before: existing,
   })
   const sectionPageType = await getPageTypeByPageId(db, existing.pageId)
-  void revalidatePublic({ paths: getPageRevalidatePaths(sectionPageType), keys: getPageCacheKeys(sectionPageType) })
+  await revalidatePublic({ paths: getPageRevalidatePaths(sectionPageType), keys: getPageCacheKeys(sectionPageType) })
 }

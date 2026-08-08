@@ -166,7 +166,7 @@ export async function ensureHomeBlueprint(): Promise<{ created: number }> {
   })
 
   revalidateAdmin('/admin/home')
-  void revalidatePublic({ paths: getHomeRevalidatePaths(), keys: getHomeCacheKeys(home.id) })
+  await revalidatePublic({ paths: getHomeRevalidatePaths(), keys: getHomeCacheKeys(home.id) })
 
   return { created }
 }
@@ -245,7 +245,7 @@ export async function updateHomeMeta(input: z.infer<typeof homeMetaSchema>): Pro
   })
 
   revalidateAdmin('/admin/home')
-  void revalidatePublic({ paths: getHomeRevalidatePaths(), keys: getHomeCacheKeys(home.id) })
+  await revalidatePublic({ paths: getHomeRevalidatePaths(), keys: getHomeCacheKeys(home.id) })
 
   return { ok: true }
 }
@@ -344,7 +344,7 @@ export async function updateHomeZone(
   })
 
   revalidateAdmin('/admin/home', '/admin/pages')
-  void revalidatePublic({ paths: getHomeRevalidatePaths(), keys: getHomeCacheKeys(home.id) })
+  await revalidatePublic({ paths: getHomeRevalidatePaths(), keys: getHomeCacheKeys(home.id) })
 
   return { ok: true, heroSynced }
 }
@@ -380,7 +380,7 @@ export async function toggleHomeZone(zone: HomeZoneKey): Promise<{ ok: boolean; 
   })
 
   revalidateAdmin('/admin/home')
-  void revalidatePublic({ paths: getHomeRevalidatePaths(), keys: getHomeCacheKeys(home.id) })
+  await revalidatePublic({ paths: getHomeRevalidatePaths(), keys: getHomeCacheKeys(home.id) })
 
   return { ok: true, enabled: newEnabled }
 }
