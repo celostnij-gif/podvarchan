@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { eq, and } from 'drizzle-orm'
 import { testimonials, testimonialTranslations, redirectRules, seoMeta } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
+import { requireDelete } from '@/lib/auth/guards'
 import { canEditContent, canDelete, canPublish } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
@@ -20,6 +21,8 @@ async function requireEdit(): Promise<string> {
 const testimonialSchema = z.object({
   clientName: z.string().min(1).max(200).optional().default(''),
   clientAge: z.coerce.number().int().min(0).optional().nullable().default(null),
+  avatarInitials: z.string().max(10).optional().default(''),
+  consentConfirmed: z.boolean().optional().default(false),
   rating: z.coerce.number().int().min(1).max(5).optional().default(5),
   source: z.string().max(200).optional().default(''),
   sortOrder: z.coerce.number().int().min(0).optional().default(0),
@@ -32,6 +35,21 @@ const testimonialSchema = z.object({
   })).min(1).max(2),
 })
 
+type PublishableTestimonial = Pick<z.infer<typeof testimonialSchema>, 'consentConfirmed' | 'translations'>
+
+function validateForPublish(testimonial: PublishableTestimonial): void {
+  if (!testimonial.consentConfirmed) throw new Error('Consent is required to publish a testimonial')
+
+  const ruTranslation = testimonial.translations.find(({ locale }) => locale === 'ru')
+  const ukTranslation = testimonial.translations.find(({ locale }) => locale === 'uk')
+  if (!ruTranslation?.text) throw new Error('RU testimonial text is required for publishing')
+  if (!ukTranslation?.text) throw new Error('UK testimonial text is required for publishing')
+}
+
+function isFormDataChecked(value: FormDataEntryValue | null): boolean {
+  return value === 'true' || value === 'on' || value === '1'
+}
+
 export async function createTestimonial(formData: FormData) {
   const userId = await requireEdit()
   const db = await getActionDb()
@@ -41,17 +59,21 @@ export async function createTestimonial(formData: FormData) {
   ].filter(t => t.text || t.problem || t.result)
   const parsed = testimonialSchema.safeParse({
     clientName: formData.get('clientName'), clientAge: formData.get('clientAge'),
+    avatarInitials: formData.get('avatarInitials'),
+    consentConfirmed: isFormDataChecked(formData.get('consentConfirmed')),
     rating: formData.get('rating'), source: formData.get('source'),
     sortOrder: formData.get('sortOrder'), status: formData.get('status'), translations,
   })
   if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
   const data = parsed.data
+  if (data.status === 'PUBLISHED') validateForPublish(data)
   const id = crypto.randomUUID()
   const ts = new Date().toISOString()
   await db.insert(testimonials).values(cleanUpdate({
     id, clientName: data.clientName, clientAge: data.clientAge,
+    avatarInitials: data.avatarInitials, consentConfirmed: data.consentConfirmed,
     rating: data.rating, source: data.source,
-    sortOrder: data.sortOrder, status: data.status, consentConfirmed: false,
+    sortOrder: data.sortOrder, status: data.status,
     createdAt: ts,
   }))
   for (const t of data.translations) {
@@ -76,13 +98,17 @@ export async function updateTestimonial(id: string, formData: FormData) {
   ].filter(t => t.text || t.problem || t.result)
   const parsed = testimonialSchema.safeParse({
     clientName: formData.get('clientName'), clientAge: formData.get('clientAge'),
+    avatarInitials: formData.get('avatarInitials'),
+    consentConfirmed: isFormDataChecked(formData.get('consentConfirmed')),
     rating: formData.get('rating'), source: formData.get('source'),
     sortOrder: formData.get('sortOrder'), status: formData.get('status'), translations,
   })
   if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
   const data = parsed.data
+  if (data.status === 'PUBLISHED') validateForPublish(data)
   await db.update(testimonials).set(cleanUpdate({
     clientName: data.clientName, clientAge: data.clientAge,
+    avatarInitials: data.avatarInitials, consentConfirmed: data.consentConfirmed,
     rating: data.rating, source: data.source,
     sortOrder: data.sortOrder, status: data.status,
   })).where(eq(testimonials.id, id))
@@ -106,7 +132,7 @@ export async function updateTestimonial(id: string, formData: FormData) {
 }
 
 export async function deleteTestimonial(id: string) {
-  const userId = await requireEdit()
+  const { id: userId } = await requireDelete()
   const db = await getActionDb()
   const existing = await db.select().from(testimonials).where(eq(testimonials.id, id)).get()
   if (!existing) throw new Error('Відгук не знайдено')
@@ -128,19 +154,21 @@ export async function publishTestimonial(id: string) {
     const user = await getCurrentUser()
     if (!user || !canPublish(user.role)) throw new Error('Лише ВЛАСНИК або АДМІН можуть публікувати відгуки')
 
-    if (!existing.consentConfirmed) throw new Error('Неможливо опублікувати відгук без підтвердженої згоди')
-
-    const translations = await db
+    const translations = (await db
       .select()
       .from(testimonialTranslations)
       .where(eq(testimonialTranslations.testimonialId, id))
-      .all()
+      .all()).map((t) => ({
+        locale: t.locale,
+        text: t.text ?? '',
+        problem: t.problem ?? '',
+        result: t.result ?? '',
+      }))
 
-    const ruTr = translations.find(t => t.locale === 'ru')
-    const ukTr = translations.find(t => t.locale === 'uk')
-
-    if (!ruTr?.text) throw new Error('RU текст відгуку обов\'язковий для публікації')
-    if (!ukTr?.text) throw new Error('UK текст відгуку обов\'язковий для публікації')
+    validateForPublish({
+      consentConfirmed: existing.consentConfirmed,
+      translations,
+    })
   }
 
   await db.update(testimonials).set({ status: newStatus }).where(eq(testimonials.id, id))

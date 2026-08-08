@@ -7,6 +7,7 @@ import { eq, and } from 'drizzle-orm'
 import { faqItems, faqItemTranslations } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
 import { canEditContent } from '@/lib/auth/permissions'
+import { requireDelete } from '@/lib/auth/guards'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
 import { revalidatePublic, revalidateAdmin, getFaqRevalidatePaths, cacheKeyPrefixes } from '@/lib/revalidate'
@@ -101,7 +102,7 @@ export async function updateFaqItem(id: string, formData: FormData) {
 }
 
 export async function deleteFaqItem(id: string) {
-  const userId = await requireEdit()
+  const { id: userId } = await requireDelete()
   const db = await getActionDb()
   const existing = await db.select().from(faqItems).where(eq(faqItems.id, id)).get()
   if (!existing) throw new Error('FAQ не знайдено')

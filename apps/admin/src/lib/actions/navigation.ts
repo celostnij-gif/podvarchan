@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { eq, asc } from 'drizzle-orm'
 import { navigationItems } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
+import { requireDelete } from '@/lib/auth/guards'
 import { canManageSettings } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
@@ -69,7 +70,7 @@ export async function saveNavigationItem(data: FormData) {
 }
 
 export async function deleteNavigationItem(id: string) {
-  const userId = await requireSettings()
+  const { id: userId } = await requireDelete()
   const db = await getActionDb()
   const existing = await db.select().from(navigationItems).where(eq(navigationItems.id, id)).get()
   if (!existing) throw new Error('Пункт навігації не знайдено')

@@ -6,7 +6,8 @@ import { revalidatePath } from 'next/cache'
 import { eq, and } from 'drizzle-orm'
 import { pages, pageTranslations, pageSections, pageSectionTranslations, redirectRules, seoMeta } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
-import { canEditContent, canDelete, canPublish } from '@/lib/auth/permissions'
+import { canEditContent, canPublish } from '@/lib/auth/permissions'
+import { requireDelete } from '@/lib/auth/guards'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
 import { revalidatePublic, revalidateAdmin, getPageRevalidatePaths, getHomeRevalidatePaths, getPageCacheKeys, getHomeCacheKeys } from '@/lib/revalidate'
@@ -17,12 +18,6 @@ import { requirePublish, assertBilingual, assertMetaPresent } from './ymyl'
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
   if (!user || !canEditContent(user.role)) throw new Error('Заборонено')
-  return user.id
-}
-
-async function requireDelete(): Promise<string> {
-  const user = await getCurrentUser()
-  if (!user || !canDelete(user.role)) throw new Error('Заборонено')
   return user.id
 }
 
@@ -238,7 +233,7 @@ export async function updatePageMeta(id: string, formData: FormData) {
 }
 
 export async function deletePage(id: string) {
-  const userId = await requireDelete()
+  const { id: userId } = await requireDelete()
   const db = await getActionDb()
   const existing = await db.select().from(pages).where(eq(pages.id, id)).get()
   if (!existing) throw new Error('Сторінку не знайдено')
@@ -614,7 +609,7 @@ export async function reorderSections(pageId: string, orderedIds: string[]) {
 }
 
 export async function deleteSection(sectionId: string) {
-  const userId = await requireDelete()
+  const { id: userId } = await requireDelete()
   const db = await getActionDb()
   const existing = await db.select().from(pageSections).where(eq(pageSections.id, sectionId)).get()
   if (!existing) throw new Error('Секцію не знайдено')

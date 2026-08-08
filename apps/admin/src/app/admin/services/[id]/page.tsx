@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm'
 import { notFound } from 'next/navigation'
 import { ServiceForm } from '../service-form'
 import PreviewButton from '@/components/admin/PreviewButton'
+import { servicePath } from '@podvarchan/shared'
 import type { ServiceWithTranslations } from '../types'
 
 interface Props {
@@ -43,14 +44,14 @@ export default async function EditServicePage(props: Props) {
                 entityType="service"
                 slug={svc.translations.find((t) => t.locale === 'ru')!.slug}
                 locale="ru"
-                publicPath={`/ru/uslugi/${svc.translations.find((t) => t.locale === 'ru')!.slug}`}
+                publicPath={servicePath('ru', svc.translations.find((t) => t.locale === 'ru')!.slug)}
               />
               <PreviewButton
                 entityType="service"
                 slug={svc.translations.find((t) => t.locale === 'uk')?.slug ?? ''}
                 locale="uk"
                 disabled={!svc.translations.find((t) => t.locale === 'uk')?.slug}
-                publicPath={`/uk/uslugi/${svc.translations.find((t) => t.locale === 'uk')?.slug ?? ''}`}
+                publicPath={servicePath('uk', svc.translations.find((t) => t.locale === 'uk')?.slug ?? '')}
               />
             </>
           )}

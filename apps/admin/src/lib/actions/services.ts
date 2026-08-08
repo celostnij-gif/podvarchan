@@ -5,9 +5,10 @@ import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 
 import { eq, and } from 'drizzle-orm'
-import { services, serviceTranslations, redirectRules, seoMeta } from '@podvarchan/shared'
+import { services, serviceTranslations, redirectRules, seoMeta, serviceIndexPath, servicePath } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
-import { canEditContent, canDelete, canPublish } from '@/lib/auth/permissions'
+import { canEditContent, canPublish } from '@/lib/auth/permissions'
+import { requireDelete } from '@/lib/auth/guards'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
 import { revalidatePublic, revalidateAdmin, getServiceRevalidatePaths, getServiceCacheKeys, cacheKeys } from '@/lib/revalidate'
@@ -17,12 +18,6 @@ import { requirePublish, assertBilingual, assertMetaPresent } from './ymyl'
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
   if (!user || !canEditContent(user.role)) throw new Error('Заборонено')
-  return user.id
-}
-
-async function requireDelete(): Promise<string> {
-  const user = await getCurrentUser()
-  if (!user || !canDelete(user.role)) throw new Error('Заборонено — лише ВЛАСНИК може видаляти')
   return user.id
 }
 
@@ -198,8 +193,8 @@ export async function updateService(id: string, formData: FormData) {
     for (const newT of data.translations) {
       const oldT = oldTranslations.find(t => t.locale === newT.locale)
       if (oldT && oldT.slug !== newT.slug) {
-        const oldPath = `/${newT.locale}/uslugi/${oldT.slug}/`
-        const newPath = `/${newT.locale}/uslugi/${newT.slug}/`
+        const oldPath = servicePath(newT.locale, oldT.slug)
+        const newPath = servicePath(newT.locale, newT.slug)
         const existingRule = await db
           .select()
           .from(redirectRules)
@@ -289,7 +284,7 @@ export async function updateService(id: string, formData: FormData) {
 }
 
 export async function deleteService(id: string) {
-  const userId = await requireDelete()
+  const { id: userId } = await requireDelete()
   const db = await getActionDb()
 
   const existing = await db.select().from(services).where(eq(services.id, id)).get()
@@ -306,7 +301,7 @@ export async function deleteService(id: string) {
   const ukSlug = delTrs.find((t) => t.locale === 'uk')?.slug || ''
   revalidateAdmin('/admin/services')
   await revalidatePublic({
-    paths: ['/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml'],
+    paths: [serviceIndexPath('ru'), serviceIndexPath('uk'), '/sitemap.xml'],
     type: 'layout',
     keys: getServiceCacheKeys(ruSlug, ukSlug, id, existing.featured),
   })
@@ -360,7 +355,7 @@ export async function publishService(id: string) {
   const ruSlug = pubTrs.find((t) => t.locale === 'ru')?.slug || ''
   const ukSlug = pubTrs.find((t) => t.locale === 'uk')?.slug || ''
   await revalidatePublic({
-    paths: ['/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml'],
+    paths: [serviceIndexPath('ru'), serviceIndexPath('uk'), '/sitemap.xml'],
     type: 'layout',
     keys: getServiceCacheKeys(ruSlug, ukSlug, id, existing.featured),
   })
@@ -375,7 +370,7 @@ export async function reorderServices(orderedIds: string[]) {
   }
   revalidateAdmin('/admin/services')
   await revalidatePublic({
-    paths: ['/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml'],
+    paths: [serviceIndexPath('ru'), serviceIndexPath('uk'), '/sitemap.xml'],
     type: 'layout',
     keys: [cacheKeys.servicesList('ru'), cacheKeys.servicesList('uk'), cacheKeys.servicesSidebar('ru'), cacheKeys.servicesSidebar('uk')],
   })

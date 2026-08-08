@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { eq, asc } from 'drizzle-orm'
 import { siteSettings, contactChannels } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
+import { requireDelete } from '@/lib/auth/guards'
 import { canManageSettings } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
@@ -43,7 +44,7 @@ export async function updateSiteSetting(key: string, valueJson: string) {
 }
 
 export async function deleteSiteSetting(key: string) {
-  const userId = await requireSettings()
+  const { id: userId } = await requireDelete()
   const db = await getActionDb()
   const existing = await db.select().from(siteSettings).where(eq(siteSettings.key, key)).get()
   if (!existing) throw new Error('Налаштування не знайдено')
@@ -104,7 +105,7 @@ export async function saveContactChannel(data: FormData) {
 }
 
 export async function deleteContactChannel(id: string) {
-  const userId = await requireSettings()
+  const { id: userId } = await requireDelete()
   const db = await getActionDb()
   const existing = await db.select().from(contactChannels).where(eq(contactChannels.id, id)).get()
   if (!existing) throw new Error('Канал не знайдено')

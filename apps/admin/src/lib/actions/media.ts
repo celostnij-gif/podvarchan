@@ -4,12 +4,14 @@ import { cleanUpdate } from './clean-update'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { eq } from 'drizzle-orm'
-import { mediaAssets } from '@podvarchan/shared'
+import { mediaAssets, serviceIndexPath } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
 import { canEditContent } from '@/lib/auth/permissions'
+import { requireDelete } from '@/lib/auth/guards'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
 import { revalidatePublic, cacheKeys } from '@/lib/revalidate'
+import { deleteR2Keys, getOwnedMediaKeys } from '@/lib/media/integrity'
 
 /**
  * Media is referenced across blog/services/pages/testimonials — broad layout
@@ -25,7 +27,7 @@ async function revalidateMediaArea(ids: string[]): Promise<void> {
     keys.push(cacheKeys.mediaUrl(id), cacheKeys.mediaVariants(id))
   }
   await revalidatePublic({
-    paths: ['/ru/', '/uk/', '/ru/blog/', '/uk/blog/', '/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml'],
+    paths: ['/ru/', '/uk/', '/ru/blog/', '/uk/blog/', serviceIndexPath('ru'), serviceIndexPath('uk'), '/sitemap.xml'],
     type: 'layout',
     keys,
   })
@@ -75,34 +77,62 @@ export async function updateMediaMeta(id: string, formData: FormData) {
   await revalidateMediaArea([id])
 }
 
+async function getMediaBucket(): Promise<R2Bucket> {
+  const { getCloudflareContext } = await import('@opennextjs/cloudflare')
+  const { env } = getCloudflareContext()
+  const r2 = env.MEDIA_R2_BUCKET as R2Bucket | undefined
+  if (!r2) throw new Error('Media storage is not configured')
+  return r2
+}
+
+type MediaAsset = typeof mediaAssets.$inferSelect
+
+async function clearAssetStorage(r2: R2Bucket, asset: MediaAsset): Promise<void> {
+  if (!asset.storageKey) throw new Error('Media asset has no storage key')
+  const keys = getOwnedMediaKeys(asset.id, asset.storageKey, asset.variantsJson)
+  try {
+    await deleteR2Keys(r2, keys)
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'unknown storage error'
+    throw new Error(`Could not delete media ${asset.id} from storage: ${message}`)
+  }
+}
+
 export async function deleteMedia(id: string) {
-  const userId = await requireEdit()
+  const { id: userId } = await requireDelete()
   const db = await getActionDb()
   const existing = await db.select().from(mediaAssets).where(eq(mediaAssets.id, id)).get()
   if (!existing) throw new Error('Медіа не знайдено')
+  const r2 = await getMediaBucket()
+  await clearAssetStorage(r2, existing)
   await db.delete(mediaAssets).where(eq(mediaAssets.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'MEDIA', entityId: id, before: existing })
   revalidatePath('/admin/media')
   await revalidateMediaArea([id])
 }
 
-/**
- * Batch delete media assets by IDs (no redirect — returns JSON for client).
- * Used by the MediaListPage client component for mass operations.
- */
+/** Batch delete media assets by IDs while keeping R2 and D1 consistent. */
 export async function deleteMediaBatch(ids: string[]): Promise<{ deleted: number; errors: number }> {
-  const userId = await requireEdit()
+  const { id: userId } = await requireDelete()
   const db = await getActionDb()
-  let deleted = 0
+  const r2 = await getMediaBucket()
+  const successfulIds: string[] = []
   let errors = 0
   for (const id of ids) {
     const existing = await db.select().from(mediaAssets).where(eq(mediaAssets.id, id)).get()
     if (!existing) { errors++; continue }
-    await db.delete(mediaAssets).where(eq(mediaAssets.id, id))
-    await writeAuditLog({ userId, action: 'DELETE', entityType: 'MEDIA', entityId: id, before: existing })
-    deleted++
+    try {
+      await clearAssetStorage(r2, existing)
+      await db.delete(mediaAssets).where(eq(mediaAssets.id, id))
+      await writeAuditLog({ userId, action: 'DELETE', entityType: 'MEDIA', entityId: id, before: existing })
+      successfulIds.push(id)
+    } catch {
+      errors++
+    }
   }
-  revalidatePath('/admin/media')
-  await revalidateMediaArea(ids)
-  return { deleted, errors }
+  if (successfulIds.length > 0) {
+    revalidatePath('/admin/media')
+    await revalidateMediaArea(successfulIds)
+  }
+  return { deleted: successfulIds.length, errors }
 }

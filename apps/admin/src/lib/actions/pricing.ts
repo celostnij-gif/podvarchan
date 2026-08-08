@@ -7,7 +7,8 @@ import { revalidatePath } from 'next/cache'
 import { eq } from 'drizzle-orm'
 import { pricingPlans, pricingPlanTranslations, cacheKeys } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
-import { canEditContent, canDelete } from '@/lib/auth/permissions'
+import { canEditContent } from '@/lib/auth/permissions'
+import { requireDelete } from '@/lib/auth/guards'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
 import { revalidatePublic, revalidateAdmin } from '@/lib/revalidate'
@@ -15,12 +16,6 @@ import { revalidatePublic, revalidateAdmin } from '@/lib/revalidate'
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
   if (!user || !canEditContent(user.role)) throw new Error('Заборонено')
-  return user.id
-}
-
-async function requireDelete(): Promise<string> {
-  const user = await getCurrentUser()
-  if (!user || !canDelete(user.role)) throw new Error('Заборонено')
   return user.id
 }
 
@@ -182,7 +177,7 @@ async function upsertTranslation(
 }
 
 export async function deletePricingPlan(id: string) {
-  const userId = await requireDelete()
+  const { id: userId } = await requireDelete()
   const db = await getActionDb()
   const existing = await db.select({ id: pricingPlans.id }).from(pricingPlans).where(eq(pricingPlans.id, id)).get()
   if (!existing) throw new Error('План не знайдено')

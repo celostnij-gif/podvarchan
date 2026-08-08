@@ -9,6 +9,7 @@ import {
   blogPosts, blogPostTranslations, redirectRules, seoMeta,
 } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
+import { requireDelete } from '@/lib/auth/guards'
 import { canEditContent, canDelete, canPublish } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import type { ActionDb } from './db'
@@ -193,7 +194,7 @@ export async function updateCategory(id: string, formData: FormData) {
 }
 
 export async function deleteCategory(id: string) {
-  const userId = await requireEdit()
+  const { id: userId } = await requireDelete()
   const db = await getActionDb()
   const existing = await db.select().from(blogCategories).where(eq(blogCategories.id, id)).get()
   if (!existing) throw new Error('Категорію не знайдено')
@@ -381,7 +382,7 @@ export async function updatePost(id: string, formData: FormData) {
 }
 
 export async function deletePost(id: string) {
-  const userId = await requireEdit()
+  const { id: userId } = await requireDelete()
   const db = await getActionDb()
   const existing = await db.select().from(blogPosts).where(eq(blogPosts.id, id)).get()
   if (!existing) throw new Error('Публікацію не знайдено')
