@@ -71,7 +71,14 @@ export async function withCache<T>(
     try {
       const raw = await b.kv.get(fullKey)
       if (raw !== null) {
-        return JSON.parse(raw) as T
+        if (raw === 'null') {
+          // Stale negative-cache entry ('null' written by an older build).
+          // Drop it and treat as a miss — a 404 must never outlive the
+          // publish that fixes it (P0 follow-up, 2026-08-08).
+          b.kv.delete(fullKey).catch(() => {})
+        } else {
+          return JSON.parse(raw) as T
+        }
       }
     } catch {
       // Parse error or KV error — fall through to fetch
@@ -96,6 +103,13 @@ export async function withCache<T>(
   }
 
   const serialized = JSON.stringify(data)
+
+  /* Never cache null/undefined — a missing entity (404) must be re-checked
+   * after any mutation instead of pinning the negative result for TTL
+   * (P0 follow-up, 2026-08-08). */
+  if (serialized === 'null' || serialized === undefined) {
+    return data
+  }
 
   /* Write to KV (sync — no ctx.waitUntil needed) */
   if (b?.kv) {
