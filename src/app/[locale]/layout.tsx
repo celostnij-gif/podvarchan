@@ -132,6 +132,17 @@ export default async function LocaleLayout({
   if (locale === 'uk') {
     const pricesItem = headerNav.find(i => i.href === '/tseny/')
     if (pricesItem) pricesItem.href = '/tsiny/'
+    // Services catalog: UK canonical is /poslugy/ (ukPath mapping, 2026-08-08)
+    const servicesItem = headerNav.find(i => i.href === '/uslugi/')
+    if (servicesItem) servicesItem.href = '/poslugy/'
+    for (const item of headerNav) {
+      if (!item.children) continue
+      for (const child of item.children) {
+        if (child.href.startsWith('/uslugi/')) {
+          child.href = `/poslugy/${child.href.slice('/uslugi/'.length)}`
+        }
+      }
+    }
   }
 
   // GA ID із Cloudflare Worker env (Server Component runtime)

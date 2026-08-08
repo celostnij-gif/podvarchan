@@ -1,7 +1,7 @@
  'use client'
  
  import { motion } from 'framer-motion'
- import { useTranslations, useMessages } from 'next-intl'
+import { useLocale, useTranslations, useMessages } from 'next-intl'
  import { Link } from '@/i18n/routing'
  import TiltCard from '@/components/ui/TiltCard'
  import { AnimatedSection, SectionContainer } from '@/components/ui'
@@ -54,6 +54,8 @@ export default function ServicesSection({
   d1Content?: { heading?: string; subtitle?: string; allLink?: string }
   maxCards?: number
 } = {}) {
+  const locale = useLocale()
+  const catalog = locale === 'uk' ? 'poslugy' : 'uslugi'
   const t = useTranslations('servicesSection')
   const messages = useMessages()
   const messagesServices = (messages?.servicesData as ServiceItem[]) ?? []
@@ -102,7 +104,7 @@ export default function ServicesSection({
             >
               <TiltCard tiltDegree={4} scale={1.015} className="rounded-xl h-full">
               <Link
-                href={`/uslugi/${service.slug}/`}
+                href={`/${catalog}/${service.slug}/`}
                 aria-label={`${service.title} — ${service.shortTitle}`}
                 className="group block p-6 border border-border-base bg-bg-surface/85
                            hover:border-gold-muted hover:shadow-lg hover:shadow-gold/5
@@ -130,7 +132,7 @@ export default function ServicesSection({
           className="mt-10 text-center"
         >
           <Link
-            href="/uslugi/"
+            href={`/${catalog}/`}
             className="text-sm text-green-light hover:text-green underline-offset-4 hover:underline transition-all"
           >
             {t('allLink')}

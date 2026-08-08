@@ -20,6 +20,7 @@ Allow: /ru/
 Allow: /uk/
 Allow: /blog/
 Allow: /uslugi/
+Allow: /poslugy/
 Allow: /ob-avtore/
 Allow: /metod/
 Allow: /faq/
@@ -181,7 +182,7 @@ export const LLMS_FULL_SUFFIX = `
 | Page | RU | UK |
 |------|----|----|
 | Home | /ru/ | /uk/ |
-| Services | /ru/uslugi/ | /uk/uslugi/ |
+| Services | /ru/uslugi/ | /uk/poslugy/ |
 | About | /ru/ob-avtore/ | /uk/pro-avtora/ |
 | Method | /ru/metod/ | /uk/metod/ |
 | Blog | /ru/blog/ | /uk/blog/ |

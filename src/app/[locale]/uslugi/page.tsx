@@ -21,6 +21,7 @@ export async function generateMetadata({
     title: t('pageTitle'),
     description: t('pageDescription'),
     path: '/uslugi',
+    ukPath: '/poslugy',
     locale,
   })
 }

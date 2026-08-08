@@ -82,8 +82,8 @@ export default async function middleware(request: NextRequest) {
     '/otzyvy.html': '/ru/',
     '/o-mne.html': '/ru/ob-avtore/',
     '/diagnostika.html': '/ru/uslugi/',
-    '/diagnostika_uk.html': '/uk/uslugi/',
-    '/uslugi_uk.html': '/uk/uslugi/',
+    '/diagnostika_uk.html': '/uk/poslugy/',
+    '/uslugi_uk.html': '/uk/poslugy/',
     '/index_uk.html': '/uk/',
   }
   if (oldHtmlRedirects[htmlPath]) {
@@ -110,6 +110,12 @@ export default async function middleware(request: NextRequest) {
       headers: { 'Cache-Control': 'public, max-age=300' },
     })
   }
+  // Legacy UK service route redirects directly to its canonical localized path.
+  if (pathname === '/uk/uslugi' || pathname.startsWith('/uk/uslugi/')) {
+    const suffix = pathname.slice('/uk/uslugi'.length).replace(/^\/+|\/+$/g, '')
+    const target = suffix ? `/uk/poslugy/${suffix}/` : '/uk/poslugy/'
+    return NextResponse.redirect(new URL(target, request.url), 301)
+  }
 
   // ── UK static page slug localization (Russian → Ukrainian) ──
   if (pathname === '/uk/tseny/' || pathname === '/uk/tseny') {
@@ -124,11 +130,11 @@ export default async function middleware(request: NextRequest) {
   if (segments.length >= 3) {
     const [locale, section, ...rest] = segments
 
-    if (locale === 'uk' && section === 'uslugi') {
+    if (locale === 'uk' && (section === 'uslugi' || section === 'poslugy')) {
       const slug = rest.join('/')
       const ukSlug = SERVICE_SLUG_UK[slug]
       if (ukSlug && ukSlug !== slug) {
-        request.nextUrl.pathname = `/uk/uslugi/${ukSlug}/`
+        request.nextUrl.pathname = `/uk/poslugy/${ukSlug}/`
         return NextResponse.redirect(request.nextUrl, 301)
       }
     }
@@ -206,8 +212,8 @@ export default async function middleware(request: NextRequest) {
 
   // ── Corrected UK slug redirects (301 from old misspelled slugs) ───
   const correctedUkSlugs: Record<string, string> = {
-    '/uk/uslugi/nevnennist-i-strah-nevdachi/': '/uk/uslugi/nevpevnenist-i-strakh-provala/',
-    '/uk/uslugi/nabyadlivi-dumki/': '/uk/uslugi/navyazlyvi-dumky/',
+    '/uk/poslugy/nevnennist-i-strah-nevdachi/': '/uk/poslugy/nevpevnenist-i-strakh-provala/',
+    '/uk/poslugy/nabyadlivi-dumki/': '/uk/poslugy/navyazlyvi-dumky/',
     '/uk/blog/nevnennist-yak-podolati/': '/uk/blog/nevpevnenist-yak-podolati/',
     '/uk/blog/chomu-trivoga-ne-minaye-rokarami/': '/uk/blog/chomu-trivoga-ne-minaye-rokamy/',
     '/uk/blog/psihosomatika-zamorochennya/': '/uk/blog/psihosomatika-zapamorochennya/',
@@ -215,6 +221,16 @@ export default async function middleware(request: NextRequest) {
   if (correctedUkSlugs[pathname]) {
     return NextResponse.redirect(new URL(correctedUkSlugs[pathname], request.url), 301)
   }
+
+  // ── RU services section localization: /ru/poslugy/* → /ru/uslugi/* (301) ──
+  // Mirror of the UK block. poslugy is the Ukrainian catalog name only — the
+  // Russian catalog stays /uslugi/. This catches wrong-locale guesses such as
+  // the bare /poslugy/ path, which intlMiddleware localizes to /ru/poslugy/.
+  if (/^\/ru\/poslugy(?=\/|$)/.test(pathname)) {
+    const rest = pathname.slice('/ru/poslugy'.length) // '' | '/' | '/slug/'
+    return NextResponse.redirect(new URL(`/ru/uslugi${rest || '/'}`, request.url), 301)
+  }
+
 
   // ── KV-based redirect rules (populated by admin on redirect_rules mutations) ──
   const kvRules = await readKvRedirectRules()
@@ -235,7 +251,7 @@ export default async function middleware(request: NextRequest) {
   // edge for a week (the /:locale(ru|uk)/:path* s-maxage=604800 rule does not
   // match these paths, but be explicit anyway).
   const KNOWN_BARE_SECTIONS = new Set([
-    'blog', 'uslugi', 'ob-avtore', 'pro-avtora', 'metod', 'faq', 'kontakty',
+    'blog', 'uslugi', 'poslugy', 'ob-avtore', 'pro-avtora', 'metod', 'faq', 'kontakty',
     'politika-konfidentsialnosti', 'disclaimer', 'tseny', 'tsiny', 'search',
   ])
   const firstSegment = pathname.split('/').filter(Boolean)[0]
@@ -297,9 +313,17 @@ export const config = {
 //    curl -sI https://podvarchan.com/otzyvy.html
 //    → HTTP/2 301 → Location: /ru/
 //
-// 5. /ua/ → /uk/ → 301 (unchanged):
+// 5. /ua/ → /uk/ → 301, then UK services section moves to poslugy:
 //    curl -sI https://podvarchan.com/ua/uslugi/
-//    → HTTP/2 301 → Location: /uk/uslugi/
-// 6. WordPress scanner paths → 410 Gone (site has no WP):
+//    → HTTP/2 301 → Location: /uk/poslugy/
+// 6. Legacy UK services section → 301 to Ukrainian catalog (2026-08-08):
+//    curl -sI https://podvarchan.com/uk/uslugi/
+//    → HTTP/2 301 → Location: /uk/poslugy/
+// 7. poslugy under /ru/ (wrong-locale guess) → 301 to Russian catalog:
+//    curl -sI https://podvarchan.com/ru/poslugy/
+//    → HTTP/2 301 → Location: /ru/uslugi/
+//    curl -sI https://podvarchan.com/poslugy/
+//    → HTTP/2 308 → Location: /ru/poslugy/ → 301 → Location: /ru/uslugi/
+// 8. WordPress scanner paths → 410 Gone (site has no WP):
 //    curl -sI https://podvarchan.com/ru/wp-admin/install.php/
 //    → HTTP/2 410

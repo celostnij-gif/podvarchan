@@ -1,13 +1,14 @@
 'use client'
 
 import { useState } from 'react'
+import { SERVICE_SLUG_UK } from '@/lib/slugMapping'
 import { useTranslations } from 'next-intl'
+import { Link } from '@/i18n/routing'
 import { AnimatedText, SectionContainer, AnimatedSection, Button } from '@/components/ui'
 import { useSetBreadcrumbs } from '@/providers/BreadcrumbsProvider'
 import type { BreadcrumbItem } from '@/components/ui/Breadcrumbs'
 import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 import BlogCard from '@/components/blog/BlogCard'
-import { Link } from '@/i18n/routing'
 import type { BlogPost } from '@/types'
 
 const PAGE_SIZE = 9
@@ -135,7 +136,7 @@ export function ClientBlogCategory({ category, posts, locale, breadcrumbs }: Pro
           <div className="text-center">
             <AnimatedText direction="up">
               <Link
-                href={`/uslugi/${category.serviceSlug}/`}
+                href={`/${locale === 'uk' ? 'poslugy' : 'uslugi'}/${locale === 'uk' ? (SERVICE_SLUG_UK[category.serviceSlug!] ?? category.serviceSlug!) : category.serviceSlug}/`}
                 className="inline-flex items-center gap-2 text-sm text-gold hover:text-gold-light transition-all group"
               >
                 <span>{t('readMoreLink') || 'Записаться на консультацию по этому направлению'}</span>

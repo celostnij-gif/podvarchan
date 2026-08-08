@@ -88,6 +88,9 @@ async function buildEntries(): Promise<SitemapEntry[]> {
       addPair(entries, ruUrl, `${BASE}/uk/tsiny/`, page.priority, page.changefreq, lastmod)
     } else if (page.slug === 'ob-avtore/') {
       addPair(entries, ruUrl, `${BASE}/uk/pro-avtora/`, page.priority, page.changefreq, lastmod)
+    } else if (page.slug === 'uslugi/') {
+      // UK canonical catalog is /uk/poslugy/ (ukPath mapping, 2026-08-08)
+      addPair(entries, ruUrl, `${BASE}/uk/poslugy/`, page.priority, page.changefreq, lastmod)
     } else {
       addPair(entries, ruUrl, `${BASE}/uk/${page.slug}`, page.priority, page.changefreq, lastmod)
     }
@@ -109,7 +112,7 @@ async function buildEntries(): Promise<SitemapEntry[]> {
         addPair(
           entries,
           `${BASE}/ru/uslugi/${ru.translation.slug}/`,
-          `${BASE}/uk/uslugi/${uk?.translation.slug ?? ru.translation.slug}/`,
+          `${BASE}/uk/poslugy/${uk?.translation.slug ?? ru.translation.slug}/`,
           ru.priority >= 2 ? 0.8 : 0.7,
           'monthly',
           ru.updatedAt,
@@ -121,7 +124,7 @@ async function buildEntries(): Promise<SitemapEntry[]> {
         addPair(
           entries,
           `${BASE}/ru/uslugi/${service.slug}/`,
-          `${BASE}/uk/uslugi/${SERVICE_SLUG_UK[service.slug] ?? service.slug}/`,
+          `${BASE}/uk/poslugy/${SERVICE_SLUG_UK[service.slug] ?? service.slug}/`,
           servicePriorityMap[service.priority] ?? 0.6,
           'monthly',
           service.updatedAt ? new Date(service.updatedAt) : new Date('2026-07-10'),
@@ -195,7 +198,7 @@ async function buildEntries(): Promise<SitemapEntry[]> {
     }, undefined)
     if (maxServiceMod || maxPostMod) {
       for (const e of entries) {
-        if (e.url === `${BASE}/ru/uslugi/` || e.url === `${BASE}/uk/uslugi/`) {
+        if (e.url === `${BASE}/ru/uslugi/` || e.url === `${BASE}/uk/poslugy/`) {
           if (maxServiceMod) e.lastModified = maxServiceMod
         } else if (e.url === `${BASE}/ru/blog/` || e.url === `${BASE}/uk/blog/`) {
           if (maxPostMod) e.lastModified = maxPostMod
