@@ -211,6 +211,15 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(`/uk/poslugy${rest || '/'}`, request.url), 301)
   }
 
+  // ── RU services section localization: /ru/poslugy/* → /ru/uslugi/* (301) ──
+  // Mirror of the UK block. poslugy is the Ukrainian catalog name only — the
+  // Russian catalog stays /uslugi/. This catches wrong-locale guesses such as
+  // the bare /poslugy/ path, which intlMiddleware localizes to /ru/poslugy/.
+  if (/^\/ru\/poslugy(?=\/|$)/.test(pathname)) {
+    const rest = pathname.slice('/ru/poslugy'.length) // '' | '/' | '/slug/'
+    return NextResponse.redirect(new URL(`/ru/uslugi${rest || '/'}`, request.url), 301)
+  }
+
 
   // ── KV-based redirect rules (populated by admin on redirect_rules mutations) ──
   const kvRules = await readKvRedirectRules()
@@ -300,3 +309,8 @@ export const config = {
 // 6. Legacy UK services section → 301 to Ukrainian catalog (2026-08-08):
 //    curl -sI https://podvarchan.com/uk/uslugi/
 //    → HTTP/2 301 → Location: /uk/poslugy/
+// 7. poslugy under /ru/ (wrong-locale guess) → 301 to Russian catalog:
+//    curl -sI https://podvarchan.com/ru/poslugy/
+//    → HTTP/2 301 → Location: /ru/uslugi/
+//    curl -sI https://podvarchan.com/poslugy/
+//    → HTTP/2 308 → Location: /ru/poslugy/ → 301 → Location: /ru/uslugi/
