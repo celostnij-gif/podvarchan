@@ -38,7 +38,12 @@ echo
 echo "--- Static pages ---"
 for locale in ru uk; do
   check_url "$BASE/$locale" "200or308"
-  check_url "$BASE/$locale/uslugi" "200or308"
+  if [[ "$locale" == "uk" ]]; then
+    # UK services catalog is /uk/poslugy/ (cutover 2026-08-08)
+    check_url "$BASE/uk/poslugy" "200or308"
+  else
+    check_url "$BASE/$locale/uslugi" "200or308"
+  fi
   check_url "$BASE/$locale/blog" "200or308"
   check_url "$BASE/$locale/ob-avtore" "200or308"
   check_url "$BASE/$locale/metod" "200or308"
@@ -59,7 +64,7 @@ done
 
 echo "--- Service pages (UK) ---"
 for slug in hipnoterapiya-onlayn psykhosomatyka-onlayn robotonos-trauma tryvozhni-rozlady; do
-  check_url "$BASE/uk/uslugi/$slug" "200or308"
+  check_url "$BASE/uk/poslugy/$slug" "200or308"
 done
 
 # ── 3. Blog pages ──
@@ -95,6 +100,7 @@ check_url "$BASE/robots.txt" 200
 echo "--- Redirects ---"
 check_url "$BASE/" 301
 check_url "$BASE/ua/uslugi/" 301
+check_url "$BASE/uk/uslugi/" 301
 check_url "$BASE/otzyvy.html" 301
 check_url "$BASE/diagnostika.html" 301
 
@@ -144,7 +150,7 @@ check_meta() {
 check_meta "$BASE/ru" "ru home"
 check_meta "$BASE/uk" "uk home"
 check_meta "$BASE/ru/uslugi" "ru services"
-check_meta "$BASE/uk/uslugi" "uk services"
+check_meta "$BASE/uk/poslugy" "uk services"
 check_meta "$BASE/ru/blog" "ru blog list"
 check_meta "$BASE/uk/blog" "uk blog list"
 check_meta "$BASE/ru/faq" "ru faq"
