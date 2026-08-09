@@ -198,7 +198,7 @@ export function ClientAboutPage({ d1Sections }: { d1Sections?: PageSectionPublic
                 <AnimatedText
                   as="h2"
                   direction="up"
-                  className="text-2xl md:text-3xl font-display text-gold"
+                  className="text-2xl md:text-3xl font-display text-gold-heading"
                 >
                   {t('personalStoryTitle')}
                 </AnimatedText>
@@ -304,7 +304,7 @@ export function ClientAboutPage({ d1Sections }: { d1Sections?: PageSectionPublic
               <AnimatedText
                 as="h2"
                 direction="up"
-                className="text-2xl md:text-3xl font-display text-gold"
+                className="text-2xl md:text-3xl font-display text-gold-heading"
               >
                 {t('familyTitle')}
               </AnimatedText>
@@ -347,7 +347,7 @@ export function ClientAboutPage({ d1Sections }: { d1Sections?: PageSectionPublic
               <AnimatedText
                 direction="up"
                 delay={100}
-                className="text-lg font-display text-gold mb-4"
+                className="text-lg font-display text-gold-heading mb-4"
               >
                 {t('authorActivityListTitle')}
               </AnimatedText>
@@ -368,7 +368,7 @@ export function ClientAboutPage({ d1Sections }: { d1Sections?: PageSectionPublic
               <AnimatedText
                 direction="up"
                 delay={100}
-                className="text-lg font-display text-gold mb-4"
+                className="text-lg font-display text-gold-heading mb-4"
               >
                 {t('authorActivityFocusTitle')}
               </AnimatedText>
@@ -426,7 +426,7 @@ export function ClientAboutPage({ d1Sections }: { d1Sections?: PageSectionPublic
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 flex-wrap">
-                      <h3 className="text-base font-display text-gold group-hover:text-gold-light transition-colors duration-300">
+                      <h3 className="text-base font-display text-gold-heading group-hover:brightness-125 transition-[filter] duration-300">
                         {cred.name}
                       </h3>
                       <span className="px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-gold/10 text-gold rounded-full">
@@ -483,7 +483,7 @@ export function ClientAboutPage({ d1Sections }: { d1Sections?: PageSectionPublic
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 flex-wrap">
-                      <h3 className="text-base font-display text-gold group-hover:text-gold-light transition-colors duration-300">
+                      <h3 className="text-base font-display text-gold-heading group-hover:brightness-125 transition-[filter] duration-300">
                         {cred.name}
                       </h3>
                       <span className="px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-gold/10 text-gold rounded-full">
