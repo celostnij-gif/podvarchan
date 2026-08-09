@@ -17,7 +17,7 @@ export { DOQueueHandler, DOShardedTagCache, BucketCachePurge };
  * The warm-up runs inside a scheduled invocation — its own CPU budget, no user
  * request is affected if it ever fails.
  */
-export async function scheduled(
+async function scheduled(
   _event: unknown,
   env: { WORKER_SELF_REFERENCE: Fetcher },
   ctx: { waitUntil(promise: Promise<unknown>): void },
@@ -37,4 +37,21 @@ export async function scheduled(
   );
 }
 
-export default openNextWorker;
+/**
+ * Default export is a plain object literal with `fetch` and `scheduled`
+ * methods. This matters: workerd's static handler detection only registers
+ * `scheduled` as a cron handler when it is a method of the default export's
+ * object literal. A standalone `export async function scheduled` gets bundled
+ * by esbuild into an `export { ..., scheduled }` re-export block, which
+ * workerd classifies as a Durable Object class — so cron invocations failed
+ * with "Handler does not export a scheduled() function" (verified in the
+ * deployed version metadata: `named_handlers: scheduled [class]`).
+ */
+export default {
+  fetch: (
+    request: Request,
+    env: CloudflareEnv,
+    ctx: { waitUntil(promise: Promise<unknown>): void },
+  ) => openNextWorker.fetch(request, env, ctx),
+  scheduled,
+};
