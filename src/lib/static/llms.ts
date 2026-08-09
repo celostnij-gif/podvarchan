@@ -1,7 +1,7 @@
 /**
  * Static text endpoints for AI/GEO readiness (AGENTS.md §6).
  *
- * /robots.txt  → src/app/robots.ts (Next metadata API)
+ * /robots.txt  → src/app/robots.txt/route.ts (route handler, explicit Cache-Control)
  * /llms.txt    → src/app/llms.txt/route.ts
  * /llms-full.txt → src/app/llms-full.txt/route.ts
  *

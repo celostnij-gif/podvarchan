@@ -81,6 +81,13 @@ const edgeCacheWrapper = () => ({
           const toCache = response.clone();
           const headers = new Headers(toCache.headers);
           headers.delete("set-cookie");
+          // Cloudflare's Cache API refuses to store responses whose Vary is
+          // anything but Accept-Encoding (the Next.js RSC Vary — rsc,
+          // next-router-state-tree, … — silently voided every put, leaving
+          // the edge cache empty: every page view was a cold SSR render and
+          // spikes returned 504). The stored copy is keyed by URL and only
+          // served to plain document navigations, so Vary is not needed.
+          headers.delete("vary");
           headers.set("cache-tag", cdnTagForPath(url.pathname));
           const copy = new Response(toCache.body, {
             status: toCache.status,

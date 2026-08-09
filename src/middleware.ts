@@ -96,6 +96,20 @@ export default async function middleware(request: NextRequest) {
   if (htmlPath.includes('.html')) {
     return new Response(null, { status: 410 })
   }
+
+  // WordPress scanner paths (no WP on this site) → 410 Gone, cheap and
+  // cacheable. Each hit used to cold-render a localized 404 (~500 ms CPU) and
+  // contributed to 504s during scanner bursts.
+  if (
+    pathname.includes('/wp-admin') ||
+    pathname.includes('/wp-login') ||
+    pathname.includes('/xmlrpc.php')
+  ) {
+    return new Response(null, {
+      status: 410,
+      headers: { 'Cache-Control': 'public, max-age=300' },
+    })
+  }
   // Legacy UK service route redirects directly to its canonical localized path.
   if (pathname === '/uk/uslugi' || pathname.startsWith('/uk/uslugi/')) {
     const suffix = pathname.slice('/uk/uslugi'.length).replace(/^\/+|\/+$/g, '')
@@ -269,7 +283,6 @@ export default async function middleware(request: NextRequest) {
     }
   }
 
-
   return response
 }
 
@@ -311,3 +324,6 @@ export const config = {
 //    → HTTP/2 301 → Location: /ru/uslugi/
 //    curl -sI https://podvarchan.com/poslugy/
 //    → HTTP/2 308 → Location: /ru/poslugy/ → 301 → Location: /ru/uslugi/
+// 8. WordPress scanner paths → 410 Gone (site has no WP):
+//    curl -sI https://podvarchan.com/ru/wp-admin/install.php/
+//    → HTTP/2 410
