@@ -304,7 +304,7 @@ export default function MetodClient({ breadcrumbs, d1Sections }: { breadcrumbs: 
               <div className="md:col-span-2">
                 <div className="flex items-center gap-4 mb-4">
                   <span className="text-4xl" aria-hidden="true">{item.icon}</span>
-                  <h3 className="text-2xl font-display text-gold">{item.title}</h3>
+                  <h3 className="text-2xl font-display text-gold-heading">{item.title}</h3>
                 </div>
                 <p className="text-text-muted text-sm leading-relaxed">{item.desc}</p>
               </div>
@@ -395,7 +395,7 @@ export default function MetodClient({ breadcrumbs, d1Sections }: { breadcrumbs: 
               className="p-6 border border-border-base text-center
                          hover:border-gold/20 transition-all duration-400 group rounded-xl h-full flex flex-col"
             >
-              <h3 className="text-base font-display text-gold group-hover:text-gold-light transition-colors duration-300">
+              <h3 className="text-base font-display text-gold-heading group-hover:brightness-125 transition-[filter] duration-300">
                 {item.title}
               </h3>
               <p className="mt-2 text-xs text-text-muted leading-relaxed flex-1">

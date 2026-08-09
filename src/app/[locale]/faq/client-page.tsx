@@ -36,7 +36,7 @@ export function ClientFaqPage({ items, breadcrumbs }: Props) {
 
         {/* ── CTA after FAQ ── */}
         <AnimatedText direction="up" className="mt-8 p-6 md:p-8 rounded-xl bg-gold/[0.04] border border-gold/10 text-center">
-          <h2 className="text-lg font-display text-gold mb-2">{t('ctaHeading')}</h2>
+          <h2 className="text-lg font-display text-gold-heading mb-2">{t('ctaHeading')}</h2>
           <p className="text-sm text-text-muted mb-4">{t('ctaText')}</p>
           <Link
             href="/kontakty/"
