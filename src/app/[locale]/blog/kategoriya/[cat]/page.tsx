@@ -1,10 +1,12 @@
 import { notFound, permanentRedirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { GlobalJsonLd } from '@/components/GlobalJsonLd'
+import { PageJsonLd } from '@/components/PageJsonLd'
 import { BLOG_CATEGORIES } from '@/constants'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getBlogPostsByCategory, getBlogCategories, getMediaPublicUrl, getBlogFirstImageUrls, resolvePublishedCategorySlug } from '@/lib/db/public'
 import { getBlogPost } from '@/lib/content'
+import { breadcrumbSchema } from '@/lib/schema'
 import { ClientBlogCategory } from './client-page'
 import { CATEGORY_SLUG_UK, resolveCategorySlug } from '@/lib/slugMapping'
 import type { BlogPostPublic, BlogCategoryPublic } from '@/lib/db/public'
@@ -169,10 +171,19 @@ export default async function BlogCategoryPage({ params }: Props) {
     // D1 unavailable — client shows empty state
   }
 
+  const commonT = await getTranslations({ locale, namespace: 'common' })
+  const breadcrumbs = [
+    { label: commonT('nav.home'), href: '/' },
+    { label: commonT('nav.blog'), href: '/blog/' },
+    { label: category.name, href: `/blog/kategoriya/${rawCat}/` },
+  ]
+  const breadcrumb = breadcrumbSchema({ items: breadcrumbs.map((b) => ({ name: b.label, url: b.href })), locale })
+
   return (
     <>
       <GlobalJsonLd locale={locale} />
-      <ClientBlogCategory category={category} posts={posts} locale={locale} />
+      <PageJsonLd schemas={[breadcrumb]} />
+      <ClientBlogCategory category={category} posts={posts} locale={locale} breadcrumbs={breadcrumbs} />
     </>
   )
 }

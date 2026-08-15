@@ -22,7 +22,6 @@ import ScrollProgress from '@/components/ui/ScrollProgress'
 import { routing } from '@/i18n/routing'
 import { DeviceProvider } from '@/providers/DeviceProvider'
 import { BreadcrumbsProvider } from '@/providers/BreadcrumbsProvider'
-import { PageSchemaRenderer } from './schema-and-breadcrumbs'
 
 /* ── Generate static params for locales ── */
 
@@ -180,7 +179,6 @@ export default async function LocaleLayout({
 
           <main id="main-content" className="flex-1 min-h-[calc(100vh-4rem)]">
             <BreadcrumbsProvider>
-              <PageSchemaRenderer />
               {children}
             </BreadcrumbsProvider>
           </main>

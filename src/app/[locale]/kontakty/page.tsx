@@ -1,7 +1,9 @@
 import { getTranslations } from 'next-intl/server'
 import { GlobalJsonLd } from '@/components/GlobalJsonLd'
+import { PageJsonLd } from '@/components/PageJsonLd'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getPageByType, getPageSeoMeta, getContactChannels } from '@/lib/db/public'
+import { breadcrumbSchema } from '@/lib/schema'
 import { cookies } from 'next/headers'
 import KontaktyClient from './client-page'
 export const revalidate = 604800
@@ -40,10 +42,27 @@ export default async function KontaktyPage({
     ])
   } catch { /* D1 unavailable */ }
 
+  const t = await getTranslations({ locale, namespace: 'contacts' })
+  const commonT = await getTranslations({ locale, namespace: 'common' })
+  const heroSection = d1Page?.sections?.find((s) => s.key === 'hero' && s.type === 'hero')
+  let heroTitle = t('pageTitle')
+  if (heroSection?.contentJson) {
+    try {
+      const parsed = JSON.parse(heroSection.contentJson)
+      if (parsed.title) heroTitle = parsed.title
+    } catch { /* fallback to messages */ }
+  }
+  const breadcrumbs = [
+    { label: commonT('nav.home'), href: '/' },
+    { label: heroTitle, href: '/kontakty/' },
+  ]
+  const breadcrumb = breadcrumbSchema({ items: breadcrumbs.map((b) => ({ name: b.label, url: b.href })), locale })
+
   return (
     <>
       <GlobalJsonLd locale={locale} />
-      <KontaktyClient d1Channels={d1Channels} d1Sections={d1Page?.sections ?? []} />
+      <PageJsonLd schemas={[breadcrumb]} />
+      <KontaktyClient d1Channels={d1Channels} d1Sections={d1Page?.sections ?? []} breadcrumbs={breadcrumbs} />
     </>
   )
 }

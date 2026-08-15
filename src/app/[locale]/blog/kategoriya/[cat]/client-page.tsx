@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/routing'
 import { AnimatedText, SectionContainer, AnimatedSection, Button } from '@/components/ui'
 import { useSetBreadcrumbs } from '@/providers/BreadcrumbsProvider'
+import type { BreadcrumbItem } from '@/components/ui/Breadcrumbs'
 import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 import BlogCard from '@/components/blog/BlogCard'
 import type { BlogPost } from '@/types'
@@ -23,18 +24,14 @@ interface Props {
   category: BlogCategoryMsg
   posts: Omit<BlogPost, 'body'>[]
   locale: string
+  breadcrumbs: BreadcrumbItem[]
 }
 
-export function ClientBlogCategory({ category, posts, locale }: Props) {
+export function ClientBlogCategory({ category, posts, locale, breadcrumbs }: Props) {
   const t = useTranslations('blog')
-  const commonT = useTranslations('common')
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
-  useSetBreadcrumbs([
-    { label: commonT('nav.home'), href: '/' },
-    { label: commonT('nav.blog'), href: '/blog/' },
-    { label: category.name },
-  ])
+  useSetBreadcrumbs(breadcrumbs)
 
   const visiblePosts = posts.slice(0, visibleCount)
   const hasMore = posts.length > visiblePosts.length

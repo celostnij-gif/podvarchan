@@ -8,8 +8,6 @@ import type { BreadcrumbItem } from '@/components/ui/Breadcrumbs'
 interface BreadcrumbsContextValue {
   items: BreadcrumbItem[]
   setItems: (items: BreadcrumbItem[]) => void
-  schemas: Record<string, unknown>[]
-  setSchemas: (schemas: Record<string, unknown>[]) => void
 }
 
 /* ── Context ── */
@@ -17,18 +15,15 @@ interface BreadcrumbsContextValue {
 const BreadcrumbsContext = createContext<BreadcrumbsContextValue>({
   items: [],
   setItems: () => {},
-  schemas: [],
-  setSchemas: () => {},
 })
 
 /* ── Provider ── */
 
 export function BreadcrumbsProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<BreadcrumbItem[]>([])
-  const [schemas, setSchemas] = useState<Record<string, unknown>[]>([])
 
   return (
-    <BreadcrumbsContext.Provider value={{ items, setItems, schemas, setSchemas }}>
+    <BreadcrumbsContext.Provider value={{ items, setItems }}>
       {children}
     </BreadcrumbsContext.Provider>
   )
@@ -39,13 +34,6 @@ export function BreadcrumbsProvider({ children }: { children: ReactNode }) {
 export function useBreadcrumbs(): BreadcrumbItem[] {
   const { items } = useContext(BreadcrumbsContext)
   return items
-}
-
-/* ── Hook for reading registered schemas ── */
-
-export function useRegisteredSchemas(): Record<string, unknown>[] {
-  const { schemas } = useContext(BreadcrumbsContext)
-  return schemas
 }
 
 /* ── Hook for setting breadcrumbs from a page component ── */
@@ -61,15 +49,4 @@ export function useSetBreadcrumbs(items: BreadcrumbItem[]): void {
       setItems(items)
     }
   })
-}
-
-export function useRegisterSchemas(newSchemas: Record<string, unknown>[]): void {
-  const { schemas: currentSchemas, setSchemas } = useContext(BreadcrumbsContext)
-
-  const currentStr = JSON.stringify(currentSchemas)
-  const nextStr = JSON.stringify(newSchemas)
-
-  if (nextStr !== currentStr) {
-    setSchemas(newSchemas)
-  }
 }

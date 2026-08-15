@@ -1,14 +1,16 @@
 import { notFound, permanentRedirect } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getBlogPost, getAllBlogSlugs, getAllBlogPosts, formatDate } from '@/lib/content'
 import { getBlogPostBySlug, getBlogPostById, getBlogPostsByCategory, getMediaWithVariants, getSEOMeta, resolvePublishedBlogSlug } from '@/lib/db/public'
 import type { BlogPostPublic } from '@/lib/db/public'
-import { articleSchema, faqSchema, speakableSchema } from '@/lib/schema'
+import { articleSchema, faqSchema, speakableSchema, breadcrumbSchema } from '@/lib/schema'
 import { ClientBlogPost } from './client-page'
 import { BLOG_SLUG_UK, resolveBlogSlug } from '@/lib/slugMapping'
 import { COVER_IMAGE_OVERRIDES } from '@/lib/content/cover-images'
 import { cookies } from 'next/headers'
 import { GlobalJsonLd } from '@/components/GlobalJsonLd'
+import { PageJsonLd } from '@/components/PageJsonLd'
 
 /**
  * Определяет, является ли статья клинической (YMYL) для добавления reviewedBy.
@@ -218,11 +220,20 @@ export default async function BlogPostPage({ params }: Props) {
     notFound()
   }
 
+  const commonT = await getTranslations({ locale, namespace: 'common' })
+
   if (data.type === 'd1') {
     const allSchemas = [data.jsonLd, ...(data.additionalSchemas ?? [])]
+    const breadcrumbs = [
+      { label: commonT('nav.home'), href: '/' },
+      { label: commonT('nav.blog'), href: '/blog/' },
+      { label: data.category, href: `/blog/kategoriya/${data.categorySlug}/` },
+    ]
+    const breadcrumb = breadcrumbSchema({ items: breadcrumbs.map((b) => ({ name: b.label, url: b.href })), locale })
     return (
       <>
         <GlobalJsonLd locale={locale} />
+        <PageJsonLd schemas={[breadcrumb, ...allSchemas]} />
         <ClientBlogPost title={data.title}
         body={data.body}
         date={data.date}
@@ -235,15 +246,22 @@ export default async function BlogPostPage({ params }: Props) {
         imageVariants={data.imageVariants}
         locale={locale}
         relatedPosts={data.relatedPosts}
-        schemas={allSchemas} />
+        breadcrumbs={breadcrumbs} />
       </>
     )
   }
 
   const { post } = data
+  const breadcrumbs = [
+    { label: commonT('nav.home'), href: '/' },
+    { label: commonT('nav.blog'), href: '/blog/' },
+    { label: post.categoryName, href: `/blog/kategoriya/${post.categorySlug}/` },
+  ]
+  const breadcrumb = breadcrumbSchema({ items: breadcrumbs.map((b) => ({ name: b.label, url: b.href })), locale })
   return (
     <>
       <GlobalJsonLd locale={locale} />
+      <PageJsonLd schemas={[breadcrumb, data.jsonLd, ...(data.fallbackSchemas ?? [])]} />
       <ClientBlogPost title={post.title}
       body={post.body ?? ''}
       date={formatDate(post.datePublished, locale)}
@@ -256,7 +274,7 @@ export default async function BlogPostPage({ params }: Props) {
       imageAlt={post.imageAlt}
       locale={locale}
       relatedPosts={data.relatedPosts}
-      schemas={[data.jsonLd, ...(data.fallbackSchemas ?? [])]} />
+      breadcrumbs={breadcrumbs} />
     </>
   )
 }

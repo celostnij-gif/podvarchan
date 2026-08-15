@@ -26,23 +26,19 @@ const FAQSection = dynamic(() => import('@/components/sections/FAQSection'), {
 })
 import { AnimatedText, AnimatedSection, SectionContainer } from '@/components/ui'
 import { Link } from '@/i18n/routing'
-import { useRegisterSchemas } from '@/providers/BreadcrumbsProvider'
 
 export default function HomeClient({
   locale: _locale,
-  schemas,
   d1Testimonials,
   d1Faqs,
   d1Sections,
 }: {
   locale: string
-  schemas?: Record<string, unknown>[]
   d1Testimonials?: TestimonialPublic[]
   d1Faqs?: FAQPublic[]
   d1Sections?: PageSectionPublic[]
 }) {
   const t = useTranslations('home')
-  useRegisterSchemas(schemas ?? [])
   // Parse per-zone D1 content (null → undefined for prop compatibility)
   const problemsD1 = parseHomeZoneContent('problems', d1Sections) ?? undefined
   const methodD1 = parseHomeZoneContent('method', d1Sections) ?? undefined

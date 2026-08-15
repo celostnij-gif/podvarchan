@@ -1,7 +1,9 @@
 import { getTranslations } from 'next-intl/server'
 import { GlobalJsonLd } from '@/components/GlobalJsonLd'
+import { PageJsonLd } from '@/components/PageJsonLd'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getServiceSidebar } from '@/lib/db/public'
+import { breadcrumbSchema } from '@/lib/schema'
 import { UslugiClient } from './page-client'
 import type { ServiceSidebarItem } from '@/lib/db/public'
 
@@ -61,10 +63,18 @@ export default async function UslugiPage({
     // D1 unavailable — client will show empty state (fallback via messages in future)
   }
 
+  const commonT = await getTranslations({ locale, namespace: 'common' })
+  const breadcrumbs = [
+    { label: commonT('nav.home'), href: '/' },
+    { label: commonT('nav.services'), href: locale === 'uk' ? '/poslugy/' : '/uslugi/' },
+  ]
+  const breadcrumb = breadcrumbSchema({ items: breadcrumbs.map((b) => ({ name: b.label, url: b.href })), locale })
+
   return (
     <>
       <GlobalJsonLd locale={locale} />
-      <UslugiClient services={services} />
+      <PageJsonLd schemas={[breadcrumb]} />
+      <UslugiClient services={services} breadcrumbs={breadcrumbs} />
     </>
   )
 }

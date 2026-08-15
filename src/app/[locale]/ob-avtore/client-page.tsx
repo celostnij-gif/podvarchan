@@ -5,6 +5,7 @@ import { useTranslations, useMessages, useLocale } from 'next-intl'
 import Image from 'next/image'
 import { AnimatedText, AnimatedSection, SectionContainer, TiltCard, childVariants, DiplomaShowcase } from '@/components/ui'
 import { useSetBreadcrumbs } from '@/providers/BreadcrumbsProvider'
+import type { BreadcrumbItem } from '@/components/ui/Breadcrumbs'
 import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 import { Link } from '@/i18n/routing'
 import { AUTHOR } from '@/constants'
@@ -37,7 +38,7 @@ function HeroBackgroundParallax() {
 
 /* ── Component ── */
 
-export function ClientAboutPage({ d1Sections }: { d1Sections?: PageSectionPublic[] } = {}) {
+export function ClientAboutPage({ breadcrumbs, d1Sections }: { breadcrumbs: BreadcrumbItem[]; d1Sections?: PageSectionPublic[] }) {
   const locale = useLocale()
   const catalog = locale === 'uk' ? 'poslugy' : 'uslugi'
   const t = useTranslations('pages.about')
@@ -55,10 +56,7 @@ export function ClientAboutPage({ d1Sections }: { d1Sections?: PageSectionPublic
     } catch { /* fallback to messages */ }
   }
 
-  useSetBreadcrumbs([
-    { label: commonT('nav.home'), href: '/' },
-    { label: commonT('nav.about') },
-  ])
+  useSetBreadcrumbs(breadcrumbs)
 
   const credNames = t.raw('credNames') as string[]
   const credOrgs = t.raw('credOrgs') as string[]

@@ -4,6 +4,7 @@ import { SITE } from '@/constants'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { aggregateRatingSchema, faqSchema, speakableSchema } from '@/lib/schema'
 import { GlobalJsonLd } from '@/components/GlobalJsonLd'
+import { PageJsonLd } from '@/components/PageJsonLd'
 import type { Testimonial } from '@/types'
 import HomeClient from './home-client'
 import Hero from '@/components/sections/Hero'
@@ -130,10 +131,10 @@ export default async function HomePage({
   return (
     <>
       <GlobalJsonLd locale={locale} breadcrumb />
+      <PageJsonLd schemas={pageSchemas} />
       <Hero t={t} commonT={commonT} d1={d1Hero} />
       <HomeClient
         locale={locale}
-        schemas={pageSchemas}
         d1Testimonials={d1Testimonials}
         d1Faqs={d1Faqs}
         d1Sections={d1Home?.sections ?? []}

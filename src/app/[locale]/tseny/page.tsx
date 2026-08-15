@@ -1,8 +1,10 @@
 import { getTranslations } from 'next-intl/server'
 import { GlobalJsonLd } from '@/components/GlobalJsonLd'
+import { PageJsonLd } from '@/components/PageJsonLd'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { SITE } from '@/constants'
-import { getPageByType, getPageSeoMeta, getPricingPlans, type PricingPlanPublic } from '@/lib/db/public'
+import { breadcrumbSchema } from '@/lib/schema'
+import { getPageByType, getPageSeoMeta, getPricingPlans } from '@/lib/db/public'
 import { cookies } from 'next/headers'
 import { TsenyClient } from './client-page'
 export const revalidate = 604800
@@ -94,10 +96,20 @@ export default async function TsenyPage({
     d1Page = await getPageByType('PRICING', locale, previewCookie)
   } catch { /* D1 unavailable */ }
 
+  const t = await getTranslations({ locale, namespace: 'tseny' })
+  const commonT = await getTranslations({ locale, namespace: 'common' })
+  const breadcrumbs = [
+    { label: commonT('nav.home'), href: '/' },
+    { label: t('badgeLabel'), href: locale === 'uk' ? '/tsiny/' : '/tseny/' },
+  ]
+  const schemas: Record<string, unknown>[] = [offerSchema]
+  schemas.push(breadcrumbSchema({ items: breadcrumbs.map((b) => ({ name: b.label, url: b.href })), locale }))
+
   return (
     <>
       <GlobalJsonLd locale={locale} />
-      <TsenyClient schemas={[offerSchema]} pricingPlans={pricingPlans} d1Sections={d1Page?.sections ?? []} />
+      <PageJsonLd schemas={schemas} />
+      <TsenyClient breadcrumbs={breadcrumbs} pricingPlans={pricingPlans} d1Sections={d1Page?.sections ?? []} />
     </>
   )
 }

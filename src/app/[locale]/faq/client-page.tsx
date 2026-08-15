@@ -3,18 +3,16 @@
 import { useTranslations } from 'next-intl'
 import { AnimatedText, SectionContainer, PageHero, FaqAccordion } from '@/components/ui'
 import type { FAQItem } from '@/types'
-import { useRegisterSchemas } from '@/providers/BreadcrumbsProvider'
+import type { BreadcrumbItem } from '@/components/ui/Breadcrumbs'
 import { Link } from '@/i18n/routing'
 
 interface Props {
   items: FAQItem[]
-  schemas?: Record<string, unknown>[]
+  breadcrumbs: BreadcrumbItem[]
 }
 
-export function ClientFaqPage({ items, schemas }: Props) {
-  useRegisterSchemas(schemas ?? [])
+export function ClientFaqPage({ items, breadcrumbs }: Props) {
   const t = useTranslations('faq')
-  const commonT = useTranslations('common')
 
   return (
     <>
@@ -22,10 +20,7 @@ export function ClientFaqPage({ items, schemas }: Props) {
         label="FAQ"
         title={t('pageTitle')}
         description={t('pageDescription')}
-        breadcrumbItems={[
-          { label: commonT('nav.home'), href: '/' },
-          { label: 'FAQ' },
-        ]}
+        breadcrumbItems={breadcrumbs}
         clean
       />
 

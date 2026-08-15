@@ -1,14 +1,39 @@
 import { notFound, permanentRedirect } from 'next/navigation'
-import { getMessages } from 'next-intl/server'
+import { getMessages, getTranslations } from 'next-intl/server'
 import { GlobalJsonLd } from '@/components/GlobalJsonLd'
+import { PageJsonLd } from '@/components/PageJsonLd'
 import { cookies } from 'next/headers'
 import { SERVICES } from '@/constants'
 import { SERVICE_SLUG_UK, resolveServiceSlug } from '@/lib/slugMapping'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
-import { serviceSchema, faqSchema, speakableSchema } from '@/lib/schema'
+import { serviceSchema, faqSchema, speakableSchema, breadcrumbSchema } from '@/lib/schema'
 import { getServiceBySlug, getServiceById, getServiceSidebar, getSEOMeta, resolvePublishedServiceSlug } from '@/lib/db/public'
 import type { ServiceSidebarItem } from '@/lib/db/public'
 import { ClientServicePage } from '@/app/[locale]/uslugi/[slug]/client-page'
+
+interface ServiceBreadcrumbItem {
+  label: string
+  href: string
+}
+
+async function buildBreadcrumbs({
+  locale,
+  catalog,
+  serviceSlug,
+  serviceLabel,
+}: {
+  locale: string
+  catalog: ServiceCatalog
+  serviceSlug: string
+  serviceLabel: string
+}): Promise<ServiceBreadcrumbItem[]> {
+  const commonT = await getTranslations({ locale, namespace: 'common' })
+  return [
+    { label: commonT('nav.home'), href: '/' },
+    { label: commonT('nav.services'), href: catalog === 'poslugy' ? '/poslugy/' : '/uslugi/' },
+    { label: serviceLabel, href: `/${catalog}/${serviceSlug}/` },
+  ]
+}
 
 /**
  * Shared service-detail page + metadata for BOTH service catalogs.
@@ -250,10 +275,14 @@ export async function ServiceDetailPage({ params, catalog }: ServiceDetailProps)
       } catch { /* faqJson optional */ }
     }
 
+    const breadcrumbs = await buildBreadcrumbs({ locale, catalog, serviceSlug: data.slug, serviceLabel: data.shortTitle || data.title })
+    schemas.push(breadcrumbSchema({ items: breadcrumbs.map((b) => ({ name: b.label, url: b.href })), locale }))
+
     return (
       <>
         <GlobalJsonLd locale={locale} />
-        <ClientServicePage service={data} locale={locale} schemas={schemas} />
+        <PageJsonLd schemas={schemas} />
+        <ClientServicePage service={data} locale={locale} breadcrumbs={breadcrumbs} />
       </>
     )
   }
@@ -270,10 +299,14 @@ export async function ServiceDetailPage({ params, catalog }: ServiceDetailProps)
   schemas.push(speakableSchema('.section-card-body p, .subsection-body p'))
   schemas.push(faqSchema(faqs))
 
+  const breadcrumbs = await buildBreadcrumbs({ locale, catalog, serviceSlug: service.slug, serviceLabel: service.shortTitle || service.title })
+  schemas.push(breadcrumbSchema({ items: breadcrumbs.map((b) => ({ name: b.label, url: b.href })), locale }))
+
   return (
     <>
       <GlobalJsonLd locale={locale} />
-      <ClientServicePage service={service} locale={locale} schemas={schemas} allServices={allServices} />
+      <PageJsonLd schemas={schemas} />
+      <ClientServicePage service={service} locale={locale} breadcrumbs={breadcrumbs} allServices={allServices} />
     </>
   )
 }

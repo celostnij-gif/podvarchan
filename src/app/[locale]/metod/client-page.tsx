@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { AnimatedText, AnimatedSection, SectionContainer, Button, TiltCard, childVariants } from '@/components/ui'
 import MedicalDisclaimer from '@/components/MedicalDisclaimer'
 import { useSetBreadcrumbs } from '@/providers/BreadcrumbsProvider'
+import type { BreadcrumbItem } from '@/components/ui/Breadcrumbs'
 import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 import { Link } from '@/i18n/routing'
 import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
@@ -69,7 +70,7 @@ function HeroBackgroundImage() {
 
 /* ── Page ── */
 
-export default function MetodClient({ d1Sections }: { d1Sections?: PageSectionPublic[] } = {}) {
+export default function MetodClient({ breadcrumbs, d1Sections }: { breadcrumbs: BreadcrumbItem[]; d1Sections?: PageSectionPublic[] }) {
   const t = useTranslations('pages.metod')
   const methodT = useTranslations('method')
   const commonT = useTranslations('common')
@@ -86,10 +87,7 @@ export default function MetodClient({ d1Sections }: { d1Sections?: PageSectionPu
     } catch { /* fallback to messages */ }
   }
 
-  useSetBreadcrumbs([
-    { label: commonT('nav.home'), href: '/' },
-    { label: t('breadcrumb') },
-  ])
+  useSetBreadcrumbs(breadcrumbs)
 
   const components = t.raw('items') as Array<{
     title: string
