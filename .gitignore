@@ -88,3 +88,6 @@ nul
 # agent harness metadata
 /.agents/
 /.claude/
+
+# seerophant — отдельный проект, полностью вне этого репозитория
+/seerophant/
