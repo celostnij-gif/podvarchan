@@ -1,0 +1,42 @@
+# Content Signals — AI content usage preferences
+# https://contentsignals.org/
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+
+User-Agent: *
+Allow: /
+Allow: /_next/static/
+
+Disallow: /api/
+Disallow: /search/
+Disallow: /api/visitor-stats
+User-Agent: GPTBot
+Allow: /
+
+User-Agent: Google-Extended
+Allow: /
+
+User-Agent: ClaudeBot
+Allow: /
+
+User-Agent: CCBot
+Allow: /
+
+User-Agent: Applebot-Extended
+Allow: /
+
+User-Agent: Amazonbot
+Allow: /
+
+User-Agent: Bytespider
+Allow: /
+
+User-Agent: PerplexityBot
+Allow: /
+
+User-Agent: ChatGPT-User
+Allow: /
+
+User-Agent: CloudflareBrowserRenderingCrawler
+Allow: /
+
+Sitemap: https://podvarchan.com/sitemap.xml

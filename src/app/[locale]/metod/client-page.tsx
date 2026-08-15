@@ -6,7 +6,6 @@ import Image from 'next/image'
 import { AnimatedText, AnimatedSection, SectionContainer, Button, TiltCard, childVariants } from '@/components/ui'
 import MedicalDisclaimer from '@/components/MedicalDisclaimer'
 import { useSetBreadcrumbs } from '@/providers/BreadcrumbsProvider'
-import type { BreadcrumbItem } from '@/components/ui/Breadcrumbs'
 import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 import { Link } from '@/i18n/routing'
 import { useDeviceCapabilities } from '@/hooks/useDeviceCapabilities'
@@ -70,7 +69,7 @@ function HeroBackgroundImage() {
 
 /* ── Page ── */
 
-export default function MetodClient({ breadcrumbs, d1Sections }: { breadcrumbs: BreadcrumbItem[]; d1Sections?: PageSectionPublic[] }) {
+export default function MetodClient({ d1Sections }: { d1Sections?: PageSectionPublic[] } = {}) {
   const t = useTranslations('pages.metod')
   const methodT = useTranslations('method')
   const commonT = useTranslations('common')
@@ -87,7 +86,10 @@ export default function MetodClient({ breadcrumbs, d1Sections }: { breadcrumbs: 
     } catch { /* fallback to messages */ }
   }
 
-  useSetBreadcrumbs(breadcrumbs)
+  useSetBreadcrumbs([
+    { label: commonT('nav.home'), href: '/' },
+    { label: t('breadcrumb') },
+  ])
 
   const components = t.raw('items') as Array<{
     title: string
@@ -304,7 +306,7 @@ export default function MetodClient({ breadcrumbs, d1Sections }: { breadcrumbs: 
               <div className="md:col-span-2">
                 <div className="flex items-center gap-4 mb-4">
                   <span className="text-4xl" aria-hidden="true">{item.icon}</span>
-                  <h3 className="text-2xl font-display text-gold-heading">{item.title}</h3>
+                  <h3 className="text-2xl font-display text-gold">{item.title}</h3>
                 </div>
                 <p className="text-text-muted text-sm leading-relaxed">{item.desc}</p>
               </div>
@@ -395,7 +397,7 @@ export default function MetodClient({ breadcrumbs, d1Sections }: { breadcrumbs: 
               className="p-6 border border-border-base text-center
                          hover:border-gold/20 transition-all duration-400 group rounded-xl h-full flex flex-col"
             >
-              <h3 className="text-base font-display text-gold-heading group-hover:brightness-125 transition-[filter] duration-300">
+              <h3 className="text-base font-display text-gold group-hover:text-gold-light transition-colors duration-300">
                 {item.title}
               </h3>
               <p className="mt-2 text-xs text-text-muted leading-relaxed flex-1">

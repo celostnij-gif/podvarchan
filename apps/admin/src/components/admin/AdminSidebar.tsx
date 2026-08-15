@@ -14,7 +14,6 @@ import {
   Users,
   Settings,
   Navigation,
-  Tag,
   ArrowLeftRight,
   ClipboardList,
   Search,
@@ -58,7 +57,7 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Головна', href: '/admin/home', icon: FileText },
       { label: 'Сторінки', href: '/admin/pages', icon: FileText },
       { label: 'Медіа', href: '/admin/media', icon: Image },
-      { label: 'Ціни', href: '/admin/pricing', icon: Tag },
+      { label: 'SEO', href: '/admin/seo', icon: Search },
     ],
   },
   {

@@ -4,18 +4,19 @@ import { motion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/routing'
 import { AnimatedSection, AnimatedText, SectionContainer, FaqAccordion, PageHero } from '@/components/ui'
-import type { BreadcrumbItem } from '@/components/ui/Breadcrumbs'
-import type { PageSectionPublic, PricingPlanPublic } from '@/lib/db/public'
+import { useRegisterSchemas } from '@/providers/BreadcrumbsProvider'
+import type { PageSectionPublic } from '@/lib/db/public'
 
 interface TsenyClientProps {
-  breadcrumbs: BreadcrumbItem[]
-  pricingPlans?: PricingPlanPublic[]
+  schemas?: Record<string, unknown>[]
   d1Sections?: PageSectionPublic[]
 }
 
-export function TsenyClient({ breadcrumbs, pricingPlans = [], d1Sections: _d1Sections }: TsenyClientProps) {
+export function TsenyClient({ schemas, d1Sections: _d1Sections }: TsenyClientProps) {
   const t = useTranslations('tseny')
+  const commonT = useTranslations('common')
   const d1Sections = _d1Sections ?? []
+  useRegisterSchemas(schemas ?? [])
 
   // D1 hero section: overlay text if present
   const heroSection = d1Sections.find((s) => s.key === 'hero' && s.type === 'hero')
@@ -28,10 +29,11 @@ export function TsenyClient({ breadcrumbs, pricingPlans = [], d1Sections: _d1Sec
       if (parsed.subtitle) heroSubtitle = parsed.subtitle
     } catch { /* fallback to messages */ }
   }
+  useRegisterSchemas(schemas ?? [])
 
   // Extract pricing cards from D1 services-grid sections
   const servicesSections = d1Sections.filter(s => s.type === 'services-grid' && s.key)
-  const gridPlans = servicesSections
+  const pricingPlans = servicesSections
     .flatMap(section => {
       try {
         const content = JSON.parse(section.contentJson ?? 'null')
@@ -109,20 +111,7 @@ export function TsenyClient({ breadcrumbs, pricingPlans = [], d1Sections: _d1Sec
     },
   ]
 
-  // Прайс из D1 (pricing_plans) — единый источник; messages — fallback.
-  const dbPricingPlans = pricingPlans.map((plan) => ({
-    title: plan.title,
-    subtitle: plan.subtitle ?? '',
-    price: plan.price === 0 ? t('freeConsultationPrice') : `${plan.price}$`,
-    originalPrice: plan.oldPrice != null ? `${plan.oldPrice}$` : undefined,
-    oldPrice: plan.oldPrice != null ? `${plan.oldPrice}$` : undefined,
-    description: plan.description ?? '',
-    features: plan.features ?? [],
-    badge: plan.badge ?? '',
-    highlighted: plan.key === 'premium',
-  }))
-
-  const displayPlans = dbPricingPlans.length > 0 ? dbPricingPlans : gridPlans.length > 0 ? gridPlans : fallbackPricingPlans
+  const displayPlans = pricingPlans.length > 0 ? pricingPlans : fallbackPricingPlans
 
   const displayFaqItems = faqItems.length > 0 ? faqItems : [
     { question: t('faqPaymentTitle'), answer: t('faqPaymentAnswer') },
@@ -136,7 +125,10 @@ export function TsenyClient({ breadcrumbs, pricingPlans = [], d1Sections: _d1Sec
         label={t('badgeLabel')}
         title={heroTitle}
         description={heroSubtitle}
-        breadcrumbItems={breadcrumbs}
+        breadcrumbItems={[
+          { label: commonT('nav.home'), href: '/' },
+          { label: t('badgeLabel') },
+        ]}
         clean
       />
 

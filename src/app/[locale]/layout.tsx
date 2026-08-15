@@ -1,14 +1,14 @@
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
 import { cookies } from 'next/headers'
 import dynamic from 'next/dynamic'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, getTranslations } from 'next-intl/server'
 import { SITE, MAIN_NAV } from '@/constants'
+import { personSchema, practiceSchema } from '@/lib/schema'
 import { buildCanonical } from '@/lib/seo/metadata'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
-import { getNavigation } from '@/lib/db/public'
+import { getCachedNavigation } from '@/lib/db/cached-public'
 import type { NavItem } from '@/types'
 
 import { getCloudflareContext } from '@opennextjs/cloudflare'
@@ -22,19 +22,13 @@ import ScrollProgress from '@/components/ui/ScrollProgress'
 import { routing } from '@/i18n/routing'
 import { DeviceProvider } from '@/providers/DeviceProvider'
 import { BreadcrumbsProvider } from '@/providers/BreadcrumbsProvider'
+import { PageSchemaRenderer } from './schema-and-breadcrumbs'
 
 /* ── Generate static params for locales ── */
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }))
 }
-
-// Only ru/uk are valid locales. dynamicParams=false makes Next return 404 for
-// anything else (bot-scanner paths like /credentials.json/, /.env.txt/,
-// /wp-includes/…) WITHOUT executing this layout — no getNavigation /
-// getBlogCategories calls, so no junk KV keys or D1 queries per unique path
-// (unbounded cardinality — see incident 1102 analysis and middleware P1-C).
-export const dynamicParams = false
 
 /* ── Metadata ── */
 
@@ -44,12 +38,6 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>
 }): Promise<Metadata> {
   const { locale } = await params
-  // P1: dynamicParams=false is not enforced by the OpenNext runtime for
-  // paths excluded from the middleware matcher (e.g. /credentials.json/,
-  // /.env.txt/ — file extensions). Render would run getNavigation /
-  // getBlogCategories with an unbounded-cardinality locale and write junk
-  // KV keys. Reject here instead.
-  if (locale !== 'ru' && locale !== 'uk') notFound()
   const t = await getTranslations({ locale, namespace: 'common' })
   // Preview mode: add noindex so Google doesn't index DRAFT content
   let robots: Metadata['robots'] = undefined
@@ -107,12 +95,9 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
-  // P1: same guard as generateMetadata — must run before getNavigation /
-  // getBlogCategories below (junk locales must never hit KV/D1).
-  if (locale !== 'ru' && locale !== 'uk') notFound()
   const messages = await getMessages()
   const t = await getTranslations({ locale, namespace: 'common' })
-  const headerNav: NavItem[] = (await getNavigation('HEADER', locale).catch(() => [])).map((n) => ({
+  const headerNav: NavItem[] = (await getCachedNavigation('HEADER', locale).catch(() => [])).map((n) => ({
     href: n.href ?? '#',
     label: n.label,
     children: n.children?.map((c) => ({ href: c.href ?? '#', label: c.label })),
@@ -132,17 +117,6 @@ export default async function LocaleLayout({
   if (locale === 'uk') {
     const pricesItem = headerNav.find(i => i.href === '/tseny/')
     if (pricesItem) pricesItem.href = '/tsiny/'
-    // Services catalog: UK canonical is /poslugy/ (ukPath mapping, 2026-08-08)
-    const servicesItem = headerNav.find(i => i.href === '/uslugi/')
-    if (servicesItem) servicesItem.href = '/poslugy/'
-    for (const item of headerNav) {
-      if (!item.children) continue
-      for (const child of item.children) {
-        if (child.href.startsWith('/uslugi/')) {
-          child.href = `/poslugy/${child.href.slice('/uslugi/'.length)}`
-        }
-      }
-    }
   }
 
   // GA ID із Cloudflare Worker env (Server Component runtime)
@@ -155,10 +129,62 @@ export default async function LocaleLayout({
     gaId = process.env.NEXT_PUBLIC_GA_ID
   }
 
+  /* ── JSON-LD Schema ── */
+  const jsonLdSchemas = [
+    personSchema({ jobTitle: t('authorTitle'), locale }),
+    practiceSchema(locale),
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      '@id': `${SITE.url}/#website`,
+      url: SITE.url,
+      name: SITE.fullName,
+      description: SITE.fullName,
+      inLanguage: locale === 'uk' ? 'uk' : 'ru',
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: {
+          '@type': 'EntryPoint',
+          urlTemplate: `${SITE.url}/${locale}/search?q={search_term_string}`,
+        },
+        'query-input': 'required name=search_term_string',
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: SITE.fullName,
+        url: SITE.url,
+        logo: {
+          '@type': 'ImageObject',
+          url: `${SITE.url}/logo.webp`,
+        },
+      },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      // Static fallback breadcrumb — страницы переопределяют его через BreadcrumbsProvider
+      '@id': `${SITE.url}/${locale}/#breadcrumb-fallback`,
+      inLanguage: locale === 'uk' ? 'uk' : 'ru',
+      itemListElement: [{
+        '@type': 'ListItem',
+        position: 1,
+        name: t('siteName'),
+        url: `${SITE.url}/${locale}/`,
+      }],
+    },
+  ]
+
   return (
 
     <NextIntlClientProvider locale={locale} messages={messages}>
-
+      {/* JSON-LD Schema */}
+      {jsonLdSchemas.map((schema, index) => (
+        <script
+          key={index}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        />
+      ))}
 
       {/* Skip-to-content link */}
       <a
@@ -179,6 +205,7 @@ export default async function LocaleLayout({
 
           <main id="main-content" className="flex-1 min-h-[calc(100vh-4rem)]">
             <BreadcrumbsProvider>
+              <PageSchemaRenderer />
               {children}
             </BreadcrumbsProvider>
           </main>

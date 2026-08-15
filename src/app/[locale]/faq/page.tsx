@@ -1,14 +1,12 @@
 import { getTranslations, getMessages } from 'next-intl/server'
 import { cookies } from 'next/headers'
-import { GlobalJsonLd } from '@/components/GlobalJsonLd'
-import { PageJsonLd } from '@/components/PageJsonLd'
 
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
-import { faqSchema, breadcrumbSchema } from '@/lib/schema'
-import { getFAQs, getPageSeoMeta } from '@/lib/db/public'
+import { faqSchema } from '@/lib/schema'
+import { getFAQs } from '@/lib/db/public'
 import { ClientFaqPage } from './client-page'
 import type { FAQItem } from '@/types'
-export const revalidate = 604800
+export const revalidate = 3600
 
 export async function generateMetadata({
   params,
@@ -17,12 +15,10 @@ export async function generateMetadata({
 }) {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'faq' })
-  const previewCookie = (await cookies()).get('__preview')?.value
-  const seo = await getPageSeoMeta('FAQ', locale, previewCookie).catch(() => null)
 
   return seoMetadata({
-    title: seo?.title ?? t('metaTitle'),
-    description: seo?.description ?? t('metaDescription'),
+    title: t('metaTitle'),
+    description: t('metaDescription'),
     path: '/faq',
     keywords: ['гипнотерапия вопросы', 'онлайн гипноз безопасность', 'сколько сессий гипноза', 'FAQ гипнотерапевт'],
     locale,
@@ -57,19 +53,6 @@ export default async function FaqPage({
   }
 
   const schema = faqSchema(faqItems)
-  const commonT = await getTranslations({ locale: (await _params).locale, namespace: 'common' })
-  const breadcrumbs = [
-    { label: commonT('nav.home'), href: '/' },
-    { label: commonT('nav.faq') ?? 'FAQ', href: '/faq/' },
-  ]
-  const schemas: Record<string, unknown>[] = [schema]
-  schemas.push(breadcrumbSchema({ items: breadcrumbs.map((b) => ({ name: b.label, url: b.href })), locale: (await _params).locale }))
 
-  return (
-    <>
-      <GlobalJsonLd locale={(await _params).locale} />
-      <PageJsonLd schemas={schemas} />
-      <ClientFaqPage items={faqItems} breadcrumbs={breadcrumbs} />
-    </>
-  )
+  return <ClientFaqPage items={faqItems} schemas={[schema]} />
 }

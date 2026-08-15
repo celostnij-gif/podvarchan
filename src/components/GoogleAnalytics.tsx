@@ -102,9 +102,9 @@ export default function GoogleAnalytics({ gaId }: { gaId?: string }) {
 
     const cleanups: (() => void)[] = []
 
-    /* Scroll: /uslugi/* and /poslugy/* pages at 80% */
-    if ((pathname.startsWith('/uslugi/') || pathname.startsWith('/poslugy/')) && pathname !== '/uslugi/' && pathname !== '/poslugy/') {
-      const serviceSlug = pathname.replace(/^\/?(ru|uk)?\/?(uslugi|poslugy)\//, '').replace(/\/$/, '')
+    /* Scroll: /uslugi/* pages at 80% */
+    if (pathname.startsWith('/uslugi/') && pathname !== '/uslugi/') {
+      const serviceSlug = pathname.replace(/^\/?(ru|uk)?\/?uslugi\//, '').replace(/\/$/, '')
       const key = `uslugi-scroll:${serviceSlug}`
       const handleScroll = () => {
         const scrollHeight = document.documentElement.scrollHeight - window.innerHeight

@@ -1,13 +1,10 @@
 import { getTranslations } from 'next-intl/server'
-import { GlobalJsonLd } from '@/components/GlobalJsonLd'
-import { PageJsonLd } from '@/components/PageJsonLd'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getServiceSidebar } from '@/lib/db/public'
-import { breadcrumbSchema } from '@/lib/schema'
 import { UslugiClient } from './page-client'
 import type { ServiceSidebarItem } from '@/lib/db/public'
 
-export const revalidate = 604800
+export const revalidate = 3600
 
 export async function generateMetadata({
   params,
@@ -21,7 +18,6 @@ export async function generateMetadata({
     title: t('pageTitle'),
     description: t('pageDescription'),
     path: '/uslugi',
-    ukPath: '/poslugy',
     locale,
   })
 }
@@ -63,18 +59,5 @@ export default async function UslugiPage({
     // D1 unavailable — client will show empty state (fallback via messages in future)
   }
 
-  const commonT = await getTranslations({ locale, namespace: 'common' })
-  const breadcrumbs = [
-    { label: commonT('nav.home'), href: '/' },
-    { label: commonT('nav.services'), href: locale === 'uk' ? '/poslugy/' : '/uslugi/' },
-  ]
-  const breadcrumb = breadcrumbSchema({ items: breadcrumbs.map((b) => ({ name: b.label, url: b.href })), locale })
-
-  return (
-    <>
-      <GlobalJsonLd locale={locale} />
-      <PageJsonLd schemas={[breadcrumb]} />
-      <UslugiClient services={services} breadcrumbs={breadcrumbs} />
-    </>
-  )
+  return <UslugiClient services={services} />
 }

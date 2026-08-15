@@ -6,7 +6,7 @@
  *
  * Free plan: keep each cache-miss path to 1–3 cheap queries (see AGENT.md §2).
  */
-import { eq, and, desc, inArray, isNotNull } from 'drizzle-orm'
+import { eq, and, desc, inArray } from 'drizzle-orm'
 import { canPreview, canPreviewList } from '@/lib/preview'
 import { getDB } from '@/db'
 import { services, serviceTranslations } from '@/db/schema/services'
@@ -26,22 +26,6 @@ import {
   contactChannels,
   siteSettings,
 } from '@/db/schema/settings'
-import { pricingPlans, pricingPlanTranslations } from '@/db/schema/pricing'
-import { withCache } from './kv-cache'
-import { parseDate } from '@/lib/dates'
-import { cacheKeys } from '@podvarchan/shared'
-
-/* ── TTLs (seconds) — AGENTS.md §3 cache matrix ── */
-const TTL_NAV = 86400 // navigation_items
-const TTL_SETTINGS = 86400 // site_settings
-const TTL_CONTACTS = 86400 // contact_channels
-const TTL_SERVICES = 21600 // services / service:{slug}
-const TTL_FAQ = 21600 // faq:{group}
-const TTL_PAGE = 43200 // pages
-const TTL_BLOG_CATS = 43200 // blog_categories
-const TTL_TESTIMONIALS = 43200 // testimonials
-const TTL_BLOG = 3600 // blog_posts list/detail
-const TTL_MEDIA = 3600 // media lookups (frequent admin edits)
 
 // ─── Limits (safety vs Free CPU / payload) ───
 
@@ -189,7 +173,7 @@ function mapServiceRow(r: {
   }
 }
 
-async function getServicesUncached(locale: string): Promise<ServicePublic[]> {
+export async function getServices(locale: string): Promise<ServicePublic[]> {
   const db = getDB()
   const loc = locale as 'ru' | 'uk'
   const rows = await db
@@ -205,120 +189,6 @@ async function getServicesUncached(locale: string): Promise<ServicePublic[]> {
 
   return rows.map(mapServiceRow)
 }
-export function getServices(locale: string): Promise<ServicePublic[]> {
-  return withCache(cacheKeys.servicesList(locale), TTL_SERVICES, () => getServicesUncached(locale))
-}
-// ─── Pricing plans (прайс /tseny — единый источник цен для JSON-LD и llms.txt) ───
-
-export interface PricingPlanPublic {
-  id: string
-  key: string
-  price: number
-  oldPrice: number | null
-  currency: string
-  title: string
-  subtitle: string | null
-  description: string | null
-  badge: string | null
-  note: string | null
-  features: string[]
-}
-
-export function mapPricingRow(r: {
-  pricing_plans: typeof pricingPlans.$inferSelect
-  pricing_plan_translations: typeof pricingPlanTranslations.$inferSelect
-}): PricingPlanPublic {
-  let features: string[] = []
-  if (r.pricing_plan_translations.featuresJson) {
-    try {
-      const parsed: unknown = JSON.parse(r.pricing_plan_translations.featuresJson)
-      if (Array.isArray(parsed)) features = parsed.filter((f): f is string => typeof f === 'string')
-    } catch { /* malformed — keep empty */ }
-  }
-  return {
-    id: r.pricing_plans.id,
-    key: r.pricing_plans.key,
-    price: r.pricing_plans.price,
-    oldPrice: r.pricing_plans.oldPrice,
-    currency: r.pricing_plans.currency,
-    title: r.pricing_plan_translations.title,
-    subtitle: r.pricing_plan_translations.subtitle,
-    description: r.pricing_plan_translations.description,
-    badge: r.pricing_plan_translations.badge,
-    note: r.pricing_plan_translations.note,
-    features,
-  }
-}
-
-async function getPricingPlansUncached(locale: string): Promise<PricingPlanPublic[]> {
-  const db = getDB()
-  const loc = locale as 'ru' | 'uk'
-  const rows = await db
-    .select()
-    .from(pricingPlans)
-    .innerJoin(pricingPlanTranslations, eq(pricingPlans.id, pricingPlanTranslations.planId))
-    .where(
-      and(eq(pricingPlans.status, 'PUBLISHED'), eq(pricingPlanTranslations.locale, loc)),
-    )
-    .orderBy(pricingPlans.sortOrder)
-    .limit(20)
-    .all()
-
-  return rows.map(mapPricingRow)
-}
-export function getPricingPlans(locale: string): Promise<PricingPlanPublic[]> {
-  return withCache(cacheKeys.pricingList(locale), TTL_SERVICES, () => getPricingPlansUncached(locale))
-}
-
-// ─── Sitemap lastmods (max updated_at по типам страниц и категориям блога) ───
-
-/**
- * Max updated_at по каждой странице (pages.type), только PUBLISHED.
- * Возвращает Map type → Date (ISO и epoch-millis нормализуются через parseDate —
- * исторический mixed-формат в pages.updated_at).
- */
-async function getPageLastmodsUncached(): Promise<Map<string, Date>> {
-  const db = getDB()
-  const rows = await db
-    .select({ type: pages.type, updatedAt: pages.updatedAt })
-    .from(pages)
-    .where(eq(pages.status, 'PUBLISHED'))
-    .all()
-  const result = new Map<string, Date>()
-  for (const row of rows) {
-    const d = parseDate(row.updatedAt)
-    if (!d) continue
-    const current = result.get(row.type)
-    if (!current || d.getTime() > current.getTime()) result.set(row.type, d)
-  }
-  return result
-}
-export function getPageLastmods(): Promise<Map<string, Date>> {
-  return withCache(cacheKeys.sitemapPageLastmods, TTL_BLOG, () => getPageLastmodsUncached())
-}
-
-/**
- * Max updated_at опубликованных постов по category_id — lastmod категорий блога.
- */
-async function getCategoryLastmodsUncached(): Promise<Map<string, Date>> {
-  const db = getDB()
-  const rows = await db
-    .select({ categoryId: blogPosts.categoryId, updatedAt: blogPosts.updatedAt })
-    .from(blogPosts)
-    .where(and(eq(blogPosts.status, 'PUBLISHED'), isNotNull(blogPosts.categoryId)))
-    .all()
-  const result = new Map<string, Date>()
-  for (const row of rows) {
-    const d = parseDate(row.updatedAt)
-    if (!d || !row.categoryId) continue
-    const current = result.get(row.categoryId)
-    if (!current || d.getTime() > current.getTime()) result.set(row.categoryId, d)
-  }
-  return result
-}
-export function getCategoryLastmods(): Promise<Map<string, Date>> {
-  return withCache(cacheKeys.sitemapCatLastmods, TTL_BLOG, () => getCategoryLastmodsUncached())
-}
 // ─── Service Sidebar (lightweight — only 5 fields for listing/sidebar) ───
 
 export interface ServiceSidebarItem {
@@ -330,7 +200,7 @@ export interface ServiceSidebarItem {
 }
 
 /** Lightweight service list for sidebar/footer — skips heavy JSON columns (contentHtml, heroTitle, etc.) */
-async function getServiceSidebarUncached(locale: string): Promise<ServiceSidebarItem[]> {
+export async function getServiceSidebar(locale: string): Promise<ServiceSidebarItem[]> {
   const db = getDB()
   const loc = locale as 'ru' | 'uk'
   const rows = await db
@@ -352,12 +222,9 @@ async function getServiceSidebarUncached(locale: string): Promise<ServiceSidebar
 
   return rows.map((r) => ({ ...r, title: r.title ?? '' }))
 }
-export function getServiceSidebar(locale: string): Promise<ServiceSidebarItem[]> {
-  return withCache(cacheKeys.servicesSidebar(locale), TTL_SERVICES, () => getServiceSidebarUncached(locale))
-}
 
 /** Single service by translation slug — no full-table scan. */
-async function getServiceBySlugUncached(
+export async function getServiceBySlug(
   slug: string,
   locale: string,
   previewCookie?: string,
@@ -382,57 +249,10 @@ async function getServiceBySlugUncached(
 
   return row ? mapServiceRow(row) : null
 }
-export function getServiceBySlug(
-  slug: string,
-  locale: string,
-  previewCookie?: string,
-): Promise<ServicePublic | null> {
-  // Preview mode must never read from cache — DRAFT content stays uncached
-  if (previewCookie) return getServiceBySlugUncached(slug, locale, previewCookie)
-  return withCache(cacheKeys.service(slug, locale), TTL_SERVICES, () => getServiceBySlugUncached(slug, locale))
-}
-/** Paired-locale lookup by id — for correct hreflang alternates when slugs differ across locales. */
-async function getServiceByIdUncached(id: string, locale: string): Promise<ServicePublic | null> {
-  const db = getDB()
-  const loc = locale as 'ru' | 'uk'
-  const row = await db
-    .select()
-    .from(services)
-    .innerJoin(serviceTranslations, eq(services.id, serviceTranslations.serviceId))
-    .where(
-      and(
-        eq(services.status, 'PUBLISHED'),
-        eq(serviceTranslations.locale, loc),
-        eq(services.id, id),
-      ),
-    )
-    .get()
-
-  return row ? mapServiceRow(row) : null
-}
-export function getServiceById(id: string, locale: string): Promise<ServicePublic | null> {
-  return withCache(cacheKeys.serviceById(id, locale), TTL_SERVICES, () => getServiceByIdUncached(id, locale))
-}
-
-/** Slug → published service in ANY locale — used to 301 a cross-locale slug swap (lang switcher) to the correct URL. */
-export async function resolvePublishedServiceSlug(
-  slug: string,
-): Promise<{ locale: 'ru' | 'uk'; slug: string } | null> {
-  const db = getDB()
-  const row = await db
-    .select({ locale: serviceTranslations.locale, slug: serviceTranslations.slug })
-    .from(serviceTranslations)
-    .innerJoin(services, eq(services.id, serviceTranslations.serviceId))
-    .where(and(eq(serviceTranslations.slug, slug), eq(services.status, 'PUBLISHED')))
-    .get()
-
-  if (!row) return null
-  return { locale: row.locale as 'ru' | 'uk', slug: row.slug }
-}
 
 // ─── Blog categories ───
 
-async function getBlogCategoriesUncached(
+export async function getBlogCategories(
   locale: string,
 ): Promise<BlogCategoryPublic[]> {
   const db = getDB()
@@ -460,27 +280,6 @@ async function getBlogCategoriesUncached(
     name: r.blog_category_translations.name,
     description: r.blog_category_translations.description,
   }))
-}
-export function getBlogCategories(locale: string): Promise<BlogCategoryPublic[]> {
-  return withCache(cacheKeys.blogCats(locale), TTL_BLOG_CATS, () => getBlogCategoriesUncached(locale))
-}
-
-
-/** Slug → published blog category in ANY locale — used to 301 a cross-locale slug swap (lang switcher) to the correct URL. */
-
-export async function resolvePublishedCategorySlug(
-  slug: string,
-): Promise<{ locale: 'ru' | 'uk'; slug: string } | null> {
-  const db = getDB()
-  const row = await db
-    .select({ locale: blogCategoryTranslations.locale, slug: blogCategoryTranslations.slug })
-    .from(blogCategoryTranslations)
-    .innerJoin(blogCategories, eq(blogCategories.id, blogCategoryTranslations.categoryId))
-    .where(and(eq(blogCategoryTranslations.slug, slug), eq(blogCategories.status, 'PUBLISHED')))
-    .get()
-
-  if (!row) return null
-  return { locale: row.locale as 'ru' | 'uk', slug: row.slug }
 }
 
 // ─── Blog posts ───
@@ -518,7 +317,7 @@ function mapBlogDetailRow(r: BlogJoinRow): BlogPostPublic {
 }
 
 /** Published posts for lists/sitemap — without contentHtml (CPU/payload). */
-async function getBlogPostsUncached(locale: string): Promise<BlogPostPublic[]> {
+export async function getBlogPosts(locale: string): Promise<BlogPostPublic[]> {
   const db = getDB()
   const loc = locale as 'ru' | 'uk'
   const rows = await db
@@ -560,51 +359,9 @@ async function getBlogPostsUncached(locale: string): Promise<BlogPostPublic[]> {
     }),
   )
 }
-export function getBlogPosts(locale: string): Promise<BlogPostPublic[]> {
-  return withCache(cacheKeys.blogList(locale), TTL_BLOG, () => getBlogPostsUncached(locale))
-}
-
-/** Sitemap-only minimal fields (id/slug/updatedAt/publishedAt) — the full
- * blog:list carries faqJson/excerpt/title needed for the /blog page but not
- * for sitemap; parsing ~50 KB per locale on every sitemap render was part of
- * the 1102 failure. Own cache key (blog:list:lite) — invalidation via the
- * blog:list keys' callers already covers it (getBlogPostCacheKeys). */
-export type BlogPostLite = {
-  id: string
-  slug: string
-  updatedAt: string | null
-  publishedAt: string | null
-}
-
-async function getBlogPostsLiteUncached(locale: string): Promise<BlogPostLite[]> {
-  const db = getDB()
-  const loc = locale as 'ru' | 'uk'
-  return db
-    .select({
-      id: blogPosts.id,
-      slug: blogPostTranslations.slug,
-      updatedAt: blogPosts.updatedAt,
-      publishedAt: blogPosts.publishedAt,
-    })
-    .from(blogPosts)
-    .innerJoin(blogPostTranslations, eq(blogPosts.id, blogPostTranslations.postId))
-    .where(
-      and(
-        eq(blogPosts.status, 'PUBLISHED'),
-        eq(blogPostTranslations.locale, loc),
-      ),
-    )
-    .orderBy(desc(blogPosts.publishedAt))
-    .limit(LIMIT_BLOG_POSTS)
-    .all()
-}
-
-export function getBlogPostsLite(locale: string): Promise<BlogPostLite[]> {
-  return withCache(cacheKeys.blogListLite(locale), TTL_BLOG, () => getBlogPostsLiteUncached(locale))
-}
 
 /** Single post by translation slug — includes contentHtml. */
-async function getBlogPostBySlugUncached(
+export async function getBlogPostBySlug(
   slug: string,
   locale: string,
   previewCookie?: string,
@@ -651,76 +408,9 @@ async function getBlogPostBySlugUncached(
     blog_category_translations: row.blog_category_translations,
   })
 }
-export function getBlogPostBySlug(
-  slug: string,
-  locale: string,
-  previewCookie?: string,
-): Promise<BlogPostPublic | null> {
-  if (previewCookie) return getBlogPostBySlugUncached(slug, locale, previewCookie)
-  return withCache(cacheKeys.blogPost(slug, locale), TTL_BLOG, () => getBlogPostBySlugUncached(slug, locale))
-}
-/** Paired-locale lookup by post id — for correct hreflang alternates when slugs differ across locales. */
-async function getBlogPostByIdUncached(id: string, locale: string): Promise<BlogPostPublic | null> {
-  const db = getDB()
-  const loc = locale as 'ru' | 'uk'
-  const row = await db
-    .select({
-      blog_posts: blogPosts,
-      blog_post_translations: blogPostTranslations,
-      blog_categories: blogCategories,
-      blog_category_translations: blogCategoryTranslations,
-    })
-    .from(blogPosts)
-    .innerJoin(blogPostTranslations, eq(blogPosts.id, blogPostTranslations.postId))
-    .leftJoin(blogCategories, eq(blogPosts.categoryId, blogCategories.id))
-    .leftJoin(
-      blogCategoryTranslations,
-      and(
-        eq(blogCategories.id, blogCategoryTranslations.categoryId),
-        eq(blogCategoryTranslations.locale, loc),
-      ),
-    )
-    .where(
-      and(
-        eq(blogPosts.status, 'PUBLISHED'),
-        eq(blogPostTranslations.locale, loc),
-        eq(blogPosts.id, id),
-      ),
-    )
-    .get()
-
-  if (!row) return null
-  return mapBlogDetailRow({
-    blog_posts: row.blog_posts,
-    blog_post_translations: row.blog_post_translations,
-    blog_categories: row.blog_categories,
-    blog_category_translations: row.blog_category_translations,
-  })
-}
-export function getBlogPostById(id: string, locale: string): Promise<BlogPostPublic | null> {
-  return withCache(cacheKeys.blogPostById(id, locale), TTL_BLOG, () => getBlogPostByIdUncached(id, locale))
-}
-
-
-/** Slug → published blog post in ANY locale — used to 301 a cross-locale slug swap (lang switcher) to the correct URL. */
-
-export async function resolvePublishedBlogSlug(
-  slug: string,
-): Promise<{ locale: 'ru' | 'uk'; slug: string } | null> {
-  const db = getDB()
-  const row = await db
-    .select({ locale: blogPostTranslations.locale, slug: blogPostTranslations.slug })
-    .from(blogPostTranslations)
-    .innerJoin(blogPosts, eq(blogPosts.id, blogPostTranslations.postId))
-    .where(and(eq(blogPostTranslations.slug, slug), eq(blogPosts.status, 'PUBLISHED')))
-    .get()
-
-  if (!row) return null
-  return { locale: row.locale as 'ru' | 'uk', slug: row.slug }
-}
 
 /** Posts in a category by category translation slug — list shape (no HTML body). */
-async function getBlogPostsByCategoryUncached(
+export async function getBlogPostsByCategory(
   categorySlug: string,
   locale: string,
 ): Promise<BlogPostPublic[]> {
@@ -766,12 +456,6 @@ async function getBlogPostsByCategoryUncached(
     }),
   )
 }
-export function getBlogPostsByCategory(
-  categorySlug: string,
-  locale: string,
-): Promise<BlogPostPublic[]> {
-  return withCache(cacheKeys.blogCatPosts(categorySlug, locale), TTL_BLOG, () => getBlogPostsByCategoryUncached(categorySlug, locale))
-}
 
 /** Extract first <img src="..."> from HTML content. */
 export function extractFirstImageUrl(html: string): string | null {
@@ -783,7 +467,7 @@ export function extractFirstImageUrl(html: string): string | null {
  * Batch fetch first image URL from contentHtml for multiple posts.
  * One query instead of N+1 lookups.
  */
-async function getBlogFirstImageUrlsUncached(ids: string[]): Promise<Map<string, string | null>> {
+export async function getBlogFirstImageUrls(ids: string[]): Promise<Map<string, string | null>> {
   if (ids.length === 0) return new Map()
   const db = getDB()
   const rows = await db
@@ -803,19 +487,10 @@ async function getBlogFirstImageUrlsUncached(ids: string[]): Promise<Map<string,
   }
   return result
 }
-export async function getBlogFirstImageUrls(ids: string[]): Promise<Map<string, string | null>> {
-  if (ids.length === 0) return new Map()
-  const key = cacheKeys.blogFirstImages([...ids].sort().join(','))
-  const cached = await withCache<Record<string, string | null>>(key, TTL_BLOG, async () => {
-    const m = await getBlogFirstImageUrlsUncached(ids)
-    return Object.fromEntries(m)
-  })
-  return new Map(Object.entries(cached))
-}
 
 // ─── Pages ───
 
-async function getPageByTypeUncached(
+export async function getPageByType(
   type:
     | 'HOME'
     | 'METHOD'
@@ -888,23 +563,6 @@ async function getPageByTypeUncached(
     sections: Array.from(sectionMap.values()),
   }
 }
-export function getPageByType(
-  type:
-    | 'HOME'
-    | 'METHOD'
-    | 'ABOUT'
-    | 'FAQ'
-    | 'CONTACTS'
-    | 'PRIVACY'
-    | 'DISCLAIMER'
-    | 'PRICING'
-    | 'CUSTOM',
-  locale: string,
-  previewCookie?: string,
-): Promise<PagePublic | null> {
-  if (previewCookie) return getPageByTypeUncached(type, locale, previewCookie)
-  return withCache(cacheKeys.page(type, locale), TTL_PAGE, () => getPageByTypeUncached(type, locale))
-}
 
 // ─── FAQ ───
 
@@ -914,7 +572,7 @@ export interface FAQPublic {
   answer: string | null
 }
 
-async function getFAQsUncached(
+export async function getFAQs(
   locale: string,
   group?: string,
   previewCookie?: string | null,
@@ -952,42 +610,17 @@ async function getFAQsUncached(
     answer: r.faq_item_translations.answer ?? '',
   }))
 }
-export function getFAQs(
-  locale: string,
-  group?: string,
-  previewCookie?: string | null,
-): Promise<FAQPublic[]> {
-  if (previewCookie) return getFAQsUncached(locale, group, previewCookie)
-  return withCache(cacheKeys.faq(group, locale), TTL_FAQ, () => getFAQsUncached(locale, group))
-}
 
 // ─── SEO ───
 
-/**
- * Deterministic pick among duplicate seo_meta rows for the same
- * (entity_type, entity_id, locale): oldest created_at wins.
- * Guards against non-deterministic .get() while legacy duplicates exist;
- * after cleanup (plan v3 phase 1b) there should be a single row, but the
- * deterministic pick stays as a regression net.
- */
-export function pickSeoMetaWinner<T extends { createdAt: string | null }>(
-  rows: readonly T[],
-): T | null {
-  let best: T | null = null
-  for (const row of rows) {
-    if (best === null || (row.createdAt ?? '') < (best.createdAt ?? '')) best = row
-  }
-  return best
-}
-
-async function getSEOMetaUncached(
+export async function getSEOMeta(
   entityType: string,
   entityId: string,
   locale: string,
 ): Promise<SEOMetaPublic | null> {
   const db = getDB()
   const loc = locale as 'ru' | 'uk'
-  const rows = await db
+  const row = await db
     .select()
     .from(seoMeta)
     .where(
@@ -997,40 +630,14 @@ async function getSEOMetaUncached(
         eq(seoMeta.locale, loc),
       ),
     )
-    .all()
+    .get()
 
-  const row = pickSeoMetaWinner(rows)
   if (!row) return null
   return {
     title: row.title,
     description: row.description,
     keywords: row.keywords,
   }
-}
-export function getSEOMeta(
-  entityType: string,
-  entityId: string,
-  locale: string,
-): Promise<SEOMetaPublic | null> {
-  const ttl = entityType === 'blog_post' ? TTL_BLOG : TTL_PAGE
-  return withCache(cacheKeys.seo(entityType, entityId, locale), ttl, () => getSEOMetaUncached(entityType, entityId, locale))
-}
-
-/**
- * Resolve SEO metadata for a static page type (HOME, METHOD, …) through the
- * page's own id: getPageByType → getSEOMeta. Both reads go through withCache
- * (KV → R2 → D1, AGENTS.md §3). Returns null when the page type has no row
- * (e.g. SERVICES/BLOG are not in `pages`) or D1 is unavailable — callers keep
- * the messages fallback.
- */
-export async function getPageSeoMeta(
-  pageType: Parameters<typeof getPageByType>[0],
-  locale: string,
-  previewCookie?: string,
-): Promise<SEOMetaPublic | null> {
-  const page = await getPageByType(pageType, locale, previewCookie)
-  if (!page?.id) return null
-  return getSEOMeta('page', page.id, locale)
 }
 
 // ─── Media ───
@@ -1039,7 +646,7 @@ export async function getPageSeoMeta(
  * Resolve media id or pass-through absolute/relative URL.
  * One cheap .get() — do not call in a tight loop over large lists.
  */
-async function getMediaPublicUrlUncached(idOrUrl: string): Promise<string | null> {
+export async function getMediaPublicUrl(idOrUrl: string): Promise<string | null> {
   if (!idOrUrl) return null
   if (idOrUrl.startsWith('/') || idOrUrl.startsWith('http://') || idOrUrl.startsWith('https://')) {
     return idOrUrl
@@ -1054,9 +661,6 @@ async function getMediaPublicUrlUncached(idOrUrl: string): Promise<string | null
 
   return row?.publicUrl ?? null
 }
-export function getMediaPublicUrl(idOrUrl: string): Promise<string | null> {
-  return withCache(cacheKeys.mediaUrl(idOrUrl), TTL_MEDIA, () => getMediaPublicUrlUncached(idOrUrl))
-}
 
 /**
  * Resolve media id to URL + variants for ResponsiveImage.
@@ -1067,7 +671,7 @@ export interface MediaWithVariants {
   variants?: { width: number; url: string }[]
 }
 
-async function getMediaWithVariantsUncached(idOrUrl: string): Promise<MediaWithVariants | null> {
+export async function getMediaWithVariants(idOrUrl: string): Promise<MediaWithVariants | null> {
   if (!idOrUrl) return null
   if (idOrUrl.startsWith('/') || idOrUrl.startsWith('http://') || idOrUrl.startsWith('https://')) {
     return { url: idOrUrl }
@@ -1090,9 +694,6 @@ async function getMediaWithVariantsUncached(idOrUrl: string): Promise<MediaWithV
   }
   return result
 }
-export function getMediaWithVariants(idOrUrl: string): Promise<MediaWithVariants | null> {
-  return withCache(cacheKeys.mediaVariants(idOrUrl), TTL_MEDIA, () => getMediaWithVariantsUncached(idOrUrl))
-}
 
 
 // ─── Testimonials ───
@@ -1101,7 +702,7 @@ export function getMediaWithVariants(idOrUrl: string): Promise<MediaWithVariants
  * Published testimonials with consent, ordered by sortOrder.
  * Returns max 20 items with locale-specific text.
  */
-async function getTestimonialsUncached(
+export async function getTestimonials(
   locale: string,
   previewCookie?: string | null,
 ): Promise<TestimonialPublic[]> {
@@ -1148,13 +749,6 @@ async function getTestimonialsUncached(
     publishedAt: r.publishedAt,
   }))
 }
-export function getTestimonials(
-  locale: string,
-  previewCookie?: string | null,
-): Promise<TestimonialPublic[]> {
-  if (previewCookie) return getTestimonialsUncached(locale, previewCookie)
-  return withCache(cacheKeys.testimonials(locale), TTL_TESTIMONIALS, () => getTestimonialsUncached(locale))
-}
 
 // ─── Navigation ───
 
@@ -1162,7 +756,7 @@ export function getTestimonials(
  * Enabled navigation items for a location, ordered by sortOrder.
  * Children are nested under parent items (single level).
  */
-async function getNavigationUncached(
+export async function getNavigation(
   location: 'HEADER' | 'FOOTER' | 'MOBILE',
   locale: string,
 ): Promise<NavItemPublic[]> {
@@ -1197,19 +791,13 @@ async function getNavigationUncached(
     return item
   })
 }
-export function getNavigation(
-  location: 'HEADER' | 'FOOTER' | 'MOBILE',
-  locale: string,
-): Promise<NavItemPublic[]> {
-  return withCache(cacheKeys.nav(location, locale), TTL_NAV, () => getNavigationUncached(location, locale))
-}
 
 // ─── Contact Channels ───
 
 /**
  * Enabled contact channels ordered by sortOrder.
  */
-async function getContactChannelsUncached(): Promise<ContactChannelPublic[]> {
+export async function getContactChannels(): Promise<ContactChannelPublic[]> {
   const db = getDB()
   const rows = await db
     .select()
@@ -1226,16 +814,13 @@ async function getContactChannelsUncached(): Promise<ContactChannelPublic[]> {
   }))
 
 }
-export function getContactChannels(): Promise<ContactChannelPublic[]> {
-  return withCache(cacheKeys.contacts(), TTL_CONTACTS, () => getContactChannelsUncached())
-}
 
 // ─── Site Settings ───
 
 /**
  * Get a single site setting by key, returns parsed value or null.
  */
-async function getSiteSettingUncached(key: string): Promise<unknown | null> {
+export async function getSiteSetting(key: string): Promise<unknown | null> {
   const db = getDB()
   const row = await db
     .select({ valueJson: siteSettings.valueJson })
@@ -1249,7 +834,4 @@ async function getSiteSettingUncached(key: string): Promise<unknown | null> {
   } catch {
     return null
   }
-}
-export function getSiteSetting(key: string): Promise<unknown | null> {
-  return withCache(cacheKeys.settings(key), TTL_SETTINGS, () => getSiteSettingUncached(key))
 }

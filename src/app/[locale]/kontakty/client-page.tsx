@@ -6,18 +6,16 @@ import ContactForm from '@/components/ContactForm'
 import { TelegramIcon, WhatsAppIcon, EmailIcon } from '@/components/ui/Icons'
 import MedicalDisclaimer from '@/components/MedicalDisclaimer'
 import type { ContactChannelPublic, PageSectionPublic } from '@/lib/db/public'
-import type { BreadcrumbItem } from '@/components/ui/Breadcrumbs'
 
 export default function KontaktyClient({
   d1Channels: _d1Channels,
   d1Sections,
-  breadcrumbs,
 }: {
   d1Channels?: ContactChannelPublic[]
   d1Sections?: PageSectionPublic[]
-  breadcrumbs: BreadcrumbItem[]
-}) {
+} = {}) {
   const t = useTranslations('contacts')
+  const commonT = useTranslations('common')
 
   // D1 hero section: overlay text if present
   const heroSection = d1Sections?.find((s) => s.key === 'hero' && s.type === 'hero')
@@ -36,7 +34,10 @@ export default function KontaktyClient({
       <PageHero
         title={heroTitle}
         description={heroSubtitle}
-        breadcrumbItems={breadcrumbs}
+        breadcrumbItems={[
+          { label: commonT('nav.home'), href: '/' },
+          { label: heroTitle },
+        ]}
         clean
       />
 
@@ -47,7 +48,7 @@ export default function KontaktyClient({
           <div className="lg:col-span-2 space-y-8">
             {/* Steps */}
             <AnimatedText direction="up" className="p-6 rounded-xl bg-bg-surface/85 border border-border-base">
-              <h2 className="text-lg font-display text-gold-heading mb-4">{t('stepsTitle')}</h2>
+              <h2 className="text-lg font-display text-gold mb-4">{t('stepsTitle')}</h2>
               <ol className="space-y-4">
                 <li className="flex gap-3 items-start">
                   <span className="shrink-0 w-7 h-7 rounded-full bg-gold/10 text-gold text-xs font-bold flex items-center justify-center mt-0.5">
@@ -72,7 +73,7 @@ export default function KontaktyClient({
 
             {/* Contact info */}
             <AnimatedText direction="up" className="p-6 rounded-xl bg-bg-surface/85 border border-border-base">
-              <h2 className="text-lg font-display text-gold-heading mb-4">{t('bookingTitle')}</h2>
+              <h2 className="text-lg font-display text-gold mb-4">{t('bookingTitle')}</h2>
               <p className="mt-0 mb-5 text-sm text-text-muted">
                 {t('bookingDescription')}
               </p>
@@ -150,7 +151,7 @@ export default function KontaktyClient({
 
           {/* ── Right column: form ── */}
           <AnimatedText direction="up" delay={100} className="lg:col-span-3 p-6 md:p-8 rounded-xl bg-bg-surface/85 border border-border-base">
-            <h2 className="text-lg font-display text-gold-heading mb-2">{t('formTitle')}</h2>
+            <h2 className="text-lg font-display text-gold mb-2">{t('formTitle')}</h2>
             <p className="text-sm text-text-muted mb-6">
               {t('formDescription')}
             </p>

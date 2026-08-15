@@ -33,8 +33,8 @@
       "id": "2f39c831b94841b3b30d7b6246c2a221"
     },
     {
-      "binding": "CONTENT_CACHE_KV",
-      "id": "f837cd15ed1e4262ad1566099a4c30c0"
+      "binding": "KV_BINDING",
+      "id": "2f39c831b94841b3b30d7b6246c2a221"
     }
   ],
   "r2_buckets": [

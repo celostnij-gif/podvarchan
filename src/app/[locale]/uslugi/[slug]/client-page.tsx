@@ -1,9 +1,8 @@
 'use client'
 
-import { useLocale, useTranslations, useMessages } from 'next-intl'
+import { useTranslations, useMessages } from 'next-intl'
 import { Link } from '@/i18n/routing'
-import { useSetBreadcrumbs } from '@/providers/BreadcrumbsProvider'
-import type { BreadcrumbItem } from '@/components/ui/Breadcrumbs'
+import { useSetBreadcrumbs, useRegisterSchemas } from '@/providers/BreadcrumbsProvider'
 import SuitableForSection from '@/components/sections/SuitableForSection'
 import MedicalDisclaimer from '@/components/MedicalDisclaimer'
 import { motion } from 'framer-motion'
@@ -36,7 +35,7 @@ interface ServiceData {
 interface Props {
   service: ServiceData
   locale: string
-  breadcrumbs: BreadcrumbItem[]
+  schemas?: Record<string, unknown>[]
   allServices?: ServiceData[]
 }
 /* ── Symptoms from D1 JSON or messages (localized) ── */
@@ -99,9 +98,14 @@ const faqItem = (i: number) => ({
 
 /* ── Hero Section ── */
 
-function HeroSection({ service, breadcrumbs }: { service: ServiceData; breadcrumbs: BreadcrumbItem[] }) {
+function HeroSection({ service }: { service: ServiceData }) {
+  const commonT = useTranslations('common')
   const t = useTranslations('serviceSection')
-  useSetBreadcrumbs(breadcrumbs)
+  useSetBreadcrumbs([
+    { label: commonT('nav.home'), href: '/' },
+    { label: commonT('nav.services'), href: '/uslugi/' },
+    { label: service.shortTitle },
+  ])
 
   return (
     <section className="relative overflow-hidden">
@@ -411,7 +415,6 @@ function CTASection({ service }: { service: ServiceData }) {
 
 /* ── Related Services Section ── */
 function RelatedServicesSection({ service, allServices }: { service: ServiceData; allServices: ServiceData[] }) {
-  const locale = useLocale()
   const t = useTranslations('serviceSection')
   const relatedSlugs = RELATED_SERVICES[service.slug] || []
   const related = allServices.filter(s => relatedSlugs.includes(s.slug)).slice(0, 3)
@@ -436,7 +439,7 @@ function RelatedServicesSection({ service, allServices }: { service: ServiceData
             >
               <TiltCard tiltDegree={4} scale={1.015} className="rounded-xl h-full">
                 <Link
-                  href={`/${locale === 'uk' ? 'poslugy' : 'uslugi'}/${item.slug}/`}
+                  href={`/uslugi/${item.slug}/`}
                   className="group block p-6 border border-border-base h-full
                              hover:bg-bg-elevated hover:border-gold/30 hover:-translate-y-0.5
                              hover:shadow-glow-gold transition-all duration-400 rounded-xl"
@@ -739,15 +742,16 @@ function ContentSection({ service }: { service: ServiceData }) {
 
 /* ── Main Component ── */
 
-export function ClientServicePage({ service, breadcrumbs, locale, allServices: allServicesProp }: Props) {
+export function ClientServicePage({ service, schemas, locale, allServices: allServicesProp }: Props) {
   const messages = useMessages()
 
   // Use D1 allServices if provided, fallback to messages
   const allServices = allServicesProp ?? ((messages?.servicesData as ServiceData[]) ?? [])
+  useRegisterSchemas(schemas ?? [])
 
   return (
     <>
-      <HeroSection service={service} breadcrumbs={breadcrumbs} />
+      <HeroSection service={service} />
       <SymptomsSection service={service} />
       <ContentSection service={service} />
       <MethodSection service={service} />

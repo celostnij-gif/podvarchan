@@ -1,5 +1,5 @@
+export * from './visitor-stats'
 export * from './auth'
-
 export * from './services'
 export * from './blog'
 export * from './pages'
@@ -9,6 +9,5 @@ export * from './leads'
 export * from './media'
 export * from './settings'
 export * from './revisions'
-export * from './pricing'
 export * from './seo'
 export * from './relations'

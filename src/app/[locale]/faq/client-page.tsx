@@ -3,16 +3,18 @@
 import { useTranslations } from 'next-intl'
 import { AnimatedText, SectionContainer, PageHero, FaqAccordion } from '@/components/ui'
 import type { FAQItem } from '@/types'
-import type { BreadcrumbItem } from '@/components/ui/Breadcrumbs'
+import { useRegisterSchemas } from '@/providers/BreadcrumbsProvider'
 import { Link } from '@/i18n/routing'
 
 interface Props {
   items: FAQItem[]
-  breadcrumbs: BreadcrumbItem[]
+  schemas?: Record<string, unknown>[]
 }
 
-export function ClientFaqPage({ items, breadcrumbs }: Props) {
+export function ClientFaqPage({ items, schemas }: Props) {
+  useRegisterSchemas(schemas ?? [])
   const t = useTranslations('faq')
+  const commonT = useTranslations('common')
 
   return (
     <>
@@ -20,7 +22,10 @@ export function ClientFaqPage({ items, breadcrumbs }: Props) {
         label="FAQ"
         title={t('pageTitle')}
         description={t('pageDescription')}
-        breadcrumbItems={breadcrumbs}
+        breadcrumbItems={[
+          { label: commonT('nav.home'), href: '/' },
+          { label: 'FAQ' },
+        ]}
         clean
       />
 
@@ -36,7 +41,7 @@ export function ClientFaqPage({ items, breadcrumbs }: Props) {
 
         {/* ── CTA after FAQ ── */}
         <AnimatedText direction="up" className="mt-8 p-6 md:p-8 rounded-xl bg-gold/[0.04] border border-gold/10 text-center">
-          <h2 className="text-lg font-display text-gold-heading mb-2">{t('ctaHeading')}</h2>
+          <h2 className="text-lg font-display text-gold mb-2">{t('ctaHeading')}</h2>
           <p className="text-sm text-text-muted mb-4">{t('ctaText')}</p>
           <Link
             href="/kontakty/"

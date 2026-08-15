@@ -1,16 +1,13 @@
-import { notFound, permanentRedirect } from 'next/navigation'
-import { getTranslations } from 'next-intl/server'
+import { notFound } from 'next/navigation'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getBlogPost, getAllBlogSlugs, getAllBlogPosts, formatDate } from '@/lib/content'
-import { getBlogPostBySlug, getBlogPostById, getBlogPostsByCategory, getMediaWithVariants, getSEOMeta, resolvePublishedBlogSlug } from '@/lib/db/public'
+import { getBlogPostBySlug, getBlogPostsByCategory, getMediaWithVariants, getSEOMeta } from '@/lib/db/public'
 import type { BlogPostPublic } from '@/lib/db/public'
-import { articleSchema, faqSchema, speakableSchema, breadcrumbSchema } from '@/lib/schema'
+import { articleSchema, faqSchema, speakableSchema } from '@/lib/schema'
 import { ClientBlogPost } from './client-page'
 import { BLOG_SLUG_UK, resolveBlogSlug } from '@/lib/slugMapping'
 import { COVER_IMAGE_OVERRIDES } from '@/lib/content/cover-images'
 import { cookies } from 'next/headers'
-import { GlobalJsonLd } from '@/components/GlobalJsonLd'
-import { PageJsonLd } from '@/components/PageJsonLd'
 
 /**
  * Определяет, является ли статья клинической (YMYL) для добавления reviewedBy.
@@ -24,7 +21,7 @@ function isClinicalArticle(categorySlug: string | null | undefined, slug: string
   return false
 }
 
-export const revalidate = 86400
+export const revalidate = 3600
 
 interface Props {
   params: Promise<{ slug: string; locale: string }>
@@ -45,11 +42,8 @@ export async function generateMetadata({ params }: Props) {
     const post = await getBlogPostBySlug(slug, locale, previewCookie)
     if (post) {
       const seo = post.id ? await getSEOMeta('blog_post', post.id, locale).catch(() => null) : null
-      const ukSibling = await getBlogPostById(post.id, 'uk').catch(() => null)
-      const ruSibling = locale === 'uk' ? await getBlogPostById(post.id, 'ru').catch(() => null) : null
-      const ukSlug = ukSibling?.slug ?? BLOG_SLUG_UK[slug]
+      const ukSlug = BLOG_SLUG_UK[slug]
       const ukPath = ukSlug ? `/blog/${ukSlug}` : undefined
-      const ruPathSlug = ruSibling?.slug ?? resolveBlogSlug(slug)
       // Use locale-specific cover image from override map for og:image
       const resolvedSlug = resolveBlogSlug(slug)
       const overrideCover = COVER_IMAGE_OVERRIDES[resolvedSlug]
@@ -58,7 +52,6 @@ export async function generateMetadata({ params }: Props) {
         title: seo?.title ?? post.title ?? '',
         description: seo?.description ?? post.excerpt ?? post.title ?? '',
         path: `/blog/${slug}`,
-        ruPath: `/blog/${ruPathSlug}`,
         ukPath,
         type: 'article',
         ogImage,
@@ -78,7 +71,6 @@ export async function generateMetadata({ params }: Props) {
     description: post.metaDescription,
     keywords: post.keywords,
     path: `/blog/${slug}`,
-    ruPath: `/blog/${resolveBlogSlug(slug)}`,
     ukPath,
     type: 'article',
     ogImage: post.image,
@@ -210,31 +202,13 @@ export default async function BlogPostPage({ params }: Props) {
   const { slug: rawSlug, locale } = await params
   const slug = rawSlug
   const data = await loadBlogPost(slug, locale)
-  if (!data) {
-    // Cross-locale slug swap (lang switcher on admin content): 301 to the
-    // correct locale URL instead of a hard 404.
-    const resolved = await resolvePublishedBlogSlug(slug).catch(() => null)
-    if (resolved && resolved.locale !== locale) {
-      permanentRedirect(`/${resolved.locale}/blog/${resolved.slug}/`)
-    }
-    notFound()
-  }
-
-  const commonT = await getTranslations({ locale, namespace: 'common' })
+  if (!data) notFound()
 
   if (data.type === 'd1') {
     const allSchemas = [data.jsonLd, ...(data.additionalSchemas ?? [])]
-    const breadcrumbs = [
-      { label: commonT('nav.home'), href: '/' },
-      { label: commonT('nav.blog'), href: '/blog/' },
-      { label: data.category, href: `/blog/kategoriya/${data.categorySlug}/` },
-    ]
-    const breadcrumb = breadcrumbSchema({ items: breadcrumbs.map((b) => ({ name: b.label, url: b.href })), locale })
     return (
-      <>
-        <GlobalJsonLd locale={locale} />
-        <PageJsonLd schemas={[breadcrumb, ...allSchemas]} />
-        <ClientBlogPost title={data.title}
+      <ClientBlogPost
+        title={data.title}
         body={data.body}
         date={data.date}
         category={data.category}
@@ -246,23 +220,15 @@ export default async function BlogPostPage({ params }: Props) {
         imageVariants={data.imageVariants}
         locale={locale}
         relatedPosts={data.relatedPosts}
-        breadcrumbs={breadcrumbs} />
-      </>
+        schemas={allSchemas}
+      />
     )
   }
 
   const { post } = data
-  const breadcrumbs = [
-    { label: commonT('nav.home'), href: '/' },
-    { label: commonT('nav.blog'), href: '/blog/' },
-    { label: post.categoryName, href: `/blog/kategoriya/${post.categorySlug}/` },
-  ]
-  const breadcrumb = breadcrumbSchema({ items: breadcrumbs.map((b) => ({ name: b.label, url: b.href })), locale })
   return (
-    <>
-      <GlobalJsonLd locale={locale} />
-      <PageJsonLd schemas={[breadcrumb, data.jsonLd, ...(data.fallbackSchemas ?? [])]} />
-      <ClientBlogPost title={post.title}
+    <ClientBlogPost
+      title={post.title}
       body={post.body ?? ''}
       date={formatDate(post.datePublished, locale)}
       category={post.categoryName}
@@ -274,7 +240,7 @@ export default async function BlogPostPage({ params }: Props) {
       imageAlt={post.imageAlt}
       locale={locale}
       relatedPosts={data.relatedPosts}
-      breadcrumbs={breadcrumbs} />
-    </>
+      schemas={[data.jsonLd, ...(data.fallbackSchemas ?? [])]}
+    />
   )
 }

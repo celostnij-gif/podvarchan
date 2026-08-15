@@ -6,7 +6,6 @@
 		"nodejs_compat",
 		"global_fetch_strictly_public"
 	],
-	"triggers": { "crons": ["*/50 * * * *"] },
 
 	"assets": {
 		"binding": "ASSETS",
@@ -31,10 +30,9 @@
 
 	"kv_namespaces": [
 		{ "binding": "RATE_LIMIT_KV", "id": "2f39c831b94841b3b30d7b6246c2a221" },
-		{ "binding": "CONTENT_CACHE_KV", "id": "f837cd15ed1e4262ad1566099a4c30c0" }
+		{ "binding": "KV_BINDING", "id": "2f39c831b94841b3b30d7b6246c2a221" }
 	],
 	"r2_buckets": [
-		{ "binding": "CONTENT_CACHE_R2", "bucket_name": "podvarchan-content-cache" },
 		{ "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "podvarchan-inc-cache" },
 		{ "binding": "MEDIA_R2_BUCKET", "bucket_name": "podvarchan-media" }
 	],
@@ -44,11 +42,8 @@
 		"NEXT_PUBLIC_GA_ID": "G-42W6951F8L",
 		"NEXT_PUBLIC_TURNSTILE_SITE_KEY": "0x4AAAAAADYZ2z3RysEsBoQu",
 		"CONTACT_EMAIL": "podvarchan@gmail.com",
+		"AUTH_TRUST_HOST": "true",
 		"REVALIDATE_URL": "https://podvarchan.com/api/revalidate",
-		// Zone ID of podvarchan.com — global CDN purge of Cache API entries
-		// (P0-2). CACHE_PURGE_API_TOKEN set via `wrangler secret put
-		// CACHE_PURGE_API_TOKEN` — never commit real values.
-		"CACHE_PURGE_ZONE_ID": "9ed1252ab93408d37152d76b4c8aea72",
 		// AUTH_SECRET set via `wrangler secret put AUTH_SECRET` — never commit real values
 	}
 }

@@ -4,7 +4,6 @@ import { eq, asc, like } from 'drizzle-orm'
 import { siteSettings } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
 import { canEditContent } from '@/lib/auth/permissions'
-import { requireDelete } from '@/lib/auth/guards'
 import { getActionDb } from './db'
 import { revalidatePath } from 'next/cache'
 
@@ -129,7 +128,7 @@ export async function getBlockTemplate(id: string): Promise<BlockTemplate | null
  * Delete a block template by id.
  */
 export async function deleteBlockTemplate(id: string) {
-  await requireDelete()
+  await requireEdit()
   const db = await getActionDb()
   await db.delete(siteSettings).where(eq(siteSettings.key, `${TEMPLATE_PREFIX}${id}`))
   revalidatePath('/admin/pages')

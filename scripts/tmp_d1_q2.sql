@@ -1,0 +1,1 @@
+SELECT ps.id, ps.key, ps.type, ps.enabled, ps.sort_order, pst.locale, length(pst.content_json) AS len, substr(pst.content_json, 1, 200) AS sample FROM pages p JOIN page_sections ps ON ps.page_id = p.id LEFT JOIN page_section_translations pst ON pst.section_id = ps.id WHERE p.type = 'HOME' ORDER BY ps.sort_order, pst.locale;  

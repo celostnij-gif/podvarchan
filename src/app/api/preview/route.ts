@@ -13,20 +13,15 @@ export async function GET(req: NextRequest) {
   const redirect = req.nextUrl.searchParams.get('redirect') || '/'
 
   if (!token) {
-    const err = NextResponse.json({ error: 'Missing token' }, { status: 400 })
-    err.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
-    return err
+    return NextResponse.json({ error: 'Missing token' }, { status: 400 })
   }
 
   const payload = await verifyPreviewToken(token)
   if (!payload) {
-    const err = NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 })
-    err.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
-    return err
+    return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 })
   }
 
   const res = NextResponse.redirect(new URL(redirect, req.url))
-  res.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
   res.cookies.set('__preview', token, {
     httpOnly: true,
     secure: true,

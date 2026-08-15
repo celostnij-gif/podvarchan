@@ -6,7 +6,6 @@ import { Link } from '@/i18n/routing'
 import { AnimatedText, SectionContainer } from '@/components/ui'
 import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 import { useSetBreadcrumbs } from '@/providers/BreadcrumbsProvider'
-import type { BreadcrumbItem } from '@/components/ui/Breadcrumbs'
 import type { BlogPost } from '@/types'
 
 interface ServiceItem {
@@ -32,7 +31,6 @@ interface Props {
   blogPosts: Omit<BlogPost, 'body'>[]
   services: ServiceItem[]
   translations: SearchTranslations
-  breadcrumbs: BreadcrumbItem[]
 }
 
 function highlightMatch(text: string, query: string): React.ReactNode {
@@ -45,12 +43,15 @@ function highlightMatch(text: string, query: string): React.ReactNode {
   )
 }
 
-export function ClientSearchPage({ locale, blogPosts, services, translations, breadcrumbs }: Props) {
-  const catalog = locale === 'uk' ? 'poslugy' : 'uslugi'
+export function ClientSearchPage({ locale: _locale, blogPosts, services, translations }: Props) {
   const t = useTranslations('search')
+  const commonT = useTranslations('common')
   const [query, setQuery] = useState('')
 
-  useSetBreadcrumbs(breadcrumbs)
+  useSetBreadcrumbs([
+    { label: commonT('nav.home'), href: '/' },
+    { label: t('breadcrumb'), href: '/search/' },
+  ])
 
   const normalizedQuery = query.toLowerCase().trim()
 
@@ -167,7 +168,7 @@ export function ClientSearchPage({ locale, blogPosts, services, translations, br
                     {filteredServices.slice(0, 10).map((svc) => (
                       <Link
                         key={svc.slug}
-                        href={`/${catalog}/${svc.slug}/`}
+                        href={`/uslugi/${svc.slug}/`}
                         className="block p-4 rounded-xl bg-bg-base border border-border-base
                                    hover:border-gold/30 hover:bg-gold/[0.02] transition-all duration-300 group"
                       >

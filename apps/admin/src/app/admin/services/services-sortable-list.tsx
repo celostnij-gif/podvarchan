@@ -3,7 +3,6 @@
 import ViewOnSiteLink from '@/components/admin/ViewOnSiteLink'
 
 import Link from 'next/link'
-import { servicePath } from '@podvarchan/shared'
 import { SortableList } from '@/components/admin/SortableList'
 import { reorderServices } from '@/lib/actions/services'
 import { PublishButton } from './publish-button'
@@ -65,8 +64,8 @@ export function ServicesSortableList({ items }: { items: ServiceRow[] }) {
               </Link>
               {item.status === 'PUBLISHED' && item.slugBase && (
                 <>
-                  <ViewOnSiteLink href={servicePath('ru', item.slugBase)} label="RU" />
-                  <ViewOnSiteLink href={servicePath('uk', item.slugBase)} label="UK" />
+                  <ViewOnSiteLink href={`/ru/uslugi/${item.slugBase}`} label="RU" />
+                  <ViewOnSiteLink href={`/uk/uslugi/${item.slugBase}`} label="UK" />
                 </>
               )}
               <DeleteButton id={item.id} />

@@ -4,7 +4,6 @@ import { useState, useMemo } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
 import { AnimatedText, SectionContainer, AnimatedSection, Button } from '@/components/ui'
 import { useSetBreadcrumbs } from '@/providers/BreadcrumbsProvider'
-import type { BreadcrumbItem } from '@/components/ui/Breadcrumbs'
 import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 import { Link } from '@/i18n/routing'
 import BlogCard from '@/components/blog/BlogCard'
@@ -31,17 +30,19 @@ export interface BlogPostItem {
 interface Props {
   posts: BlogPostItem[]
   categories: BlogCategoryItem[]
-  breadcrumbs: BreadcrumbItem[]
 }
 
-export default function BlogClient({ posts, categories, breadcrumbs }: Props) {
+export default function BlogClient({ posts, categories }: Props) {
   const t = useTranslations('blog')
   const commonT = useTranslations('common')
   const locale = useLocale()
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
-  useSetBreadcrumbs(breadcrumbs)
+  useSetBreadcrumbs([
+    { label: commonT('nav.home'), href: '/' },
+    { label: commonT('nav.blog') },
+  ])
 
   const filteredPosts = useMemo(() => {
     if (!activeCategory) return posts

@@ -6,11 +6,10 @@ import { revalidatePath } from 'next/cache'
 import { eq, asc } from 'drizzle-orm'
 import { siteSettings, contactChannels } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
-import { requireDelete } from '@/lib/auth/guards'
 import { canManageSettings } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
-import { revalidatePublic, getHomeRevalidatePaths, cacheKeys } from '@/lib/revalidate'
+import { revalidatePublic, getHomeRevalidatePaths } from '@/lib/revalidate'
 
 async function requireSettings(): Promise<string> {
   const user = await getCurrentUser()
@@ -40,18 +39,18 @@ export async function updateSiteSetting(key: string, valueJson: string) {
   }
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'SETTING', entityId: key, before: existing, after: { valueJson } })
   revalidatePath('/admin/settings')
-  await revalidatePublic({ paths: getHomeRevalidatePaths(), type: 'layout', keys: [cacheKeys.settings(key)] })
+  void revalidatePublic({ paths: getHomeRevalidatePaths(), type: 'layout' })
 }
 
 export async function deleteSiteSetting(key: string) {
-  const { id: userId } = await requireDelete()
+  const userId = await requireSettings()
   const db = await getActionDb()
   const existing = await db.select().from(siteSettings).where(eq(siteSettings.key, key)).get()
   if (!existing) throw new Error('Налаштування не знайдено')
   await db.delete(siteSettings).where(eq(siteSettings.key, key))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'SETTING', entityId: key, before: existing })
   revalidatePath('/admin/settings')
-  await revalidatePublic({ paths: getHomeRevalidatePaths(), type: 'layout', keys: [cacheKeys.settings(key)] })
+  void revalidatePublic({ paths: getHomeRevalidatePaths(), type: 'layout' })
 }
 
 /* ── Contact Channels ── */
@@ -101,18 +100,18 @@ export async function saveContactChannel(data: FormData) {
     await writeAuditLog({ userId, action: 'CREATE', entityType: 'CONTACT_CHANNEL', entityId: newId, after: ch })
   }
   revalidatePath('/admin/settings')
-  await revalidatePublic({ paths: getHomeRevalidatePaths(), type: 'layout', keys: [cacheKeys.contacts()] })
+  void revalidatePublic({ paths: getHomeRevalidatePaths(), type: 'layout' })
 }
 
 export async function deleteContactChannel(id: string) {
-  const { id: userId } = await requireDelete()
+  const userId = await requireSettings()
   const db = await getActionDb()
   const existing = await db.select().from(contactChannels).where(eq(contactChannels.id, id)).get()
   if (!existing) throw new Error('Канал не знайдено')
   await db.delete(contactChannels).where(eq(contactChannels.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'CONTACT_CHANNEL', entityId: id, before: existing })
   revalidatePath('/admin/settings')
-  await revalidatePublic({ paths: getHomeRevalidatePaths(), type: 'layout', keys: [cacheKeys.contacts()] })
+  void revalidatePublic({ paths: getHomeRevalidatePaths(), type: 'layout' })
 }
 
 export async function reorderContactChannels(ids: string[]) {
@@ -123,5 +122,5 @@ export async function reorderContactChannels(ids: string[]) {
   }
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'CONTACT_CHANNEL', entityId: 'batch', after: { order: ids } })
   revalidatePath('/admin/settings')
-  await revalidatePublic({ paths: getHomeRevalidatePaths(), type: 'layout', keys: [cacheKeys.contacts()] })
+  void revalidatePublic({ paths: getHomeRevalidatePaths(), type: 'layout' })
 }

@@ -7,8 +7,6 @@ interface GenerateMetadataParams extends PageMeta {
   locale?: string
   /** If UK slug differs from RU, pass UK path for correct hreflang and canonical */
   ukPath?: string
-  /** If RU slug differs from UK (i.e. on a UK page), pass RU path so ru/x-default hreflang stay valid */
-  ruPath?: string
 }
 
 /**
@@ -68,7 +66,6 @@ export function generateMetadata({
   path,
   locale = 'ru',
   ukPath,
-  ruPath,
 }: GenerateMetadataParams): Metadata {
   const langPrefix = locale === 'ru' ? '/ru' : '/uk'
   // When on UK page with different slug, use ukPath for canonical URL
@@ -83,10 +80,9 @@ export function generateMetadata({
   if (modifiedTime) other['article:modified_time'] = modifiedTime
   if (author) other['article:author'] = author
 
-  // Hreflang: ukPath pairs the UK URL; ruPath pairs the RU URL (identity when slugs match)
-  const ruHref = `${SITE.url}/ru${ruPath ?? path}/`
+  // Hreflang: use ukPath when UK slug differs from RU slug
   const ukHref = ukPath ? `${SITE.url}/uk${ukPath}/` : `${SITE.url}/uk${path}/`
-  const defaultHref = ruHref
+  const defaultHref = `${SITE.url}/ru${path}/`
 
   return {
     title: buildTitle(title, locale),
@@ -96,7 +92,7 @@ export function generateMetadata({
     alternates: {
       canonical: canonicalUrl,
       languages: {
-        ru: ruHref,
+        ru: `${SITE.url}/ru${path}/`,
         uk: ukHref,
         'x-default': defaultHref,
       },

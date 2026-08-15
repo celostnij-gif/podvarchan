@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
 import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/routing'
-import { getServiceSidebar, getBlogCategories, getContactChannels, getSiteSetting } from '@/lib/db/public'
-
+import { getCachedServiceSidebar, getCachedBlogCategories, getCachedContactChannels, getCachedSiteSetting } from '@/lib/db/cached-public'
+import VisitorCounter from './VisitorCounter'
 
 
 /* ── Footer Column ── */
@@ -30,10 +30,10 @@ function FooterLink({ href, children }: { href: string; children: ReactNode }) {
 
 export default async function Footer({ locale }: { locale: string }) {
   const t = await getTranslations({ locale, namespace: 'common' })
-  const services = await getServiceSidebar(locale).catch(() => [])
-  const blogCategories = await getBlogCategories(locale).catch(() => [])
-  const contactChannels = await getContactChannels().catch(() => [])
-  const rawEmail = await getSiteSetting('contactEmail').catch(() => null)
+  const services = await getCachedServiceSidebar(locale).catch(() => [])
+  const blogCategories = await getCachedBlogCategories(locale).catch(() => [])
+  const contactChannels = await getCachedContactChannels().catch(() => [])
+  const rawEmail = await getCachedSiteSetting('contactEmail').catch(() => null)
   const contactEmail = typeof rawEmail === 'string' ? rawEmail : 'podvarchan@gmail.com'
 
   return (
@@ -103,11 +103,11 @@ export default async function Footer({ locale }: { locale: string }) {
           {/* Services */}
           <FooterColumn title={t('footerServices')}>
             {services.slice(0, 5).map((s) => (
-              <FooterLink key={s.slug} href={`/${locale === 'uk' ? 'poslugy' : 'uslugi'}/${s.slug}/`}>
+              <FooterLink key={s.slug} href={`/uslugi/${s.slug}/`}>
                 {s.shortTitle ?? s.title ?? s.slug}
               </FooterLink>
             ))}
-            <FooterLink href={locale === 'uk' ? '/poslugy/' : '/uslugi/'}>{t('footerAllServices')} <span aria-hidden="true">→</span></FooterLink>
+            <FooterLink href="/uslugi/">{t('footerAllServices')} <span aria-hidden="true">→</span></FooterLink>
           </FooterColumn>
 
           {/* Blog */}
@@ -173,7 +173,7 @@ export default async function Footer({ locale }: { locale: string }) {
         {/* Bottom bar */}
         <div className="mt-12 pt-8 border-t border-border-base flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-text-muted">© {new Date().getFullYear()} {t('copyright')}</p>
-
+          <VisitorCounter />
           <nav className="flex items-center gap-4" aria-label={t('aria.legal')}>
             <Link href="/politika-konfidentsialnosti/"
                   className="text-xs text-text-muted hover:text-gold transition-colors duration-200">

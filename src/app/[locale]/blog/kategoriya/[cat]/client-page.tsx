@@ -1,14 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { SERVICE_SLUG_UK } from '@/lib/slugMapping'
 import { useTranslations } from 'next-intl'
-import { Link } from '@/i18n/routing'
 import { AnimatedText, SectionContainer, AnimatedSection, Button } from '@/components/ui'
 import { useSetBreadcrumbs } from '@/providers/BreadcrumbsProvider'
-import type { BreadcrumbItem } from '@/components/ui/Breadcrumbs'
 import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 import BlogCard from '@/components/blog/BlogCard'
+import { Link } from '@/i18n/routing'
 import type { BlogPost } from '@/types'
 
 const PAGE_SIZE = 9
@@ -24,14 +22,18 @@ interface Props {
   category: BlogCategoryMsg
   posts: Omit<BlogPost, 'body'>[]
   locale: string
-  breadcrumbs: BreadcrumbItem[]
 }
 
-export function ClientBlogCategory({ category, posts, locale, breadcrumbs }: Props) {
+export function ClientBlogCategory({ category, posts, locale }: Props) {
   const t = useTranslations('blog')
+  const commonT = useTranslations('common')
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
-  useSetBreadcrumbs(breadcrumbs)
+  useSetBreadcrumbs([
+    { label: commonT('nav.home'), href: '/' },
+    { label: commonT('nav.blog'), href: '/blog/' },
+    { label: category.name },
+  ])
 
   const visiblePosts = posts.slice(0, visibleCount)
   const hasMore = posts.length > visiblePosts.length
@@ -136,7 +138,7 @@ export function ClientBlogCategory({ category, posts, locale, breadcrumbs }: Pro
           <div className="text-center">
             <AnimatedText direction="up">
               <Link
-                href={`/${locale === 'uk' ? 'poslugy' : 'uslugi'}/${locale === 'uk' ? (SERVICE_SLUG_UK[category.serviceSlug!] ?? category.serviceSlug!) : category.serviceSlug}/`}
+                href={`/uslugi/${category.serviceSlug}/`}
                 className="inline-flex items-center gap-2 text-sm text-gold hover:text-gold-light transition-all group"
               >
                 <span>{t('readMoreLink') || 'Записаться на консультацию по этому направлению'}</span>

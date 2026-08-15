@@ -1,8 +1,3 @@
-/* ── Cloudflare extension: `caches.default` (Workers global cache, P0-2) ── */
-interface CacheStorage {
-	default: Cache;
-}
-
 /* ── Minimal KVNamespace type (avoiding @cloudflare/workers-types dep) ── */
 interface KVNamespace {
   get(key: string, options?: { type: 'text' }): Promise<string | null>
@@ -36,7 +31,6 @@ interface R2Object {
   size: number
   httpMetadata?: { contentType?: string }
   customMetadata?: Record<string, string>
-  json(): Promise<unknown>
 }
 
 /* ── Minimal DurableObjectNamespace type (avoids @cloudflare/workers-types dep) ── */
@@ -84,13 +78,11 @@ interface __BaseEnv_CloudflareEnv {
 	NEXT_PUBLIC_GA_ID: string;
 	NEXT_PUBLIC_TURNSTILE_SITE_KEY: string;
 	CONTACT_EMAIL: string;
-	CACHE_PURGE_ZONE_ID: string;
 	WORKER_SELF_REFERENCE: Fetcher /* podvarchan */;
-	CONTENT_CACHE_KV?: KVNamespace;
+	KV_BINDING?: KVNamespace;
 	RATE_LIMIT_KV?: KVNamespace;
 	MEDIA_R2_BUCKET?: R2Bucket;
 	NEXT_INC_CACHE_R2_BUCKET?: R2Bucket;
-	CONTENT_CACHE_R2?: R2Bucket;
 	DB: D1Database;
 }
 
@@ -98,9 +90,7 @@ interface __BaseEnv_CloudflareEnv {
 interface CloudflareSecrets {
 	RESEND_API_KEY: string;
 	TURNSTILE_SECRET_KEY: string;
-	CACHE_PURGE_API_TOKEN: string;
 }
-
 
 declare namespace Cloudflare {
 	interface Env extends __BaseEnv_CloudflareEnv, CloudflareSecrets {}

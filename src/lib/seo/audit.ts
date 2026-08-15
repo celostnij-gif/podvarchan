@@ -106,7 +106,7 @@ async function collectServices(): Promise<SeoUrlRow[]> {
   for (const row of all) {
     const trans = row.service_translations
     if (!trans) continue
-    const url = `/${trans.locale}/${trans.locale === 'uk' ? 'poslugy' : 'uslugi'}/${trans.slug}`
+    const url = `/${trans.locale}/uslugi/${trans.slug}`
     const title = trans.title ?? null
     const description = trans.description ?? null
     // hero fields often serve as H1

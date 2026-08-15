@@ -5,8 +5,7 @@ import { useTranslations } from 'next-intl'
 import { useMessages } from 'next-intl'
 import { motion } from 'framer-motion'
 import { AnimatedText, AnimatedSection, SectionContainer, Button, ScrollProgress } from '@/components/ui'
-import { useSetBreadcrumbs } from '@/providers/BreadcrumbsProvider'
-import type { BreadcrumbItem } from '@/components/ui/Breadcrumbs'
+import { useSetBreadcrumbs, useRegisterSchemas } from '@/providers/BreadcrumbsProvider'
 import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 import { Link } from '@/i18n/routing'
 import ServiceCTA from '@/components/blog/ServiceCTA'
@@ -32,7 +31,7 @@ interface Props {
   imageVariants?: { width: number; url: string }[]
   locale: string
   relatedPosts: RelatedPost[]
-  breadcrumbs: BreadcrumbItem[]
+  schemas?: Record<string, unknown>[]
 }
 
 const heroContainer = {
@@ -47,12 +46,18 @@ const heroFadeUp = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.1, 0, 1] as const } },
 }
 
-export function ClientBlogPost({ title, body, date, category, categorySlug, author, readingTime, slug: _slug, image, imageAlt, imageVariants, locale: _locale, relatedPosts, breadcrumbs }: Props) {
+export function ClientBlogPost({ title, body, date, category, categorySlug, author, readingTime, slug: _slug, image, imageAlt, imageVariants, locale: _locale, relatedPosts, schemas }: Props) {
   const t = useTranslations('blog')
   const commonT = useTranslations('common')
   const messages = useMessages()
 
-  useSetBreadcrumbs(breadcrumbs)
+  useRegisterSchemas(schemas ?? [])
+
+  useSetBreadcrumbs([
+    { label: commonT('nav.home'), href: '/' },
+    { label: commonT('nav.blog'), href: '/blog/' },
+    { label: category, href: `/blog/kategoriya/${categorySlug}/` },
+  ])
 
   /* ── Service CTA data from category mapping ── */
   const servicesData = (messages?.servicesData as Array<{ slug: string; title: string; description: string }>) ?? []

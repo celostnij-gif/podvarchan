@@ -6,7 +6,6 @@ import { revalidatePath } from 'next/cache'
 import { eq } from 'drizzle-orm'
 import { contactLeads, leadEvents } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
-import { requireDelete } from '@/lib/auth/guards'
 import { canEditContent, canDelete } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
@@ -44,7 +43,8 @@ export async function markLeadRead(id: string) {
 }
 
 export async function deleteLead(id: string) {
-  const user = await requireDelete()
+  const user = await requireView()
+  if (!canDelete(user.role)) throw new Error('Заборонено')
   const db = await getActionDb()
   await db.delete(leadEvents).where(eq(leadEvents.leadId, id))
   await db.delete(contactLeads).where(eq(contactLeads.id, id))

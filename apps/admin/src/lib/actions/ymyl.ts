@@ -4,34 +4,6 @@ import { getCurrentUser } from '@/lib/auth/session'
 import { canPublish } from '@/lib/auth/permissions'
 import type { ActionDb } from './db'
 
-/**
- * Publish rejection with a stable machine-readable code and a human-readable
- * reason (P1-3). The reason is what surfaces to the admin in the UI toast, so
- * "why can't I publish?" is answered instead of a generic error message.
- */
-export class PublishValidationError extends Error {
-  readonly code: string
-  readonly reason: string
-
-  constructor(code: string, reason: string) {
-    super(reason)
-    this.name = 'PublishValidationError'
-    this.code = code
-    this.reason = reason
-  }
-}
-
-export type PublishFailure =
-  | { code: 'FORBIDDEN'; reason: string }
-  | { code: 'RU_INCOMPLETE'; reason: string }
-  | { code: 'UK_INCOMPLETE'; reason: string }
-  | { code: 'META_MISSING'; reason: string }
-  | { code: 'CONSENT_MISSING'; reason: string }
-
-export function publishFailure(failure: PublishFailure): never {
-  throw new PublishValidationError(failure.code, failure.reason)
-}
-
 export interface YmylTranslation {
   title?: string | null
   slug?: string | null
@@ -44,7 +16,7 @@ export interface YmylTranslation {
 export async function requirePublish(): Promise<void> {
   const user = await getCurrentUser()
   if (!user || !canPublish(user.role)) {
-    publishFailure({ code: 'FORBIDDEN', reason: 'Лише ВЛАСНИК або АДМІН можуть публікувати' })
+    throw new Error('Лише ВЛАСНИК або АДМІН можуть публікувати')
   }
 }
 
@@ -55,10 +27,10 @@ export function assertBilingual(
   label: string,
 ): void {
   if (!ru?.title || !ru?.slug) {
-    publishFailure({ code: 'RU_INCOMPLETE', reason: `${label}: RU переклад повинен мати непорожній заголовок та slug` })
+    throw new Error(`${label}: RU переклад повинен мати непорожній заголовок та slug`)
   }
   if (!uk?.title || !uk?.slug) {
-    publishFailure({ code: 'UK_INCOMPLETE', reason: `${label}: UK переклад повинен мати непорожній заголовок та slug` })
+    throw new Error(`${label}: UK переклад повинен мати непорожній заголовок та slug`)
   }
 }
 
@@ -84,9 +56,8 @@ export async function assertMetaPresent(
   const metaText = ru.excerpt ?? ru.description ?? ''
   const hasLongMeta = metaText.length >= 50
   if (!metaDesc && !hasLongMeta) {
-    publishFailure({
-      code: 'META_MISSING',
-      reason: `${label}: повинен мати мета-опис (seo_meta.description або excerpt/description ≥ 50 символів)`,
-    })
+    throw new Error(
+      `${label}: повинен мати мета-опис (seo_meta.description або excerpt/description ≥ 50 символів)`,
+    )
   }
 }

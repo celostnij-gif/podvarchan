@@ -27,10 +27,7 @@ export function aggregateRatingSchema(
   params: AggregateRatingSchemaParams = {}
 ): Record<string, unknown> {
   const {
-    // Real data only (AGENTS.md §5): average of the supplied reviews, never a hardcoded value.
-    ratingValue = reviews.length > 0
-      ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
-      : undefined,
+    ratingValue = '5.0',
     bestRating = '5',
     worstRating = '1',
     ratingCount = reviews.length,
@@ -39,45 +36,38 @@ export function aggregateRatingSchema(
     itemUrl = SITE.url,
   } = params
 
-  const schema: Record<string, unknown> = {
+  return {
     '@context': 'https://schema.org',
     '@type': 'Product',
     '@id': `${SITE.url}#product`,
     name: itemName,
     url: itemUrl,
-  }
-
-  // No reviews → no aggregateRating (a fake rating is worse than none for E-E-A-T)
-  if (ratingValue !== undefined && ratingCount > 0) {
-    schema.aggregateRating = {
+    aggregateRating: {
       '@type': 'AggregateRating',
       ratingValue,
       bestRating,
       worstRating,
       ratingCount,
       reviewCount,
-    }
+    },
+    review: reviews.map((review) => ({
+      '@type': 'Review',
+      author: {
+        '@type': 'Person',
+        name: review.author,
+      },
+      datePublished: review.date,
+      reviewBody: review.text,
+      reviewRating: {
+        '@type': 'Rating',
+        ratingValue: String(review.rating),
+        bestRating,
+        worstRating,
+      },
+      itemReviewed: {
+        '@type': 'Service',
+        name: review.result,
+      },
+    })),
   }
-
-  schema.review = reviews.map((review) => ({
-    '@type': 'Review',
-    author: {
-      '@type': 'Person',
-      name: review.author,
-    },
-    datePublished: review.date,
-    reviewBody: review.text,
-    reviewRating: {
-      '@type': 'Rating',
-      ratingValue: String(review.rating),
-      bestRating,
-      worstRating,
-    },
-    itemReviewed: {
-      '@type': 'Service',
-      name: review.result,
-    },
-  }))
-
-  return schema
 }

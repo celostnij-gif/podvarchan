@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyTurnstileToken } from '@/lib/verifyTurnstile'
 import { sendContactNotification, sendAutoReply } from '@/lib/email'
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
-import { getDB } from '@/db'
-import { contactLeads, leadEvents } from '@podvarchan/shared'
 import type { SendContactEmailParams } from '@/lib/email'
 
 /* ── Types ── */
@@ -102,48 +100,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // ── Persist lead (D1) — AGENTS.md §2 legitimate public write path ──
-    // Save BEFORE email so a delivery failure never loses the request.
-    let leadId: string | null = null
-    try {
-      const ts = new Date().toISOString()
-      leadId = crypto.randomUUID()
-      await getDB().insert(contactLeads).values({
-        id: leadId,
-        name,
-        email,
-        phone: phone ?? null,
-        message,
-        sourcePage: request.headers.get('referer') ?? null,
-        status: 'NEW',
-        userAgent: request.headers.get('user-agent') ?? null,
-        createdAt: ts,
-        updatedAt: ts,
-      })
-    } catch (err) {
-      // Uniform, grep-able marker — search worker logs for CONTACT_LEAD_WRITE_FAILED
-      // to detect silent lead loss during D1 degradation (see TEMP report).
-      console.error('[CONTACT_LEAD_WRITE_FAILED]', JSON.stringify({ name, email, error: String(err) }))
+    // ── В dev-режимі — якщо немає API ключа, просто повертаємо success ──
+    if (process.env.NODE_ENV === 'development' && !process.env.RESEND_API_KEY) {
+      return NextResponse.json(
+        { success: true, message: 'Заявка отправлена! (dev mode)' },
+        { status: 200 },
+      )
     }
 
     // ── Send notification to owner ──
     const notificationResult = await sendContactNotification({ name, email, message, phone })
-
-    // ── Record delivery outcome as a lead event (best-effort) ──
-    if (leadId) {
-      try {
-        await getDB().insert(leadEvents).values({
-          id: crypto.randomUUID(),
-          leadId,
-          userId: null,
-          type: notificationResult.success ? 'EMAIL_SENT' : 'EMAIL_FAILED',
-          note: notificationResult.success ? null : 'owner notification failed',
-          createdAt: new Date().toISOString(),
-        })
-      } catch (err) {
-        console.error('[CONTACT_LEAD_EVENT_WRITE_FAILED]', JSON.stringify({ leadId, error: String(err) }))
-      }
-    }
 
     if (!notificationResult.success) {
       console.error('[Contact API] Notification send failed')
@@ -165,7 +131,7 @@ export async function POST(request: NextRequest) {
       { status: 200 },
     )
   } catch {
-    console.error('[CONTACT_API_UNEXPECTED]')
+    console.error('[Contact API] Unexpected error')
     return NextResponse.json(
       { error: 'Произошла ошибка. Попробуйте позже или напишите в Telegram.', field: 'form' },
       { status: 500 },

@@ -21,8 +21,8 @@ export function PublishToggle({ pageId, currentStatus }: PublishToggleProps) {
       await updatePageMeta(pageId, formData)
       showToast('success', isPublished ? 'Знято з публікації' : 'Опубліковано')
       router.refresh()
-    } catch (err) {
-      showToast('error', err instanceof Error ? err.message : 'Помилка при зміні статусу')
+    } catch {
+      showToast('error', 'Помилка при зміні статусу')
     }
   }
 

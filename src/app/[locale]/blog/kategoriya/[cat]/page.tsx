@@ -1,21 +1,17 @@
-import { notFound, permanentRedirect } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
-import { GlobalJsonLd } from '@/components/GlobalJsonLd'
-import { PageJsonLd } from '@/components/PageJsonLd'
 import { BLOG_CATEGORIES } from '@/constants'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
-import { getBlogPostsByCategory, getBlogCategories, getMediaPublicUrl, getBlogFirstImageUrls, resolvePublishedCategorySlug } from '@/lib/db/public'
+import { getBlogPostsByCategory, getBlogCategories, getMediaPublicUrl, getBlogFirstImageUrls } from '@/lib/db/public'
 import { getBlogPost } from '@/lib/content'
-import { breadcrumbSchema } from '@/lib/schema'
 import { ClientBlogCategory } from './client-page'
 import { CATEGORY_SLUG_UK, resolveCategorySlug } from '@/lib/slugMapping'
-import type { BlogPostPublic, BlogCategoryPublic } from '@/lib/db/public'
+import type { BlogPostPublic } from '@/lib/db/public'
 import type { BlogPost } from '@/types'
 
 export const dynamicParams = true
 
 interface BlogCategoryMeta {
-  id?: string
   slug: string
   name: string
   description: string
@@ -34,7 +30,6 @@ async function resolveCategoryMeta(
     const found = cats.find((c) => c.slug === rawCat || c.slug === canonical)
     if (found) {
       return {
-        id: found.id,
         slug: rawCat,
         name: found.name ?? rawCat,
         description: found.description ?? '',
@@ -75,21 +70,15 @@ export async function generateMetadata({ params }: Props) {
   if (!category) return {}
   const t = await getTranslations({ locale, namespace: 'blog' })
 
-  // D1-truth slug pairing by category id (constants map is incomplete vs D1)
-  const ruCats = await getBlogCategories('ru').catch(() => [])
-  const ukCats = await getBlogCategories('uk').catch(() => [])
-  const slugById = (list: BlogCategoryPublic[], id?: string) =>
-    id ? list.find((c) => c.id === id)?.slug : undefined
-  const canonical = slugById(ruCats, category.id) ?? resolveCategorySlug(rawCat)
-  const ukSlug = slugById(ukCats, category.id) ?? CATEGORY_SLUG_UK[canonical]
-  const ukPath = ukSlug ? `/blog/kategoriya/${ukSlug}` : undefined
+  const canonical = resolveCategorySlug(rawCat)
+  const ukCat = CATEGORY_SLUG_UK[canonical]
+  const ukPath = ukCat ? `/blog/kategoriya/${ukCat}` : undefined
 
   return seoMetadata({
     title: `${category.name} — ${t('pageTitle')}`,
     description: category.metaDescription,
     keywords: category.keywords,
     path: `/blog/kategoriya/${canonical}`,
-    ruPath: `/blog/kategoriya/${canonical}`,
     ukPath,
     locale,
   })
@@ -116,15 +105,7 @@ function mapPost(p: BlogPostPublic, image?: string, imageAlt?: string): Omit<Blo
 export default async function BlogCategoryPage({ params }: Props) {
   const { cat: rawCat, locale } = await params
   const category = await resolveCategoryMeta(rawCat, locale)
-  if (!category) {
-    // Cross-locale slug swap (lang switcher on admin content): 301 to the
-    // correct locale URL instead of a hard 404.
-    const resolved = await resolvePublishedCategorySlug(rawCat).catch(() => null)
-    if (resolved && resolved.locale !== locale) {
-      permanentRedirect(`/${resolved.locale}/blog/kategoriya/${resolved.slug}/`)
-    }
-    notFound()
-  }
+  if (!category) notFound()
 
   let posts: Omit<BlogPost, 'body'>[] = []
 
@@ -171,19 +152,5 @@ export default async function BlogCategoryPage({ params }: Props) {
     // D1 unavailable — client shows empty state
   }
 
-  const commonT = await getTranslations({ locale, namespace: 'common' })
-  const breadcrumbs = [
-    { label: commonT('nav.home'), href: '/' },
-    { label: commonT('nav.blog'), href: '/blog/' },
-    { label: category.name, href: `/blog/kategoriya/${rawCat}/` },
-  ]
-  const breadcrumb = breadcrumbSchema({ items: breadcrumbs.map((b) => ({ name: b.label, url: b.href })), locale })
-
-  return (
-    <>
-      <GlobalJsonLd locale={locale} />
-      <PageJsonLd schemas={[breadcrumb]} />
-      <ClientBlogCategory category={category} posts={posts} locale={locale} breadcrumbs={breadcrumbs} />
-    </>
-  )
+  return <ClientBlogCategory category={category} posts={posts} locale={locale} />
 }

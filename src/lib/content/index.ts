@@ -121,15 +121,14 @@ interface TranslationItem {
 }
 
 interface BlogPostItem {
-  id: string
   slug: string
   updatedAt?: Date
   publishedAt?: Date
   translation: {
     slug: string
   }
-  datePublished?: string
-  dateModified?: string
+ datePublished?: string
+ dateModified?: string
 }
 /**
  * Запрашивает опубликованные услуги из D1 (или кидает ошибку для fallback).
@@ -157,11 +156,10 @@ export async function getPublishedServices(
  */
 export async function getPublishedBlogCategories(
   locale: string,
-): Promise<{ id: string; translation: { slug: string } }[] | null> {
+): Promise<{ translation: { slug: string } }[] | null> {
   const { getBlogCategories } = await import('@/lib/db/public')
   const cats = await getBlogCategories(locale)
   return cats.map((c) => ({
-    id: c.id,
     translation: { slug: c.slug },
   }))
 }
@@ -175,7 +173,6 @@ export async function getPublishedBlogPosts(
   const { getBlogPosts } = await import('@/lib/db/public')
   const posts = await getBlogPosts(locale)
   return posts.map((p) => ({
-    id: p.id,
     slug: p.slug,
     updatedAt: p.updatedAt ? new Date(p.updatedAt) : undefined,
     publishedAt: p.publishedAt ? new Date(p.publishedAt) : undefined,
