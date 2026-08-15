@@ -7,7 +7,7 @@ import { revalidatePath } from 'next/cache'
 import { eq, and } from 'drizzle-orm'
 import { services, serviceTranslations, redirectRules, seoMeta, serviceIndexPath, servicePath } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
-import { canEditContent, canPublish } from '@/lib/auth/permissions'
+import { canEditContent } from '@/lib/auth/permissions'
 import { requireDelete } from '@/lib/auth/guards'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
@@ -325,8 +325,7 @@ export async function publishService(id: string) {
 
   // YMYL: only OWNER/ADMIN can publish
   if (newStatus === 'PUBLISHED') {
-    const user = await getCurrentUser()
-    if (!user || !canPublish(user.role)) throw new Error('Лише ВЛАСНИК або АДМІН можуть публікувати')
+    await requirePublish()
 
     const translations = await db
       .select()
@@ -337,16 +336,8 @@ export async function publishService(id: string) {
     const ruTr = translations.find(t => t.locale === 'ru')
     const ukTr = translations.find(t => t.locale === 'uk')
 
-    if (!ruTr?.title || !ruTr?.slug) throw new Error('RU переклад повинен мати непорожній заголовок та slug')
-    if (!ukTr?.title || !ukTr?.slug) throw new Error('UK переклад повинен мати непорожній заголовок та slug')
-
-    // Require meta description
-    const meta = ruTr.seoMetaId
-      ? await db.select().from(seoMeta).where(eq(seoMeta.id, ruTr.seoMetaId)).get()
-      : null
-    const hasMetaDesc = meta?.description && meta.description.length > 0
-    const hasDesc = ruTr.description && ruTr.description.length >= 50
-    if (!hasMetaDesc && !hasDesc) throw new Error('Послуга повинна мати мета-опис (seo_meta.description або description >= 50 символів)')
+    assertBilingual(ruTr, ukTr, 'Послуга')
+    await assertMetaPresent(ruTr!, db, 'Послуга')
   }
 
   await db.update(services).set({ status: newStatus, updatedAt: await now() }).where(eq(services.id, id))

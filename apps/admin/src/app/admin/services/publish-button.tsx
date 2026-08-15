@@ -19,8 +19,8 @@ export function PublishButton({ id, status }: Props) {
       await publishService(id)
       showToast('success', isPublished ? 'Знято з публікації' : 'Опубліковано')
       router.refresh()
-    } catch {
-      showToast('error', 'Помилка при зміні статусу')
+    } catch (err) {
+      showToast('error', err instanceof Error ? err.message : 'Помилка при зміні статусу')
     }
   }
 

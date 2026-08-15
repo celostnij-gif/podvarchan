@@ -10,7 +10,7 @@ import {
 } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
 import { requireDelete } from '@/lib/auth/guards'
-import { canEditContent, canDelete, canPublish } from '@/lib/auth/permissions'
+import { canEditContent, canDelete } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import type { ActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
@@ -427,8 +427,7 @@ export async function publishPost(id: string) {
 
   // YMYL: only OWNER/ADMIN can publish
   if (newStatus === 'PUBLISHED') {
-    const user = await getCurrentUser()
-    if (!user || !canPublish(user.role)) throw new Error('Лише ВЛАСНИК або АДМІН можуть публікувати')
+    await requirePublish()
 
     // Load ru + uk translations
     const translations = await db
@@ -440,17 +439,8 @@ export async function publishPost(id: string) {
     const ruTr = translations.find(t => t.locale === 'ru')
     const ukTr = translations.find(t => t.locale === 'uk')
 
-    // Require non-empty: ru.title, ru.slug, uk.title, uk.slug
-    if (!ruTr?.title || !ruTr?.slug) throw new Error('RU переклад повинен мати непорожній заголовок та slug')
-    if (!ukTr?.title || !ukTr?.slug) throw new Error('UK переклад повинен мати непорожній заголовок та slug')
-
-    // Require meta description (seo_meta.description OR excerpt >= 50 chars)
-    const meta = ruTr.seoMetaId
-      ? await db.select().from(seoMeta).where(eq(seoMeta.id, ruTr.seoMetaId)).get()
-      : null
-    const hasMetaDesc = meta?.description && meta.description.length > 0
-    const hasExcerpt = ruTr.excerpt && ruTr.excerpt.length >= 50
-    if (!hasMetaDesc && !hasExcerpt) throw new Error('Публікація повинна мати мета-опис (seo_meta.description або excerpt >= 50 символів)')
+    assertBilingual(ruTr, ukTr, 'Публікація')
+    await assertMetaPresent(ruTr!, db, 'Публікація')
   }
 
   await db.update(blogPosts).set({ status: newStatus, updatedAt: await now() }).where(eq(blogPosts.id, id))

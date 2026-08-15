@@ -7,10 +7,11 @@ import { eq, and } from 'drizzle-orm'
 import { testimonials, testimonialTranslations, redirectRules, seoMeta } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
 import { requireDelete } from '@/lib/auth/guards'
-import { canEditContent, canDelete, canPublish } from '@/lib/auth/permissions'
+import { canEditContent, canDelete } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
 import { revalidatePublic, revalidateAdmin, getHomeRevalidatePaths, getTestimonialsCacheKeys } from '@/lib/revalidate'
+import { requirePublish, publishFailure } from './ymyl'
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
@@ -38,12 +39,14 @@ const testimonialSchema = z.object({
 type PublishableTestimonial = Pick<z.infer<typeof testimonialSchema>, 'consentConfirmed' | 'translations'>
 
 function validateForPublish(testimonial: PublishableTestimonial): void {
-  if (!testimonial.consentConfirmed) throw new Error('Consent is required to publish a testimonial')
+  if (!testimonial.consentConfirmed) {
+    publishFailure({ code: 'CONSENT_MISSING', reason: 'Для публікації відгуку потрібна згода клієнта (consentConfirmed)' })
+  }
 
   const ruTranslation = testimonial.translations.find(({ locale }) => locale === 'ru')
   const ukTranslation = testimonial.translations.find(({ locale }) => locale === 'uk')
-  if (!ruTranslation?.text) throw new Error('RU testimonial text is required for publishing')
-  if (!ukTranslation?.text) throw new Error('UK testimonial text is required for publishing')
+  if (!ruTranslation?.text) publishFailure({ code: 'RU_INCOMPLETE', reason: 'Для публікації потрібен текст відгуку (RU)' })
+  if (!ukTranslation?.text) publishFailure({ code: 'UK_INCOMPLETE', reason: 'Для публікації потрібен текст відгуку (UK)' })
 }
 
 function isFormDataChecked(value: FormDataEntryValue | null): boolean {
@@ -155,8 +158,7 @@ export async function publishTestimonial(id: string) {
 
   // YMYL: only OWNER/ADMIN can publish, requires consent
   if (newStatus === 'PUBLISHED') {
-    const user = await getCurrentUser()
-    if (!user || !canPublish(user.role)) throw new Error('Лише ВЛАСНИК або АДМІН можуть публікувати відгуки')
+    await requirePublish()
 
     const translations = (await db
       .select()
