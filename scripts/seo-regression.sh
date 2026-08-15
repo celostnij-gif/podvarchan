@@ -179,14 +179,14 @@ check_pricing_schema() {
   fi
   prices=$(printf '%s\n' "$html" | grep -o '"price":"[0-9]*"' | sort -u | tr '\n' ' ')
   for want in '"price":"0"' '"price":"50"' '"price":"210"' '"price":"400"'; do
-    if ! printf '%s' "$prices" | grep -qF "$want"; then
+    if [[ "$prices" != *"$want"* ]]; then
       echo "  ❌ $label JSON-LD lacks $want (got: $prices)"
       FAIL=$((FAIL + 1)); RESULTS+=("$label missing $want")
       return
     fi
   done
   pr=$(printf '%s\n' "$html" | grep -o '"priceRange":"[^"]*"' | head -1)
-  if ! printf '%s' "$pr" | grep -q '400\$'; then
+  if [[ "$pr" != *'400$'* ]]; then
     echo "  ❌ $label priceRange malformed: $pr"
     FAIL=$((FAIL + 1)); RESULTS+=("$label priceRange")
     return
@@ -214,7 +214,7 @@ check_llms_pricing() {
     return
   fi
   for want in '| Free |' '| $50 |' '| $210 |' '| $400 |'; do
-    if ! printf '%s' "$html" | grep -qF "$want"; then
+    if [[ "$html" != *"$want"* ]]; then
       echo "  ❌ $label llms-full lacks pricing row ($want)"
       FAIL=$((FAIL + 1)); RESULTS+=("$label missing $want")
       return
