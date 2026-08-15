@@ -59,7 +59,15 @@ const edgeCacheWrapper = () => ({
       if (isNavigation) {
         try {
           const cached = await caches.default.match(request);
-          if (cached) return cached;
+          if (cached) {
+            const hit = new Response(cached.body, {
+              status: cached.status,
+              statusText: cached.statusText,
+              headers: cached.headers,
+            });
+            hit.headers.set("x-pv-cache", "HIT");
+            return hit;
+          }
         } catch {
           // A cache failure must never break the site — fall through to render.
         }
@@ -99,6 +107,7 @@ const edgeCacheWrapper = () => ({
           // Best-effort — the client still gets the fresh response.
         }
       }
+      if (isNavigation) response.headers.set("x-pv-cache", "MISS");
       return response;
     };
   },

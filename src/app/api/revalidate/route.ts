@@ -134,6 +134,45 @@ export async function POST(request: NextRequest) {
       // best-effort — local purge + TTL cover the gap
     }
 
+    // Warm-up (AGENTS.md §3.5): after invalidation the affected paths are cold
+    // at the edge. Self-fetch them through the service binding so the next real
+    // visitor gets an edge-cache HIT instead of a cold render at peak traffic.
+    // Runs in ctx.waitUntil (fire-and-forget, its own subrequest budgets).
+    const warmable = paths.filter((p) => !p.startsWith('/api/'))
+    if (warmable.length > 0) {
+      try {
+        const { env: cfEnv, ctx } = await import('@opennextjs/cloudflare').then((m) =>
+          m.getCloudflareContext(),
+        )
+        const selfRef = cfEnv.WORKER_SELF_REFERENCE
+        const baseUrl = env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '')
+        if (selfRef && ctx?.waitUntil) {
+          // Serial chunks of self-fetches to avoid a stampede on bulk
+          // revalidations (up to MAX_BATCH=40 paths fire-and-forget in
+          // the background after this handler returns).
+          const CHUNK = 6
+          const warm = (p: string) =>
+            selfRef
+              .fetch(`${baseUrl}${p.startsWith('/') ? p : `/${p}`}`)
+              .then((res: Response) => {
+                res.body?.cancel()
+              })
+              .catch(() => {
+                // best-effort — TTL / next request covers the gap
+              })
+          ctx.waitUntil(
+            (async () => {
+              for (let i = 0; i < warmable.length; i += CHUNK) {
+                await Promise.allSettled(warmable.slice(i, i + CHUNK).map(warm))
+              }
+            })(),
+          )
+        }
+      } catch {
+        // best-effort
+      }
+    }
+
     return NextResponse.json({
       revalidated: errors.length === 0,
       paths: done,

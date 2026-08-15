@@ -71,6 +71,23 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
+      - name: Verify edge cache HIT after deploy (site)
+        # P0-3 DoD: after purge+warm, the second curl must be served from the
+        # edge cache (X-Pv-Cache: HIT) — the cold render happened in CI, not
+        # for the first real visitor. First curl may still be MISS (warm phase
+        # and this probe may land on different edge nodes), so retry a few times.
+        run: |
+          for u in "https://podvarchan.com/ru/" "https://podvarchan.com/ru/blog/" "https://podvarchan.com/ru/faq/" "https://podvarchan.com/ru/tseny/"; do
+            hit=""
+            for i in 1 2 3 4 5; do
+              h=$(curl -s -o /dev/null -D - "$u")
+              if printf '%s\n' "$h" | grep -qiE "^x-pv-cache: HIT"; then hit=1; break; fi
+              sleep 2
+            done
+            [[ -n "$hit" ]] || { echo "FAIL: no edge HIT on $u"; exit 1; }
+            echo "OK edge HIT $u"
+          done
+
       - name: Verify headers after deploy (site)
         run: |
           for u in "https://podvarchan.com/ru/" "https://podvarchan.com/ru/blog/" "https://podvarchan.com/sitemap.xml" "https://podvarchan.com/robots.txt" "https://podvarchan.com/llms.txt" "https://podvarchan.com/api/preview/"; do
