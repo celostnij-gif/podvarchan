@@ -238,7 +238,11 @@ export async function deletePage(id: string) {
   const existing = await db.select().from(pages).where(eq(pages.id, id)).get()
   if (!existing) throw new Error('Сторінку не знайдено')
   if (existing.type === 'HOME') throw new Error('Головну сторінку не можна видалити')
-  await db.delete(pages).where(eq(pages.id, id))
+  // seo_meta has no FK — delete linked rows in the same transaction (P0-2).
+  await db.transaction(async (tx) => {
+    await tx.delete(seoMeta).where(and(eq(seoMeta.entityType, 'page'), eq(seoMeta.entityId, id)))
+    await tx.delete(pages).where(eq(pages.id, id))
+  })
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'PAGE', entityId: id, before: existing })
   revalidateAdmin('/admin/pages', '/admin/home')
   await revalidatePublic({ paths: getPageRevalidatePaths(existing.type), keys: getPageCacheKeys(existing.type) })

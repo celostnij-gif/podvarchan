@@ -4,7 +4,7 @@ import { cleanUpdate } from './clean-update'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { eq, and } from 'drizzle-orm'
-import { faqItems, faqItemTranslations } from '@podvarchan/shared'
+import { faqItems, faqItemTranslations, seoMeta } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
 import { canEditContent } from '@/lib/auth/permissions'
 import { requireDelete } from '@/lib/auth/guards'
@@ -106,7 +106,11 @@ export async function deleteFaqItem(id: string) {
   const db = await getActionDb()
   const existing = await db.select().from(faqItems).where(eq(faqItems.id, id)).get()
   if (!existing) throw new Error('FAQ не знайдено')
-  await db.delete(faqItems).where(eq(faqItems.id, id))
+  // Safety net: seo_meta has no FK — remove any linked rows in the same transaction (P0-2).
+  await db.transaction(async (tx) => {
+    await tx.delete(seoMeta).where(eq(seoMeta.entityId, id))
+    await tx.delete(faqItems).where(eq(faqItems.id, id))
+  })
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'FAQ', entityId: id, before: existing })
   revalidateAdmin('/admin/faq')
   await revalidatePublic({ paths: getFaqRevalidatePaths(), prefixes: [cacheKeyPrefixes.faq] })

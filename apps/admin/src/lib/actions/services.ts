@@ -290,8 +290,7 @@ export async function deleteService(id: string) {
   const existing = await db.select().from(services).where(eq(services.id, id)).get()
   if (!existing) throw new Error('Послугу не знайдено')
 
-  await db.delete(services).where(eq(services.id, id))
-  await writeAuditLog({ userId, action: 'DELETE', entityType: 'SERVICE', entityId: id, before: existing })
+  // Capture slugs before the cascade delete removes translations.
   const delTrs = await db
     .select()
     .from(serviceTranslations)
@@ -299,6 +298,14 @@ export async function deleteService(id: string) {
     .all()
   const ruSlug = delTrs.find((t) => t.locale === 'ru')?.slug || ''
   const ukSlug = delTrs.find((t) => t.locale === 'uk')?.slug || ''
+
+  // seo_meta has no FK — delete linked rows in the same transaction (P0-2).
+  await db.transaction(async (tx) => {
+    await tx.delete(seoMeta).where(and(eq(seoMeta.entityType, 'service'), eq(seoMeta.entityId, id)))
+    await tx.delete(services).where(eq(services.id, id))
+  })
+
+  await writeAuditLog({ userId, action: 'DELETE', entityType: 'SERVICE', entityId: id, before: existing })
   revalidateAdmin('/admin/services')
   await revalidatePublic({
     paths: [serviceIndexPath('ru'), serviceIndexPath('uk'), '/sitemap.xml'],

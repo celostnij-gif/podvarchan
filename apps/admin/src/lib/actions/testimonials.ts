@@ -136,7 +136,11 @@ export async function deleteTestimonial(id: string) {
   const db = await getActionDb()
   const existing = await db.select().from(testimonials).where(eq(testimonials.id, id)).get()
   if (!existing) throw new Error('Відгук не знайдено')
-  await db.delete(testimonials).where(eq(testimonials.id, id))
+  // Safety net: seo_meta has no FK — remove any linked rows in the same transaction (P0-2).
+  await db.transaction(async (tx) => {
+    await tx.delete(seoMeta).where(eq(seoMeta.entityId, id))
+    await tx.delete(testimonials).where(eq(testimonials.id, id))
+  })
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'TESTIMONIAL', entityId: id, before: existing })
   revalidateAdmin('/admin/testimonials')
   await revalidatePublic({ paths: getHomeRevalidatePaths(), keys: getTestimonialsCacheKeys() })

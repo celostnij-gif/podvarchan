@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 
 import { eq } from 'drizzle-orm'
-import { pricingPlans, pricingPlanTranslations, cacheKeys } from '@podvarchan/shared'
+import { pricingPlans, pricingPlanTranslations, cacheKeys, seoMeta } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
 import { canEditContent } from '@/lib/auth/permissions'
 import { requireDelete } from '@/lib/auth/guards'
@@ -181,7 +181,11 @@ export async function deletePricingPlan(id: string) {
   const db = await getActionDb()
   const existing = await db.select({ id: pricingPlans.id }).from(pricingPlans).where(eq(pricingPlans.id, id)).get()
   if (!existing) throw new Error('План не знайдено')
-  await db.delete(pricingPlans).where(eq(pricingPlans.id, id)) // translations — ON DELETE CASCADE
+  // Safety net: seo_meta has no FK — remove any linked rows in the same transaction (P0-2).
+  await db.transaction(async (tx) => {
+    await tx.delete(seoMeta).where(eq(seoMeta.entityId, id))
+    await tx.delete(pricingPlans).where(eq(pricingPlans.id, id)) // translations — ON DELETE CASCADE
+  })
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'PRICING_PLAN', entityId: id })
   revalidatePricing()
 }
