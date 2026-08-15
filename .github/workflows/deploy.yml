@@ -77,6 +77,19 @@ jobs:
           npm ci
           cd apps/admin && npm install --no-audit --no-fund
 
+      - name: Build admin
+        run: cd apps/admin && npx opennextjs-cloudflare build
+        env:
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          AUTH_URL: ${{ secrets.AUTH_URL }}
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+          ADMIN_SEED_EMAIL: ${{ secrets.ADMIN_SEED_EMAIL }}
+          ADMIN_SEED_PASSWORD: ${{ secrets.ADMIN_SEED_PASSWORD }}
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY: 0x4AAAAAADYZ2z3RysEsBoQu
+          NEXTJS_ENV: production
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_DATABASE_ID: ${{ secrets.CLOUDFLARE_DATABASE_ID }}
+
       - name: TypeScript check (admin)
         run: cd apps/admin && npx tsc --noEmit
         env:
@@ -92,19 +105,6 @@ jobs:
         # leaves realistic headroom for admin UI growth (current ~1.42 MiB)
         # without alerting on every PR. 1.5/2.0 MiB proved too tight (~5%).
         run: node scripts/check-bundle-size.mjs --path apps/admin/.open-next/server-functions/default/apps/admin/handler.mjs --warn 1887436 --fail 2621440
-
-      - name: Build admin
-        run: cd apps/admin && npx opennextjs-cloudflare build
-        env:
-          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
-          AUTH_URL: ${{ secrets.AUTH_URL }}
-          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
-          ADMIN_SEED_EMAIL: ${{ secrets.ADMIN_SEED_EMAIL }}
-          ADMIN_SEED_PASSWORD: ${{ secrets.ADMIN_SEED_PASSWORD }}
-          NEXT_PUBLIC_TURNSTILE_SITE_KEY: 0x4AAAAAADYZ2z3RysEsBoQu
-          NEXTJS_ENV: production
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_DATABASE_ID: ${{ secrets.CLOUDFLARE_DATABASE_ID }}
 
       - name: Deploy admin to Cloudflare
         uses: cloudflare/wrangler-action@v4
