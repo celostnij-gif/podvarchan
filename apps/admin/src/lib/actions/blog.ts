@@ -9,10 +9,12 @@ import {
   blogPosts, blogPostTranslations, redirectRules, seoMeta,
 } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
-import { canEditContent, canDelete, canPublish } from '@/lib/auth/permissions'
+import { requireDelete } from '@/lib/auth/guards'
+import { canEditContent, canDelete } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
+import type { ActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
-import { revalidatePublic, revalidateAdmin, getBlogPostRevalidatePaths } from '@/lib/revalidate'
+import { revalidatePublic, revalidateAdmin, getBlogPostRevalidatePaths, getBlogPostCacheKeys, cacheKeys, cacheKeyPrefixes } from '@/lib/revalidate'
 import { syncRedirectRulesToKv } from './redirects'
 import { requirePublish, assertBilingual, assertMetaPresent } from './ymyl'
 
@@ -23,6 +25,22 @@ async function requireEdit(): Promise<string> {
 }
 
 async function now(): Promise<string> { return new Date().toISOString() }
+
+/** Category translation slugs for a category id (per locale) — for blog-cat cache keys. */
+async function getCategorySlugs(
+  db: ActionDb,
+  categoryId: string | null | undefined,
+): Promise<{ ru?: string; uk?: string }> {
+  if (!categoryId) return {}
+  const rows = await db
+    .select()
+    .from(blogCategoryTranslations)
+    .where(eq(blogCategoryTranslations.categoryId, categoryId))
+    .all()
+  const out: { ru?: string; uk?: string } = {}
+  for (const r of rows) out[r.locale as 'ru' | 'uk'] = r.slug
+  return out
+}
 
 /* ── Category Schemas ── */
 
@@ -80,7 +98,6 @@ export async function createCategory(formData: FormData) {
   if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
   const data = parsed.data
   const id = crypto.randomUUID()
-  const ts = await now()
   await db.insert(blogCategories).values(cleanUpdate({
     id, slugBase: data.slugBase, serviceId: data.serviceId,
     sortOrder: data.sortOrder, status: 'PUBLISHED',
@@ -93,13 +110,23 @@ export async function createCategory(formData: FormData) {
   }
   await writeAuditLog({ userId, action: 'CREATE', entityType: 'BLOG_CATEGORY', entityId: id, after: data })
   revalidateAdmin('/admin/blog/categories')
-  revalidatePublic({ paths: [
-    '/ru/blog/',
-    '/uk/blog/',
-    '/ru/blog/kategoriya/' + translations.find(t => t.locale === 'ru')?.slug + '/',
-    '/uk/blog/kategoriya/' + translations.find(t => t.locale === 'uk')?.slug + '/',
-    '/sitemap.xml',
-  ] })
+  const ruCatSlug = data.translations.find((t) => t.locale === 'ru')?.slug
+  const ukCatSlug = data.translations.find((t) => t.locale === 'uk')?.slug
+  await revalidatePublic({
+    paths: [
+      '/ru/blog/',
+      '/uk/blog/',
+      `/ru/blog/kategoriya/${ruCatSlug}/`,
+      `/uk/blog/kategoriya/${ukCatSlug}/`,
+      '/sitemap.xml',
+    ],
+    keys: [
+      cacheKeys.blogCats('ru'),
+      cacheKeys.blogCats('uk'),
+      ...(ruCatSlug ? [cacheKeys.blogCatPosts(ruCatSlug, 'ru')] : []),
+      ...(ukCatSlug ? [cacheKeys.blogCatPosts(ukCatSlug, 'uk')] : []),
+    ],
+  })
 }
 
 
@@ -108,6 +135,11 @@ export async function updateCategory(id: string, formData: FormData) {
   const db = await getActionDb()
   const existing = await db.select().from(blogCategories).where(eq(blogCategories.id, id)).get()
   if (!existing) throw new Error('Категорію не знайдено')
+  const oldCatTrs = await db
+    .select()
+    .from(blogCategoryTranslations)
+    .where(eq(blogCategoryTranslations.categoryId, id))
+    .all()
   const translations = [
     { locale: 'ru', slug: formData.get('ru_slug'), name: formData.get('ru_name'), description: formData.get('ru_description') },
     { locale: 'uk', slug: formData.get('uk_slug'), name: formData.get('uk_name'), description: formData.get('uk_description') },
@@ -138,25 +170,48 @@ export async function updateCategory(id: string, formData: FormData) {
   }
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'BLOG_CATEGORY', entityId: id, before: existing, after: data })
   revalidateAdmin('/admin/blog/categories')
-  void revalidatePublic({ paths: [
-    '/ru/blog/',
-    '/uk/blog/',
-    '/ru/blog/kategoriya/' + data.translations.find(t => t.locale === 'ru')?.slug + '/',
-    '/uk/blog/kategoriya/' + data.translations.find(t => t.locale === 'uk')?.slug + '/',
-    '/sitemap.xml',
-  ] })
+  const ruCatSlug = data.translations.find((t) => t.locale === 'ru')?.slug
+  const ukCatSlug = data.translations.find((t) => t.locale === 'uk')?.slug
+  const oldRuCat = oldCatTrs.find((t) => t.locale === 'ru')?.slug
+  const oldUkCat = oldCatTrs.find((t) => t.locale === 'uk')?.slug
+  await revalidatePublic({
+    paths: [
+      '/ru/blog/',
+      '/uk/blog/',
+      `/ru/blog/kategoriya/${ruCatSlug}/`,
+      `/uk/blog/kategoriya/${ukCatSlug}/`,
+      '/sitemap.xml',
+    ],
+    keys: [
+      cacheKeys.blogCats('ru'),
+      cacheKeys.blogCats('uk'),
+      ...(ruCatSlug ? [cacheKeys.blogCatPosts(ruCatSlug, 'ru')] : []),
+      ...(ukCatSlug ? [cacheKeys.blogCatPosts(ukCatSlug, 'uk')] : []),
+      ...(oldRuCat ? [cacheKeys.blogCatPosts(oldRuCat, 'ru')] : []),
+      ...(oldUkCat ? [cacheKeys.blogCatPosts(oldUkCat, 'uk')] : []),
+    ],
+  })
 }
 
 export async function deleteCategory(id: string) {
-  const userId = await requireEdit()
+  const { id: userId } = await requireDelete()
   const db = await getActionDb()
   const existing = await db.select().from(blogCategories).where(eq(blogCategories.id, id)).get()
   if (!existing) throw new Error('Категорію не знайдено')
-  await db.delete(blogCategories).where(eq(blogCategories.id, id))
+  // seo_meta has no FK — delete linked rows in the same transaction (P0-2).
+  await db.transaction(async (tx) => {
+    await tx.delete(seoMeta).where(and(eq(seoMeta.entityType, 'blog_category'), eq(seoMeta.entityId, id)))
+    await tx.delete(blogCategories).where(eq(blogCategories.id, id))
+  })
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'BLOG_CATEGORY', entityId: id, before: existing })
   revalidateAdmin('/admin/blog/categories')
   // Revalidate blog area (list + category pages affected)
-  void revalidatePublic({ paths: ['/ru/blog/', '/uk/blog/', '/sitemap.xml'], type: 'layout' })
+  await revalidatePublic({
+    paths: ['/ru/blog/', '/uk/blog/', '/sitemap.xml'],
+    type: 'layout',
+    keys: [cacheKeys.blogCats('ru'), cacheKeys.blogCats('uk')],
+    prefixes: [cacheKeyPrefixes.blogCatPosts],
+  })
 }
 
 /* ── Post Actions ── */
@@ -205,8 +260,13 @@ export async function createPost(formData: FormData) {
   await writeAuditLog({ userId, action: 'CREATE', entityType: 'BLOG_POST', entityId: id, after: data })
   const ruSlug = data.translations.find((t: { locale: string }) => t.locale === 'ru')?.slug || ''
   const ukSlug = data.translations.find((t: { locale: string }) => t.locale === 'uk')?.slug || ''
+  const cats = await getCategorySlugs(db, data.categoryId)
   revalidateAdmin('/admin/blog/posts')
-  void revalidatePublic({ paths: getBlogPostRevalidatePaths(ruSlug, ukSlug) })
+  await revalidatePublic({
+    paths: getBlogPostRevalidatePaths(ruSlug, ukSlug, cats.ru, cats.uk),
+    keys: getBlogPostCacheKeys(ruSlug, ukSlug, cats.ru, cats.uk, id),
+    prefixes: [cacheKeyPrefixes.blogImages],
+  })
 }
 
 export async function updatePost(id: string, formData: FormData) {
@@ -303,18 +363,58 @@ export async function updatePost(id: string, formData: FormData) {
   const ruSlug = data.translations.find((t: { locale: string }) => t.locale === 'ru')?.slug || ''
   const ukSlug = data.translations.find((t: { locale: string }) => t.locale === 'uk')?.slug || ''
   revalidateAdmin('/admin/blog/posts', `/admin/blog/posts/${id}`)
-  void revalidatePublic({ paths: getBlogPostRevalidatePaths(ruSlug, ukSlug) })
+  const oldTrs = await db
+    .select()
+    .from(blogPostTranslations)
+    .where(eq(blogPostTranslations.postId, id))
+    .all()
+  const oldRuSlug = oldTrs.find((t) => t.locale === 'ru')?.slug || ''
+  const oldUkSlug = oldTrs.find((t) => t.locale === 'uk')?.slug || ''
+  const newCats = await getCategorySlugs(db, data.categoryId)
+  const oldCats = await getCategorySlugs(db, existing.categoryId)
+  await revalidatePublic({
+    paths: getBlogPostRevalidatePaths(ruSlug, ukSlug, newCats.ru, newCats.uk),
+    keys: [
+      ...getBlogPostCacheKeys(ruSlug, ukSlug, newCats.ru, newCats.uk, id),
+      ...(oldRuSlug ? [cacheKeys.blogPost(oldRuSlug, 'ru')] : []),
+      ...(oldUkSlug ? [cacheKeys.blogPost(oldUkSlug, 'uk')] : []),
+      ...(oldCats.ru ? [cacheKeys.blogCatPosts(oldCats.ru, 'ru')] : []),
+      ...(oldCats.uk ? [cacheKeys.blogCatPosts(oldCats.uk, 'uk')] : []),
+    ],
+    prefixes: [cacheKeyPrefixes.blogImages],
+  })
 }
 
 export async function deletePost(id: string) {
-  const userId = await requireEdit()
+  const { id: userId } = await requireDelete()
   const db = await getActionDb()
   const existing = await db.select().from(blogPosts).where(eq(blogPosts.id, id)).get()
   if (!existing) throw new Error('Публікацію не знайдено')
-  await db.delete(blogPosts).where(eq(blogPosts.id, id))
+
+  // Capture slugs before the cascade delete removes translations.
+  const trs = await db
+    .select()
+    .from(blogPostTranslations)
+    .where(eq(blogPostTranslations.postId, id))
+    .all()
+  const ruSlug = trs.find((t) => t.locale === 'ru')?.slug || ''
+  const ukSlug = trs.find((t) => t.locale === 'uk')?.slug || ''
+  const cats = await getCategorySlugs(db, existing.categoryId)
+
+  // seo_meta has no FK — delete linked rows in the same transaction (P0-2).
+  await db.transaction(async (tx) => {
+    await tx.delete(seoMeta).where(and(eq(seoMeta.entityType, 'blog_post'), eq(seoMeta.entityId, id)))
+    await tx.delete(blogPosts).where(eq(blogPosts.id, id))
+  })
+
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'BLOG_POST', entityId: id, before: existing })
   revalidateAdmin('/admin/blog/posts')
-  void revalidatePublic({ paths: ['/ru/blog/', '/uk/blog/', '/sitemap.xml'], type: 'layout' })
+  await revalidatePublic({
+    paths: ['/ru/blog/', '/uk/blog/', '/sitemap.xml'],
+    type: 'layout',
+    keys: getBlogPostCacheKeys(ruSlug, ukSlug, cats.ru, cats.uk, id),
+    prefixes: [cacheKeyPrefixes.blogImages],
+  })
 }
 
 export async function publishPost(id: string) {
@@ -327,8 +427,7 @@ export async function publishPost(id: string) {
 
   // YMYL: only OWNER/ADMIN can publish
   if (newStatus === 'PUBLISHED') {
-    const user = await getCurrentUser()
-    if (!user || !canPublish(user.role)) throw new Error('Лише ВЛАСНИК або АДМІН можуть публікувати')
+    await requirePublish()
 
     // Load ru + uk translations
     const translations = await db
@@ -340,17 +439,8 @@ export async function publishPost(id: string) {
     const ruTr = translations.find(t => t.locale === 'ru')
     const ukTr = translations.find(t => t.locale === 'uk')
 
-    // Require non-empty: ru.title, ru.slug, uk.title, uk.slug
-    if (!ruTr?.title || !ruTr?.slug) throw new Error('RU переклад повинен мати непорожній заголовок та slug')
-    if (!ukTr?.title || !ukTr?.slug) throw new Error('UK переклад повинен мати непорожній заголовок та slug')
-
-    // Require meta description (seo_meta.description OR excerpt >= 50 chars)
-    const meta = ruTr.seoMetaId
-      ? await db.select().from(seoMeta).where(eq(seoMeta.id, ruTr.seoMetaId)).get()
-      : null
-    const hasMetaDesc = meta?.description && meta.description.length > 0
-    const hasExcerpt = ruTr.excerpt && ruTr.excerpt.length >= 50
-    if (!hasMetaDesc && !hasExcerpt) throw new Error('Публікація повинна мати мета-опис (seo_meta.description або excerpt >= 50 символів)')
+    assertBilingual(ruTr, ukTr, 'Публікація')
+    await assertMetaPresent(ruTr!, db, 'Публікація')
   }
 
   await db.update(blogPosts).set({ status: newStatus, updatedAt: await now() }).where(eq(blogPosts.id, id))
@@ -359,5 +449,18 @@ export async function publishPost(id: string) {
     entityType: 'BLOG_POST', entityId: id, after: { status: newStatus },
   })
   revalidateAdmin('/admin/blog/posts')
-  void revalidatePublic({ paths: ['/ru/blog/', '/uk/blog/', '/sitemap.xml'], type: 'layout' })
+  const trs = await db
+    .select()
+    .from(blogPostTranslations)
+    .where(eq(blogPostTranslations.postId, id))
+    .all()
+  const ruSlug = trs.find((t) => t.locale === 'ru')?.slug || ''
+  const ukSlug = trs.find((t) => t.locale === 'uk')?.slug || ''
+  const cats = await getCategorySlugs(db, existing.categoryId)
+  await revalidatePublic({
+    paths: ['/ru/blog/', '/uk/blog/', '/sitemap.xml'],
+    type: 'layout',
+    keys: getBlogPostCacheKeys(ruSlug, ukSlug, cats.ru, cats.uk, id),
+    prefixes: [cacheKeyPrefixes.blogImages],
+  })
 }

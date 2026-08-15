@@ -3,14 +3,19 @@ import { cleanUpdate } from './clean-update'
 
 import { revalidatePath } from 'next/cache'
 import { eq, and } from 'drizzle-orm'
-import { seoMeta } from '@podvarchan/shared'
+import { seoMeta, serviceIndexPath } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
 import { canEditContent } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
 import { runSeoAudit } from '@/lib/seo/audit'
-import { revalidatePublic, revalidateAdmin, getHomeRevalidatePaths } from '@/lib/revalidate'
+import { revalidatePublic, revalidateAdmin, getHomeRevalidatePaths, cacheKeys } from '@/lib/revalidate'
 import type { SeoUrlRow } from '@/lib/seo/audit'
+
+async function requireView(): Promise<void> {
+  const user = await getCurrentUser()
+  if (!user) throw new Error('Не авторизовано')
+}
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
@@ -21,6 +26,7 @@ async function requireEdit(): Promise<string> {
 /* ── SEO meta overrides per entity (used by seo/[entityType]/[entityId]) ── */
 
 export async function getSeoOverride(entityType: string, entityId: string, locale: string) {
+  await requireView()
   const db = await getActionDb()
   return db.select().from(seoMeta)
     .where(and(eq(seoMeta.entityType, entityType), eq(seoMeta.entityId, entityId), eq(seoMeta.locale, locale as 'ru' | 'uk')))
@@ -54,11 +60,32 @@ export async function bulkUpdateSeo(formData: FormData) {
   }
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'SEO_META', entityId: 'bulk', after: { ids } })
   revalidatePath('/admin/seo')
+
+  // SEO overrides feed generateMetadata on live pages — invalidate affected areas
+  const types = new Set(ids.map((i) => i.entityType))
+  const paths: string[] = []
+  for (const t of types) {
+    if (t.startsWith('service')) {
+      paths.push(serviceIndexPath('ru'), serviceIndexPath('uk'), '/sitemap.xml')
+    } else if (t.startsWith('blog')) {
+      paths.push('/ru/blog/', '/uk/blog/', '/sitemap.xml')
+    } else if (t === 'page') {
+      paths.push(...getHomeRevalidatePaths())
+    }
+  }
+  if (paths.length > 0) {
+    await revalidatePublic({
+      paths,
+      type: 'layout',
+      keys: ids.map((i) => cacheKeys.seo(i.entityType, i.entityId, i.locale)),
+    })
+  }
 }
 
 /* ── Audit (SEO audit table) ── */
 
 export async function getSeoAudit(): Promise<SeoUrlRow[]> {
+  await requireView()
   return runSeoAudit()
 }
 
@@ -107,11 +134,22 @@ export async function saveSeoOverride(formData: FormData) {
 
   revalidateAdmin('/admin/seo', `/admin/seo/${entityType}/${entityId}`)
   if (entityType.startsWith('service')) {
-    void revalidatePublic({ paths: ['/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml'], type: 'layout' })
+    await revalidatePublic({
+      paths: [serviceIndexPath('ru'), serviceIndexPath('uk'), '/sitemap.xml'],
+      type: 'layout',
+      keys: [cacheKeys.seo(entityType, entityId, locale)],
+    })
   } else if (entityType.startsWith('blog')) {
-    void revalidatePublic({ paths: ['/ru/blog/', '/uk/blog/', '/sitemap.xml'], type: 'layout' })
+    await revalidatePublic({
+      paths: ['/ru/blog/', '/uk/blog/', '/sitemap.xml'],
+      type: 'layout',
+      keys: [cacheKeys.seo(entityType, entityId, locale)],
+    })
   } else if (entityType === 'page') {
-    void revalidatePublic({ paths: getHomeRevalidatePaths() })
+    await revalidatePublic({
+      paths: getHomeRevalidatePaths(),
+      keys: [cacheKeys.seo(entityType, entityId, locale)],
+    })
   }
 
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'SEO_META', entityId, after: { title, description, keywords } })
@@ -120,6 +158,7 @@ export async function saveSeoOverride(formData: FormData) {
 /* ── Export SEO audit to CSV ── */
 
 export async function exportSeoCsv(): Promise<string> {
+  await requireView()
   const rows = await runSeoAudit()
   const header = 'URL,Locale,Type,Title,Description,H1,Word Count,Score,Warnings'
   const lines = rows.map((r) => {

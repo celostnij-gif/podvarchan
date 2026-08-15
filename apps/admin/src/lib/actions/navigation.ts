@@ -6,10 +6,11 @@ import { revalidatePath } from 'next/cache'
 import { eq, asc } from 'drizzle-orm'
 import { navigationItems } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
+import { requireDelete } from '@/lib/auth/guards'
 import { canManageSettings } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
-import { revalidatePublic, revalidateAdmin, getHomeRevalidatePaths } from '@/lib/revalidate'
+import { revalidatePublic, revalidateAdmin, getHomeRevalidatePaths, cacheKeyPrefixes } from '@/lib/revalidate'
 
 async function requireSettings(): Promise<string> {
   const user = await getCurrentUser()
@@ -64,19 +65,19 @@ export async function saveNavigationItem(data: FormData) {
     await writeAuditLog({ userId, action: 'CREATE', entityType: 'NAVIGATION', entityId: newId, after: item })
   }
   revalidateAdmin('/admin/navigation', '/admin/settings')
-  void revalidatePublic({ paths: getHomeRevalidatePaths() })
+  await revalidatePublic({ paths: getHomeRevalidatePaths(), prefixes: [cacheKeyPrefixes.nav] })
 
 }
 
 export async function deleteNavigationItem(id: string) {
-  const userId = await requireSettings()
+  const { id: userId } = await requireDelete()
   const db = await getActionDb()
   const existing = await db.select().from(navigationItems).where(eq(navigationItems.id, id)).get()
   if (!existing) throw new Error('Пункт навігації не знайдено')
   await db.delete(navigationItems).where(eq(navigationItems.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'NAVIGATION', entityId: id, before: existing })
   revalidateAdmin('/admin/navigation', '/admin/settings')
-  void revalidatePublic({ paths: getHomeRevalidatePaths() })
+  await revalidatePublic({ paths: getHomeRevalidatePaths(), prefixes: [cacheKeyPrefixes.nav] })
 
 }
 
@@ -88,7 +89,7 @@ export async function toggleNavigationItem(id: string) {
   await db.update(navigationItems).set({ isEnabled: !existing.isEnabled }).where(eq(navigationItems.id, id))
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'NAVIGATION', entityId: id, before: existing, after: { isEnabled: !existing.isEnabled } })
   revalidateAdmin('/admin/navigation', '/admin/settings')
-  void revalidatePublic({ paths: getHomeRevalidatePaths() })
+  await revalidatePublic({ paths: getHomeRevalidatePaths(), prefixes: [cacheKeyPrefixes.nav] })
 }
 
 export async function reorderNavigationItems(items: { id: string; parentId: string | null; sortOrder: number }[]) {
@@ -99,5 +100,5 @@ export async function reorderNavigationItems(items: { id: string; parentId: stri
   }
   await writeAuditLog({ userId, action: 'REORDER', entityType: 'NAVIGATION', entityId: 'batch', after: { items } })
   revalidateAdmin('/admin/navigation')
-  void revalidatePublic({ paths: getHomeRevalidatePaths() })
+  await revalidatePublic({ paths: getHomeRevalidatePaths(), prefixes: [cacheKeyPrefixes.nav] })
 }

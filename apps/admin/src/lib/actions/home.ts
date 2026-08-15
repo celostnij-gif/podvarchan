@@ -12,7 +12,7 @@ import { eq, and } from 'drizzle-orm'
 import { getActionDb } from './db'
 import { requireAdminSession } from '@/lib/auth/session'
 import { canEditContent } from '@/lib/auth/permissions'
-import { revalidatePublic, revalidateAdmin, getHomeRevalidatePaths } from '@/lib/revalidate'
+import { revalidatePublic, revalidateAdmin, getHomeRevalidatePaths, getHomeCacheKeys } from '@/lib/revalidate'
 import { writeAuditLog } from '@/lib/audit/log'
 import {
   pages,
@@ -166,6 +166,7 @@ export async function ensureHomeBlueprint(): Promise<{ created: number }> {
   })
 
   revalidateAdmin('/admin/home')
+  await revalidatePublic({ paths: getHomeRevalidatePaths(), keys: getHomeCacheKeys(home.id) })
 
   return { created }
 }
@@ -244,7 +245,7 @@ export async function updateHomeMeta(input: z.infer<typeof homeMetaSchema>): Pro
   })
 
   revalidateAdmin('/admin/home')
-  void revalidatePublic({ paths: getHomeRevalidatePaths() })
+  await revalidatePublic({ paths: getHomeRevalidatePaths(), keys: getHomeCacheKeys(home.id) })
 
   return { ok: true }
 }
@@ -343,7 +344,7 @@ export async function updateHomeZone(
   })
 
   revalidateAdmin('/admin/home', '/admin/pages')
-  void revalidatePublic({ paths: getHomeRevalidatePaths() })
+  await revalidatePublic({ paths: getHomeRevalidatePaths(), keys: getHomeCacheKeys(home.id) })
 
   return { ok: true, heroSynced }
 }
@@ -379,7 +380,7 @@ export async function toggleHomeZone(zone: HomeZoneKey): Promise<{ ok: boolean; 
   })
 
   revalidateAdmin('/admin/home')
-  void revalidatePublic({ paths: getHomeRevalidatePaths() })
+  await revalidatePublic({ paths: getHomeRevalidatePaths(), keys: getHomeCacheKeys(home.id) })
 
   return { ok: true, enabled: newEnabled }
 }

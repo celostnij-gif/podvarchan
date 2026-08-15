@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { eq, asc } from 'drizzle-orm'
 import { redirectRules } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
+import { requireDelete } from '@/lib/auth/guards'
 import { canManageSettings } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
@@ -62,7 +63,7 @@ export async function saveRedirectRule(data: FormData) {
 }
 
 export async function deleteRedirectRule(id: string) {
-  const userId = await requireSettings()
+  const { id: userId } = await requireDelete()
   const db = await getActionDb()
   const existing = await db.select().from(redirectRules).where(eq(redirectRules.id, id)).get()
   if (!existing) throw new Error('Правило перенаправлення не знайдено')
@@ -101,7 +102,7 @@ export async function syncRedirectRulesToKv() {
       map[r.fromPath] = { to: r.toPath, code: r.statusCode }
     }
     const { env } = getCloudflareContext()
-    const kv = env.KV_BINDING as KVNamespace
+    const kv = env.CONTENT_CACHE_KV as KVNamespace
     await kv.put('redirect_rules', JSON.stringify(map))
   } catch (err) {
     console.error('syncRedirectRulesToKv failed:', String(err))

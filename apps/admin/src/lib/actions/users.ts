@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { eq } from 'drizzle-orm'
 import { users } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
+import { requireDelete } from '@/lib/auth/guards'
 import { canManageUsers } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
@@ -49,7 +50,7 @@ export async function updateUser(id: string, formData: FormData) {
 }
 
 export async function deleteUser(id: string) {
-  const userId = await requireManageUsers()
+  const { id: userId } = await requireDelete()
   const db = await getActionDb()
   const existing = await db.select().from(users).where(eq(users.id, id)).get()
   if (!existing) throw new Error('Користувача не знайдено')

@@ -77,6 +77,21 @@ jobs:
           npm ci
           cd apps/admin && npm install --no-audit --no-fund
 
+      - name: TypeScript check (admin)
+        run: cd apps/admin && npx tsc --noEmit
+        env:
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          AUTH_URL: ${{ secrets.AUTH_URL }}
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+          NEXTJS_ENV: production
+
+      - name: Invalidation coverage check
+        run: node scripts/check-invalidation-coverage.mjs
+      - name: Bundle size gate (admin)
+        # Same ~3 MiB gzip platform ceiling as the public worker; 1.8/2.5 MiB
+        # leaves realistic headroom for admin UI growth (current ~1.42 MiB)
+        # without alerting on every PR. 1.5/2.0 MiB proved too tight (~5%).
+        run: node scripts/check-bundle-size.mjs --path apps/admin/.open-next/server-functions/default/apps/admin/handler.mjs --warn 1887436 --fail 2621440
 
       - name: Build admin
         run: cd apps/admin && npx opennextjs-cloudflare build
@@ -98,4 +113,10 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: apps/admin
           command: deploy --no-autoconfig
+
+      - name: Verify admin responds
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" -H "Cache-Control: no-cache" https://admin.podvarchan.com/)
+          echo "admin.podvarchan.com -> $code"
+          [[ "$code" != "000" ]] || { echo "FAIL: admin unreachable"; exit 1; }
 

@@ -6,10 +6,12 @@ import { revalidatePath } from 'next/cache'
 import { eq, and } from 'drizzle-orm'
 import { pages, pageTranslations, pageSections, pageSectionTranslations, redirectRules, seoMeta } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
-import { canEditContent, canDelete, canPublish } from '@/lib/auth/permissions'
+import { canEditContent } from '@/lib/auth/permissions'
+import { requireDelete } from '@/lib/auth/guards'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
-import { revalidatePublic, revalidateAdmin, getPageRevalidatePaths, getHomeRevalidatePaths } from '@/lib/revalidate'
+import { revalidatePublic, revalidateAdmin, getPageRevalidatePaths, getHomeRevalidatePaths, getPageCacheKeys, getHomeCacheKeys } from '@/lib/revalidate'
+import type { ActionDb } from './db'
 import { syncRedirectRulesToKv } from './redirects'
 import { requirePublish, assertBilingual, assertMetaPresent } from './ymyl'
 
@@ -19,14 +21,14 @@ async function requireEdit(): Promise<string> {
   return user.id
 }
 
-async function requireDelete(): Promise<string> {
-  const user = await getCurrentUser()
-  if (!user || !canDelete(user.role)) throw new Error('Заборонено')
-  return user.id
-}
-
 function now(): string {
   return new Date().toISOString()
+}
+
+/** Resolve the page type for a section's parent page (for targeted cache keys). */
+async function getPageTypeByPageId(db: ActionDb, pageId: string): Promise<string> {
+  const page = await db.select().from(pages).where(eq(pages.id, pageId)).get()
+  return page?.type ?? 'CUSTOM'
 }
 
 const PAGE_TYPES = [
@@ -222,7 +224,7 @@ export async function updatePage(id: string, formData: FormData) {
     after: data,
   })
   revalidateAdmin('/admin/pages', `/admin/pages/${id}`, '/admin/home')
-  void revalidatePublic({ paths: getPageRevalidatePaths(existing.type) })
+  await revalidatePublic({ paths: getPageRevalidatePaths(existing.type), keys: [...getPageCacheKeys(existing.type), ...getPageCacheKeys(data.type)] })
 }
 
 /** Primary save from edit form (meta + translations). */
@@ -231,15 +233,19 @@ export async function updatePageMeta(id: string, formData: FormData) {
 }
 
 export async function deletePage(id: string) {
-  const userId = await requireDelete()
+  const { id: userId } = await requireDelete()
   const db = await getActionDb()
   const existing = await db.select().from(pages).where(eq(pages.id, id)).get()
   if (!existing) throw new Error('Сторінку не знайдено')
   if (existing.type === 'HOME') throw new Error('Головну сторінку не можна видалити')
-  await db.delete(pages).where(eq(pages.id, id))
+  // seo_meta has no FK — delete linked rows in the same transaction (P0-2).
+  await db.transaction(async (tx) => {
+    await tx.delete(seoMeta).where(and(eq(seoMeta.entityType, 'page'), eq(seoMeta.entityId, id)))
+    await tx.delete(pages).where(eq(pages.id, id))
+  })
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'PAGE', entityId: id, before: existing })
   revalidateAdmin('/admin/pages', '/admin/home')
-  void revalidatePublic({ paths: getPageRevalidatePaths(existing.type) })
+  await revalidatePublic({ paths: getPageRevalidatePaths(existing.type), keys: getPageCacheKeys(existing.type) })
 }
 
 export async function publishPage(id: string) {
@@ -251,8 +257,7 @@ export async function publishPage(id: string) {
 
   // YMYL: only OWNER/ADMIN can publish
   if (newStatus === 'PUBLISHED') {
-    const user = await getCurrentUser()
-    if (!user || !canPublish(user.role)) throw new Error('Лише ВЛАСНИК або АДМІН можуть публікувати')
+    await requirePublish()
 
     const translations = await db
       .select()
@@ -263,16 +268,8 @@ export async function publishPage(id: string) {
     const ruTr = translations.find(t => t.locale === 'ru')
     const ukTr = translations.find(t => t.locale === 'uk')
 
-    if (!ruTr?.title || !ruTr?.slug) throw new Error('RU переклад повинен мати непорожній заголовок та slug')
-    if (!ukTr?.title || !ukTr?.slug) throw new Error('UK переклад повинен мати непорожній заголовок та slug')
-
-    // Require meta description
-    const meta = ruTr.seoMetaId
-      ? await db.select().from(seoMeta).where(eq(seoMeta.id, ruTr.seoMetaId)).get()
-      : null
-    const hasMetaDesc = meta?.description && meta.description.length > 0
-    const hasExcerpt = ruTr.excerpt && ruTr.excerpt.length >= 50
-    if (!hasMetaDesc && !hasExcerpt) throw new Error('Сторінка повинна мати мета-опис (seo_meta.description або excerpt >= 50 символів)')
+    assertBilingual(ruTr, ukTr, 'Сторінка')
+    await assertMetaPresent(ruTr!, db, 'Сторінка')
   }
 
   const ts = now()
@@ -293,7 +290,7 @@ export async function publishPage(id: string) {
     after: { status: newStatus },
   })
   revalidateAdmin('/admin/pages', `/admin/pages/${id}`, '/admin/home')
-  void revalidatePublic({ paths: getPageRevalidatePaths(existing.type) })
+  await revalidatePublic({ paths: getPageRevalidatePaths(existing.type), keys: getPageCacheKeys(existing.type) })
 }
 const homeContentSchema = z.object({
   ru_slug: z.string().min(1).default('/'),
@@ -414,7 +411,7 @@ export async function updateHomeContent(formData: FormData) {
     after: { type: 'HOME', ...d },
   })
   revalidateAdmin('/admin/home', '/admin/pages', `/admin/pages/${home.id}`)
-  void revalidatePublic({ paths: getHomeRevalidatePaths() })
+  await revalidatePublic({ paths: getHomeRevalidatePaths(), keys: getHomeCacheKeys(home.id) })
 }
 
 /* ── Section schemas ── */
@@ -477,8 +474,8 @@ export async function addSection(pageId: string, formData: FormData): Promise<{ 
     entityId: sectionId,
     after: { pageId, key, type },
   })
-  revalidateAdmin(`/admin/pages/${pageId}`, '/admin/home')
-  void revalidatePublic({ paths: getHomeRevalidatePaths() })
+  const sectionPageType = await getPageTypeByPageId(db, pageId)
+  await revalidatePublic({ paths: getPageRevalidatePaths(sectionPageType), keys: getPageCacheKeys(sectionPageType) })
 
   return { sectionId }
 }
@@ -532,12 +529,12 @@ export async function updateSectionContent(sectionId: string, formData: FormData
     before: existing,
     after: { key, type: typeRaw },
   })
-  revalidateAdmin(`/admin/pages/${existing.pageId}`, '/admin/pages', '/admin/home')
-  void revalidatePublic({ paths: getHomeRevalidatePaths() })
+  const sectionPageType = await getPageTypeByPageId(db, existing.pageId)
+  await revalidatePublic({ paths: getPageRevalidatePaths(sectionPageType), keys: getPageCacheKeys(sectionPageType) })
 }
 
 async function upsertSectionTranslation(
-  db: Awaited<ReturnType<typeof getActionDb>>,
+  db: ActionDb,
   sectionId: string,
   locale: 'ru' | 'uk',
   contentJson: string,
@@ -580,8 +577,8 @@ export async function toggleSection(sectionId: string, enabled: boolean) {
     before: existing,
     after: { enabled },
   })
-  revalidateAdmin(`/admin/pages/${existing.pageId}`, '/admin/home')
-  void revalidatePublic({ paths: getHomeRevalidatePaths() })
+  const sectionPageType = await getPageTypeByPageId(db, existing.pageId)
+  await revalidatePublic({ paths: getPageRevalidatePaths(sectionPageType), keys: getPageCacheKeys(sectionPageType) })
 }
 
 export async function reorderSections(pageId: string, orderedIds: string[]) {
@@ -600,12 +597,14 @@ export async function reorderSections(pageId: string, orderedIds: string[]) {
     entityId: pageId,
     after: { orderedIds },
   })
+  const sectionPageType = await getPageTypeByPageId(db, pageId)
+  await revalidatePublic({ paths: getPageRevalidatePaths(sectionPageType), keys: getPageCacheKeys(sectionPageType) })
   revalidatePath(`/admin/pages/${pageId}`)
   revalidatePath('/admin/home')
 }
 
 export async function deleteSection(sectionId: string) {
-  const userId = await requireDelete()
+  const { id: userId } = await requireDelete()
   const db = await getActionDb()
   const existing = await db.select().from(pageSections).where(eq(pageSections.id, sectionId)).get()
   if (!existing) throw new Error('Секцію не знайдено')
@@ -617,6 +616,6 @@ export async function deleteSection(sectionId: string) {
     entityId: sectionId,
     before: existing,
   })
-  revalidateAdmin(`/admin/pages/${existing.pageId}`, '/admin/home')
-  void revalidatePublic({ paths: getHomeRevalidatePaths() })
+  const sectionPageType = await getPageTypeByPageId(db, existing.pageId)
+  await revalidatePublic({ paths: getPageRevalidatePaths(sectionPageType), keys: getPageCacheKeys(sectionPageType) })
 }

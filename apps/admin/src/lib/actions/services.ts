@@ -5,24 +5,19 @@ import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 
 import { eq, and } from 'drizzle-orm'
-import { services, serviceTranslations, redirectRules, seoMeta } from '@podvarchan/shared'
+import { services, serviceTranslations, redirectRules, seoMeta, serviceIndexPath, servicePath } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
-import { canEditContent, canDelete, canPublish } from '@/lib/auth/permissions'
+import { canEditContent } from '@/lib/auth/permissions'
+import { requireDelete } from '@/lib/auth/guards'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
-import { revalidatePublic, revalidateAdmin, getServiceRevalidatePaths } from '@/lib/revalidate'
+import { revalidatePublic, revalidateAdmin, getServiceRevalidatePaths, getServiceCacheKeys, cacheKeys } from '@/lib/revalidate'
 import { syncRedirectRulesToKv } from './redirects'
 import { requirePublish, assertBilingual, assertMetaPresent } from './ymyl'
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
   if (!user || !canEditContent(user.role)) throw new Error('Заборонено')
-  return user.id
-}
-
-async function requireDelete(): Promise<string> {
-  const user = await getCurrentUser()
-  if (!user || !canDelete(user.role)) throw new Error('Заборонено — лише ВЛАСНИК може видаляти')
   return user.id
 }
 
@@ -146,7 +141,10 @@ export async function createService(formData: FormData) {
   const ruSlug = data.translations.find((t: { locale: string }) => t.locale === 'ru')?.slug || ''
   const ukSlug = data.translations.find((t: { locale: string }) => t.locale === 'uk')?.slug || ''
   revalidateAdmin('/admin/services')
-  void revalidatePublic({ paths: getServiceRevalidatePaths(ruSlug, ukSlug, data.featured) })
+  await revalidatePublic({
+    paths: getServiceRevalidatePaths(ruSlug, ukSlug, data.featured),
+    keys: getServiceCacheKeys(ruSlug, ukSlug, serviceId, data.featured),
+  })
   
 }
 
@@ -195,8 +193,8 @@ export async function updateService(id: string, formData: FormData) {
     for (const newT of data.translations) {
       const oldT = oldTranslations.find(t => t.locale === newT.locale)
       if (oldT && oldT.slug !== newT.slug) {
-        const oldPath = `/${newT.locale}/uslugi/${oldT.slug}/`
-        const newPath = `/${newT.locale}/uslugi/${newT.slug}/`
+        const oldPath = servicePath(newT.locale, oldT.slug)
+        const newPath = servicePath(newT.locale, newT.slug)
         const existingRule = await db
           .select()
           .from(redirectRules)
@@ -266,23 +264,54 @@ export async function updateService(id: string, formData: FormData) {
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'SERVICE', entityId: id, before: existing, after: data })
   const ruSlug = data.translations.find((t: { locale: string }) => t.locale === 'ru')?.slug || ''
   const ukSlug = data.translations.find((t: { locale: string }) => t.locale === 'uk')?.slug || ''
+  const oldTrs = await db
+    .select()
+    .from(serviceTranslations)
+    .where(eq(serviceTranslations.serviceId, id))
+    .all()
+  const oldRuSlug = oldTrs.find((t) => t.locale === 'ru')?.slug || ''
+  const oldUkSlug = oldTrs.find((t) => t.locale === 'uk')?.slug || ''
   revalidateAdmin('/admin/services', `/admin/services/${id}`)
-  void revalidatePublic({ paths: getServiceRevalidatePaths(ruSlug, ukSlug, data.featured) })
+  await revalidatePublic({
+    paths: getServiceRevalidatePaths(ruSlug, ukSlug, data.featured || existing.featured),
+    keys: [
+      ...getServiceCacheKeys(ruSlug, ukSlug, id, data.featured || existing.featured),
+      ...(oldRuSlug && oldRuSlug !== ruSlug ? [cacheKeys.service(oldRuSlug, 'ru')] : []),
+      ...(oldUkSlug && oldUkSlug !== ukSlug ? [cacheKeys.service(oldUkSlug, 'uk')] : []),
+    ],
+  })
   
 }
 
 export async function deleteService(id: string) {
-  const userId = await requireDelete()
+  const { id: userId } = await requireDelete()
   const db = await getActionDb()
 
   const existing = await db.select().from(services).where(eq(services.id, id)).get()
   if (!existing) throw new Error('Послугу не знайдено')
 
-  await db.delete(services).where(eq(services.id, id))
+  // Capture slugs before the cascade delete removes translations.
+  const delTrs = await db
+    .select()
+    .from(serviceTranslations)
+    .where(eq(serviceTranslations.serviceId, id))
+    .all()
+  const ruSlug = delTrs.find((t) => t.locale === 'ru')?.slug || ''
+  const ukSlug = delTrs.find((t) => t.locale === 'uk')?.slug || ''
+
+  // seo_meta has no FK — delete linked rows in the same transaction (P0-2).
+  await db.transaction(async (tx) => {
+    await tx.delete(seoMeta).where(and(eq(seoMeta.entityType, 'service'), eq(seoMeta.entityId, id)))
+    await tx.delete(services).where(eq(services.id, id))
+  })
+
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'SERVICE', entityId: id, before: existing })
   revalidateAdmin('/admin/services')
-  void revalidatePublic({ paths: ['/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml'], type: 'layout' })
-  
+  await revalidatePublic({
+    paths: [serviceIndexPath('ru'), serviceIndexPath('uk'), '/sitemap.xml'],
+    type: 'layout',
+    keys: getServiceCacheKeys(ruSlug, ukSlug, id, existing.featured),
+  })
 }
 
 export async function publishService(id: string) {
@@ -296,8 +325,7 @@ export async function publishService(id: string) {
 
   // YMYL: only OWNER/ADMIN can publish
   if (newStatus === 'PUBLISHED') {
-    const user = await getCurrentUser()
-    if (!user || !canPublish(user.role)) throw new Error('Лише ВЛАСНИК або АДМІН можуть публікувати')
+    await requirePublish()
 
     const translations = await db
       .select()
@@ -308,16 +336,8 @@ export async function publishService(id: string) {
     const ruTr = translations.find(t => t.locale === 'ru')
     const ukTr = translations.find(t => t.locale === 'uk')
 
-    if (!ruTr?.title || !ruTr?.slug) throw new Error('RU переклад повинен мати непорожній заголовок та slug')
-    if (!ukTr?.title || !ukTr?.slug) throw new Error('UK переклад повинен мати непорожній заголовок та slug')
-
-    // Require meta description
-    const meta = ruTr.seoMetaId
-      ? await db.select().from(seoMeta).where(eq(seoMeta.id, ruTr.seoMetaId)).get()
-      : null
-    const hasMetaDesc = meta?.description && meta.description.length > 0
-    const hasDesc = ruTr.description && ruTr.description.length >= 50
-    if (!hasMetaDesc && !hasDesc) throw new Error('Послуга повинна мати мета-опис (seo_meta.description або description >= 50 символів)')
+    assertBilingual(ruTr, ukTr, 'Послуга')
+    await assertMetaPresent(ruTr!, db, 'Послуга')
   }
 
   await db.update(services).set({ status: newStatus, updatedAt: await now() }).where(eq(services.id, id))
@@ -325,7 +345,18 @@ export async function publishService(id: string) {
     entityType: 'SERVICE', entityId: id, after: { status: newStatus },
   })
   revalidateAdmin('/admin/services')
-  void revalidatePublic({ paths: ['/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml'], type: 'layout' })
+  const pubTrs = await db
+    .select()
+    .from(serviceTranslations)
+    .where(eq(serviceTranslations.serviceId, id))
+    .all()
+  const ruSlug = pubTrs.find((t) => t.locale === 'ru')?.slug || ''
+  const ukSlug = pubTrs.find((t) => t.locale === 'uk')?.slug || ''
+  await revalidatePublic({
+    paths: [serviceIndexPath('ru'), serviceIndexPath('uk'), '/sitemap.xml'],
+    type: 'layout',
+    keys: getServiceCacheKeys(ruSlug, ukSlug, id, existing.featured),
+  })
 }
 
 /* ── Reorder (drag-and-drop) ── */
@@ -336,5 +367,9 @@ export async function reorderServices(orderedIds: string[]) {
     await db.update(services).set({ sortOrder: i }).where(eq(services.id, orderedIds[i]))
   }
   revalidateAdmin('/admin/services')
-  void revalidatePublic({ paths: ['/ru/uslugi/', '/uk/uslugi/', '/sitemap.xml'], type: 'layout' })
+  await revalidatePublic({
+    paths: [serviceIndexPath('ru'), serviceIndexPath('uk'), '/sitemap.xml'],
+    type: 'layout',
+    keys: [cacheKeys.servicesList('ru'), cacheKeys.servicesList('uk'), cacheKeys.servicesSidebar('ru'), cacheKeys.servicesSidebar('uk')],
+  })
 }
