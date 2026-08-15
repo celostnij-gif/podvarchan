@@ -1,9 +1,10 @@
 import { getTranslations, getMessages } from 'next-intl/server'
 import { cookies } from 'next/headers'
 import { GlobalJsonLd } from '@/components/GlobalJsonLd'
+import { PageJsonLd } from '@/components/PageJsonLd'
 
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
-import { faqSchema } from '@/lib/schema'
+import { faqSchema, breadcrumbSchema } from '@/lib/schema'
 import { getFAQs, getPageSeoMeta } from '@/lib/db/public'
 import { ClientFaqPage } from './client-page'
 import type { FAQItem } from '@/types'
@@ -56,11 +57,19 @@ export default async function FaqPage({
   }
 
   const schema = faqSchema(faqItems)
+  const commonT = await getTranslations({ locale: (await _params).locale, namespace: 'common' })
+  const breadcrumbs = [
+    { label: commonT('nav.home'), href: '/' },
+    { label: commonT('nav.faq') ?? 'FAQ', href: '/faq/' },
+  ]
+  const schemas: Record<string, unknown>[] = [schema]
+  schemas.push(breadcrumbSchema({ items: breadcrumbs.map((b) => ({ name: b.label, url: b.href })), locale: (await _params).locale }))
 
   return (
     <>
       <GlobalJsonLd locale={(await _params).locale} />
-      <ClientFaqPage items={faqItems} schemas={[schema]} />
+      <PageJsonLd schemas={schemas} />
+      <ClientFaqPage items={faqItems} breadcrumbs={breadcrumbs} />
     </>
   )
 }

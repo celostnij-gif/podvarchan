@@ -1,8 +1,10 @@
 import { getTranslations } from 'next-intl/server'
 import { GlobalJsonLd } from '@/components/GlobalJsonLd'
+import { PageJsonLd } from '@/components/PageJsonLd'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getBlogPosts, getBlogCategories, getMediaPublicUrl, getBlogFirstImageUrls } from '@/lib/db/public'
 import { getBlogPost } from '@/lib/content'
+import { breadcrumbSchema } from '@/lib/schema'
 import BlogClient from './page-client'
 import type { BlogPostPublic, BlogCategoryPublic } from '@/lib/db/public'
 import type { BlogPostItem, BlogCategoryItem } from './page-client'
@@ -102,10 +104,18 @@ export default async function BlogPage({
     // D1 unavailable — fallback to empty, client shows empty state
   }
 
+  const commonT = await getTranslations({ locale, namespace: 'common' })
+  const breadcrumbs = [
+    { label: commonT('nav.home'), href: '/' },
+    { label: commonT('nav.blog'), href: '/blog/' },
+  ]
+  const breadcrumb = breadcrumbSchema({ items: breadcrumbs.map((b) => ({ name: b.label, url: b.href })), locale })
+
   return (
     <>
       <GlobalJsonLd locale={locale} />
-      <BlogClient posts={posts} categories={categories} />
+      <PageJsonLd schemas={[breadcrumb]} />
+      <BlogClient posts={posts} categories={categories} breadcrumbs={breadcrumbs} />
     </>
   )
 }

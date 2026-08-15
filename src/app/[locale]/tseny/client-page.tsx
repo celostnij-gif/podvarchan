@@ -4,20 +4,18 @@ import { motion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/routing'
 import { AnimatedSection, AnimatedText, SectionContainer, FaqAccordion, PageHero } from '@/components/ui'
-import { useRegisterSchemas } from '@/providers/BreadcrumbsProvider'
+import type { BreadcrumbItem } from '@/components/ui/Breadcrumbs'
 import type { PageSectionPublic, PricingPlanPublic } from '@/lib/db/public'
 
 interface TsenyClientProps {
-  schemas?: Record<string, unknown>[]
+  breadcrumbs: BreadcrumbItem[]
   pricingPlans?: PricingPlanPublic[]
   d1Sections?: PageSectionPublic[]
 }
 
-export function TsenyClient({ schemas, pricingPlans = [], d1Sections: _d1Sections }: TsenyClientProps) {
+export function TsenyClient({ breadcrumbs, pricingPlans = [], d1Sections: _d1Sections }: TsenyClientProps) {
   const t = useTranslations('tseny')
-  const commonT = useTranslations('common')
   const d1Sections = _d1Sections ?? []
-  useRegisterSchemas(schemas ?? [])
 
   // D1 hero section: overlay text if present
   const heroSection = d1Sections.find((s) => s.key === 'hero' && s.type === 'hero')
@@ -138,10 +136,7 @@ export function TsenyClient({ schemas, pricingPlans = [], d1Sections: _d1Section
         label={t('badgeLabel')}
         title={heroTitle}
         description={heroSubtitle}
-        breadcrumbItems={[
-          { label: commonT('nav.home'), href: '/' },
-          { label: t('badgeLabel') },
-        ]}
+        breadcrumbItems={breadcrumbs}
         clean
       />
 

@@ -6,16 +6,18 @@ import ContactForm from '@/components/ContactForm'
 import { TelegramIcon, WhatsAppIcon, EmailIcon } from '@/components/ui/Icons'
 import MedicalDisclaimer from '@/components/MedicalDisclaimer'
 import type { ContactChannelPublic, PageSectionPublic } from '@/lib/db/public'
+import type { BreadcrumbItem } from '@/components/ui/Breadcrumbs'
 
 export default function KontaktyClient({
   d1Channels: _d1Channels,
   d1Sections,
+  breadcrumbs,
 }: {
   d1Channels?: ContactChannelPublic[]
   d1Sections?: PageSectionPublic[]
-} = {}) {
+  breadcrumbs: BreadcrumbItem[]
+}) {
   const t = useTranslations('contacts')
-  const commonT = useTranslations('common')
 
   // D1 hero section: overlay text if present
   const heroSection = d1Sections?.find((s) => s.key === 'hero' && s.type === 'hero')
@@ -34,10 +36,7 @@ export default function KontaktyClient({
       <PageHero
         title={heroTitle}
         description={heroSubtitle}
-        breadcrumbItems={[
-          { label: commonT('nav.home'), href: '/' },
-          { label: heroTitle },
-        ]}
+        breadcrumbItems={breadcrumbs}
         clean
       />
 

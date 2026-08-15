@@ -95,6 +95,15 @@ export function articleSchema(params: ArticleSchemaParams): Record<string, unkno
       name: effectiveAuthorName,
       description: reviewedByDesc,
     }
+    const medicallyReviewedByDesc = locale === 'uk'
+      ? 'Матеріал перевірено з позиції психотерапевтичної практики: сертифікований гіпнотерапевт (ABH), практик НЛП (INLPTA), магістр музичної терапії (The University of Kansas). Не є медичною консультацією — при клінічних симптомах звертайтесь до лікаря.'
+      : 'Материал проверен с позиции психотерапевтической практики: сертифицированный гипнотерапевт (ABH), практик НЛП (INLPTA), магистр музыкальной терапии (The University of Kansas). Не является медицинской консультацией — при клинических симптомах обращайтесь к врачу.'
+    schema.medicallyReviewedBy = {
+      '@type': 'Person',
+      '@id': `${SITE.url}/ob-avtore/#person`,
+      name: effectiveAuthorName,
+      description: medicallyReviewedByDesc,
+    }
   }
 
   return schema

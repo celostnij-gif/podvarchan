@@ -226,6 +226,123 @@ check_llms_pricing() {
 
 check_llms_pricing "$BASE/llms-full.txt" "llms-full"
 
+# ── 12. JSON-LD SSR: блоки присутствуют в исходном HTML (curl без JS), парсятся, без дублей (@type,@id) ──
+echo "--- JSON-LD SSR (server-rendered, no JS execution) ---"
+check_jsonld() {
+  local url="$1" label="$2" want_type="$3" tmp html code
+  tmp=$(mktemp)
+  code=$(curl -sL --max-time 15 -w "%{http_code}" -o "$tmp" "$url" || echo "000")
+  if [[ "$code" != "200" ]]; then
+    echo "  ❌ $label HTTP $code (want 200)"
+    FAIL=$((FAIL + 1)); RESULTS+=("$label HTTP $code")
+    rm -f "$tmp"
+    return
+  fi
+  local out types has_want
+  out=$(node - "$tmp" <<'NODE'
+const fs = require('fs');
+const html = fs.readFileSync(process.argv[2], 'utf8');
+const blocks = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(m => m[1]);
+if (blocks.length === 0) { console.log('NO_JSONLD'); process.exit(0); }
+const seen = new Set(); let dups = 0;
+const types = [];
+for (const raw of blocks) {
+  try {
+    const obj = JSON.parse(raw);
+    const t = Array.isArray(obj['@type']) ? obj['@type'].join('|') : obj['@type'];
+    types.push(t);
+    const key = `${t}::${obj['@id'] ?? ''}`;
+    if (seen.has(key)) { dups++; console.log('DUP:' + key); }
+    seen.add(key);
+  } catch (e) { console.log('PARSE_ERROR:' + e.message); }
+}
+console.log('TYPES:' + types.join(','));
+console.log('DUPS:' + dups);
+NODE
+)
+  rm -f "$tmp"
+  if printf '%s' "$out" | grep -q 'NO_JSONLD'; then
+    echo "  ❌ $label no application/ld+json blocks in server HTML"
+    FAIL=$((FAIL + 1)); RESULTS+=("$label no JSON-LD")
+    return
+  fi
+  if printf '%s' "$out" | grep -q 'PARSE_ERROR'; then
+    echo "  ❌ $label JSON-LD parse error: $(printf '%s' "$out" | grep PARSE_ERROR | head -1)"
+    FAIL=$((FAIL + 1)); RESULTS+=("$label JSON-LD parse error")
+    return
+  fi
+  local dups
+  dups=$(printf '%s' "$out" | grep -o 'DUPS:[0-9]*' | cut -d: -f2)
+  if [[ -n "$dups" && "$dups" != "0" ]]; then
+    echo "  ❌ $label duplicate (@type,@id): $(printf '%s' "$out" | grep '^DUP:' | tr '\n' ' ')"
+    FAIL=$((FAIL + 1)); RESULTS+=("$label JSON-LD dups")
+    return
+  fi
+  if [[ -n "$want_type" ]]; then
+    if ! printf '%s' "$out" | grep -qF "$want_type"; then
+      echo "  ❌ $label missing $want_type (got: $(printf '%s' "$out" | grep '^TYPES:' | cut -d: -f2-))"
+      FAIL=$((FAIL + 1)); RESULTS+=("$label missing $want_type")
+      return
+    fi
+  fi
+  echo "  ✅ $label JSON-LD ok ($(printf '%s' "$out" | grep '^TYPES:' | cut -d: -f2-))"
+  PASS=$((PASS + 1))
+}
+
+# BreadcrumbList обязателен в SSR на каждой навигируемой странице (AGENTS.md §5)
+check_jsonld "$BASE/ru/faq" "ru faq" "BreadcrumbList"
+check_jsonld "$BASE/uk/faq" "uk faq" "BreadcrumbList"
+check_jsonld "$BASE/ru/tseny" "ru prices" "BreadcrumbList"
+check_jsonld "$BASE/uk/tsiny" "uk prices" "BreadcrumbList"
+check_jsonld "$BASE/ru/blog" "ru blog list" "BreadcrumbList"
+check_jsonld "$BASE/ru/metod" "ru method" "BreadcrumbList"
+check_jsonld "$BASE/ru/ob-avtore" "ru about" "BreadcrumbList"
+check_jsonld "$BASE/ru/uslugi" "ru services list" "BreadcrumbList"
+check_jsonld "$BASE/uk/poslugy" "uk services list" "BreadcrumbList"
+check_jsonld "$BASE/ru/uslugi/gipnoterapiya-onlayn" "ru service detail" "BreadcrumbList"
+check_jsonld "$BASE/uk/poslugy/hipnoterapiya-onlayn" "uk service detail" "BreadcrumbList"
+check_jsonld "$BASE/ru/blog/panicheskiye-ataki-chto-delat" "ru clinical post" "BreadcrumbList"
+check_jsonld "$BASE/uk/kontakty" "uk contacts" "BreadcrumbList"
+check_jsonld "$BASE/ru/disclaimer" "ru disclaimer" "BreadcrumbList"
+check_jsonld "$BASE/ru/politika-konfidentsialnosti" "ru privacy" "BreadcrumbList"
+check_jsonld "$BASE/ru/blog/kategoriya/ptsr" "ru category" "BreadcrumbList"
+
+# ── 13. reviewedBy/medicallyReviewedBy: обязательны на клинических статьях, отсутствуют на не-клинических ──
+echo "--- reviewedBy/medicallyReviewedBy (YMYL, AGENTS.md §5) ---"
+check_reviewed() {
+  local url="$1" label="$2" expect="$3" tmp html code
+  tmp=$(mktemp)
+  code=$(curl -sL --max-time 15 -w "%{http_code}" -o "$tmp" "$url" || echo "000")
+  html=$(<"$tmp")
+  rm -f "$tmp"
+  if [[ "$code" != "200" ]]; then
+    echo "  ❌ $label HTTP $code (want 200)"
+    FAIL=$((FAIL + 1)); RESULTS+=("$label HTTP $code")
+    return
+  fi
+  if [[ "$expect" == "present" ]]; then
+    if ! printf '%s' "$html" | grep -q '"reviewedBy"' || ! printf '%s' "$html" | grep -q '"medicallyReviewedBy"'; then
+      echo "  ❌ $label missing reviewedBy/medicallyReviewedBy in server HTML"
+      FAIL=$((FAIL + 1)); RESULTS+=("$label missing YMYL review")
+      return
+    fi
+    echo "  ✅ $label reviewedBy + medicallyReviewedBy present"
+  else
+    if printf '%s' "$html" | grep -q '"reviewedBy"'; then
+      echo "  ❌ $label has reviewedBy but category is not clinical"
+      FAIL=$((FAIL + 1)); RESULTS+=("$label unexpected reviewedBy")
+      return
+    fi
+    echo "  ✅ $label no reviewedBy (non-clinical)"
+  fi
+  PASS=$((PASS + 1))
+}
+
+check_reviewed "$BASE/ru/blog/panicheskiye-ataki-chto-delat" "ru clinical post" present
+check_reviewed "$BASE/uk/blog/panichni-ataki-shcho-robiti" "uk clinical post" present
+check_reviewed "$BASE/ru/blog/chto-takoe-gipnoterapiya" "ru non-clinical post" absent
+check_reviewed "$BASE/ru" "ru home" absent
+
 echo
 echo "============================================"
 echo "  Result: $PASS passed, $FAIL failed"

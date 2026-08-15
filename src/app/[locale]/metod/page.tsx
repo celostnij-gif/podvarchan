@@ -1,7 +1,9 @@
 import { getTranslations } from 'next-intl/server'
 import { GlobalJsonLd } from '@/components/GlobalJsonLd'
+import { PageJsonLd } from '@/components/PageJsonLd'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getPageByType, getPageSeoMeta } from '@/lib/db/public'
+import { breadcrumbSchema } from '@/lib/schema'
 import { cookies } from 'next/headers'
 import MetodClient from './client-page'
 export const revalidate = 604800
@@ -35,10 +37,19 @@ export default async function MetodPage({
     d1Page = await getPageByType('METHOD', locale, previewCookie)
   } catch { /* D1 unavailable */ }
 
+  const t = await getTranslations({ locale, namespace: 'pages.metod' })
+  const commonT = await getTranslations({ locale, namespace: 'common' })
+  const breadcrumbs = [
+    { label: commonT('nav.home'), href: '/' },
+    { label: t('breadcrumb'), href: '/metod/' },
+  ]
+  const breadcrumb = breadcrumbSchema({ items: breadcrumbs.map((b) => ({ name: b.label, url: b.href })), locale })
+
   return (
     <>
       <GlobalJsonLd locale={locale} />
-      <MetodClient d1Sections={d1Page?.sections ?? []} />
+      <PageJsonLd schemas={[breadcrumb]} />
+      <MetodClient breadcrumbs={breadcrumbs} d1Sections={d1Page?.sections ?? []} />
     </>
   )
 }

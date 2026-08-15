@@ -8,6 +8,7 @@ import { ServiceIcon } from '@/components/ui/Icons'
 import TiltCard from '@/components/ui/TiltCard'
 import { AnimatedSection, AnimatedText, SectionContainer } from '@/components/ui'
 import { useSetBreadcrumbs } from '@/providers/BreadcrumbsProvider'
+import type { BreadcrumbItem } from '@/components/ui/Breadcrumbs'
 import HeroBreadcrumbs from '@/components/ui/HeroBreadcrumbs'
 
 interface ServiceItem {
@@ -117,15 +118,12 @@ function ServiceCard({ service, index }: { service: ServiceItem; index: number }
 }
 
 /* ── Services Page ── */
-export function UslugiClient({ services }: { services: ServiceItem[] }) {
+export function UslugiClient({ services, breadcrumbs }: { services: ServiceItem[]; breadcrumbs: BreadcrumbItem[] }) {
   const t = useTranslations('services')
   const commonT = useTranslations('common')
 
   // Set breadcrumbs via layout context
-  useSetBreadcrumbs([
-    { label: commonT('nav.home'), href: '/' },
-    { label: commonT('nav.services') },
-  ])
+  useSetBreadcrumbs(breadcrumbs)
 
   return (
     <>
