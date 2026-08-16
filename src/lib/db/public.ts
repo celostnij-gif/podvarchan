@@ -414,6 +414,22 @@ export function getServiceById(id: string, locale: string): Promise<ServicePubli
   return withCache(cacheKeys.serviceById(id, locale), TTL_SERVICES, () => getServiceByIdUncached(id, locale))
 }
 
+/** Slug → published service in ANY locale — used to 301 a cross-locale slug swap (lang switcher) to the correct URL. */
+export async function resolvePublishedServiceSlug(
+  slug: string,
+): Promise<{ locale: 'ru' | 'uk'; slug: string } | null> {
+  const db = getDB()
+  const row = await db
+    .select({ locale: serviceTranslations.locale, slug: serviceTranslations.slug })
+    .from(serviceTranslations)
+    .innerJoin(services, eq(services.id, serviceTranslations.serviceId))
+    .where(and(eq(serviceTranslations.slug, slug), eq(services.status, 'PUBLISHED')))
+    .get()
+
+  if (!row) return null
+  return { locale: row.locale as 'ru' | 'uk', slug: row.slug }
+}
+
 // ─── Blog categories ───
 
 async function getBlogCategoriesUncached(
@@ -447,6 +463,22 @@ async function getBlogCategoriesUncached(
 }
 export function getBlogCategories(locale: string): Promise<BlogCategoryPublic[]> {
   return withCache(cacheKeys.blogCats(locale), TTL_BLOG_CATS, () => getBlogCategoriesUncached(locale))
+}
+
+/** Slug → published blog category in ANY locale — used to 301 a cross-locale slug swap (lang switcher) to the correct URL. */
+export async function resolvePublishedCategorySlug(
+  slug: string,
+): Promise<{ locale: 'ru' | 'uk'; slug: string } | null> {
+  const db = getDB()
+  const row = await db
+    .select({ locale: blogCategoryTranslations.locale, slug: blogCategoryTranslations.slug })
+    .from(blogCategoryTranslations)
+    .innerJoin(blogCategories, eq(blogCategories.id, blogCategoryTranslations.categoryId))
+    .where(and(eq(blogCategoryTranslations.slug, slug), eq(blogCategories.status, 'PUBLISHED')))
+    .get()
+
+  if (!row) return null
+  return { locale: row.locale as 'ru' | 'uk', slug: row.slug }
 }
 
 // ─── Blog posts ───
@@ -665,6 +697,22 @@ async function getBlogPostByIdUncached(id: string, locale: string): Promise<Blog
 }
 export function getBlogPostById(id: string, locale: string): Promise<BlogPostPublic | null> {
   return withCache(cacheKeys.blogPostById(id, locale), TTL_BLOG, () => getBlogPostByIdUncached(id, locale))
+}
+
+/** Slug → published blog post in ANY locale — used to 301 a cross-locale slug swap (lang switcher) to the correct URL. */
+export async function resolvePublishedBlogSlug(
+  slug: string,
+): Promise<{ locale: 'ru' | 'uk'; slug: string } | null> {
+  const db = getDB()
+  const row = await db
+    .select({ locale: blogPostTranslations.locale, slug: blogPostTranslations.slug })
+    .from(blogPostTranslations)
+    .innerJoin(blogPosts, eq(blogPosts.id, blogPostTranslations.postId))
+    .where(and(eq(blogPostTranslations.slug, slug), eq(blogPosts.status, 'PUBLISHED')))
+    .get()
+
+  if (!row) return null
+  return { locale: row.locale as 'ru' | 'uk', slug: row.slug }
 }
 
 /** Posts in a category by category translation slug — list shape (no HTML body). */
