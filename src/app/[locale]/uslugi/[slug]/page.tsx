@@ -1,11 +1,12 @@
 import { notFound } from 'next/navigation'
-import { getMessages } from 'next-intl/server'
+import { getMessages, getTranslations } from 'next-intl/server'
 import { GlobalJsonLd } from '@/components/GlobalJsonLd'
+import { PageJsonLd } from '@/components/PageJsonLd'
 import { cookies } from 'next/headers'
 import { SERVICES } from '@/constants'
 import { SERVICE_SLUG_UK, resolveServiceSlug } from '@/lib/slugMapping'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
-import { serviceSchema, faqSchema, speakableSchema } from '@/lib/schema'
+import { serviceSchema, faqSchema, speakableSchema, breadcrumbSchema } from '@/lib/schema'
 import { getServiceBySlug, getServiceById, getServiceSidebar, getSEOMeta } from '@/lib/db/public'
 import type { ServiceSidebarItem } from '@/lib/db/public'
 import { ClientServicePage } from './client-page'
@@ -232,10 +233,19 @@ export default async function ServicePage({ params }: Props) {
       } catch { /* faqJson optional */ }
     }
 
+    const commonT = await getTranslations({ locale, namespace: 'common' })
+    const breadcrumbs = [
+      { label: commonT('nav.home'), href: '/' },
+      { label: commonT('nav.services'), href: '/uslugi/' },
+      { label: data.shortTitle || data.title, href: `/uslugi/${data.slug}/` },
+    ]
+    schemas.push(breadcrumbSchema({ items: breadcrumbs.map((b) => ({ name: b.label, url: b.href })), locale }))
+
     return (
       <>
         <GlobalJsonLd locale={locale} />
-        <ClientServicePage service={data} locale={locale} schemas={schemas} />
+        <PageJsonLd schemas={schemas} />
+        <ClientServicePage service={data} breadcrumbs={breadcrumbs} locale={locale} />
       </>
     )
   }
@@ -252,10 +262,19 @@ export default async function ServicePage({ params }: Props) {
   schemas.push(speakableSchema('.section-card-body p, .subsection-body p'))
   schemas.push(faqSchema(faqs))
 
+  const commonT = await getTranslations({ locale, namespace: 'common' })
+  const breadcrumbs = [
+    { label: commonT('nav.home'), href: '/' },
+    { label: commonT('nav.services'), href: '/uslugi/' },
+    { label: service.shortTitle || service.title, href: `/uslugi/${service.slug}/` },
+  ]
+  schemas.push(breadcrumbSchema({ items: breadcrumbs.map((b) => ({ name: b.label, url: b.href })), locale }))
+
   return (
     <>
       <GlobalJsonLd locale={locale} />
-      <ClientServicePage service={service} locale={locale} schemas={schemas} allServices={allServices} />
+      <PageJsonLd schemas={schemas} />
+      <ClientServicePage service={service} breadcrumbs={breadcrumbs} locale={locale} allServices={allServices} />
     </>
   )
 }
