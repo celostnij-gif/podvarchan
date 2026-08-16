@@ -327,14 +327,14 @@ check_reviewed() {
     return
   fi
   if [[ "$expect" == "present" ]]; then
-    if ! printf '%s' "$html" | grep -q '"reviewedBy"' || ! printf '%s' "$html" | grep -q '"medicallyReviewedBy"'; then
+    if [[ "$html" != *'"reviewedBy"'* || "$html" != *'"medicallyReviewedBy"'* ]]; then
       echo "  ❌ $label missing reviewedBy/medicallyReviewedBy in server HTML"
       FAIL=$((FAIL + 1)); RESULTS+=("$label missing YMYL review")
       return
     fi
     echo "  ✅ $label reviewedBy + medicallyReviewedBy present"
   else
-    if printf '%s' "$html" | grep -q '"reviewedBy"'; then
+    if [[ "$html" == *'"reviewedBy"'* ]]; then
       echo "  ❌ $label has reviewedBy but category is not clinical"
       FAIL=$((FAIL + 1)); RESULTS+=("$label unexpected reviewedBy")
       return
