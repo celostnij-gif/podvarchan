@@ -30,9 +30,10 @@
 
 	"kv_namespaces": [
 		{ "binding": "RATE_LIMIT_KV", "id": "2f39c831b94841b3b30d7b6246c2a221" },
-		{ "binding": "KV_BINDING", "id": "2f39c831b94841b3b30d7b6246c2a221" }
+		{ "binding": "CONTENT_CACHE_KV", "id": "f837cd15ed1e4262ad1566099a4c30c0" }
 	],
 	"r2_buckets": [
+		{ "binding": "CONTENT_CACHE_R2", "bucket_name": "podvarchan-content-cache" },
 		{ "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "podvarchan-inc-cache" },
 		{ "binding": "MEDIA_R2_BUCKET", "bucket_name": "podvarchan-media" }
 	],
