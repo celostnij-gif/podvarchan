@@ -23,7 +23,7 @@ export function serviceSchema(params: ServiceSchemaParams): Record<string, unkno
     url,
     image,
     providerName,
-    areaServed = ['RU', 'UA'],
+    areaServed = ['Worldwide'],
     locale,
   } = params
   const effectiveProviderName = providerName ?? (locale === 'uk' ? AUTHOR.nameUk : AUTHOR.name)

@@ -78,8 +78,6 @@ export default async function RootLayout({
       className={`${cormorant.variable} ${inter.variable}`}
       suppressHydrationWarning
     >
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         {/* Hero image is CSS background-driven, not the LCP element (H1 text is LCP) — only preload mobile variant */}
         <link rel="preload" as="image" href="/images/hero-bg-mobile.webp" media="(max-width: 768px)" fetchPriority="high" />
         {/* ── Critical inline CSS for above-the-fold content (FCP/LCP optimization) ── */}

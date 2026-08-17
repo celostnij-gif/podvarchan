@@ -6,6 +6,7 @@ import { getPageByType, getPageSeoMeta } from '@/lib/db/public'
 import { breadcrumbSchema } from '@/lib/schema'
 import { cookies } from 'next/headers'
 import { ClientAboutPage } from './client-page'
+import { SITE, AUTHOR } from '@/constants'
 export const revalidate = 604800
 
 export async function generateMetadata({
@@ -48,10 +49,22 @@ export default async function AboutPage({
   ]
   const breadcrumb = breadcrumbSchema({ items: breadcrumbs.map((b) => ({ name: b.label, url: b.href })), locale })
 
+  // HP-4: единственный CreativeWork, рендерится только здесь (не в global
+  // layout) — фактологически подтверждён (диплом Music Therapy в credentials),
+  // без выдуманных названий произведений. @id ссылается на Person из layout.
+  const creativeWork: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'CreativeWork',
+    name: locale === 'uk' ? 'Авторські музичні програми для гіпнотерапії' : 'Авторские музыкальные программы для гипнотерапии',
+    creator: { '@id': `${SITE.url}${AUTHOR.url}#person` },
+    genre: 'MusicTherapy',
+    inLanguage: locale === 'uk' ? 'uk' : 'ru',
+  }
+
   return (
     <>
       <GlobalJsonLd locale={locale} />
-      <PageJsonLd schemas={[breadcrumb]} />
+      <PageJsonLd schemas={[breadcrumb, creativeWork]} />
       <ClientAboutPage breadcrumbs={breadcrumbs} d1Sections={d1Page?.sections ?? []} />
     </>
   )

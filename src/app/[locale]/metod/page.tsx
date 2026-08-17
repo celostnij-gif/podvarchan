@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Props) {
   const seo = await getPageSeoMeta('METHOD', locale, previewCookie).catch(() => null)
 
   return seoMetadata({
-    title: seo?.title ?? t('heading'),
+    title: seo?.title ?? (t.has('metaTitle') ? t('metaTitle') : t('heading')),
     description: seo?.description ?? t('heroSubtitle'),
     path: '/metod',
     locale,
