@@ -33,11 +33,6 @@ const nextConfig = {
         { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
         /* AI/GEO readiness — AGENTS.md §6: keep the exact value */
         { key: 'Content-Signal', value: 'ai-train=yes, search=yes, ai-input=yes' },
-        { key: 'X-Content-Type-Options', value: 'nosniff' },
-        { key: 'X-Frame-Options', value: 'DENY' },
-        { key: 'X-XSS-Protection', value: '1; mode=block' },
-        { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-        { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
         {
           key: 'Content-Security-Policy',
           value: [
