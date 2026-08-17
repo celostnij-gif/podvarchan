@@ -77,7 +77,7 @@ export function serviceSchema(params: ServiceSchemaParams): Record<string, unkno
  *
  * Содержит:
  *  - Organization-обёртку с логотипом
- *  - areaServed (Украина + Россия + онлайн для диаспоры)
+ *  - areaServed (Worldwide — онлайн-формат консультаций)
  *  - priceRange (актуальные цены из /tseny/)
  *  - offers — отдельный Offer на каждый ключевой направление
  *
@@ -185,10 +185,7 @@ export async function practiceSchema(locale: string = 'ru'): Promise<Record<stri
       '@type': 'PostalAddress',
       addressCountry: 'UA',
     },
-    areaServed: [
-      { '@type': 'Country', name: 'UA' },
-      { '@type': 'Country', name: 'RU' },
-    ],
+    areaServed: [{ '@type': 'Country', name: 'Worldwide' }],
     priceRange,
     offers,
     contactPoint: {
