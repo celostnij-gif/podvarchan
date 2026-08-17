@@ -26,9 +26,5 @@ export function resetTurnstile(): void {
   turnstile.reset()
 }
 
-/**
- * Публичный ключ Turnstile (публичный, встраивается в HTML/JS — безопасно).
- * Значение приходит из env (NEXT_PUBLIC_TURNSTILE_SITE_KEY) — единый источник,
- * заданный в .env/.env.local/wrangler vars/CI (P1-5). Пустая строка = виджет не рендерится.
- */
-export const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ''
+/** Публичный ключ Turnstile (публичный, встраивается в HTML/JS — безопасно) */
+export const TURNSTILE_SITE_KEY = '0x4AAAAAADYZ2z3RysEsBoQu' as const
