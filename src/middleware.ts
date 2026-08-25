@@ -8,6 +8,7 @@ import {
 } from '@/lib/slugMapping'
 import createMiddleware from 'next-intl/middleware'
 import { NextRequest, NextResponse } from 'next/server'
+import { resolveUaRedirect } from '@/lib/uaRedirect'
 import { routing } from './i18n/routing'
 import { getCloudflareContext } from '@opennextjs/cloudflare'
 
@@ -46,12 +47,13 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/ru/', request.url), 301)
   }
 
-  // P0-B: /ua/ → /uk/ locale alias redirect (ISO country code to language code)
-  // Handles any case: /UA/, /Ua/, /ua/… → /uk/…
-  const uaLocaleMatch = pathname.match(/^\/ua(\/|$)/i)
-  if (uaLocaleMatch) {
-    const rest = pathname.slice(3) // strip '/ua' prefix, keep trailing slash/path
-    return NextResponse.redirect(new URL(`/uk${rest}`, request.url), 301)
+  // P0-B: /ua/ → /uk/ locale alias redirect (ISO country code to language code).
+  // Phase 0.4 (2026-08-25): single hop — the resolver folds UK slug localization
+  // (/ua/uslugi/x → /uk/poslugy/<uk-slug>, blog/category/static-page renames) into
+  // the same 301 instead of chaining through the /uk/uslugi/* → /uk/poslugy/* block.
+  const uaTarget = resolveUaRedirect(pathname)
+  if (uaTarget) {
+    return NextResponse.redirect(new URL(uaTarget, request.url), 301)
   }
 
   // Skip API routes, static assets, well-known paths — they handle themselves
