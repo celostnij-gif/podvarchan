@@ -76,6 +76,7 @@ nul
 
 # migration/seed scripts (dev artifacts, not for commit)
 /scripts/_batch_*.sql
+/scripts/tmp_*.sql
 /scripts/d1-migration-log.txt
 /scripts/migrate-*
 /scripts/run-d1-migration.mjs
