@@ -9,10 +9,13 @@ export { DOQueueHandler, DOShardedTagCache, BucketCachePurge };
 
 /**
  * Cron warm-up (AGENTS.md §3 / incident 1102 fix): every 50 minutes, before
- * the `sitemap:xml` KV entry's 1 h TTL expires, ping the sitemap endpoint
- * through the self-reference service binding. The GET handler serves the KV
+ * the cached artifacts' 1 h TTL expires, ping the KV-cached aggregate endpoints
+ * through the self-reference service binding. Each GET handler serves the KV
  * hit (cheap) or rebuilds+repopulates; either way the next user request finds
  * a warm cache instead of hitting the heavy cold render at peak traffic.
+ *
+ * Currently warmed: /sitemap.xml (sitemap:xml) and /robots.txt (robots:txt,
+ * Phase 0.3 2026-08-25).
  *
  * The warm-up runs inside a scheduled invocation — its own CPU budget, no user
  * request is affected if it ever fails.
@@ -22,19 +25,19 @@ async function scheduled(
   env: { WORKER_SELF_REFERENCE: Fetcher },
   ctx: { waitUntil(promise: Promise<unknown>): void },
 ): Promise<void> {
-  console.log("[scheduled] sitemap warm-up start");
-  ctx.waitUntil(
-    env.WORKER_SELF_REFERENCE
-      .fetch("https://podvarchan.com/sitemap.xml?cron=1")
+  const warm = (path: string, label: string) =>
+    env.WORKER_SELF_REFERENCE.fetch(`https://podvarchan.com${path}?cron=1`)
       .then(async (res) => {
-        console.log(`[scheduled] sitemap warm-up done: ${res.status}`);
+        console.log(`[scheduled] ${label} warm-up done: ${res.status}`);
         res.body?.cancel();
       })
       .catch((err: unknown) => {
         // warm-up is best-effort — the on-request path still serves KV/R2
-        console.error("[scheduled] sitemap warm-up failed:", err);
-      }),
-  );
+        console.error(`[scheduled] ${label} warm-up failed:`, err);
+      });
+
+  console.log("[scheduled] warm-up start: sitemap.xml + robots.txt");
+  ctx.waitUntil(Promise.all([warm("/sitemap.xml", "sitemap"), warm("/robots.txt", "robots")]));
 }
 
 /**

@@ -48,6 +48,8 @@ export const cacheKeys = {
   nav: (location: string, locale: string) => `nav:${location}:${locale}`,
   sitemapPageLastmods: 'sitemap:page-lastmods',
   sitemapCatLastmods: 'sitemap:cat-lastmods',
+  /** Rendered /robots.txt artifact (static content, TTL 3600). */
+  robotsTxt: () => 'robots:txt',
   contacts: () => 'contacts:all',
   settings: (key: string) => `settings:${key}`,
 }
