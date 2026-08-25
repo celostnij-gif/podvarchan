@@ -6,6 +6,26 @@
 # Default: https://podvarchan.com
 set -eo pipefail
 
+# ── UTF-8 locale pin (Phase 0.2, 2026-08-25) ──
+# Title/description lengths are measured with bash ${#var}, which counts BYTES
+# under a C/non-UTF-8 locale (e.g. default Git Bash on Windows) — Cyrillic text
+# then reads ~2x too long and every length check false-fails. Pin a UTF-8
+# locale unless the caller explicitly set one, verified with a known 8-char
+# Cyrillic probe; bail out loudly if no working locale is found.
+_probe="Проверка" # 8 characters / 16 UTF-8 bytes
+if (( ${#_probe} != 8 )); then
+  for _loc in C.UTF-8 en_US.UTF-8 ru_RU.UTF-8 utf8; do
+    export LC_ALL="$_loc" LANG="$_loc"
+    (( ${#_probe} == 8 )) && break
+  done
+fi
+if (( ${#_probe} != 8 )); then
+  echo "ERROR: no UTF-8 locale available — title/description length checks would count bytes, not characters." >&2
+  echo "Install/enable C.UTF-8 or en_US.UTF-8, or run: LC_ALL=en_US.UTF-8 bash $0" >&2
+  exit 2
+fi
+unset _probe _loc
+
 BASE="${1:-https://podvarchan.com}"
 PASS=0
 FAIL=0
