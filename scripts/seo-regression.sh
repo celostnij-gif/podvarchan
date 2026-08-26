@@ -35,7 +35,7 @@ check_url() {
   local url="$1"
   local expected="${2:-200}"
   local code
-  code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$url" || echo "000")
+  if ! code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$url"); then code="000"; fi
   if [[ "$code" == "$expected" || "$expected" == "any" && ( "$code" == "200" || "$code" == "301" || "$code" == "308" ) ]]; then
     echo "  ✅ $url → $code (expected $expected)"
     PASS=$((PASS + 1))
@@ -122,7 +122,7 @@ check_url "$BASE/robots.txt" 200
 check_redirect() {
   local url="$1" expected="$2" suffix="$3"
   local code loc
-  code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$url" || echo "000")
+  if ! code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$url"); then code="000"; fi
   loc=$(curl -s -o /dev/null -w "%{redirect_url}" --max-time 10 "$url")
   if [[ "$code" == "$expected" && "$loc" == *"$suffix" ]]; then
     echo "  ✅ $url → $code → …$suffix"
@@ -164,7 +164,7 @@ check_meta() {
   local label="$2"
   local tmp html title desc code tlen dlen
   tmp=$(mktemp)
-  code=$(curl -sL --max-time 15 -w "%{http_code}" -o "$tmp" "$url" || echo "000")
+  if ! code=$(curl -sL --max-time 15 -w "%{http_code}" -o "$tmp" "$url"); then code="000"; fi
   html=$(<"$tmp")
   rm -f "$tmp"
   title=$(printf '%s\n' "$html" | grep -o '<title>[^<]*</title>' | head -1 | sed -E 's/^<title>//; s#</title>$##')
@@ -223,7 +223,7 @@ echo "--- JSON-LD pricing (D1 pricing_plans: 0/50/210/400) ---"
 check_pricing_schema() {
   local url="$1" label="$2" tmp html code prices pr
   tmp=$(mktemp)
-  code=$(curl -sL --max-time 15 -w "%{http_code}" -o "$tmp" "$url" || echo "000")
+  if ! code=$(curl -sL --max-time 15 -w "%{http_code}" -o "$tmp" "$url"); then code="000"; fi
   html=$(<"$tmp")
   rm -f "$tmp"
   if [[ "$code" != "200" ]]; then
@@ -259,7 +259,7 @@ echo "--- llms-full.txt pricing (D1 pricing_plans) ---"
 check_llms_pricing() {
   local url="$1" label="$2" tmp html code
   tmp=$(mktemp)
-  code=$(curl -sL --max-time 15 -w "%{http_code}" -o "$tmp" "$url" || echo "000")
+  if ! code=$(curl -sL --max-time 15 -w "%{http_code}" -o "$tmp" "$url"); then code="000"; fi
   html=$(<"$tmp")
   rm -f "$tmp"
   if [[ "$code" != "200" ]]; then
@@ -285,7 +285,7 @@ echo "--- JSON-LD SSR (server-rendered, no JS execution) ---"
 check_jsonld() {
   local url="$1" label="$2" want_type="$3" tmp html code
   tmp=$(mktemp)
-  code=$(curl -sL --max-time 15 -w "%{http_code}" -o "$tmp" "$url" || echo "000")
+  if ! code=$(curl -sL --max-time 15 -w "%{http_code}" -o "$tmp" "$url"); then code="000"; fi
   if [[ "$code" != "200" ]]; then
     echo "  ❌ $label HTTP $code (want 200)"
     FAIL=$((FAIL + 1)); RESULTS+=("$label HTTP $code")
@@ -366,7 +366,7 @@ echo "--- reviewedBy/medicallyReviewedBy (YMYL, AGENTS.md §5) ---"
 check_reviewed() {
   local url="$1" label="$2" expect="$3" tmp html code
   tmp=$(mktemp)
-  code=$(curl -sL --max-time 15 -w "%{http_code}" -o "$tmp" "$url" || echo "000")
+  if ! code=$(curl -sL --max-time 15 -w "%{http_code}" -o "$tmp" "$url"); then code="000"; fi
   html=$(<"$tmp")
   rm -f "$tmp"
   if [[ "$code" != "200" ]]; then
