@@ -255,8 +255,15 @@ export async function ServiceDetailPage({ params, catalog }: ServiceDetailProps)
       const loc = (locale === 'uk' ? 'uk' : 'ru') as 'ru' | 'uk'
       const other: 'ru' | 'uk' = loc === 'uk' ? 'ru' : 'uk'
       const section = (l: 'ru' | 'uk') => (l === 'uk' ? 'poslugy' : 'uslugi')
-      if (resolved[loc]) permanentRedirect(`/${loc}/${section(loc)}/${resolved[loc]}/`)
-      if (resolved[other]) permanentRedirect(`/${other}/${section(other)}/${resolved[other]}/`)
+      const current = `/${locale}/${catalog}/${rawSlug}/`
+      if (resolved[loc]) {
+        const target = `/${loc}/${section(loc)}/${resolved[loc]}/`
+        if (target !== current) permanentRedirect(target)
+      }
+      if (resolved[other]) {
+        const target = `/${other}/${section(other)}/${resolved[other]}/`
+        if (target !== current) permanentRedirect(target)
+      }
     }
     notFound()
   }

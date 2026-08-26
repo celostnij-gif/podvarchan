@@ -218,8 +218,15 @@ export default async function BlogPostPage({ params }: Props) {
     if (resolved) {
       const loc = (locale === 'uk' ? 'uk' : 'ru') as 'ru' | 'uk'
       const other: 'ru' | 'uk' = loc === 'uk' ? 'ru' : 'uk'
-      if (resolved[loc]) permanentRedirect(`/${loc}/blog/${resolved[loc]}/`)
-      if (resolved[other]) permanentRedirect(`/${other}/blog/${resolved[other]}/`)
+      const current = `/${locale}/blog/${slug}/`
+      if (resolved[loc]) {
+        const target = `/${loc}/blog/${resolved[loc]}/`
+        if (target !== current) permanentRedirect(target)
+      }
+      if (resolved[other]) {
+        const target = `/${other}/blog/${resolved[other]}/`
+        if (target !== current) permanentRedirect(target)
+      }
     }
     notFound()
   }

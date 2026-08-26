@@ -509,6 +509,54 @@ type BlogJoinRow = {
   blog_category_translations: typeof blogCategoryTranslations.$inferSelect | null
 }
 
+const blogListSelect = {
+  id: blogPosts.id,
+  categoryId: blogPosts.categoryId,
+  coverImageId: blogPosts.coverImageId,
+  readingMinutes: blogPosts.readingMinutes,
+  publishedAt: blogPosts.publishedAt,
+  updatedAt: blogPosts.updatedAt,
+  slug: blogPostTranslations.slug,
+  title: blogPostTranslations.title,
+  excerpt: blogPostTranslations.excerpt,
+  faqJson: blogPostTranslations.faqJson,
+  categorySlug: blogCategoryTranslations.slug,
+  categoryName: blogCategoryTranslations.name,
+}
+
+type BlogListSelectRow = {
+  id: string
+  categoryId: string | null
+  coverImageId: string | null
+  readingMinutes: number | null
+  publishedAt: string | null
+  updatedAt: string | null
+  slug: string
+  title: string | null
+  excerpt: string | null
+  faqJson: string | null
+  categorySlug: string | null
+  categoryName: string | null
+}
+
+function mapBlogListSelectedRow(r: BlogListSelectRow): BlogPostPublic {
+  return {
+    id: r.id,
+    slug: r.slug,
+    title: r.title,
+    excerpt: r.excerpt,
+    contentHtml: null,
+    categoryId: r.categoryId,
+    categorySlug: r.categorySlug ?? null,
+    categoryName: r.categoryName ?? null,
+    coverImageId: r.coverImageId,
+    readingMinutes: r.readingMinutes,
+    publishedAt: r.publishedAt,
+    updatedAt: r.updatedAt,
+    faqJson: r.faqJson,
+  }
+}
+
 function mapBlogListRow(r: BlogJoinRow): BlogPostPublic {
   return {
     id: r.blog_posts.id,
@@ -539,12 +587,7 @@ async function getBlogPostsUncached(locale: string): Promise<BlogPostPublic[]> {
   const db = getDB()
   const loc = locale as 'ru' | 'uk'
   const rows = await db
-    .select({
-      blog_posts: blogPosts,
-      blog_post_translations: blogPostTranslations,
-      blog_categories: blogCategories,
-      blog_category_translations: blogCategoryTranslations,
-    })
+    .select(blogListSelect)
     .from(blogPosts)
     .innerJoin(
       blogPostTranslations,
@@ -568,14 +611,7 @@ async function getBlogPostsUncached(locale: string): Promise<BlogPostPublic[]> {
     .limit(LIMIT_BLOG_POSTS)
     .all()
 
-  return rows.map((r) =>
-    mapBlogListRow({
-      blog_posts: r.blog_posts,
-      blog_post_translations: r.blog_post_translations,
-      blog_categories: r.blog_categories,
-      blog_category_translations: r.blog_category_translations,
-    }),
-  )
+  return rows.map(mapBlogListSelectedRow)
 }
 export function getBlogPosts(locale: string): Promise<BlogPostPublic[]> {
   return withCache(cacheKeys.blogList(locale), TTL_BLOG, () => getBlogPostsUncached(locale))
@@ -752,12 +788,7 @@ async function getBlogPostsByCategoryUncached(
   const db = getDB()
   const loc = locale as 'ru' | 'uk'
   const rows = await db
-    .select({
-      blog_posts: blogPosts,
-      blog_post_translations: blogPostTranslations,
-      blog_categories: blogCategories,
-      blog_category_translations: blogCategoryTranslations,
-    })
+    .select(blogListSelect)
     .from(blogPosts)
     .innerJoin(
       blogPostTranslations,
@@ -782,14 +813,7 @@ async function getBlogPostsByCategoryUncached(
     .limit(LIMIT_BLOG_POSTS)
     .all()
 
-  return rows.map((r) =>
-    mapBlogListRow({
-      blog_posts: r.blog_posts,
-      blog_post_translations: r.blog_post_translations,
-      blog_categories: r.blog_categories,
-      blog_category_translations: r.blog_category_translations,
-    }),
-  )
+  return rows.map(mapBlogListSelectedRow)
 }
 export function getBlogPostsByCategory(
   categorySlug: string,

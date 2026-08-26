@@ -61,4 +61,15 @@ describe('resolveUaRedirect', () => {
     expect(resolveUaRedirect('/ua/metod/')).toBe('/uk/metod/')
     expect(resolveUaRedirect('/ua/faq')).toBe('/uk/faq/')
   })
+
+  it('service slug without a static-map pair passes through unchanged (DB resolver decides downstream)', () => {
+    // A RU slug missing from SERVICE_SLUG_UK must NOT produce an empty path or
+    // a loop: it keeps the same slug under /uk/poslugy/, where the page-level
+    // SlugPair resolver 301s to the paired UK slug (or back to /ru/ if the
+    // service is untranslated). Never '' and never /uk/poslugy//.
+    const out = resolveUaRedirect('/ua/uslugi/slug-bez-static-pary/')
+    expect(out).toBe('/uk/poslugy/slug-bez-static-pary/')
+    expect(out).not.toContain('//')
+    expect(out!.split('/').filter(Boolean).length).toBeGreaterThanOrEqual(2)
+  })
 })

@@ -124,8 +124,15 @@ export default async function BlogCategoryPage({ params }: Props) {
     if (resolved) {
       const loc = (locale === 'uk' ? 'uk' : 'ru') as 'ru' | 'uk'
       const other: 'ru' | 'uk' = loc === 'uk' ? 'ru' : 'uk'
-      if (resolved[loc]) permanentRedirect(`/${loc}/blog/kategoriya/${resolved[loc]}/`)
-      if (resolved[other]) permanentRedirect(`/${other}/blog/kategoriya/${resolved[other]}/`)
+      const current = `/${locale}/blog/kategoriya/${rawCat}/`
+      if (resolved[loc]) {
+        const target = `/${loc}/blog/kategoriya/${resolved[loc]}/`
+        if (target !== current) permanentRedirect(target)
+      }
+      if (resolved[other]) {
+        const target = `/${other}/blog/kategoriya/${resolved[other]}/`
+        if (target !== current) permanentRedirect(target)
+      }
     }
     notFound()
   }
