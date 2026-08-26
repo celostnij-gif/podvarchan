@@ -1,0 +1,11 @@
+{
+  "_comment": "Single source of truth for CDN Cache-Control values (AGENTS.md §3). Imported by src/lib/cache/cache-control-matrix.ts (runtime), next.config.mjs (edge header rules) and scripts/check-cache-sync.mjs (CI drift check). Never duplicate these strings elsewhere.",
+  "pages": "public, s-maxage=604800, stale-while-revalidate=2592000, stale-if-error=604800",
+  "blog": "public, s-maxage=86400, stale-while-revalidate=604800, stale-if-error=604800",
+  "sitemapXml": "public, s-maxage=3600, stale-while-revalidate=86400, stale-if-error=604800",
+  "robots": "public, s-maxage=3600, stale-while-revalidate=86400, stale-if-error=604800",
+  "llms": "public, s-maxage=3600, stale-while-revalidate=86400, stale-if-error=604800",
+  "llmsFull": "public, s-maxage=3600, stale-while-revalidate=86400, stale-if-error=604800",
+  "staticImmutable": "public, max-age=31536000, immutable",
+  "preview": "no-cache, no-store, must-revalidate"
+}

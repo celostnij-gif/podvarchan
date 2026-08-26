@@ -127,6 +127,24 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/uk/pro-avtora/', request.url), 301)
   }
 
+  // ── RU mirrors (Phase 2.1, 2026-08-25): UK-only slugs must not render under /ru/ ──
+  // [locale]/tsiny and [locale]/pro-avtora are re-export shims serving any locale;
+  // without these rules /ru/tsiny/ would render content on a non-canonical RU path
+  // (canonical tag saves indexing, but the page stays reachable). Redirect to the
+  // RU canonical slug, preserving any deeper path segments.
+  if (/^\/ru\/tsiny(\/|$)/.test(pathname)) {
+    return NextResponse.redirect(
+      new URL(`/ru/tseny${pathname.slice('/ru/tsiny'.length)}`, request.url),
+      301,
+    )
+  }
+  if (/^\/ru\/pro-avtora(\/|$)/.test(pathname)) {
+    return NextResponse.redirect(
+      new URL(`/ru/ob-avtore${pathname.slice('/ru/pro-avtora'.length)}`, request.url),
+      301,
+    )
+  }
+
   // ── UK slug redirects ──
   const segments = pathname.split('/').filter(Boolean)
   if (segments.length >= 3) {
@@ -329,3 +347,7 @@ export const config = {
 // 8. WordPress scanner paths → 410 Gone (site has no WP):
 //    curl -sI https://podvarchan.com/ru/wp-admin/install.php/
 //    → HTTP/2 410
+// 9. Non-canonical cross-locale slugs redirect within the same locale (Phase 2.1):
+//    curl -sI https://podvarchan.com/ru/tsiny/      → HTTP/2 301 → /ru/tseny/
+//    curl -sI https://podvarchan.com/ru/pro-avtora/ → HTTP/2 301 → /ru/ob-avtore/
+//    (canon: /uk/tsiny/, /uk/pro-avtora/ stay 200)

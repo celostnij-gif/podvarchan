@@ -1,27 +1,22 @@
 /**
- * Single source of truth for the CDN Cache-Control matrix (AGENTS.md §3).
+ * Typed access layer over `cache-control-values.json` (AGENTS.md §3).
  *
- * TS files import these constants. `next.config.mjs` cannot import TypeScript
- * from `src/` (plain ESM, no transpile) — the values there are duplicated by
- * hand; keep them in sync and reference this module in comments.
+ * THE JSON FILE IS THE SINGLE SOURCE OF TRUTH: it is imported here (runtime),
+ * by next.config.mjs (edge header rules) and validated by
+ * scripts/check-cache-sync.mjs in CI — no hand-duplicated literals anywhere
+ * anymore (the old "keep in sync manually" comment in next.config.mjs is gone).
  *
  * The header must ALWAYS carry a long s-maxage: freshness is guaranteed by
  * on-demand invalidation (AGENTS.md §4), not by short TTLs — a short TTL only
  * multiplies D1 reads without improving freshness.
  */
-export const CACHE_CONTROL = {
-  /** Home / Services / FAQ / About / Method / Pricing / Contacts / Privacy / Disclaimer */
-  pages: 'public, s-maxage=604800, stale-while-revalidate=2592000, stale-if-error=604800',
-  /** Blog list / post / category */
-  blog: 'public, s-maxage=86400, stale-while-revalidate=604800, stale-if-error=604800',
-  /** /sitemap.xml — KV-cached XML (see src/lib/sitemap.ts), short s-maxage on purpose:
-   *  the route handler itself is cheap (1 KV get) and crawlers re-request often. */
-  sitemapXml: 'public, s-maxage=3600, stale-while-revalidate=86400, stale-if-error=604800',
-  robots: 'public, s-maxage=3600, stale-while-revalidate=86400, stale-if-error=604800',
-  llms: 'public, s-maxage=3600, stale-while-revalidate=86400, stale-if-error=604800',
-  llmsFull: 'public, s-maxage=3600, stale-while-revalidate=86400, stale-if-error=604800',
-  /** Static assets / R2 media */
-  staticImmutable: 'public, max-age=31536000, immutable',
-  /** /api/preview — never cached, unconditionally */
-  preview: 'no-cache, no-store, must-revalidate',
-} as const
+import values from './cache-control-values.json'
+
+type CacheControlKey = keyof Omit<typeof values, '_comment'>
+
+const cacheControl = {} as Record<CacheControlKey, string>
+for (const [key, value] of Object.entries(values)) {
+  if (key !== '_comment') cacheControl[key as CacheControlKey] = value as string
+}
+
+export const CACHE_CONTROL = cacheControl

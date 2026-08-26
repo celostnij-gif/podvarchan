@@ -1,4 +1,5 @@
 import createNextIntlPlugin from 'next-intl/plugin'
+import cc from './src/lib/cache/cache-control-values.json' with { type: 'json' }
 
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
@@ -62,13 +63,13 @@ const nextConfig = {
     {
       source: '/images/(.*)',
       headers: [
-        { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        { key: 'Cache-Control', value: cc.staticImmutable },
       ],
     },
     {
       source: '/_next/static/(.*)',
       headers: [
-        { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        { key: 'Cache-Control', value: cc.staticImmutable },
       ],
     },
     {
@@ -80,14 +81,14 @@ const nextConfig = {
     {
       source: '/fonts/(.*)',
       headers: [
-        { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        { key: 'Cache-Control', value: cc.staticImmutable },
       ],
     },
     /* ── CDN cache for HTML pages (AGENTS.md §3 matrix) ── */
     /* Middleware Cache-Control doesn't propagate to page responses in Cloudflare Workers */
     /* Order matters: later rules override earlier ones for the same header key. */
-    /* SOURCE OF TRUTH: src/lib/cache/cache-control-matrix.ts — next.config.mjs
-       cannot import TypeScript; keep these values in sync manually. */
+    /* SINGLE SOURCE OF TRUTH: src/lib/cache/cache-control-values.json — imported
+       above as `cc` and validated in CI by scripts/check-cache-sync.mjs. */
 
     /* Home / Services / FAQ / About / Method / Pricing / Contacts / Privacy / Disclaimer */
     {
@@ -95,7 +96,7 @@ const nextConfig = {
       headers: [
         {
           key: 'Cache-Control',
-          value: 'public, s-maxage=604800, stale-while-revalidate=2592000, stale-if-error=604800',
+          value: cc.pages,
         },
       ],
     },
@@ -105,7 +106,7 @@ const nextConfig = {
       headers: [
         {
           key: 'Cache-Control',
-          value: 'public, s-maxage=86400, stale-while-revalidate=604800, stale-if-error=604800',
+          value: cc.blog,
         },
       ],
     },
@@ -115,7 +116,7 @@ const nextConfig = {
       headers: [
         {
           key: 'Cache-Control',
-          value: 'public, s-maxage=3600, stale-while-revalidate=86400, stale-if-error=604800',
+          value: cc.sitemapXml,
         },
       ],
     },
@@ -124,7 +125,7 @@ const nextConfig = {
       headers: [
         {
           key: 'Cache-Control',
-          value: 'public, s-maxage=3600, stale-while-revalidate=86400, stale-if-error=604800',
+          value: cc.robots,
         },
       ],
     },
@@ -133,7 +134,7 @@ const nextConfig = {
       headers: [
         {
           key: 'Cache-Control',
-          value: 'public, s-maxage=3600, stale-while-revalidate=86400, stale-if-error=604800',
+          value: cc.llms,
         },
       ],
     },
@@ -142,7 +143,7 @@ const nextConfig = {
       headers: [
         {
           key: 'Cache-Control',
-          value: 'public, s-maxage=3600, stale-while-revalidate=86400, stale-if-error=604800',
+          value: cc.llmsFull,
         },
       ],
     },
@@ -150,7 +151,7 @@ const nextConfig = {
     {
       source: '/api/preview/:path*',
       headers: [
-        { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
+        { key: 'Cache-Control', value: cc.preview },
       ],
     },
   ],

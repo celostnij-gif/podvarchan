@@ -117,12 +117,40 @@ check_url "$BASE/sitemap.xml" 200
 check_url "$BASE/robots.txt" 200
 
 # ── 7. Redirect checks ──
+# check_redirect <url> <expected_status> <expected_location_suffix>
+#   Location must END WITH the suffix (origin-independent, trailing-slash aware).
+check_redirect() {
+  local url="$1" expected="$2" suffix="$3"
+  local code loc
+  code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$url" || echo "000")
+  loc=$(curl -s -o /dev/null -w "%{redirect_url}" --max-time 10 "$url")
+  if [[ "$code" == "$expected" && "$loc" == *"$suffix" ]]; then
+    echo "  ✅ $url → $code → …$suffix"
+    PASS=$((PASS + 1))
+  else
+    echo "  ❌ $url → $code (expected $expected), location='$loc' (want suffix '$suffix')"
+    FAIL=$((FAIL + 1)); RESULTS+=("$url redirect $code→$loc != $expected…$suffix")
+  fi
+}
+
 echo "--- Redirects ---"
 check_url "$BASE/" 301
-check_url "$BASE/ua/uslugi/" 301
-check_url "$BASE/uk/uslugi/" 301
 check_url "$BASE/otzyvy.html" 301
 check_url "$BASE/diagnostika.html" 301
+
+# Single-hop /ua/* (Phase 0.4): final UK path in ONE hop incl. slug localization
+check_redirect "$BASE/ua/uslugi/" 301 "/uk/poslugy/"
+check_redirect "$BASE/ua/tseny/" 301 "/uk/tsiny/"
+
+# UK cutover redirects
+check_redirect "$BASE/uk/uslugi/" 301 "/uk/poslugy/"
+check_redirect "$BASE/uk/tseny/" 301 "/uk/tsiny/"
+check_redirect "$BASE/uk/ob-avtore/" 301 "/uk/pro-avtora/"
+
+# RU mirrors of UK-only slugs (Phase 2.1): non-canonical RU paths → RU canon
+check_redirect "$BASE/ru/poslugy/" 301 "/ru/uslugi/"
+check_redirect "$BASE/ru/tsiny/" 301 "/ru/tseny/"
+check_redirect "$BASE/ru/pro-avtora/" 301 "/ru/ob-avtore/"
 
 # ── 8. 404 check ──
 echo "--- 404 ---"
