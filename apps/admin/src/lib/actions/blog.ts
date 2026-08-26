@@ -126,6 +126,7 @@ export async function createCategory(formData: FormData) {
       ...(ruCatSlug ? [cacheKeys.blogCatPosts(ruCatSlug, 'ru')] : []),
       ...(ukCatSlug ? [cacheKeys.blogCatPosts(ukCatSlug, 'uk')] : []),
     ],
+    prefixes: [cacheKeyPrefixes.blogCatSlugPair],
   })
 }
 
@@ -190,6 +191,7 @@ export async function updateCategory(id: string, formData: FormData) {
       ...(oldRuCat ? [cacheKeys.blogCatPosts(oldRuCat, 'ru')] : []),
       ...(oldUkCat ? [cacheKeys.blogCatPosts(oldUkCat, 'uk')] : []),
     ],
+    prefixes: [cacheKeyPrefixes.blogCatSlugPair],
   })
 }
 
@@ -210,7 +212,7 @@ export async function deleteCategory(id: string) {
     paths: ['/ru/blog/', '/uk/blog/', '/sitemap.xml'],
     type: 'layout',
     keys: [cacheKeys.blogCats('ru'), cacheKeys.blogCats('uk')],
-    prefixes: [cacheKeyPrefixes.blogCatPosts],
+    prefixes: [cacheKeyPrefixes.blogCatPosts, cacheKeyPrefixes.blogCatSlugPair],
   })
 }
 
@@ -265,7 +267,7 @@ export async function createPost(formData: FormData) {
   await revalidatePublic({
     paths: getBlogPostRevalidatePaths(ruSlug, ukSlug, cats.ru, cats.uk),
     keys: getBlogPostCacheKeys(ruSlug, ukSlug, cats.ru, cats.uk, id),
-    prefixes: [cacheKeyPrefixes.blogImages],
+    prefixes: [cacheKeyPrefixes.blogImages, cacheKeyPrefixes.blogSlugPair],
   })
 }
 
@@ -381,7 +383,7 @@ export async function updatePost(id: string, formData: FormData) {
       ...(oldCats.ru ? [cacheKeys.blogCatPosts(oldCats.ru, 'ru')] : []),
       ...(oldCats.uk ? [cacheKeys.blogCatPosts(oldCats.uk, 'uk')] : []),
     ],
-    prefixes: [cacheKeyPrefixes.blogImages],
+    prefixes: [cacheKeyPrefixes.blogImages, cacheKeyPrefixes.blogSlugPair],
   })
 }
 
@@ -413,7 +415,7 @@ export async function deletePost(id: string) {
     paths: ['/ru/blog/', '/uk/blog/', '/sitemap.xml'],
     type: 'layout',
     keys: getBlogPostCacheKeys(ruSlug, ukSlug, cats.ru, cats.uk, id),
-    prefixes: [cacheKeyPrefixes.blogImages],
+    prefixes: [cacheKeyPrefixes.blogImages, cacheKeyPrefixes.blogSlugPair],
   })
 }
 
@@ -461,6 +463,6 @@ export async function publishPost(id: string) {
     paths: ['/ru/blog/', '/uk/blog/', '/sitemap.xml'],
     type: 'layout',
     keys: getBlogPostCacheKeys(ruSlug, ukSlug, cats.ru, cats.uk, id),
-    prefixes: [cacheKeyPrefixes.blogImages],
+    prefixes: [cacheKeyPrefixes.blogImages, cacheKeyPrefixes.blogSlugPair],
   })
 }

@@ -11,7 +11,7 @@ import { canEditContent } from '@/lib/auth/permissions'
 import { requireDelete } from '@/lib/auth/guards'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
-import { revalidatePublic, revalidateAdmin, getServiceRevalidatePaths, getServiceCacheKeys, cacheKeys } from '@/lib/revalidate'
+import { revalidatePublic, revalidateAdmin, getServiceRevalidatePaths, getServiceCacheKeys, cacheKeys, cacheKeyPrefixes } from '@/lib/revalidate'
 import { syncRedirectRulesToKv } from './redirects'
 import { requirePublish, assertBilingual, assertMetaPresent } from './ymyl'
 
@@ -144,6 +144,7 @@ export async function createService(formData: FormData) {
   await revalidatePublic({
     paths: getServiceRevalidatePaths(ruSlug, ukSlug, data.featured),
     keys: getServiceCacheKeys(ruSlug, ukSlug, serviceId, data.featured),
+    prefixes: [cacheKeyPrefixes.serviceSlugPair],
   })
   
 }
@@ -279,6 +280,7 @@ export async function updateService(id: string, formData: FormData) {
       ...(oldRuSlug && oldRuSlug !== ruSlug ? [cacheKeys.service(oldRuSlug, 'ru')] : []),
       ...(oldUkSlug && oldUkSlug !== ukSlug ? [cacheKeys.service(oldUkSlug, 'uk')] : []),
     ],
+    prefixes: [cacheKeyPrefixes.serviceSlugPair],
   })
   
 }
@@ -311,6 +313,7 @@ export async function deleteService(id: string) {
     paths: [serviceIndexPath('ru'), serviceIndexPath('uk'), '/sitemap.xml'],
     type: 'layout',
     keys: getServiceCacheKeys(ruSlug, ukSlug, id, existing.featured),
+    prefixes: [cacheKeyPrefixes.serviceSlugPair],
   })
 }
 
@@ -356,6 +359,7 @@ export async function publishService(id: string) {
     paths: [serviceIndexPath('ru'), serviceIndexPath('uk'), '/sitemap.xml'],
     type: 'layout',
     keys: getServiceCacheKeys(ruSlug, ukSlug, id, existing.featured),
+    prefixes: [cacheKeyPrefixes.serviceSlugPair],
   })
 }
 

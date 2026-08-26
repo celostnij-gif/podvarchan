@@ -414,20 +414,32 @@ export function getServiceById(id: string, locale: string): Promise<ServicePubli
   return withCache(cacheKeys.serviceById(id, locale), TTL_SERVICES, () => getServiceByIdUncached(id, locale))
 }
 
-/** Slug → published service in ANY locale — used to 301 a cross-locale slug swap (lang switcher) to the correct URL. */
+/** Both-locale slugs of one published entity (either side may be untranslated → null). */
+export type SlugPair = { ru: string | null; uk: string | null }
+
+/** Slug → published service's slug pair across locales (resolved by serviceId).
+ *  Used by the lang-switcher fallback: a UK path carrying a RU slug must 301 to
+ *  the paired UK slug of the SAME service, not bounce back to the origin locale. */
 export async function resolvePublishedServiceSlug(
   slug: string,
-): Promise<{ locale: 'ru' | 'uk'; slug: string } | null> {
-  const db = getDB()
-  const row = await db
-    .select({ locale: serviceTranslations.locale, slug: serviceTranslations.slug })
-    .from(serviceTranslations)
-    .innerJoin(services, eq(services.id, serviceTranslations.serviceId))
-    .where(and(eq(serviceTranslations.slug, slug), eq(services.status, 'PUBLISHED')))
-    .get()
-
-  if (!row) return null
-  return { locale: row.locale as 'ru' | 'uk', slug: row.slug }
+): Promise<SlugPair | null> {
+  return withCache(cacheKeys.serviceSlugPair(slug), TTL_SERVICES, async () => {
+    const db = getDB()
+    const found = await db
+      .select({ id: services.id })
+      .from(serviceTranslations)
+      .innerJoin(services, eq(services.id, serviceTranslations.serviceId))
+      .where(and(eq(serviceTranslations.slug, slug), eq(services.status, 'PUBLISHED')))
+      .get()
+    if (!found) return null
+    const rows = await db
+      .select({ locale: serviceTranslations.locale, slug: serviceTranslations.slug })
+      .from(serviceTranslations)
+      .where(eq(serviceTranslations.serviceId, found.id))
+    const pair: SlugPair = { ru: null, uk: null }
+    for (const r of rows) pair[r.locale as 'ru' | 'uk'] = r.slug
+    return pair
+  })
 }
 
 // ─── Blog categories ───
@@ -465,20 +477,27 @@ export function getBlogCategories(locale: string): Promise<BlogCategoryPublic[]>
   return withCache(cacheKeys.blogCats(locale), TTL_BLOG_CATS, () => getBlogCategoriesUncached(locale))
 }
 
-/** Slug → published blog category in ANY locale — used to 301 a cross-locale slug swap (lang switcher) to the correct URL. */
+/** Slug → published blog category's slug pair across locales (resolved by categoryId). */
 export async function resolvePublishedCategorySlug(
   slug: string,
-): Promise<{ locale: 'ru' | 'uk'; slug: string } | null> {
-  const db = getDB()
-  const row = await db
-    .select({ locale: blogCategoryTranslations.locale, slug: blogCategoryTranslations.slug })
-    .from(blogCategoryTranslations)
-    .innerJoin(blogCategories, eq(blogCategories.id, blogCategoryTranslations.categoryId))
-    .where(and(eq(blogCategoryTranslations.slug, slug), eq(blogCategories.status, 'PUBLISHED')))
-    .get()
-
-  if (!row) return null
-  return { locale: row.locale as 'ru' | 'uk', slug: row.slug }
+): Promise<SlugPair | null> {
+  return withCache(cacheKeys.blogCatSlugPair(slug), TTL_BLOG_CATS, async () => {
+    const db = getDB()
+    const found = await db
+      .select({ id: blogCategories.id })
+      .from(blogCategoryTranslations)
+      .innerJoin(blogCategories, eq(blogCategories.id, blogCategoryTranslations.categoryId))
+      .where(and(eq(blogCategoryTranslations.slug, slug), eq(blogCategories.status, 'PUBLISHED')))
+      .get()
+    if (!found) return null
+    const rows = await db
+      .select({ locale: blogCategoryTranslations.locale, slug: blogCategoryTranslations.slug })
+      .from(blogCategoryTranslations)
+      .where(eq(blogCategoryTranslations.categoryId, found.id))
+    const pair: SlugPair = { ru: null, uk: null }
+    for (const r of rows) pair[r.locale as 'ru' | 'uk'] = r.slug
+    return pair
+  })
 }
 
 // ─── Blog posts ───
@@ -699,20 +718,30 @@ export function getBlogPostById(id: string, locale: string): Promise<BlogPostPub
   return withCache(cacheKeys.blogPostById(id, locale), TTL_BLOG, () => getBlogPostByIdUncached(id, locale))
 }
 
-/** Slug → published blog post in ANY locale — used to 301 a cross-locale slug swap (lang switcher) to the correct URL. */
+/** Slug → published blog post's slug pair across locales (resolved by postId).
+ *  The lang switcher swaps the locale prefix on the current path; when post slugs
+ *  differ across locales the target URL carries a foreign-locale slug — this
+ *  resolver maps it to the SAME post's slug in each locale. */
 export async function resolvePublishedBlogSlug(
   slug: string,
-): Promise<{ locale: 'ru' | 'uk'; slug: string } | null> {
-  const db = getDB()
-  const row = await db
-    .select({ locale: blogPostTranslations.locale, slug: blogPostTranslations.slug })
-    .from(blogPostTranslations)
-    .innerJoin(blogPosts, eq(blogPosts.id, blogPostTranslations.postId))
-    .where(and(eq(blogPostTranslations.slug, slug), eq(blogPosts.status, 'PUBLISHED')))
-    .get()
-
-  if (!row) return null
-  return { locale: row.locale as 'ru' | 'uk', slug: row.slug }
+): Promise<SlugPair | null> {
+  return withCache(cacheKeys.blogSlugPair(slug), TTL_BLOG, async () => {
+    const db = getDB()
+    const found = await db
+      .select({ postId: blogPostTranslations.postId })
+      .from(blogPostTranslations)
+      .innerJoin(blogPosts, eq(blogPosts.id, blogPostTranslations.postId))
+      .where(and(eq(blogPostTranslations.slug, slug), eq(blogPosts.status, 'PUBLISHED')))
+      .get()
+    if (!found) return null
+    const rows = await db
+      .select({ locale: blogPostTranslations.locale, slug: blogPostTranslations.slug })
+      .from(blogPostTranslations)
+      .where(eq(blogPostTranslations.postId, found.postId))
+    const pair: SlugPair = { ru: null, uk: null }
+    for (const r of rows) pair[r.locale as 'ru' | 'uk'] = r.slug
+    return pair
+  })
 }
 
 /** Posts in a category by category translation slug — list shape (no HTML body). */

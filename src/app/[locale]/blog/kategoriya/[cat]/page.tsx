@@ -1,10 +1,10 @@
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { GlobalJsonLd } from '@/components/GlobalJsonLd'
 import { PageJsonLd } from '@/components/PageJsonLd'
 import { BLOG_CATEGORIES } from '@/constants'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
-import { getBlogPostsByCategory, getBlogCategories, getMediaPublicUrl, getBlogFirstImageUrls } from '@/lib/db/public'
+import { getBlogPostsByCategory, getBlogCategories, getMediaPublicUrl, getBlogFirstImageUrls, resolvePublishedCategorySlug } from '@/lib/db/public'
 import { getBlogPost } from '@/lib/content'
 import { breadcrumbSchema } from '@/lib/schema'
 import { ClientBlogCategory } from './client-page'
@@ -116,7 +116,19 @@ function mapPost(p: BlogPostPublic, image?: string, imageAlt?: string): Omit<Blo
 export default async function BlogCategoryPage({ params }: Props) {
   const { cat: rawCat, locale } = await params
   const category = await resolveCategoryMeta(rawCat, locale)
-  if (!category) notFound()
+  if (!category) {
+    // Cross-locale slug swap (lang switcher swaps only the locale prefix):
+    // 301 to the paired slug of the SAME category in the requested locale; if
+    // untranslated, fall back to the locale where it exists.
+    const resolved = await resolvePublishedCategorySlug(rawCat).catch(() => null)
+    if (resolved) {
+      const loc = (locale === 'uk' ? 'uk' : 'ru') as 'ru' | 'uk'
+      const other: 'ru' | 'uk' = loc === 'uk' ? 'ru' : 'uk'
+      if (resolved[loc]) permanentRedirect(`/${loc}/blog/kategoriya/${resolved[loc]}/`)
+      if (resolved[other]) permanentRedirect(`/${other}/blog/kategoriya/${resolved[other]}/`)
+    }
+    notFound()
+  }
 
   let posts: Omit<BlogPost, 'body'>[] = []
 

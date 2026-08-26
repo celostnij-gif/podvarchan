@@ -211,11 +211,15 @@ export default async function BlogPostPage({ params }: Props) {
   const slug = rawSlug
   const data = await loadBlogPost(slug, locale)
   if (!data) {
-    // Cross-locale slug swap (lang switcher on admin content): 301 to the
-    // correct locale URL instead of a hard 404.
+    // Cross-locale slug swap (lang switcher swaps only the locale prefix):
+    // 301 to the paired slug of the SAME post in the requested locale; if the
+    // post has no translation for it, fall back to the locale where it exists.
     const resolved = await resolvePublishedBlogSlug(slug).catch(() => null)
-    if (resolved && resolved.locale !== locale) {
-      permanentRedirect(`/${resolved.locale}/blog/${resolved.slug}/`)
+    if (resolved) {
+      const loc = (locale === 'uk' ? 'uk' : 'ru') as 'ru' | 'uk'
+      const other: 'ru' | 'uk' = loc === 'uk' ? 'ru' : 'uk'
+      if (resolved[loc]) permanentRedirect(`/${loc}/blog/${resolved[loc]}/`)
+      if (resolved[other]) permanentRedirect(`/${other}/blog/${resolved[other]}/`)
     }
     notFound()
   }

@@ -37,6 +37,12 @@ export const cacheKeys = {
   blogPost: (slug: string, locale: string) => `blog:${slug}:${locale}`,
   blogPostById: (id: string, locale: string) => `blog:id:${id}:${locale}`,
   blogCatPosts: (catSlug: string, locale: string) => `blog-cat:${catSlug}:${locale}`,
+  /** Cross-locale slug pair for one published post (lang-switcher 301 fallback). */
+  blogSlugPair: (slug: string) => `blog:slug-pair:${slug}`,
+  /** Cross-locale slug pair for one published category (lang-switcher 301 fallback). */
+  blogCatSlugPair: (slug: string) => `blog-cat-slug-pair:${slug}`,
+  /** Cross-locale slug pair for one published service (lang-switcher 301 fallback). */
+  serviceSlugPair: (slug: string) => `service:slug-pair:${slug}`,
   blogFirstImages: (idList: string) => `blog:images:${hashKey(idList)}`,
   page: (type: string, locale: string) => `page:${type}:${locale}`,
   faq: (group: string | undefined | null, locale: string) => `faq:${group ?? 'all'}:${locale}`,
@@ -67,4 +73,8 @@ export const cacheKeyPrefixes = {
   nav: 'nav:',
   blogImages: 'blog:images:',
   blogCatPosts: 'blog-cat:',
+  /** Cross-locale slug-pair lookups (lang-switcher 301 fallbacks) — wiped with their entity family. */
+  blogSlugPair: 'blog:slug-pair:',
+  blogCatSlugPair: 'blog-cat-slug-pair:',
+  serviceSlugPair: 'service:slug-pair:',
 }

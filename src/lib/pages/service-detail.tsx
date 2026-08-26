@@ -247,11 +247,16 @@ export async function ServiceDetailPage({ params, catalog }: ServiceDetailProps)
   const slug = locale === 'uk' ? rawSlug : resolveServiceSlug(rawSlug)
   const data = await loadService(slug, locale)
   if (!data) {
-    // Cross-locale slug swap (lang switcher on admin content): 301 to the
-    // correct locale URL instead of a hard 404.
+    // Cross-locale slug swap (lang switcher swaps only the locale prefix):
+    // 301 to the paired slug of the SAME service in the requested locale; if
+    // untranslated, fall back to the locale where it exists.
     const resolved = await resolvePublishedServiceSlug(slug).catch(() => null)
-    if (resolved && resolved.locale !== locale) {
-      permanentRedirect(`/${resolved.locale}/${resolved.locale === 'uk' ? 'poslugy' : 'uslugi'}/${resolved.slug}/`)
+    if (resolved) {
+      const loc = (locale === 'uk' ? 'uk' : 'ru') as 'ru' | 'uk'
+      const other: 'ru' | 'uk' = loc === 'uk' ? 'ru' : 'uk'
+      const section = (l: 'ru' | 'uk') => (l === 'uk' ? 'poslugy' : 'uslugi')
+      if (resolved[loc]) permanentRedirect(`/${loc}/${section(loc)}/${resolved[loc]}/`)
+      if (resolved[other]) permanentRedirect(`/${other}/${section(other)}/${resolved[other]}/`)
     }
     notFound()
   }
