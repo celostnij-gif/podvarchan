@@ -24,7 +24,10 @@ const testimonialSchema = z.object({
   clientAge: z.coerce.number().int().min(0).optional().nullable().default(null),
   avatarInitials: z.string().max(10).optional().default(''),
   consentConfirmed: z.boolean().optional().default(false),
-  rating: z.coerce.number().int().min(1).max(5).optional().default(5),
+  rating: z.preprocess(
+    (v) => (v === '' || v === null || v === undefined || v === 0 || v === '0' ? 5 : v),
+    z.coerce.number().int().min(1).max(5),
+  ).optional().default(5),
   source: z.string().max(200).optional().default(''),
   sortOrder: z.coerce.number().int().min(0).optional().default(0),
   status: z.enum(['DRAFT', 'PUBLISHED', 'HIDDEN']).optional().default('DRAFT'),
