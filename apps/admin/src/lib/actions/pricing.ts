@@ -181,11 +181,12 @@ export async function deletePricingPlan(id: string) {
   const db = await getActionDb()
   const existing = await db.select({ id: pricingPlans.id }).from(pricingPlans).where(eq(pricingPlans.id, id)).get()
   if (!existing) throw new Error('План не знайдено')
-  // Safety net: seo_meta has no FK — remove any linked rows in the same transaction (P0-2).
-  await db.transaction(async (tx) => {
-    await tx.delete(seoMeta).where(eq(seoMeta.entityId, id))
-    await tx.delete(pricingPlans).where(eq(pricingPlans.id, id)) // translations — ON DELETE CASCADE
-  })
+  // Safety net: seo_meta has no FK — remove any linked rows atomically (P0-2).
+  // D1 has no BEGIN/COMMIT — db.transaction() would fail; use db.batch().
+  await db.batch([
+    db.delete(seoMeta).where(eq(seoMeta.entityId, id)),
+    db.delete(pricingPlans).where(eq(pricingPlans.id, id)), // translations — ON DELETE CASCADE
+  ])
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'PRICING_PLAN', entityId: id })
   revalidatePricing()
 }

@@ -106,11 +106,12 @@ export async function deleteFaqItem(id: string) {
   const db = await getActionDb()
   const existing = await db.select().from(faqItems).where(eq(faqItems.id, id)).get()
   if (!existing) throw new Error('FAQ не знайдено')
-  // Safety net: seo_meta has no FK — remove any linked rows in the same transaction (P0-2).
-  await db.transaction(async (tx) => {
-    await tx.delete(seoMeta).where(eq(seoMeta.entityId, id))
-    await tx.delete(faqItems).where(eq(faqItems.id, id))
-  })
+  // Safety net: seo_meta has no FK — remove any linked rows atomically (P0-2).
+  // D1 has no BEGIN/COMMIT — db.transaction() would fail; use db.batch().
+  await db.batch([
+    db.delete(seoMeta).where(eq(seoMeta.entityId, id)),
+    db.delete(faqItems).where(eq(faqItems.id, id)),
+  ])
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'FAQ', entityId: id, before: existing })
   revalidateAdmin('/admin/faq')
   await revalidatePublic({ paths: getFaqRevalidatePaths(), prefixes: [cacheKeyPrefixes.faq] })

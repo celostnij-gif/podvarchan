@@ -200,11 +200,12 @@ export async function deleteCategory(id: string) {
   const db = await getActionDb()
   const existing = await db.select().from(blogCategories).where(eq(blogCategories.id, id)).get()
   if (!existing) throw new Error('Категорію не знайдено')
-  // seo_meta has no FK — delete linked rows in the same transaction (P0-2).
-  await db.transaction(async (tx) => {
-    await tx.delete(seoMeta).where(and(eq(seoMeta.entityType, 'blog_category'), eq(seoMeta.entityId, id)))
-    await tx.delete(blogCategories).where(eq(blogCategories.id, id))
-  })
+  // seo_meta has no FK — delete linked rows atomically (P0-2).
+  // D1 has no BEGIN/COMMIT — db.transaction() would fail; use db.batch().
+  await db.batch([
+    db.delete(seoMeta).where(and(eq(seoMeta.entityType, 'blog_category'), eq(seoMeta.entityId, id))),
+    db.delete(blogCategories).where(eq(blogCategories.id, id)),
+  ])
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'BLOG_CATEGORY', entityId: id, before: existing })
   revalidateAdmin('/admin/blog/categories')
   // Revalidate blog area (list + category pages affected)
@@ -403,11 +404,12 @@ export async function deletePost(id: string) {
   const ukSlug = trs.find((t) => t.locale === 'uk')?.slug || ''
   const cats = await getCategorySlugs(db, existing.categoryId)
 
-  // seo_meta has no FK — delete linked rows in the same transaction (P0-2).
-  await db.transaction(async (tx) => {
-    await tx.delete(seoMeta).where(and(eq(seoMeta.entityType, 'blog_post'), eq(seoMeta.entityId, id)))
-    await tx.delete(blogPosts).where(eq(blogPosts.id, id))
-  })
+  // seo_meta has no FK — delete linked rows atomically (P0-2).
+  // D1 has no BEGIN/COMMIT — db.transaction() would fail; use db.batch().
+  await db.batch([
+    db.delete(seoMeta).where(and(eq(seoMeta.entityType, 'blog_post'), eq(seoMeta.entityId, id))),
+    db.delete(blogPosts).where(eq(blogPosts.id, id)),
+  ])
 
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'BLOG_POST', entityId: id, before: existing })
   revalidateAdmin('/admin/blog/posts')

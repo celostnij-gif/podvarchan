@@ -301,11 +301,13 @@ export async function deleteService(id: string) {
   const ruSlug = delTrs.find((t) => t.locale === 'ru')?.slug || ''
   const ukSlug = delTrs.find((t) => t.locale === 'uk')?.slug || ''
 
-  // seo_meta has no FK — delete linked rows in the same transaction (P0-2).
-  await db.transaction(async (tx) => {
-    await tx.delete(seoMeta).where(and(eq(seoMeta.entityType, 'service'), eq(seoMeta.entityId, id)))
-    await tx.delete(services).where(eq(services.id, id))
-  })
+  // seo_meta has no FK — delete linked rows atomically (P0-2).
+  // D1 has no BEGIN/COMMIT — db.transaction() would run raw `begin` and fail;
+  // use db.batch(), D1's native atomic multi-statement API.
+  await db.batch([
+    db.delete(seoMeta).where(and(eq(seoMeta.entityType, 'service'), eq(seoMeta.entityId, id))),
+    db.delete(services).where(eq(services.id, id)),
+  ])
 
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'SERVICE', entityId: id, before: existing })
   revalidateAdmin('/admin/services')
