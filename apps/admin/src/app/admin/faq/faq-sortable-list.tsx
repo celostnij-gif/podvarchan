@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { SortableList } from '@/components/admin/SortableList'
 import { reorderFaqItems } from '@/lib/actions/faq'
+import { DeleteButton } from './faq-delete-button'
 
 interface FaqRow {
   id: string
@@ -45,10 +46,11 @@ export function FaqSortableList({ items }: { items: FaqRow[] }) {
             <span className="truncate text-zinc-200">{item.questionRu ?? '—'}</span>
             <span className="text-zinc-500">{groupLabels[item.group] ?? item.group}</span>
             <StatusBadge status={item.status} />
-            <div className="text-right">
+            <div className="flex items-center justify-end gap-1">
               <Link href={`/admin/faq/${item.id}`} className="rounded px-2 py-1 text-amber-400 hover:bg-zinc-800">
                 Редагувати
               </Link>
+              <DeleteButton id={item.id} />
             </div>
           </div>
         )}
