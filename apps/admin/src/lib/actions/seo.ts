@@ -1,6 +1,7 @@
 'use server'
 import { cleanUpdate } from './clean-update'
 
+import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { eq, and } from 'drizzle-orm'
 import { seoMeta, serviceIndexPath } from '@podvarchan/shared'
@@ -33,12 +34,22 @@ export async function getSeoOverride(entityType: string, entityId: string, local
     .get()
 }
 
+const bulkSeoIdsSchema = z.array(z.object({
+  entityType: z.string().min(1),
+  entityId: z.string().min(1),
+  locale: z.enum(['ru', 'uk']),
+}))
+
 export async function bulkUpdateSeo(formData: FormData) {
   const userId = await requireEdit()
   const db = await getActionDb()
   const idsJson = formData.get('ids') as string | null
   if (!idsJson) throw new Error('Не надано ID')
-  const ids: { entityType: string; entityId: string; locale: string }[] = JSON.parse(idsJson)
+  let rawIds: unknown
+  try { rawIds = JSON.parse(idsJson) } catch { throw new Error('Некоректний JSON у полі ID') }
+  const parsedIds = bulkSeoIdsSchema.safeParse(rawIds)
+  if (!parsedIds.success) throw new Error(`Некоректні ID для масового оновлення: ${parsedIds.error.message}`)
+  const ids = parsedIds.data
   const title = formData.get('title') as string | null
   const description = formData.get('description') as string | null
   const ts = new Date().toISOString()

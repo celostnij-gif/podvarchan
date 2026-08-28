@@ -32,8 +32,8 @@ podvarchan/
 
 Два независимых Cloudflare Workers на **общей** D1-базе `podvarchan` и общей R2-медиатеке
 `podvarchan-media`. KV разделён на два **независимых** namespace: `RATE_LIMIT_KV`
-(rate-limit + скомпилированные `redirect_rules`) и `CONTENT_CACHE_KV` (кеш контента, префикс
-ключей `d1c:`). R2 под кеш контента и ISR-кеш фреймворка — тоже разделены на независимые бакеты
+(только rate-limit) и `CONTENT_CACHE_KV` (кеш контента, префикс ключей `d1c:`, плюс
+скомпилированные `redirect_rules`). R2 под кеш контента и ISR-кеш фреймворка — тоже разделены на независимые бакеты
 (см. Раздел 3 — смешивание этих бакетов однажды уже было ошибкой и было исправлено).
 
 **Возможен legacy-каталог `apps/site/`** — более старая версия публичного воркера, не упомянутая
@@ -141,7 +141,7 @@ R2 для кеша контента и R2 для incremental cache фреймв�
 | `blog_posts` список/detail | `blog:list:{locale}`, `blog:{slug}:{locale}` | 3600 |
 | `media_assets` (url/variants) | `media:url:{hash}`, `media:variants:{hash}` | по семейству, точечная инвалидация по id |
 | `seo_meta` override | `seo:{entityType}:{id}:{locale}` | по семейству |
-| Скомпилированные `redirect_rules` | ключ в `RATE_LIMIT_KV`, не в `CONTENT_CACHE_KV` | короткий TTL (десятки секунд) + инвалидация из админки |
+| Скомпилированные `redirect_rules` | ключ `redirect_rules` в `CONTENT_CACHE_KV` (не префикс `d1c:`; пишет админка `apps/admin/src/lib/actions/redirects.ts`, читает публичный middleware `src/middleware.ts`) | короткий TTL (десятки секунд) + инвалидация из админки |
 
 Изменение TTL-матрицы — только с пересмотром всего плана инвалидации, не точечной правкой одного
 числа без понимания, что ещё на него полагается.

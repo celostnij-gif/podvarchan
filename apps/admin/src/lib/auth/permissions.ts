@@ -5,10 +5,15 @@ export function canPublish(role: UserRole): boolean {
 }
 
 export function canDelete(role: UserRole): boolean {
-  return role === 'OWNER'
+  return ['OWNER', 'ADMIN'].includes(role)
 }
 
 export function canManageUsers(role: UserRole): boolean {
+  return role === 'OWNER'
+}
+
+/** Only OWNER can delete (and thereby remove access of) other user accounts. */
+export function canDeleteUsers(role: UserRole): boolean {
   return role === 'OWNER'
 }
 

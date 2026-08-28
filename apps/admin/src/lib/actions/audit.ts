@@ -3,12 +3,12 @@
 import { eq, desc, and, gte, lte } from 'drizzle-orm'
 import { auditLogs, contentRevisions } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
-import { canManageSettings } from '@/lib/auth/permissions'
+import { canViewAudit } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 
 async function requireAuditView(): Promise<void> {
   const user = await getCurrentUser()
-  if (!user || !canManageSettings(user.role)) throw new Error('Заборонено')
+  if (!user || !canViewAudit(user.role)) throw new Error('Заборонено')
 }
 
 export interface AuditLogFilters {

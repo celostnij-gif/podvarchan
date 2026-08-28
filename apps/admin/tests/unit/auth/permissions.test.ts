@@ -3,6 +3,7 @@ import {
   canPublish,
   canDelete,
   canManageUsers,
+  canDeleteUsers,
   canEditContent,
   canManageSettings,
   canViewAudit,
@@ -31,18 +32,28 @@ describe('permissions', () => {
   })
 
   describe('canDelete', () => {
-    it('allows only OWNER', () => {
-      expect(allowed(canDelete)).toEqual(['OWNER'])
+    it('allows OWNER and ADMIN (ADMIN deletes content, not users)', () => {
+      expect(allowed(canDelete)).toEqual(['OWNER', 'ADMIN'])
     })
 
-    it('denies ADMIN, EDITOR, VIEWER', () => {
-      expect(denied(canDelete)).toEqual(['ADMIN', 'EDITOR', 'VIEWER'])
+    it('denies EDITOR and VIEWER', () => {
+      expect(denied(canDelete)).toEqual(['EDITOR', 'VIEWER'])
     })
   })
 
   describe('canManageUsers', () => {
     it('allows only OWNER', () => {
       expect(allowed(canManageUsers)).toEqual(['OWNER'])
+    })
+  })
+
+  describe('canDeleteUsers', () => {
+    it('allows only OWNER (ADMIN never deletes other user accounts)', () => {
+      expect(allowed(canDeleteUsers)).toEqual(['OWNER'])
+    })
+
+    it('denies ADMIN, EDITOR, VIEWER', () => {
+      expect(denied(canDeleteUsers)).toEqual(['ADMIN', 'EDITOR', 'VIEWER'])
     })
   })
 

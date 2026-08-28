@@ -2,10 +2,10 @@
 
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
-import { eq } from 'drizzle-orm'
+import { eq, and, sql } from 'drizzle-orm'
 import { users } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
-import { requireDelete } from '@/lib/auth/guards'
+import { requireDeleteUser } from '@/lib/auth/guards'
 import { canManageUsers } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
@@ -17,6 +17,34 @@ async function requireManageUsers(): Promise<string> {
 }
 
 async function now(): Promise<string> { return new Date().toISOString() }
+
+/**
+ * Guard: never let a user account operation remove the last remaining access
+ * to the admin. An OWNER whose change would deactivate/demote/delete the final
+ * active OWNER (or another OWNER) is rejected.
+ */
+async function assertOwnerCapabilityRemains(
+  db: Awaited<ReturnType<typeof getActionDb>>,
+  target: { id: string; role: string; isActive: boolean },
+  actingUserId: string,
+): Promise<void> {
+  if (target.role !== 'OWNER') return
+
+  if (target.id !== actingUserId) {
+    throw new Error('ЗАБОРОНЕНО: лише сам ВЛАСНИК може змінювати власний обліковий запис ВЛАСНИКА')
+  }
+
+  const activeOwnerCount = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(users)
+    .where(and(eq(users.role, 'OWNER'), eq(users.isActive, true)))
+    .get()
+
+  const ownerSelfIsActive = target.isActive
+  if ((activeOwnerCount?.count ?? 0) <= 1 && ownerSelfIsActive) {
+    throw new Error('Неможливо: ви є останнім активним ВЛАСНИКОМ — доступ до адмінки буде втрачено')
+  }
+}
 
 const updateUserSchema = z.object({
   name: z.string().max(200).optional(),
@@ -44,16 +72,25 @@ export async function updateUser(id: string, formData: FormData) {
   if (data.name !== undefined) updateData.name = data.name
   if (data.role !== undefined) updateData.role = data.role
   if (data.isActive !== undefined) updateData.isActive = data.isActive
+
+  // Policy (§D3): never let an edit remove the last admin access.
+  const demotesOwner =
+    existing.role === 'OWNER' && (data.role !== undefined && data.role !== 'OWNER' || data.isActive === false)
+  if (demotesOwner) {
+    await assertOwnerCapabilityRemains(db, existing, userId)
+  }
+
   await db.update(users).set(updateData).where(eq(users.id, id))
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'USER', entityId: id, before: existing, after: data })
   revalidatePath('/admin/users')
 }
 
 export async function deleteUser(id: string) {
-  const { id: userId } = await requireDelete()
+  const { id: userId } = await requireDeleteUser()
   const db = await getActionDb()
   const existing = await db.select().from(users).where(eq(users.id, id)).get()
   if (!existing) throw new Error('Користувача не знайдено')
+  await assertOwnerCapabilityRemains(db, existing, userId)
   await db.delete(users).where(eq(users.id, id))
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'USER', entityId: id, before: existing })
   revalidatePath('/admin/users')
