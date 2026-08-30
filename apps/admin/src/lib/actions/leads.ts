@@ -27,22 +27,6 @@ async function requireEdit() {
 
 async function now(): Promise<string> { return new Date().toISOString() }
 
-export async function getLeads() {
-  await requireView()
-  const db = await getActionDb()
-  return db.select().from(contactLeads).orderBy(contactLeads.createdAt)
-}
-
-export async function markLeadRead(id: string) {
-  const user = await requireEdit()
-  const db = await getActionDb()
-  const existing = await db.select().from(contactLeads).where(eq(contactLeads.id, id)).get()
-  if (!existing) throw new Error('Заявку не знайдено')
-  await db.update(contactLeads).set({ status: 'CONTACTED' }).where(eq(contactLeads.id, id))
-  await writeAuditLog({ userId: user.id, action: 'UPDATE', entityType: 'LEAD', entityId: id, before: existing, after: { status: 'CONTACTED' } })
-  revalidatePath('/admin/leads')
-}
-
 export async function deleteLead(id: string) {
   const user = await requireDelete()
   const db = await getActionDb()
@@ -55,12 +39,6 @@ export async function deleteLead(id: string) {
   ])
   await writeAuditLog({ userId: user.id, action: 'DELETE', entityType: 'LEAD', entityId: id })
   revalidatePath('/admin/leads')
-}
-
-export async function exportLeads() {
-  await requireView()
-  const db = await getActionDb()
-  return db.select().from(contactLeads).orderBy(contactLeads.createdAt)
 }
 
 /* ── Status update ── */

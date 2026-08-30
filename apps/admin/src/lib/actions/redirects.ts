@@ -1,7 +1,7 @@
 'use server'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
-import { eq, asc } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import { redirectRules } from '@podvarchan/shared'
 import { getCurrentUser } from '@/lib/auth/session'
 import { requireDelete } from '@/lib/auth/guards'
@@ -24,12 +24,6 @@ const redirectSchema = z.object({
   statusCode: z.coerce.number().int().optional().default(301),
   isEnabled: z.coerce.boolean().optional().default(true),
 })
-
-export async function getRedirectRules() {
-  await requireSettings()
-  const db = await getActionDb()
-  return db.select().from(redirectRules).orderBy(asc(redirectRules.createdAt))
-}
 
 export async function saveRedirectRule(data: FormData) {
   const userId = await requireSettings()

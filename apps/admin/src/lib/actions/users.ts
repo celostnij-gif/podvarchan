@@ -52,12 +52,6 @@ const updateUserSchema = z.object({
   isActive: z.coerce.boolean().optional(),
 })
 
-export async function getUsers() {
-  await requireManageUsers()
-  const db = await getActionDb()
-  return db.select().from(users).orderBy(users.createdAt)
-}
-
 export async function updateUser(id: string, formData: FormData) {
   const userId = await requireManageUsers()
   const db = await getActionDb()

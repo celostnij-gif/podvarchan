@@ -48,12 +48,6 @@ const mediaSchema = z.object({
   captionUk: z.string().optional().default(''),
 })
 
-export async function getMediaList() {
-  await requireEdit()
-  const db = await getActionDb()
-  return db.select().from(mediaAssets).orderBy(mediaAssets.createdAt)
-}
-
 export async function updateMediaMeta(id: string, formData: FormData) {
   const userId = await requireEdit()
   const db = await getActionDb()
