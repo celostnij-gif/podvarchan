@@ -74,6 +74,7 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Користувачі', href: '/admin/users', icon: Users },
       { label: 'Налаштування', href: '/admin/settings', icon: Settings },
       { label: 'Редиректи', href: '/admin/redirects', icon: ArrowLeftRight },
+      { label: 'SEO', href: '/admin/seo', icon: Search },
       { label: 'Журнал', href: '/admin/audit', icon: ClipboardList },
     ],
   },

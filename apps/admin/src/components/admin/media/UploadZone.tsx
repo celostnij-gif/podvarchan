@@ -46,32 +46,34 @@ export function UploadZone() {
   const uploadFile = useCallback(async (item: UploadItem, file: File) => {
     const isImage = file.type.startsWith('image/') && !file.type.includes('svg')
 
-    let body: FormData
-    if (isImage) {
-      updateItem(item.id, { status: 'optimizing' })
-      try {
-        const { master, variants } = await buildWebpVariants(file)
-        const webpName = file.name.replace(/\.[^.]+$/, '.webp')
-        body = new FormData()
-        // Master file
-        body.append('file', master.blob, webpName)
-        body.append('width', String(master.width))
-        body.append('height', String(master.height))
-        body.append('variants', JSON.stringify(variants.map(v => ({ width: v.width }))))
-        // Append each variant blob with suffix key
-        for (const v of variants) {
-          body.append(`variant-${v.width}`, v.blob, webpName.replace('.webp', `-${v.width}.webp`))
-        }
-      } catch (err) {
-        updateItem(item.id, {
-          status: 'error',
-          error: err instanceof Error ? err.message : 'Помилка генерації варіантів',
-        })
-        return
+    if (!isImage) {
+      updateItem(item.id, {
+        status: 'error',
+        error: 'Підтримуються лише зображення (WebP/JPEG/PNG)',
+      })
+      return
+    }
+
+    updateItem(item.id, { status: 'optimizing' })
+    const body = new FormData()
+    try {
+      const { master, variants } = await buildWebpVariants(file)
+      const webpName = file.name.replace(/\.[^.]+$/, '.webp')
+      // Master file
+      body.append('file', master.blob, webpName)
+      body.append('width', String(master.width))
+      body.append('height', String(master.height))
+      body.append('variants', JSON.stringify(variants.map(v => ({ width: v.width }))))
+      // Append each variant blob with suffix key
+      for (const v of variants) {
+        body.append(`variant-${v.width}`, v.blob, webpName.replace('.webp', `-${v.width}.webp`))
       }
-    } else {
-      body = new FormData()
-      body.append('file', file)
+    } catch (err) {
+      updateItem(item.id, {
+        status: 'error',
+        error: err instanceof Error ? err.message : 'Помилка генерації варіантів',
+      })
+      return
     }
 
     updateItem(item.id, { status: 'uploading', progress: 10 })
@@ -171,7 +173,7 @@ export function UploadZone() {
           ref={inputRef}
           type="file"
           multiple
-          accept="image/*,application/pdf"
+          accept="image/*"
           className="hidden"
           onChange={handleInputChange}
         />

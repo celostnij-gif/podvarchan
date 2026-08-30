@@ -48,7 +48,7 @@ async function assertOwnerCapabilityRemains(
 
 const updateUserSchema = z.object({
   name: z.string().max(200).optional(),
-  role: z.enum(['OWNER', 'ADMIN', 'EDITOR', 'VIEWER', 'USER']).optional(),
+  role: z.enum(['OWNER', 'ADMIN', 'EDITOR', 'VIEWER']).optional(),
   isActive: z.coerce.boolean().optional(),
 })
 

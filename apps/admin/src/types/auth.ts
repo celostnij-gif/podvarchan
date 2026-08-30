@@ -2,7 +2,7 @@
  * Типи для системи авторизації адмін-панелі.
  */
 
-export type UserRole = 'USER' | 'VIEWER' | 'EDITOR' | 'ADMIN' | 'OWNER'
+export type UserRole = 'VIEWER' | 'EDITOR' | 'ADMIN' | 'OWNER'
 
 export type SessionWithRole = {
   user: {
