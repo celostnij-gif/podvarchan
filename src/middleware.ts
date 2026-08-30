@@ -42,9 +42,10 @@ export default async function middleware(request: NextRequest) {
   }
 
 
-  // P0-A: locale redirect — корень / редиректит на RU (дефолтный язык)
+  // P0-A: locale redirect — корень / редиректит на RU (дефолтный язык).
+  // 308 (permanent, method-preserving) per AGENTS §12: locale redirects are 308, never 307.
   if (pathname === '/') {
-    return NextResponse.redirect(new URL('/ru/', request.url), 301)
+    return NextResponse.redirect(new URL('/ru/', request.url), 308)
   }
 
   // P0-B: /ua/ → /uk/ locale alias redirect (ISO country code to language code).
