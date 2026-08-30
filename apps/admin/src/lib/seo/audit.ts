@@ -2,7 +2,7 @@ import { STATIC_PAGES } from '@/constants'
 import { getDB } from '@/db'
 import { services, serviceTranslations } from '@/db/schema/services'
 import { blogPosts, blogPostTranslations, blogCategories, blogCategoryTranslations } from '@/db/schema/blog'
-import { pages, pageTranslations } from '@/db/schema/pages'
+import { pages, pageTranslations } from '@podvarchan/shared'
 import { eq } from 'drizzle-orm'
 
 /* ── Types ── */

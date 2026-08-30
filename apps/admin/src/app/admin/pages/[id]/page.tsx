@@ -1,5 +1,5 @@
 import { getDB } from '@/db'
-import { pages, pageTranslations, pageSections, pageSectionTranslations } from '@/db/schema/pages'
+import { pages, pageTranslations, pageSections, pageSectionTranslations } from '@podvarchan/shared'
 import { eq } from 'drizzle-orm'
 import { notFound } from 'next/navigation'
 import { EditPageForm } from './edit-form'
