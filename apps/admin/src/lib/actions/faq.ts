@@ -12,6 +12,7 @@ import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
 import { revalidatePublic, revalidateAdmin, getFaqRevalidatePaths, cacheKeyPrefixes } from '@/lib/revalidate'
 import { sanitizeHtml } from '@/lib/sanitize'
+import { captureEntityRevision } from '@/lib/revisions'
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
@@ -79,6 +80,10 @@ export async function updateFaqItem(id: string, formData: FormData) {
   })
   if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
   const data = parsed.data
+
+  const translationsSnapshot = await db.select().from(faqItemTranslations).where(eq(faqItemTranslations.faqItemId, id)).all()
+  await captureEntityRevision({ kind: 'faq_item', entityId: id, main: existing, translations: translationsSnapshot, userId, label: 'До оновлення' })
+
   await db.update(faqItems).set(cleanUpdate({
     group: data.group, sortOrder: data.sortOrder,
     status: data.status, serviceId: data.serviceId,

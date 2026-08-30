@@ -15,6 +15,7 @@ import { revalidatePublic, revalidateAdmin, getServiceRevalidatePaths, getServic
 import { syncRedirectRulesToKv } from './redirects'
 import { requirePublish, assertBilingual, assertMetaPresent } from './ymyl'
 import { sanitizeHtml } from '@/lib/sanitize'
+import { captureEntityRevision } from '@/lib/revisions'
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
@@ -227,6 +228,9 @@ export async function updateService(id: string, formData: FormData) {
   }
 
   const ts = await now()
+
+  const translationsSnapshot = await db.select().from(serviceTranslations).where(eq(serviceTranslations.serviceId, id)).all()
+  await captureEntityRevision({ kind: 'service', entityId: id, main: existing, translations: translationsSnapshot, userId, label: 'До оновлення' })
 
   await db.update(services).set({
     slugBase: data.slugBase, priority: data.priority, status: data.status,

@@ -14,6 +14,7 @@ import { revalidatePublic, revalidateAdmin, getPageRevalidatePaths, getHomeReval
 import type { ActionDb } from './db'
 import { syncRedirectRulesToKv } from './redirects'
 import { requirePublish, assertBilingual, assertMetaPresent } from './ymyl'
+import { captureEntityRevision } from '@/lib/revisions'
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
@@ -204,6 +205,10 @@ export async function updatePage(id: string, formData: FormData) {
   await syncRedirectRulesToKv()
 
   const ts = now()
+
+  const translationsSnapshot = await db.select().from(pageTranslations).where(eq(pageTranslations.pageId, id)).all()
+  await captureEntityRevision({ kind: 'page', entityId: id, main: existing, translations: translationsSnapshot, userId, label: 'До оновлення' })
+
   await db
     .update(pages)
     .set({
