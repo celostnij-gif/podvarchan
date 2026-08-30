@@ -5,6 +5,7 @@ import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import LinkExtension from '@tiptap/extension-link'
 import ImageExtension from '@tiptap/extension-image'
+import DOMPurify from 'dompurify'
 import { useEffect, useState } from 'react'
 import { MediaPickerDialog } from '@/components/admin/media/MediaPickerDialog'
 
@@ -47,7 +48,7 @@ export function TipTapEditor({ value, onChange, placeholder, onImageSelected }: 
     ],
     content: value || '<p></p>',
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML(), JSON.stringify(editor.getJSON()))
+      onChange(DOMPurify.sanitize(editor.getHTML()), JSON.stringify(editor.getJSON()))
     },
   })
 

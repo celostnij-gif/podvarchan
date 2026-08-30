@@ -7,8 +7,8 @@ import {
   canEditContent,
   canManageSettings,
   canViewAudit,
-} from '@/lib/auth/permissions'
-import type { UserRole } from '@/lib/auth/permissions'
+} from '../../../src/lib/auth/permissions'
+import type { UserRole } from '../../../src/lib/auth/permissions'
 
 const ALL_ROLES: UserRole[] = ['OWNER', 'ADMIN', 'EDITOR', 'VIEWER']
 

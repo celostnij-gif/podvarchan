@@ -11,6 +11,7 @@ import { requireDelete } from '@/lib/auth/guards'
 import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
 import { revalidatePublic, revalidateAdmin, getFaqRevalidatePaths, cacheKeyPrefixes } from '@/lib/revalidate'
+import { sanitizeHtml } from '@/lib/sanitize'
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
@@ -28,7 +29,7 @@ const faqSchema = z.object({
   translations: z.array(z.object({
     locale: z.enum(['ru', 'uk']),
     question: z.string().min(1).max(1000).optional().default(''),
-    answer: z.string().min(1).max(10000).optional().default(''),
+    answer: z.string().min(1).max(10000).optional().default('').transform(sanitizeHtml),
   })).min(1).max(2),
 })
 

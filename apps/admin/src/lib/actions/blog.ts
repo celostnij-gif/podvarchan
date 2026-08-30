@@ -17,6 +17,7 @@ import { writeAuditLog } from '@/lib/audit/log'
 import { revalidatePublic, revalidateAdmin, getBlogPostRevalidatePaths, getBlogPostCacheKeys, cacheKeys, cacheKeyPrefixes } from '@/lib/revalidate'
 import { syncRedirectRulesToKv } from './redirects'
 import { requirePublish, assertBilingual, assertMetaPresent } from './ymyl'
+import { sanitizeHtml } from '@/lib/sanitize'
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
@@ -66,7 +67,7 @@ const postTranslationSchema = z.object({
   title: z.string().min(1).max(500),
   excerpt: z.string().optional().default(''),
   contentJson: z.string().optional().default(''),
-  contentHtml: z.string().optional().default(''),
+  contentHtml: z.string().optional().default('').transform(sanitizeHtml),
   tableOfContentsJson: z.string().nullable().default(''),
   faqJson: z.string().optional().default(''),
 })

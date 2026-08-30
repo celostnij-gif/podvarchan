@@ -1,16 +1,41 @@
 import { auth } from '@/auth'
 import type { SessionWithRole } from '@/types/auth'
+import { users } from '@podvarchan/shared'
+import { eq } from 'drizzle-orm'
+import { getActionDb } from '@/lib/actions/db'
 import type { UserRole } from './permissions'
+
+// Re-validates the session against D1 on every call: the JWT role is not
+// trusted after login, so deactivated/downgraded users lose privileges
+// immediately, not when the token expires.
+let _persistedUserCache: { id: string; role: UserRole; isActive: boolean } | null = null
+
+async function resolvePersistedUser(
+  id: string,
+): Promise<{ role: UserRole; isActive: boolean } | null> {
+  if (_persistedUserCache && _persistedUserCache.id === id) return _persistedUserCache
+  const db = await getActionDb()
+  const row = await db
+    .select({ role: users.role, isActive: users.isActive })
+    .from(users)
+    .where(eq(users.id, id))
+    .get()
+  if (!row) return null
+  _persistedUserCache = { id, role: row.role, isActive: row.isActive }
+  return _persistedUserCache
+}
 
 export async function getAdminSession(): Promise<SessionWithRole | null> {
   const session = await auth()
-  if (!session?.user) return null
+  if (!session?.user?.id) return null
+  const persisted = await resolvePersistedUser(session.user.id)
+  if (!persisted || !persisted.isActive) return null
   return {
     user: {
       id: session.user.id,
       email: session.user.email!,
       name: session.user.name ?? null,
-      role: session.user.role as SessionWithRole['user']['role'],
+      role: persisted.role,
     },
     expires: session.expires!,
   }
@@ -45,11 +70,13 @@ export interface AdminUser {
 
 export async function getCurrentUser(): Promise<AdminUser | null> {
   const session = await auth()
-  if (!session?.user) return null
+  if (!session?.user?.id) return null
+  const persisted = await resolvePersistedUser(session.user.id)
+  if (!persisted || !persisted.isActive) return null
   return {
     id: session.user.id,
     email: session.user.email!,
     name: session.user.name ?? '',
-    role: session.user.role as UserRole,
+    role: persisted.role,
   }
 }

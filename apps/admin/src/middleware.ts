@@ -1,6 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server'
+import NextAuth from 'next-auth'
+import authConfig from '@/auth.config'
+import { NextResponse } from 'next/server'
 
-export default function middleware(request: NextRequest) {
+const { auth } = NextAuth(authConfig)
+
+export default auth((request) => {
   const { pathname } = request.nextUrl
 
   // Admin route protection
@@ -12,14 +16,11 @@ export default function middleware(request: NextRequest) {
     // Static assets — let through
     if (p.includes('.')) return NextResponse.next()
 
-    // Check for NextAuth session token
-    const cookieName = request.url.startsWith('https')
-      ? '__Secure-authjs.session-token'
-      : 'authjs.session-token'
-    const token = request.cookies.get(cookieName)?.value
-    if (!token) {
-      if (p === '/admin/login') return NextResponse.next()
-      return NextResponse.redirect(new URL('/admin/login', request.url))
+    // NextAuth verifies the auth.js session JWT (signature + exp) on the edge.
+    if (!request.auth?.user) {
+      const loginUrl = new URL('/admin/login', request.url)
+      loginUrl.searchParams.set('callbackUrl', pathname)
+      return NextResponse.redirect(loginUrl)
     }
     return NextResponse.next()
   }
@@ -36,7 +37,7 @@ export default function middleware(request: NextRequest) {
 
   // Default redirect to /admin
   return NextResponse.redirect(new URL('/admin', request.url))
-}
+})
 
 export const config = {
   matcher: [
