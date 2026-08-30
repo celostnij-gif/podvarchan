@@ -14,6 +14,7 @@ import { requireAdminSession } from '@/lib/auth/session'
 import { canEditContent } from '@/lib/auth/permissions'
 import { revalidatePublic, revalidateAdmin, getHomeRevalidatePaths, getHomeCacheKeys } from '@/lib/revalidate'
 import { writeAuditLog } from '@/lib/audit/log'
+import { requirePublish } from './ymyl'
 import {
   pages,
   pageTranslations,
@@ -264,6 +265,9 @@ export async function updateHomeZone(
   const userId = await requireEdit()
   const parsed = updateZoneSchema.parse(input)
   const db = await getActionDb()
+
+  // Hero zone is the brand-facing H1 block — only OWNER/ADMIN may edit it.
+  if (parsed.zone === 'hero') await requirePublish()
 
   const home = await db.select().from(pages).where(eq(pages.type, 'HOME')).get()
   if (!home) throw new Error('HOME page not found')
