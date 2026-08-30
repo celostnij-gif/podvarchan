@@ -192,11 +192,12 @@ export async function publishTestimonial(id: string) {
 
 /* ── Reorder (drag-and-drop) ── */
 export async function reorderTestimonials(orderedIds: string[]) {
-  await requireEdit()
+  const userId = await requireEdit()
   const db = await getActionDb()
   for (let i = 0; i < orderedIds.length; i++) {
     await db.update(testimonials).set({ sortOrder: i }).where(eq(testimonials.id, orderedIds[i]))
   }
+  await writeAuditLog({ userId, action: 'REORDER', entityType: 'TESTIMONIAL', entityId: 'batch', after: { order: orderedIds } })
   revalidateAdmin('/admin/testimonials')
   await revalidatePublic({ paths: getHomeRevalidatePaths(), keys: getTestimonialsCacheKeys() })
 }

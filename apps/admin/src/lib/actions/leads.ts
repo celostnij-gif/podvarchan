@@ -46,8 +46,13 @@ export async function markLeadRead(id: string) {
 export async function deleteLead(id: string) {
   const user = await requireDelete()
   const db = await getActionDb()
-  await db.delete(leadEvents).where(eq(leadEvents.leadId, id))
-  await db.delete(contactLeads).where(eq(contactLeads.id, id))
+  const existing = await db.select({ id: contactLeads.id }).from(contactLeads).where(eq(contactLeads.id, id)).get()
+  if (!existing) throw new Error('Заявку не знайдено')
+  // D1 has no BEGIN/COMMIT — db.transaction() would fail; use db.batch() (atomic).
+  await db.batch([
+    db.delete(leadEvents).where(eq(leadEvents.leadId, id)),
+    db.delete(contactLeads).where(eq(contactLeads.id, id)),
+  ])
   await writeAuditLog({ userId: user.id, action: 'DELETE', entityType: 'LEAD', entityId: id })
   revalidatePath('/admin/leads')
 }
@@ -110,6 +115,7 @@ export async function addLeadEvent(leadId: string, formData: FormData) {
     type: parsed.data.type, note: parsed.data.note, createdAt: await now(),
   }))
   await db.update(contactLeads).set({ updatedAt: await now() }).where(eq(contactLeads.id, leadId))
+  await writeAuditLog({ userId: user.id, action: 'CREATE', entityType: 'LEAD_EVENT', entityId: leadId, after: { type: parsed.data.type, note: parsed.data.note } })
 
   revalidatePath(`/admin/leads/${leadId}`)
   revalidatePath('/admin/leads')
@@ -122,8 +128,11 @@ export async function updateInternalNote(leadId: string, formData: FormData) {
   const parsed = noteSchema.safeParse({ note: formData.get('note') ?? '' })
   if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
 
+  const existing = await db.select({ internalNote: contactLeads.internalNote }).from(contactLeads).where(eq(contactLeads.id, leadId)).get()
+  if (!existing) throw new Error('Лід не знайдено')
+
   await db.update(contactLeads).set({ internalNote: parsed.data.note, updatedAt: await now() }).where(eq(contactLeads.id, leadId))
-  await writeAuditLog({ userId: user.id, action: 'UPDATE', entityType: 'LEAD', entityId: leadId })
+  await writeAuditLog({ userId: user.id, action: 'UPDATE', entityType: 'LEAD', entityId: leadId, before: { internalNote: existing.internalNote }, after: { internalNote: parsed.data.note } })
 
   revalidatePath(`/admin/leads/${leadId}`)
   revalidatePath('/admin/leads')

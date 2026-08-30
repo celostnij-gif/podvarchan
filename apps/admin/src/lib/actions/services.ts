@@ -368,11 +368,12 @@ export async function publishService(id: string) {
 
 /* ── Reorder (drag-and-drop) ── */
 export async function reorderServices(orderedIds: string[]) {
-  await requireEdit()
+  const userId = await requireEdit()
   const db = await getActionDb()
   for (let i = 0; i < orderedIds.length; i++) {
     await db.update(services).set({ sortOrder: i }).where(eq(services.id, orderedIds[i]))
   }
+  await writeAuditLog({ userId, action: 'REORDER', entityType: 'SERVICE', entityId: 'batch', after: { order: orderedIds } })
   revalidateAdmin('/admin/services')
   await revalidatePublic({
     paths: [serviceIndexPath('ru'), serviceIndexPath('uk'), '/sitemap.xml'],
