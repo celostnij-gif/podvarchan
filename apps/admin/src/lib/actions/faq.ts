@@ -120,11 +120,12 @@ export async function deleteFaqItem(id: string) {
 
 /* ── Reorder (drag-and-drop) ── */
 export async function reorderFaqItems(orderedIds: string[]) {
-  await requireEdit()
+  const userId = await requireEdit()
   const db = await getActionDb()
   for (let i = 0; i < orderedIds.length; i++) {
     await db.update(faqItems).set({ sortOrder: i }).where(eq(faqItems.id, orderedIds[i]))
   }
+  await writeAuditLog({ userId, action: 'REORDER', entityType: 'FAQ_ITEM', entityId: 'batch', after: { order: orderedIds } })
   revalidateAdmin('/admin/faq')
   await revalidatePublic({ paths: getFaqRevalidatePaths(), prefixes: [cacheKeyPrefixes.faq] })
 }

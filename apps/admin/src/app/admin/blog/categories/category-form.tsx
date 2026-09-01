@@ -89,15 +89,6 @@ export function CategoryForm({ category, services }: Props) {
         <legend className="text-sm font-semibold text-zinc-300">Основні параметри</legend>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label htmlFor="status" className="block text-sm font-medium text-zinc-300">Статус</label>
-            <select id="status" name="status" defaultValue={category?.status ?? 'PUBLISHED'}
-              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30">
-              <option value="DRAFT">Чернетка</option>
-              <option value="PUBLISHED">Опубліковано</option>
-              <option value="ARCHIVED">Архів</option>
-            </select>
-          </div>
-          <div>
             <label htmlFor="serviceId" className="block text-sm font-medium text-zinc-300">Пов&apos;язана послуга</label>
             <select id="serviceId" name="serviceId" defaultValue={category?.serviceId ?? ''}
               className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30">

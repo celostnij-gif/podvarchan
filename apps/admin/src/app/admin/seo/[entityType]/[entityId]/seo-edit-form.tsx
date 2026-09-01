@@ -16,6 +16,8 @@ interface EditFormProps {
     canonicalPath: string
     ogTitle: string
     ogDescription: string
+    robotsIndex: boolean
+    robotsFollow: boolean
   }
 }
 
@@ -115,6 +117,31 @@ export function SeoEditForm({ entityType, entityId, locale, defaults }: EditForm
             className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-200 shadow-sm focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/30"
           />
         </div>
+      </div>
+
+      <div className="flex items-center gap-6 rounded-lg border border-zinc-700/50 bg-zinc-900/40 p-3">
+        <label htmlFor="seo-robotsIndex" className="flex items-center gap-2 text-sm text-zinc-300">
+          <input
+            id="seo-robotsIndex"
+            name="robotsIndex"
+            type="checkbox"
+            value="true"
+            defaultChecked={defaults.robotsIndex}
+            className="h-4 w-4 rounded border-zinc-600 bg-zinc-800 text-amber-600 focus:ring-amber-500/30"
+          />
+          Дозволити індексацію
+        </label>
+        <label htmlFor="seo-robotsFollow" className="flex items-center gap-2 text-sm text-zinc-300">
+          <input
+            id="seo-robotsFollow"
+            name="robotsFollow"
+            type="checkbox"
+            value="true"
+            defaultChecked={defaults.robotsFollow}
+            className="h-4 w-4 rounded border-zinc-600 bg-zinc-800 text-amber-600 focus:ring-amber-500/30"
+          />
+          Переходити за посиланнями
+        </label>
       </div>
 
       <div className="flex items-center gap-3">

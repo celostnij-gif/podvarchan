@@ -1,4 +1,4 @@
-export type UserRole = 'USER' | 'VIEWER' | 'EDITOR' | 'ADMIN' | 'OWNER'
+export type UserRole = 'VIEWER' | 'EDITOR' | 'ADMIN' | 'OWNER'
 
 export function canPublish(role: UserRole): boolean {
   return ['OWNER', 'ADMIN'].includes(role)

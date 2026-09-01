@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm'
 import { notFound } from 'next/navigation'
 import { CategoryForm } from '../category-form'
 import type { CategoryWithTranslations } from '../../types'
+import ViewOnSiteLink from '@/components/admin/ViewOnSiteLink'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -42,9 +43,14 @@ export default async function EditCategoryPage(props: Props) {
     }
   }
 
+  const ruSlug = category.translations.find((t) => t.locale === 'ru')?.slug
+
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-zinc-200">Редагувати: {category.slugBase}</h1>
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <h1 className="text-2xl font-bold text-zinc-200">Редагувати: {category.slugBase}</h1>
+        {ruSlug && <ViewOnSiteLink href={`/ru/blog/kategoriya/${ruSlug}/`} label="Переглянути на сайті" />}
+      </div>
       <CategoryForm category={category} services={Array.from(grouped.values())} />
     </div>
   )

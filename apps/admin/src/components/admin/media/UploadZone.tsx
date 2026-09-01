@@ -171,7 +171,7 @@ export function UploadZone() {
           ref={inputRef}
           type="file"
           multiple
-          accept="image/*,application/pdf"
+          accept="image/png,image/jpeg,image/webp"
           className="hidden"
           onChange={handleInputChange}
         />

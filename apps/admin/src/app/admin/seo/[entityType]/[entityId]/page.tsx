@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import { getDB } from '@/db'
 import { services, serviceTranslations } from '@/db/schema/services'
-import { blogPosts, blogPostTranslations } from '@/db/schema/blog'
+import { blogPosts, blogPostTranslations, blogCategories, blogCategoryTranslations } from '@/db/schema/blog'
 import { pages, pageTranslations } from '@/db/schema/pages'
 import { eq } from 'drizzle-orm'
 import { getSeoOverride } from '@/lib/actions/seo'
@@ -80,6 +80,21 @@ async function getEntityData(entityType: string, entityId: string) {
         description: r.blog_post_translations?.excerpt ?? null,
       }))
     }
+    case 'blog_category': {
+      const row = await db
+        .select()
+        .from(blogCategories)
+        .leftJoin(blogCategoryTranslations, eq(blogCategories.id, blogCategoryTranslations.categoryId))
+        .where(eq(blogCategories.id, entityId))
+        .all()
+      return row.map((r) => ({
+        ...r.blog_categories,
+        translation: r.blog_category_translations,
+        locale: r.blog_category_translations?.locale ?? 'ru',
+        title: r.blog_category_translations?.name ?? null,
+        description: r.blog_category_translations?.description ?? null,
+      }))
+    }
     case 'static_page':
     case 'page': {
       const row = await db
@@ -114,7 +129,7 @@ export default async function SeoDetailPage(props: Props) {
   const ruSeoOverride = await getSeoOverride(entityType, entityId, 'ru')
   const ukSeoOverride = ukEntry ? await getSeoOverride(entityType, entityId, 'uk') : null
 
-  const entityUrl = `/${ruEntry.locale}/${entityType === 'service' ? 'uslugi' : entityType === 'blog_post' ? 'blog' : ''}/${ruEntry.translation?.slug ?? ''}`
+  const entityUrl = `/${ruEntry.locale}/${entityType === 'service' ? 'uslugi' : entityType === 'blog_post' ? 'blog' : entityType === 'blog_category' ? 'blog/kategoriya' : ''}/${ruEntry.translation?.slug ?? ''}`
   const ymylResult = checkYmyl(entityType, ruSeoOverride?.title ?? ruEntry.title, ruSeoOverride?.description ?? ruEntry.description)
 
   return (
@@ -159,6 +174,8 @@ export default async function SeoDetailPage(props: Props) {
             canonicalPath: ruSeoOverride?.canonicalPath ?? '',
             ogTitle: ruSeoOverride?.ogTitle ?? '',
             ogDescription: ruSeoOverride?.ogDescription ?? '',
+            robotsIndex: ruSeoOverride?.robotsIndex ?? true,
+            robotsFollow: ruSeoOverride?.robotsFollow ?? true,
           }}
         />
       </div>
@@ -177,6 +194,8 @@ export default async function SeoDetailPage(props: Props) {
               canonicalPath: ukSeoOverride?.canonicalPath ?? '',
               ogTitle: ukSeoOverride?.ogTitle ?? '',
               ogDescription: ukSeoOverride?.ogDescription ?? '',
+              robotsIndex: ukSeoOverride?.robotsIndex ?? true,
+              robotsFollow: ukSeoOverride?.robotsFollow ?? true,
             }}
           />
         </div>
