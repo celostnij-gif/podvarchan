@@ -14,8 +14,9 @@ export { DOQueueHandler, DOShardedTagCache, BucketCachePurge };
  * hit (cheap) or rebuilds+repopulates; either way the next user request finds
  * a warm cache instead of hitting the heavy cold render at peak traffic.
  *
- * Currently warmed: /sitemap.xml (sitemap:xml) and /robots.txt (robots:txt,
- * Phase 0.3 2026-08-25).
+ * Currently warmed: /sitemap.xml (sitemap:xml), /robots.txt (robots:txt,
+ * Phase 0.3 2026-08-25) and /llms-full.txt (llms:full:txt, Phase 5.1
+ * 2026-09-01).
  *
  * The warm-up runs inside a scheduled invocation — its own CPU budget, no user
  * request is affected if it ever fails.
@@ -36,8 +37,14 @@ async function scheduled(
         console.error(`[scheduled] ${label} warm-up failed:`, err);
       });
 
-  console.log("[scheduled] warm-up start: sitemap.xml + robots.txt");
-  ctx.waitUntil(Promise.all([warm("/sitemap.xml", "sitemap"), warm("/robots.txt", "robots")]));
+  console.log("[scheduled] warm-up start: sitemap.xml + robots.txt + llms-full.txt");
+  ctx.waitUntil(
+    Promise.all([
+      warm("/sitemap.xml", "sitemap"),
+      warm("/robots.txt", "robots"),
+      warm("/llms-full.txt", "llms-full"),
+    ]),
+  );
 }
 
 /**

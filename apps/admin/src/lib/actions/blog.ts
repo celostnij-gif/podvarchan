@@ -125,6 +125,9 @@ export async function createCategory(formData: FormData) {
     keys: [
       cacheKeys.blogCats('ru'),
       cacheKeys.blogCats('uk'),
+      // llms-full.txt URL index embeds categorySlug per post.
+      cacheKeys.blogListIndex('ru'),
+      cacheKeys.blogListIndex('uk'),
       ...(ruCatSlug ? [cacheKeys.blogCatPosts(ruCatSlug, 'ru')] : []),
       ...(ukCatSlug ? [cacheKeys.blogCatPosts(ukCatSlug, 'uk')] : []),
     ],
@@ -188,6 +191,9 @@ export async function updateCategory(id: string, formData: FormData) {
     keys: [
       cacheKeys.blogCats('ru'),
       cacheKeys.blogCats('uk'),
+      // llms-full.txt URL index embeds categorySlug per post.
+      cacheKeys.blogListIndex('ru'),
+      cacheKeys.blogListIndex('uk'),
       ...(ruCatSlug ? [cacheKeys.blogCatPosts(ruCatSlug, 'ru')] : []),
       ...(ukCatSlug ? [cacheKeys.blogCatPosts(ukCatSlug, 'uk')] : []),
       ...(oldRuCat ? [cacheKeys.blogCatPosts(oldRuCat, 'ru')] : []),
@@ -214,7 +220,13 @@ export async function deleteCategory(id: string) {
   await revalidatePublic({
     paths: ['/ru/blog/', '/uk/blog/', '/sitemap.xml'],
     type: 'layout',
-    keys: [cacheKeys.blogCats('ru'), cacheKeys.blogCats('uk')],
+    keys: [
+      cacheKeys.blogCats('ru'),
+      cacheKeys.blogCats('uk'),
+      // llms-full.txt URL index embeds categorySlug per post.
+      cacheKeys.blogListIndex('ru'),
+      cacheKeys.blogListIndex('uk'),
+    ],
     prefixes: [cacheKeyPrefixes.blogCatPosts, cacheKeyPrefixes.blogCatSlugPair],
   })
 }

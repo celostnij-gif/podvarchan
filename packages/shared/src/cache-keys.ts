@@ -34,6 +34,8 @@ export const cacheKeys = {
   blogList: (locale: string) => `blog:list:${locale}`,
   /** Sitemap-only lightweight list (id/slug/updatedAt/publishedAt, no faqJson/excerpt). */
   blogListLite: (locale: string) => `blog:list:lite:${locale}`,
+  /** llms-full.txt index list (id/slug/title/excerpt/categorySlug, no contentHtml/faqJson). */
+  blogListIndex: (locale: string) => `blog:list:index:${locale}`,
   blogPost: (slug: string, locale: string) => `blog:${slug}:${locale}`,
   blogPostById: (id: string, locale: string) => `blog:id:${id}:${locale}`,
   blogCatPosts: (catSlug: string, locale: string) => `blog-cat:${catSlug}:${locale}`,

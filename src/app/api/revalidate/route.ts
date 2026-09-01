@@ -84,6 +84,11 @@ export async function POST(request: NextRequest) {
         const { invalidateSitemapXml, warmSitemapXml } = await import('@/lib/sitemap')
         await invalidateSitemapXml(cfEnv)
         ctx?.waitUntil?.(warmSitemapXml(cfEnv).catch(() => {}))
+        // llms-full.txt is the sibling aggregate (URL index mirrors sitemap
+        // sources) — invalidate + re-warm in the same operation (§3.5).
+        const { invalidateLlmsFull, warmLlmsFull } = await import('@/lib/llms-full')
+        await invalidateLlmsFull(cfEnv)
+        ctx?.waitUntil?.(warmLlmsFull(cfEnv).catch(() => {}))
       } catch {
         // best-effort — CDN SWR (86400 s) covers the gap; next render repopulates
       }

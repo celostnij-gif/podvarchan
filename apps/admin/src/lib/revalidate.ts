@@ -226,6 +226,9 @@ export function getBlogPostCacheKeys(
     // until the 1 h TTL expires (see src/lib/sitemap.ts).
     cacheKeys.blogListLite('ru'),
     cacheKeys.blogListLite('uk'),
+    // llms-full.txt URL index is built from the index list (blog:list:index).
+    cacheKeys.blogListIndex('ru'),
+    cacheKeys.blogListIndex('uk'),
     cacheKeys.blogCats('ru'),
     cacheKeys.blogCats('uk'),
   ]

@@ -656,6 +656,61 @@ export function getBlogPostsLite(locale: string): Promise<BlogPostLite[]> {
   return withCache(cacheKeys.blogListLite(locale), TTL_BLOG, () => getBlogPostsLiteUncached(locale))
 }
 
+/** llms-full.txt index fields (id/slug/title/excerpt/categorySlug — no
+ * contentHtml/faqJson). Own cache key (blog:list:index) — invalidated together
+ * with the blog:list family (getBlogPostCacheKeys on the admin side). */
+export type BlogPostIndexItem = {
+  id: string
+  slug: string
+  title: string
+  excerpt: string | null
+  categorySlug: string | null
+}
+
+async function getBlogPostsIndexUncached(locale: string): Promise<BlogPostIndexItem[]> {
+  const db = getDB()
+  const loc = locale as 'ru' | 'uk'
+  const rows = await db
+    .select({
+      id: blogPosts.id,
+      slug: blogPostTranslations.slug,
+      title: blogPostTranslations.title,
+      excerpt: blogPostTranslations.excerpt,
+      categorySlug: blogCategoryTranslations.slug,
+    })
+    .from(blogPosts)
+    .innerJoin(blogPostTranslations, eq(blogPosts.id, blogPostTranslations.postId))
+    .leftJoin(blogCategories, eq(blogPosts.categoryId, blogCategories.id))
+    .leftJoin(
+      blogCategoryTranslations,
+      and(
+        eq(blogCategories.id, blogCategoryTranslations.categoryId),
+        eq(blogCategoryTranslations.locale, loc),
+      ),
+    )
+    .where(
+      and(
+        eq(blogPosts.status, 'PUBLISHED'),
+        eq(blogPostTranslations.locale, loc),
+      ),
+    )
+    .orderBy(desc(blogPosts.publishedAt))
+    .limit(LIMIT_BLOG_POSTS)
+    .all()
+
+  return rows.map((r) => ({
+    id: r.id,
+    slug: r.slug,
+    title: r.title ?? '',
+    excerpt: r.excerpt,
+    categorySlug: r.categorySlug,
+  }))
+}
+
+export function getBlogPostsIndex(locale: string): Promise<BlogPostIndexItem[]> {
+  return withCache(cacheKeys.blogListIndex(locale), TTL_BLOG, () => getBlogPostsIndexUncached(locale))
+}
+
 /** Single post by translation slug — includes contentHtml. */
 async function getBlogPostBySlugUncached(
   slug: string,

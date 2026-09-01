@@ -194,19 +194,9 @@ export const LLMS_FULL_SUFFIX = `
 | Disclaimer | /ru/disclaimer/ | /uk/disclaimer/ |
 
 ### Blog Categories
-- Anxiety & Panic Attacks — /blog/kategoriya/trevoga/ (30+ articles)
-- Self-Sabotage — /blog/kategoriya/samosabotazh/
-- Emotional Burnout — /blog/kategoriya/vygoraniye/
-- Subconscious — /blog/kategoriya/podsoznanie/
-- Psychosomatics — /blog/kategoriya/psikhosomatika/
-- PTSD — /blog/kategoriya/ptsr/
-- Digital Detox — /blog/kategoriya/tsifrovoy-detoks/
-- Music & Subconscious — /blog/kategoriya/muzyka/
-- Energy & Fatigue — /blog/kategoriya/energiya/
-- Insecurity — /blog/kategoriya/neyverennost/
-- Hypnotherapy — /blog/kategoriya/gipnoterapiya/
 
-**Total blog posts:** 200+ in sitemap
+See "Blog Categories" in the auto-generated Page Index below — it is built
+from D1 (blog_categories) so slugs always match the live site.
 
 ## Frequently Asked Questions (for AI search snippets)
 
@@ -250,7 +240,7 @@ Online psychological consultations are suitable for anxiety disorders, panic att
 ## AI / Crawler Information
 
 - robots.txt: https://podvarchan.com/robots.txt
-- Sitemap: https://podvarchan.com/sitemap.xml (200+ URLs)
+- Sitemap: https://podvarchan.com/sitemap.xml
 - Content-Signal: ai-train=yes, search=yes, ai-input=yes
 - Allowed AI bots: GPTBot, Google-Extended, ClaudeBot, PerplexityBot, ChatGPT-User, CCBot, Applebot-Extended, Amazonbot, Bytespider
 `

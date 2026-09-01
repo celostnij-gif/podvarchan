@@ -24,6 +24,15 @@ function isClinicalArticle(categorySlug: string | null | undefined, slug: string
   return false
 }
 
+/**
+ * The page template renders the post title as the single <h1> (SEO §5: one h1
+ * per page). Some D1 bodies were authored with a leading <h1> of their own —
+ * strip only that leading one, mid-content headings are left untouched.
+ */
+function stripLeadingH1(html: string): string {
+  return html.replace(/^\s*(?:<!--[\s\S]*?-->\s*)*(?:<p>\s*)?<h1[^>]*>[\s\S]*?<\/h1>\s*(?:<\/p>)?\s*/i, '')
+}
+
 export const revalidate = 86400
 
 interface Props {
@@ -161,7 +170,7 @@ async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData 
       return {
         type: 'd1',
         title: post.title ?? '',
-        body: post.contentHtml ?? '',
+        body: stripLeadingH1(post.contentHtml ?? ''),
         date: post.publishedAt ? formatDate(post.publishedAt, locale) : '',
         category: post.categoryName ?? '',
         categorySlug: post.categorySlug ?? '',
@@ -274,7 +283,7 @@ export default async function BlogPostPage({ params }: Props) {
       <GlobalJsonLd locale={locale} />
       <PageJsonLd schemas={[breadcrumb, data.jsonLd, ...(data.fallbackSchemas ?? [])]} />
       <ClientBlogPost title={post.title}
-      body={post.body ?? ''}
+      body={stripLeadingH1(post.body ?? '')}
       date={formatDate(post.datePublished, locale)}
       category={post.categoryName}
       categorySlug={post.categorySlug}
