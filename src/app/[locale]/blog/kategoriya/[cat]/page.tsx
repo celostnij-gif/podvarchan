@@ -4,7 +4,7 @@ import { GlobalJsonLd } from '@/components/GlobalJsonLd'
 import { PageJsonLd } from '@/components/PageJsonLd'
 import { BLOG_CATEGORIES } from '@/constants'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
-import { getBlogPostsByCategory, getBlogCategories, getMediaPublicUrl, getBlogFirstImageUrls, resolvePublishedCategorySlug } from '@/lib/db/public'
+import { getBlogPostsByCategory, getBlogCategories, getMediaPublicUrl, getBlogFirstImageUrls, getSEOMeta, resolvePublishedCategorySlug } from '@/lib/db/public'
 import { getBlogPost } from '@/lib/content'
 import { breadcrumbSchema } from '@/lib/schema'
 import { ClientBlogCategory } from './client-page'
@@ -19,6 +19,7 @@ interface BlogCategoryMeta {
   slug: string
   name: string
   description: string
+  metaTitle?: string
   metaDescription: string
   keywords: string[]
   serviceSlug?: string
@@ -33,12 +34,18 @@ async function resolveCategoryMeta(
     const cats = await getBlogCategories(locale)
     const found = cats.find((c) => c.slug === rawCat || c.slug === canonical)
     if (found) {
+      // seo_meta override (edited in admin SEO center) wins for <title>/<meta>,
+      // same contract as blog posts. H1 keeps the category name.
+      const seo = found.id
+        ? await getSEOMeta('blog_category', found.id, locale).catch(() => null)
+        : null
       return {
         id: found.id,
         slug: rawCat,
         name: found.name ?? rawCat,
         description: found.description ?? '',
-        metaDescription: found.description ?? '',
+        metaTitle: seo?.title ?? undefined,
+        metaDescription: seo?.description ?? found.description ?? '',
         keywords: [],
       }
     }
@@ -85,7 +92,7 @@ export async function generateMetadata({ params }: Props) {
   const ukPath = ukSlug ? `/blog/kategoriya/${ukSlug}` : undefined
 
   return seoMetadata({
-    title: `${category.name} — ${t('pageTitle')}`,
+    title: category.metaTitle ?? `${category.name} — ${t('pageTitle')}`,
     description: category.metaDescription,
     keywords: category.keywords,
     path: `/blog/kategoriya/${canonical}`,
