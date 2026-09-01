@@ -6,7 +6,6 @@ import { getCurrentUser } from '@/lib/auth/session'
 import { canEditContent } from '@/lib/auth/permissions'
 import { requireDelete } from '@/lib/auth/guards'
 import { getActionDb } from './db'
-import { writeAuditLog } from '@/lib/audit/log'
 import { revalidatePath } from 'next/cache'
 
 const TEMPLATE_PREFIX = 'block_template:'
@@ -42,7 +41,7 @@ export async function saveBlockTemplate(data: {
   contentRu: string
   contentUk: string
 }) {
-  const userId = await requireEdit()
+  await requireEdit()
   const db = await getActionDb()
   const id = data.id ?? crypto.randomUUID()
   const key = `${TEMPLATE_PREFIX}${id}`
@@ -65,8 +64,6 @@ export async function saveBlockTemplate(data: {
   } else {
     await db.insert(siteSettings).values({ key, valueJson: JSON.stringify(value), updatedAt: now() })
   }
-
-  await writeAuditLog({ userId, action: existing ? 'UPDATE' : 'CREATE', entityType: 'BLOCK_TEMPLATE', entityId: id, after: { name: data.name, sectionType: data.sectionType } })
 
   revalidatePath('/admin/pages')
   return id
@@ -132,12 +129,9 @@ export async function getBlockTemplate(id: string): Promise<BlockTemplate | null
  * Delete a block template by id.
  */
 export async function deleteBlockTemplate(id: string) {
-  const { id: userId } = await requireDelete()
+  await requireDelete()
   const db = await getActionDb()
-  const existing = await db.select({ key: siteSettings.key }).from(siteSettings).where(eq(siteSettings.key, `${TEMPLATE_PREFIX}${id}`)).get()
-  if (!existing) throw new Error('Шаблон не знайдено')
   await db.delete(siteSettings).where(eq(siteSettings.key, `${TEMPLATE_PREFIX}${id}`))
-  await writeAuditLog({ userId, action: 'DELETE', entityType: 'BLOCK_TEMPLATE', entityId: id, before: { key: existing.key } })
   revalidatePath('/admin/pages')
 }
 

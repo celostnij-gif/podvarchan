@@ -139,6 +139,63 @@ export function revalidateAdmin(...paths: string[]): void {
   }
 }
 
+/**
+ * Backward-compatible: public path(s) or admin path.
+ * Bare `/blog` expands to both locales.
+ */
+export async function revalidateSitePath(path: string): Promise<void> {
+  if (path.startsWith('/admin')) {
+    revalidatePath(path)
+    return
+  }
+  await revalidatePublic({ paths: [path], type: 'page' })
+}
+
+/**
+ * Layout revalidate for a section root (invalidates children under segment).
+ * Prefer for list areas: /blog, /uslugi, /poslugy, /faq, /
+ */
+export async function revalidateSiteLayout(path: string): Promise<void> {
+  if (path.startsWith('/admin')) {
+    revalidatePath(path, 'layout')
+    return
+  }
+  await revalidatePublic({ paths: [path], type: 'layout' })
+}
+
+/** Blog area + sitemap (after post/category mutations). */
+export async function revalidateBlogArea(): Promise<void> {
+  await revalidatePublic({
+    paths: ['/blog', '/sitemap.xml'],
+    type: 'layout',
+  })
+}
+
+/** Services area + home (featured) + sitemap. */
+export async function revalidateServicesArea(): Promise<void> {
+  await revalidatePublic({
+    paths: ['/uslugi', '/uk/poslugy', '/', '/sitemap.xml'],
+    type: 'layout',
+  })
+}
+
+/** FAQ + home FAQ block. */
+export async function revalidateFaqArea(): Promise<void> {
+  await revalidatePublic({
+    paths: ['/faq', '/'],
+    type: 'layout',
+  })
+}
+
+/** Home + chrome (nav/settings/testimonials). */
+export async function revalidateHomeArea(): Promise<void> {
+  await revalidatePublic({
+    paths: ['/'],
+    type: 'layout',
+  })
+}
+
+
 /* ── Path builders (AGENTS.md §4 invalidation map) ── */
 
 /** Blog post: detail + list + category + sitemap */

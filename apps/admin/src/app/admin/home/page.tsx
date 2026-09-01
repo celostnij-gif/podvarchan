@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { getDB } from '@/db'
-import { pages, pageTranslations, pageSections, pageSectionTranslations } from '@podvarchan/shared'
+import { pages, pageTranslations, pageSections, pageSectionTranslations } from '@/db/schema/pages'
 import { seoMeta } from '@/db/schema/seo'
 import { faqItems } from '@/db/schema/faq'
 import { testimonials } from '@/db/schema/testimonials'

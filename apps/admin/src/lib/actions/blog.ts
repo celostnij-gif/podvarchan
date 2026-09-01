@@ -18,7 +18,6 @@ import { revalidatePublic, revalidateAdmin, getBlogPostRevalidatePaths, getBlogP
 import { syncRedirectRulesToKv } from './redirects'
 import { requirePublish, assertBilingual, assertMetaPresent } from './ymyl'
 import { sanitizeHtml } from '@/lib/sanitize'
-import { captureEntityRevision } from '@/lib/revisions'
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
@@ -350,11 +349,8 @@ export async function updatePost(id: string, formData: FormData) {
   }
   await syncRedirectRulesToKv()
 
-const ts = await now()
 
-  const translationsSnapshot = await db.select().from(blogPostTranslations).where(eq(blogPostTranslations.postId, id)).all()
-  await captureEntityRevision({ kind: 'blog_post', entityId: id, main: existing, translations: translationsSnapshot, userId, label: 'До оновлення' })
-
+  const ts = await now()
   await db.update(blogPosts).set(cleanUpdate({
     categoryId: data.categoryId, authorId: data.authorId,
     status: data.status, coverImageId: data.coverImageId,

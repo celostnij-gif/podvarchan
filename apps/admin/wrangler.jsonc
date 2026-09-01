@@ -1,9 +1,8 @@
 {
   "name": "podvarchan-admin",
-  "main": "wrangler/worker.ts",
+  "main": ".open-next/worker.js",
   "compatibility_date": "2026-06-27",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
-  "triggers": { "crons": ["*/10 * * * *"] },
   "assets": {
     "binding": "ASSETS",
     "directory": ".open-next/assets"

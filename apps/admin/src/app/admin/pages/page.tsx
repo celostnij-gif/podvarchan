@@ -1,6 +1,6 @@
 import ViewOnSiteLink from '@/components/admin/ViewOnSiteLink'
 import { getDB } from '@/db'
-import { pages, pageTranslations } from '@podvarchan/shared'
+import { pages, pageTranslations } from '@/db/schema/pages'
 import { desc, eq, and, like, sql } from 'drizzle-orm'
 import Link from 'next/link'
 import { DeleteButton } from './delete-button'

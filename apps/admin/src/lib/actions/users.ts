@@ -48,9 +48,15 @@ async function assertOwnerCapabilityRemains(
 
 const updateUserSchema = z.object({
   name: z.string().max(200).optional(),
-  role: z.enum(['OWNER', 'ADMIN', 'EDITOR', 'VIEWER']).optional(),
+  role: z.enum(['OWNER', 'ADMIN', 'EDITOR', 'VIEWER', 'USER']).optional(),
   isActive: z.coerce.boolean().optional(),
 })
+
+export async function getUsers() {
+  await requireManageUsers()
+  const db = await getActionDb()
+  return db.select().from(users).orderBy(users.createdAt)
+}
 
 export async function updateUser(id: string, formData: FormData) {
   const userId = await requireManageUsers()

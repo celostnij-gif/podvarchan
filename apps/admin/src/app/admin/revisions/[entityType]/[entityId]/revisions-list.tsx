@@ -1,11 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import type { InferSelectModel } from 'drizzle-orm'
 import type { contentRevisions as revSchema } from '@/db/schema/revisions'
-import { restoreRevision } from '@/lib/actions/revisions'
-import ConfirmDialog from '@/components/admin/ConfirmDialog'
 
 type Revision = InferSelectModel<typeof revSchema>
 
@@ -14,34 +10,8 @@ interface Props {
 }
 
 export function RevisionsList({ revisions }: Props) {
-  const router = useRouter()
-  const [pendingRevision, setPendingRevision] = useState<Revision | null>(null)
-  const [busy, setBusy] = useState(false)
-  const [feedback, setFeedback] = useState<{ ok: boolean; text: string } | null>(null)
-
-  async function handleRestore() {
-    if (!pendingRevision) return
-    setBusy(true)
-    setFeedback(null)
-    try {
-      await restoreRevision(pendingRevision.id)
-      setFeedback({ ok: true, text: 'Стан відновлено. Поточний стан збережено як окрему ревізію.' })
-    } catch (err) {
-      setFeedback({ ok: false, text: err instanceof Error ? err.message : 'Помилка відновлення' })
-    } finally {
-      setBusy(false)
-      setPendingRevision(null)
-      router.refresh()
-    }
-  }
-
   return (
     <div className="space-y-3">
-      {feedback && (
-        <p className={`rounded-lg border px-3 py-2 text-sm ${feedback.ok ? 'border-green-700/50 bg-green-900/20 text-green-400' : 'border-red-700/50 bg-red-900/20 text-red-400'}`}>
-          {feedback.text}
-        </p>
-      )}
       {revisions.map((r) => (
         <div key={r.id} className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3">
           <div className="flex items-center gap-3 mb-2 text-sm flex-wrap">
@@ -69,32 +39,8 @@ export function RevisionsList({ revisions }: Props) {
               </pre>
             </details>
           )}
-
-          <div className="mt-2 flex justify-end">
-            <button
-              type="button"
-              onClick={() => setPendingRevision(r)}
-              className="rounded-md bg-amber-600/20 px-2.5 py-1 text-xs font-medium text-amber-400 hover:bg-amber-600/30 transition-colors"
-            >
-              Відновити цей стан
-            </button>
-          </div>
         </div>
       ))}
-
-      <ConfirmDialog
-        open={pendingRevision !== null}
-        title="Відновити стан сутності?"
-        message={
-          pendingRevision
-            ? `Дані сутності будуть перезаписані станом ревізії від ${new Date(pendingRevision.createdAt).toLocaleString('uk-UA')}. Поточний стан збережеться окремою ревізією (скасувати можна).`
-            : ''
-        }
-        confirmLabel={busy ? 'Відновлення…' : 'Відновити'}
-        variant="warning"
-        onConfirm={handleRestore}
-        onCancel={() => setPendingRevision(null)}
-      />
     </div>
   )
 }

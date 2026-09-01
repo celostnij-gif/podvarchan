@@ -12,7 +12,6 @@ import { getActionDb } from './db'
 import { writeAuditLog } from '@/lib/audit/log'
 import { revalidatePublic, revalidateAdmin, getFaqRevalidatePaths, cacheKeyPrefixes } from '@/lib/revalidate'
 import { sanitizeHtml } from '@/lib/sanitize'
-import { captureEntityRevision } from '@/lib/revisions'
 
 async function requireEdit(): Promise<string> {
   const user = await getCurrentUser()
@@ -80,10 +79,6 @@ export async function updateFaqItem(id: string, formData: FormData) {
   })
   if (!parsed.success) throw new Error(`Помилка валідації: ${parsed.error.message}`)
   const data = parsed.data
-
-  const translationsSnapshot = await db.select().from(faqItemTranslations).where(eq(faqItemTranslations.faqItemId, id)).all()
-  await captureEntityRevision({ kind: 'faq_item', entityId: id, main: existing, translations: translationsSnapshot, userId, label: 'До оновлення' })
-
   await db.update(faqItems).set(cleanUpdate({
     group: data.group, sortOrder: data.sortOrder,
     status: data.status, serviceId: data.serviceId,
@@ -125,12 +120,11 @@ export async function deleteFaqItem(id: string) {
 
 /* ── Reorder (drag-and-drop) ── */
 export async function reorderFaqItems(orderedIds: string[]) {
-  const userId = await requireEdit()
+  await requireEdit()
   const db = await getActionDb()
   for (let i = 0; i < orderedIds.length; i++) {
     await db.update(faqItems).set({ sortOrder: i }).where(eq(faqItems.id, orderedIds[i]))
   }
-  await writeAuditLog({ userId, action: 'REORDER', entityType: 'FAQ', entityId: 'batch', after: { order: orderedIds } })
   revalidateAdmin('/admin/faq')
   await revalidatePublic({ paths: getFaqRevalidatePaths(), prefixes: [cacheKeyPrefixes.faq] })
 }

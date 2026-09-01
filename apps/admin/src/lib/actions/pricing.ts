@@ -102,8 +102,7 @@ export async function createPricingPlan(formData: FormData) {
   for (const t of data.translations) {
     await upsertTranslation(db, id, t, ts)
   }
-  await writeAuditLog({ userId, action: 'CREATE', entityType: 'PRICING_PLAN', entityId: id, after: data })
-  await revalidatePricing()
+  revalidatePricing()
 }
 
 export async function updatePricingPlan(id: string, formData: FormData) {
@@ -140,7 +139,7 @@ export async function updatePricingPlan(id: string, formData: FormData) {
     await upsertTranslation(db, id, t, ts)
   }
   await writeAuditLog({ userId, action: 'UPDATE', entityType: 'PRICING_PLAN', entityId: id, after: data })
-  await revalidatePricing()
+  revalidatePricing()
 }
 
 async function upsertTranslation(
@@ -189,7 +188,7 @@ export async function deletePricingPlan(id: string) {
     db.delete(pricingPlans).where(eq(pricingPlans.id, id)), // translations — ON DELETE CASCADE
   ])
   await writeAuditLog({ userId, action: 'DELETE', entityType: 'PRICING_PLAN', entityId: id })
-  await revalidatePricing()
+  revalidatePricing()
 }
 
 /* ── Backward-compatible aliases ── */
