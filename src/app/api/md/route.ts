@@ -5,8 +5,14 @@ import { validateMdTarget } from '@/lib/md-url'
 import { withCache } from '@/lib/db/kv-cache'
 
 const FETCH_TIMEOUT_MS = 5000
-const MAX_HTML_BYTES = 1_500_000
-const CACHE_TTL_SECONDS = 3600
+// Incident 1102 (2026-09-01): HTML→Markdown conversion is CPU-bound; the
+// largest rendered page is ~400KB (FAQ). 600KB caps the worst-case
+// conversion cost while excluding only non-page responses.
+const MAX_HTML_BYTES = 600_000
+// Conversion spikes can exceed the 10ms CPU budget on a cold path; every
+// exceeded invocation returns 502 and is never cached, so a short TTL just
+// re-rolls the dice for every crawler request. 24h keeps the warm path warm.
+const CACHE_TTL_SECONDS = 86400
 
 async function readLimitedBody(response: Response): Promise<string> {
   const declared = Number(response.headers.get('content-length'))
@@ -55,7 +61,7 @@ export async function GET(request: NextRequest) {
   if (!target.ok) return NextResponse.json({ error: 'Invalid public URL' }, { status: 400 })
   try {
     const markdown = await withCache('md:' + target.url.pathname, CACHE_TTL_SECONDS, () => generateMarkdown(target.url, request.headers.get('user-agent')))
-    return new NextResponse(markdown, { headers: { 'Content-Type': 'text/markdown; charset=utf-8', 'Cache-Control': 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400' } })
+    return new NextResponse(markdown, { headers: { 'Content-Type': 'text/markdown; charset=utf-8', 'Cache-Control': 'public, max-age=0, s-maxage=86400, stale-while-revalidate=604800' } })
   } catch {
     return NextResponse.json({ error: 'Unable to convert page' }, { status: 502 })
   }

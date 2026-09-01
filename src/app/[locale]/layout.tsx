@@ -111,6 +111,27 @@ export default async function LocaleLayout({
   // getBlogCategories below (junk locales must never hit KV/D1).
   if (locale !== 'ru' && locale !== 'uk') notFound()
   const messages = await getMessages()
+  // Only Client Components read from the provider context (useTranslations /
+  // useMessages). Serializing the FULL messages object (~160KB) into every
+  // page's RSC flight payload pushes cold renders over the Workers 10ms CPU
+  // budget (incident 1102 — intermittent 503 "Worker exceeded resource
+  // limits"). Pass only the namespaces actually consumed client-side:
+  // the 20 namespaces used by "use client" components (useTranslations)
+  // plus servicesData/faqData/diplomaData, which client fallbacks read via
+  // useMessages (TestimonialsSection, ServicesSection, FAQSection,
+  // ob-avtore/client-page). Server components are unaffected — they read
+  // the full messages via getTranslations() from the request config.
+  // When adding a client component with a new namespace, add it here.
+  const CLIENT_MESSAGE_NAMESPACES = new Set([
+    'common', 'pages', 'home', 'serviceSection', 'services', 'contacts', 'blog',
+    'faq', 'faqSection', 'problems', 'method', 'search', 'tseny',
+    'servicesSection', 'testimonials', 'authorPreview', 'diplomaShowcase',
+    'disclaimer', 'cookie', 'contactForm',
+    'servicesData', 'faqData', 'diplomaData',
+  ])
+  const clientMessages = Object.fromEntries(
+    Object.entries(messages).filter(([ns]) => CLIENT_MESSAGE_NAMESPACES.has(ns)),
+  )
   const t = await getTranslations({ locale, namespace: 'common' })
   const headerNav: NavItem[] = (await getNavigation('HEADER', locale).catch(() => [])).map((n) => ({
     href: n.href ?? '#',
@@ -157,7 +178,7 @@ export default async function LocaleLayout({
 
   return (
 
-    <NextIntlClientProvider locale={locale} messages={messages}>
+    <NextIntlClientProvider locale={locale} messages={clientMessages}>
 
 
       {/* Skip-to-content link */}
