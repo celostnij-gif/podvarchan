@@ -134,7 +134,8 @@ check_redirect() {
 }
 
 echo "--- Redirects ---"
-check_url "$BASE/" 301
+# Root locale redirect: 308 per AGENTS.md §12 (locale redirects are 308, never 307/301)
+check_url "$BASE/" 308
 check_url "$BASE/otzyvy.html" 301
 check_url "$BASE/diagnostika.html" 301
 
