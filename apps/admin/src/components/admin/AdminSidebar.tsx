@@ -17,6 +17,7 @@ import {
   Tag,
   ArrowLeftRight,
   ClipboardList,
+  History,
   Search,
   type LucideIcon,
 } from 'lucide-react'
@@ -75,7 +76,7 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Налаштування', href: '/admin/settings', icon: Settings },
       { label: 'Редиректи', href: '/admin/redirects', icon: ArrowLeftRight },
       { label: 'SEO', href: '/admin/seo', icon: Search },
-      { label: 'Ревізії', href: '/admin/revisions', icon: ClipboardList },
+      { label: 'Ревізії', href: '/admin/revisions', icon: History },
       { label: 'Журнал', href: '/admin/audit', icon: ClipboardList },
     ],
   },

@@ -49,7 +49,15 @@ export default async function EditCategoryPage(props: Props) {
     <div>
       <div className="mb-6 flex items-center justify-between gap-4">
         <h1 className="text-2xl font-bold text-zinc-200">Редагувати: {category.slugBase}</h1>
-        {ruSlug && <ViewOnSiteLink href={`/ru/blog/kategoriya/${ruSlug}/`} label="Переглянути на сайті" />}
+        <div className="flex items-center gap-2">
+          <a
+            href={`/admin/seo/blog_category/${category.id}`}
+            className="inline-flex items-center gap-1 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-700 transition-colors"
+          >
+            SEO
+          </a>
+          {ruSlug && <ViewOnSiteLink href={`/ru/blog/kategoriya/${ruSlug}/`} label="Переглянути на сайті" />}
+        </div>
       </div>
       <CategoryForm category={category} services={Array.from(grouped.values())} />
     </div>

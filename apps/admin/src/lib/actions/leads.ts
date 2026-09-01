@@ -46,14 +46,14 @@ export async function markLeadRead(id: string) {
 export async function deleteLead(id: string) {
   const user = await requireDelete()
   const db = await getActionDb()
-  const existing = await db.select({ id: contactLeads.id }).from(contactLeads).where(eq(contactLeads.id, id)).get()
+  const existing = await db.select().from(contactLeads).where(eq(contactLeads.id, id)).get()
   if (!existing) throw new Error('Заявку не знайдено')
   // D1 has no BEGIN/COMMIT — db.batch() keeps lead+events delete atomic.
   await db.batch([
     db.delete(leadEvents).where(eq(leadEvents.leadId, id)),
     db.delete(contactLeads).where(eq(contactLeads.id, id)),
   ])
-  await writeAuditLog({ userId: user.id, action: 'DELETE', entityType: 'LEAD', entityId: id })
+  await writeAuditLog({ userId: user.id, action: 'DELETE', entityType: 'LEAD', entityId: id, before: existing })
   revalidatePath('/admin/leads')
 }
 

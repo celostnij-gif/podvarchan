@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { eq, and } from 'drizzle-orm'
 import { seoMeta, serviceIndexPath } from '@podvarchan/shared'
+import { blogCategoryTranslations } from '@/db/schema/blog'
 import { getCurrentUser } from '@/lib/auth/session'
 import { canEditContent } from '@/lib/auth/permissions'
 import { getActionDb } from './db'
@@ -144,7 +145,25 @@ export async function saveSeoOverride(formData: FormData) {
   }
 
   revalidateAdmin('/admin/seo', `/admin/seo/${entityType}/${entityId}`)
-  if (entityType.startsWith('service')) {
+  if (entityType === 'blog_category') {
+    // Category pages read seo_meta overrides — invalidate the category page itself.
+    const trs = await db
+      .select({ locale: blogCategoryTranslations.locale, slug: blogCategoryTranslations.slug })
+      .from(blogCategoryTranslations)
+      .where(eq(blogCategoryTranslations.categoryId, entityId))
+      .all()
+    const ruSlug = trs.find((t) => t.locale === 'ru')?.slug
+    const ukSlug = trs.find((t) => t.locale === 'uk')?.slug
+    await revalidatePublic({
+      paths: [
+        ...(ruSlug ? [`/ru/blog/kategoriya/${ruSlug}/`] : []),
+        ...(ukSlug ? [`/uk/blog/kategoriya/${ukSlug}/`] : []),
+        '/ru/blog/', '/uk/blog/', '/sitemap.xml',
+      ],
+      type: 'layout',
+      keys: [cacheKeys.seo(entityType, entityId, locale)],
+    })
+  } else if (entityType.startsWith('service')) {
     await revalidatePublic({
       paths: [serviceIndexPath('ru'), serviceIndexPath('uk'), '/sitemap.xml'],
       type: 'layout',
