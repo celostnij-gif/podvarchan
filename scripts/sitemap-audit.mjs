@@ -124,7 +124,29 @@ async function auditUrl(url) {
     }
 
     const html = await res.text()
+
+    // Error 1102 cold-render kill can emit a truncated 200 — don't score tag
+    // checks against a body that isn't a complete document.
+    if (!html.includes('</html>')) {
+      result.issues.push(`Truncated/invalid response body (${html.length} bytes)`)
+      return result
+    }
+
     const parsed = parseHtml(html, url)
+
+    // hreflang may be delivered via the HTTP Link header (current prod
+    // behavior, mirrored by xhtml:link in sitemap.xml) — merge it in before
+    // scoring so header-only delivery is not a false "missing".
+    const linkHeader = res.headers.get('link') || ''
+    for (const part of linkHeader.split(/,(?=<)/)) {
+      const m = part.match(/<([^>]+)>\s*;(.*)/i)
+      if (!m) continue
+      if (!/rel\s*=\s*["']?alternate["']?/i.test(m[2])) continue
+      const lang = m[2].match(/hreflang\s*=\s*["']?([^;"'\s,]+)/i)
+      if (lang && !parsed.hreflangs[lang[1].toLowerCase()]) {
+        parsed.hreflangs[lang[1].toLowerCase()] = m[1]
+      }
+    }
 
     result.canonicalVal = parsed.canonical
     if (parsed.canonical) {

@@ -74,6 +74,13 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
+      - name: Warm up sitemap URLs after deploy (AGENTS.md §3.5)
+        # Cold renders must happen during the deploy, not for the first real
+        # visitor/Googlebot; retries absorb the Error 1102 cold-render lottery.
+        run: node scripts/warmup.mjs
+        env:
+          WARMUP_BASE_URL: https://podvarchan.com
+
       - name: Verify headers after deploy (site)
         run: |
           for u in "https://podvarchan.com/ru/" "https://podvarchan.com/ru/blog/" "https://podvarchan.com/sitemap.xml" "https://podvarchan.com/robots.txt" "https://podvarchan.com/llms.txt" "https://podvarchan.com/api/preview/"; do
