@@ -24,15 +24,24 @@ const baseUrl = process.env.BASE_URL || 'https://podvarchan.com'
 const concurrency = parseInt(process.env.CONCURRENCY || '6', 10)
 
 async function fetchSitemapUrls(sitemapUrl) {
-  const res = await fetch(sitemapUrl, {
-    headers: { 'User-Agent': 'SitemapAuditBot/1.0' }
-  })
-  if (!res.ok) {
-    throw new Error(`Failed to fetch sitemap: ${res.status} ${res.statusText}`)
+  let lastErr
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const res = await fetch(sitemapUrl, {
+        headers: { 'User-Agent': 'SitemapAuditBot/1.0' }
+      })
+      if (!res.ok) {
+        throw new Error(`Failed to fetch sitemap: ${res.status} ${res.statusText}`)
+      }
+      const xml = await res.text()
+      const matches = [...xml.matchAll(/<loc>\s*(https?:\/\/[^<]+)\s*<\/loc>/gi)]
+      return matches.map((m) => m[1].trim())
+    } catch (err) {
+      lastErr = err
+      await new Promise((r) => setTimeout(r, 2000))
+    }
   }
-  const xml = await res.text()
-  const matches = [...xml.matchAll(/<loc>\s*(https?:\/\/[^<]+)\s*<\/loc>/gi)]
-  return matches.map((m) => m[1].trim())
+  throw lastErr
 }
 
 function parseHtml(html, url) {
