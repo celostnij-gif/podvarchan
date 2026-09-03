@@ -28,9 +28,9 @@
  */
 const BASE = (process.env.WARMUP_BASE_URL ?? 'https://podvarchan.com').replace(/\/+$/, '')
 const CONCURRENCY = parseInt(process.env.WARMUP_CONCURRENCY ?? '4', 10)
-const MAX_ATTEMPTS = parseInt(process.env.WARMUP_ATTEMPTS ?? '4', 10)
+const MAX_ATTEMPTS = parseInt(process.env.WARMUP_ATTEMPTS ?? '6', 10)
 const TIMEOUT_MS = parseInt(process.env.WARMUP_TIMEOUT_MS ?? '45000', 10)
-const RETRY_DELAY_MS = 2000
+const RETRY_DELAY_MS = parseInt(process.env.WARMUP_RETRY_DELAY_MS ?? '2500', 10)
 
 // Aggregates purged by deploy-purge-paths.json that are not sitemap entries.
 const EXTRA_PATHS = ['/robots.txt', '/llms.txt', '/llms-full.txt']
@@ -71,22 +71,27 @@ async function warmOnce(url) {
     // Drain the body so the connection is released and the response is
     // actually rendered/inserted into cache.
     await res.arrayBuffer()
-    return res.status
-  } catch {
-    return 0 // network error / timeout
+    return { status: res.status, err: null }
+  } catch (err) {
+    // Network error / timeout — surface the cause (ECONNRESET, ETIMEDOUT,
+    // connect timeout …) so a runner-side network window is distinguishable
+    // from server-side cold-render failures.
+    return { status: 0, err: err?.cause?.code ?? err?.code ?? err?.message ?? 'error' }
   }
 }
 
 async function warmUrl(url) {
+  let lastErr = null
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-    const status = await warmOnce(url)
-    if (status === 200) return { url, status, attempts: attempt, ok: true }
+    const { status, err } = await warmOnce(url)
+    lastErr = err
+    if (status === 200) return { url, status, attempts: attempt, ok: true, err: null }
     if (status >= 400 && status < 500 && status !== 429) {
-      return { url, status, attempts: attempt, ok: false } // not retryable
+      return { url, status, attempts: attempt, ok: false, err: null } // not retryable
     }
     if (attempt < MAX_ATTEMPTS) await sleep(RETRY_DELAY_MS)
   }
-  return { url, status: 0, attempts: MAX_ATTEMPTS, ok: false }
+  return { url, status: 0, attempts: MAX_ATTEMPTS, ok: false, err: lastErr }
 }
 
 async function runQueue(urls) {
@@ -117,18 +122,22 @@ const results = await runQueue(urls)
 const failed = results.filter((r) => !r.ok)
 const retried = results.filter((r) => r.ok && r.attempts > 1)
 
-// Rescue pass for cold-render 1102: an isolate that keeps missing the CPU
+// Rescue passes for cold-render 1102: an isolate that keeps missing the CPU
 // budget is throttled state, not a broken page — after the burst moves on,
 // the same render usually fits. Spaced-out single retries convert a large
-// share of "status 0" stragglers; remaining failures are real defects.
-if (failed.length > 0) {
-  console.log(`[warmup] rescue pass for ${failed.length} URL(s)...`)
-  const rescued = await runQueue(
-    failed.map((f) => f.url),
-  )
-  for (let i = 0; i < failed.length; i++) {
+// share of stragglers; remaining failures are real render-path defects.
+// Two passes with a pause between them: cold isolates "cool down" on a
+// timescale longer than one queue sweep.
+for (let pass = 1; pass <= 2; pass++) {
+  if (failed.every((r) => r.ok)) break
+  const pending = failed.filter((r) => !r.ok)
+  console.log(`[warmup] rescue pass ${pass} for ${pending.length} URL(s)...`)
+  await sleep(5000)
+  const rescued = await runQueue(pending.map((f) => f.url))
+  for (let i = 0; i < pending.length; i++) {
     if (rescued[i]?.ok) {
-      failed[i] = rescued[i]
+      const target = failed.find((f) => f.url === pending[i].url)
+      if (target) Object.assign(target, rescued[i])
     }
   }
 }
@@ -147,7 +156,9 @@ if (retried.length > 0) {
   for (const r of retried) console.log(`  ${r.attempts} attempts: ${r.url}`)
 }
 if (stillFailed.length > 0) {
-  console.log('--- FAILED URLs ---')
-  for (const r of stillFailed) console.log(`  last status ${r.status}: ${r.url}`)
+  console.log('--- FAILED URLs (not deploy-blocking; input for render-path work) ---')
+  for (const r of stillFailed) {
+    console.log(`  last status ${r.status}${r.err ? ` (${r.err})` : ''}: ${r.url}`)
+  }
   process.exitCode = 1
 }

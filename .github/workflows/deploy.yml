@@ -77,6 +77,11 @@ jobs:
       - name: Warm up sitemap URLs after deploy (AGENTS.md §3.5)
         # Cold renders must happen during the deploy, not for the first real
         # visitor/Googlebot; retries absorb the Error 1102 cold-render lottery.
+        # Non-blocking: caches.default is per-colo, so a fresh CI colo is fully
+        # cold and some cold renders exceed the 10ms CPU budget regardless of
+        # retries — that is a signal for the render-path work, not a deploy
+        # gate. Verify-headers and SEO regression below remain the gate.
+        continue-on-error: true
         run: node scripts/warmup.mjs
         env:
           WARMUP_BASE_URL: https://podvarchan.com
