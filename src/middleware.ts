@@ -262,26 +262,30 @@ export default async function middleware(request: NextRequest) {
     }
   }
 
-  // P1-C: Garbage "locale" segments (bot scanners: /wp-includes/…,
-  // /.env.txt/…, /credentials.json/…) — reject 404 cheaply BEFORE
-  // intlMiddleware renders the [locale] layout with a junk locale (each render
-  // writes a NEW KV key + D1 query per unique path; unbounded cardinality,
-  // same failure family as incident 1102). Known bare sections without a
-  // locale prefix keep their intlMiddleware 308 → /ru|uk/ redirect.
-  // Short public cache for the 404 so even a leaked miss doesn't live on the
-  // edge for a week (the /:locale(ru|uk)/:path* s-maxage=604800 rule does not
-  // match these paths, but be explicit anyway).
-  const KNOWN_BARE_SECTIONS = new Set([
+  // P1-C: Garbage paths (bot scanners: /wp-includes/…, /.env.txt/…,
+  // /credentials.json/…, /ru/junkpath/…) — reject 404 cheaply BEFORE
+  // intlMiddleware renders the [locale] layout (each render does a KV GET for
+  // navigation + a full layout render per unique path; unbounded cardinality,
+  // same failure family as incident 1102). The top-level section inventory is
+  // static (src/app/[locale]/* route files), so any first segment outside it
+  // can never be a real page — both bare (/junk/) and locale-prefixed
+  // (/ru/junk/) variants. Known bare sections keep their intlMiddleware
+  // 308 → /ru|uk/ redirect; the locale roots (/ru/, /uk/) pass through.
+  const KNOWN_SECTIONS = new Set([
     'blog', 'uslugi', 'poslugy', 'ob-avtore', 'pro-avtora', 'metod', 'faq', 'kontakty',
     'politika-konfidentsialnosti', 'disclaimer', 'tseny', 'tsiny', 'search',
   ])
-  const firstSegment = pathname.split('/').filter(Boolean)[0]
-  if (
-    firstSegment &&
-    firstSegment !== 'ru' &&
-    firstSegment !== 'uk' &&
-    !KNOWN_BARE_SECTIONS.has(firstSegment)
-  ) {
+  const pathSegments = pathname.split('/').filter(Boolean)
+  let firstContentSegment: string | null = null
+  if (pathSegments.length > 0) {
+    if (pathSegments[0] === 'ru' || pathSegments[0] === 'uk') {
+      // Locale-prefixed: the SECOND segment is the section (locale root passes).
+      firstContentSegment = pathSegments[1] ?? null
+    } else {
+      firstContentSegment = pathSegments[0]
+    }
+  }
+  if (firstContentSegment && !KNOWN_SECTIONS.has(firstContentSegment)) {
     return new Response(null, { status: 404, headers: { 'Cache-Control': 'public, max-age=300' } })
   }
 
@@ -352,3 +356,9 @@ export const config = {
 //    curl -sI https://podvarchan.com/ru/tsiny/      → HTTP/2 301 → /ru/tseny/
 //    curl -sI https://podvarchan.com/ru/pro-avtora/ → HTTP/2 301 → /ru/ob-avtore/
 //    (canon: /uk/tsiny/, /uk/pro-avtora/ stay 200)
+// 10. Junk path under a valid locale → cheap 404, NO layout render (P1-C family,
+//     unbounded-cardinality KV/D1 protection):
+//    curl -sI https://podvarchan.com/ru/somerandomjunk/ → HTTP/2 404
+//    curl -sI https://podvarchan.com/ru/                → 200 (locale root)
+//    curl -sI https://podvarchan.com/ru/blog/           → 200 (known section)
+//    curl -sI https://podvarchan.com/ru/blog/realslug/  → renders (dynamic slug space)

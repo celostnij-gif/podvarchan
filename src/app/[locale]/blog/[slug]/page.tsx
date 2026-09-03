@@ -2,7 +2,7 @@ import { notFound, permanentRedirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getBlogPost, getAllBlogSlugs, getAllBlogPosts, formatDate } from '@/lib/content'
-import { getBlogPostBySlug, getBlogPostById, getBlogPostsByCategory, getMediaWithVariants, getSEOMeta, resolvePublishedBlogSlug } from '@/lib/db/public'
+import { getBlogPostBySlug, getBlogPostsByCategory, getMediaWithVariants, getSEOMeta, getBlogSlugsById, resolvePublishedBlogSlug } from '@/lib/db/public'
 import type { BlogPostPublic } from '@/lib/db/public'
 import { articleSchema, faqSchema, speakableSchema, breadcrumbSchema } from '@/lib/schema'
 import { ClientBlogPost } from './client-page'
@@ -54,11 +54,13 @@ export async function generateMetadata({ params }: Props) {
     const post = await getBlogPostBySlug(slug, locale, previewCookie)
     if (post) {
       const seo = post.id ? await getSEOMeta('blog_post', post.id, locale).catch(() => null) : null
-      const ukSibling = await getBlogPostById(post.id, 'uk').catch(() => null)
-      const ruSibling = locale === 'uk' ? await getBlogPostById(post.id, 'ru').catch(() => null) : null
-      const ukSlug = ukSibling?.slug ?? BLOG_SLUG_UK[slug]
+      // Light 2-column lookup — metadata needs only the sibling slugs, not the
+      // full sibling post body (a full-by-locale pull costs a heavy parse on
+      // the cold path; see getBlogSlugsById).
+      const siblingSlugs = await getBlogSlugsById(post.id).catch(() => null)
+      const ukSlug = siblingSlugs?.uk ?? BLOG_SLUG_UK[slug]
       const ukPath = ukSlug ? `/blog/${ukSlug}` : undefined
-      const ruPathSlug = ruSibling?.slug ?? resolveBlogSlug(slug)
+      const ruPathSlug = siblingSlugs?.ru ?? resolveBlogSlug(slug)
       // Use locale-specific cover image from override map for og:image
       const resolvedSlug = resolveBlogSlug(slug)
       const overrideCover = COVER_IMAGE_OVERRIDES[resolvedSlug]

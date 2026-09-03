@@ -29,6 +29,43 @@ import { getCloudflareContext } from '@opennextjs/cloudflare'
 const PREFIX = 'd1c:' // short prefix to keep KV key size minimal
 const R2_PREFIX = 'content/'
 
+/* ── Per-isolate render dedup (CPU + KV quota, cold-render 1102 relief) ──
+ * One Next.js render runs TWICE per request: generateMetadata and the page
+ * component. Both passes call the same withCache getters, so a cold render
+ * paid for the same payloads twice — a KV GET + JSON.parse each time — and
+ * doubled the KV operation count. The parsed value cannot change between
+ * the two passes of a single render.
+ *
+ * A 15s per-isolate window (inside the 30s publish-loop invariant of
+ * AGENTS.md §12: an admin publish invalidates KV and any post-publish render
+ * sees fresh content; 15s worst case stays well under the contract) removes
+ * the duplicates without any cross-request staleness beyond that window.
+ *
+ * Memory: values are read-only render data; the hard cap (256 entries, FIFO)
+ * bounds an isolate's memo to a few MB — negligible vs the 128MB limit.
+ */
+const MEMO_TTL_MS = 15_000
+const MEMO_MAX_ENTRIES = 256
+const memoStore = new Map<string, { value: unknown; expires: number }>()
+
+function memoGet<T>(fullKey: string): { hit: boolean; value: T | undefined } {
+  const hit = memoStore.get(fullKey)
+  if (!hit) return { hit: false, value: undefined }
+  if (Date.now() > hit.expires) {
+    memoStore.delete(fullKey)
+    return { hit: false, value: undefined }
+  }
+  return { hit: true, value: hit.value as T }
+}
+
+function memoSet(fullKey: string, value: unknown): void {
+  if (memoStore.size >= MEMO_MAX_ENTRIES && !memoStore.has(fullKey)) {
+    const first = memoStore.keys().next().value
+    if (first !== undefined) memoStore.delete(first)
+  }
+  memoStore.set(fullKey, { value, expires: Date.now() + MEMO_TTL_MS })
+}
+
 interface CacheBindings {
   kv?: KVNamespace
   r2?: R2Bucket
@@ -63,8 +100,15 @@ export async function withCache<T>(
   ttl: number,
   fetchFn: () => Promise<T>,
 ): Promise<T> {
-  const b = getBindings()
   const fullKey = `${PREFIX}${cacheKey}`
+
+  /* Per-isolate dedup first — a memo hit skips the KV GET entirely (CPU:
+   * JSON.parse of the payload is the heaviest step of a cold render; KV
+   * quota: one render no longer doubles the GET count). */
+  const memo = memoGet<T>(fullKey)
+  if (memo.hit) return memo.value as T
+
+  const b = getBindings()
 
   /* Try cache hit */
   if (b?.kv) {
@@ -79,7 +123,9 @@ export async function withCache<T>(
           if (b.waitUntil) b.waitUntil(deletion)
           else await deletion
         } else {
-          return JSON.parse(raw) as T
+          const parsed = JSON.parse(raw) as T
+          memoSet(fullKey, parsed)
+          return parsed
         }
       }
     } catch {
@@ -112,6 +158,9 @@ export async function withCache<T>(
   if (serialized === 'null' || serialized === undefined) {
     return data
   }
+
+  /* Memoize exactly what KV would have served (never negative results). */
+  memoSet(fullKey, data)
 
   /* Pin best-effort KV writes to the Worker lifecycle. */
   if (b?.kv) {

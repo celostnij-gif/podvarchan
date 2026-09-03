@@ -28,7 +28,8 @@ export const cacheKeys = {
   servicesList: (locale: string) => `services:list:${locale}`,
   servicesSidebar: (locale: string) => `services:sidebar:${locale}`,
   service: (slug: string, locale: string) => `service:${slug}:${locale}`,
-  serviceById: (id: string, locale: string) => `service:id:${id}:${locale}`,
+  /** Cross-locale slugs of one published service by id (lightweight). */
+  serviceSlugsById: (id: string) => `service:id-slugs:${id}`,
   pricingList: (locale: string) => `pricing:list:${locale}`,
   blogCats: (locale: string) => `blog-cats:${locale}`,
   blogList: (locale: string) => `blog:list:${locale}`,
@@ -37,7 +38,9 @@ export const cacheKeys = {
   /** llms-full.txt index list (id/slug/title/excerpt/categorySlug, no contentHtml/faqJson). */
   blogListIndex: (locale: string) => `blog:list:index:${locale}`,
   blogPost: (slug: string, locale: string) => `blog:${slug}:${locale}`,
-  blogPostById: (id: string, locale: string) => `blog:id:${id}:${locale}`,
+  /** Cross-locale slugs of one published post by id — hreflang/meta alternates
+   *  (lightweight: 2 columns, never the contentHtml payload). */
+  blogSlugsById: (id: string) => `blog:id-slugs:${id}`,
   blogCatPosts: (catSlug: string, locale: string) => `blog-cat:${catSlug}:${locale}`,
   /** Cross-locale slug pair for one published post (lang-switcher 301 fallback). */
   blogSlugPair: (slug: string) => `blog:slug-pair:${slug}`,

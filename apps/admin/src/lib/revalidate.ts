@@ -295,8 +295,7 @@ export function getBlogPostCacheKeys(
     keys.push(
       cacheKeys.seo('blog_post', postId, 'ru'),
       cacheKeys.seo('blog_post', postId, 'uk'),
-      cacheKeys.blogPostById(postId, 'ru'),
-      cacheKeys.blogPostById(postId, 'uk'),
+      cacheKeys.blogSlugsById(postId),
     )
   }
   return keys
@@ -321,8 +320,7 @@ export function getServiceCacheKeys(
     keys.push(
       cacheKeys.seo('service', serviceId, 'ru'),
       cacheKeys.seo('service', serviceId, 'uk'),
-      cacheKeys.serviceById(serviceId, 'ru'),
-      cacheKeys.serviceById(serviceId, 'uk'),
+      cacheKeys.serviceSlugsById(serviceId),
     )
   }
   if (featured) {

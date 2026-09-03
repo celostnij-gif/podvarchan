@@ -9,7 +9,7 @@ import { getBlogPost } from '@/lib/content'
 import { breadcrumbSchema } from '@/lib/schema'
 import { ClientBlogCategory } from './client-page'
 import { CATEGORY_SLUG_UK, resolveCategorySlug } from '@/lib/slugMapping'
-import type { BlogPostPublic, BlogCategoryPublic } from '@/lib/db/public'
+import type { BlogPostPublic } from '@/lib/db/public'
 import type { BlogPost } from '@/types'
 
 export const dynamicParams = true
@@ -82,13 +82,12 @@ export async function generateMetadata({ params }: Props) {
   if (!category) return {}
   const t = await getTranslations({ locale, namespace: 'blog' })
 
-  // D1-truth slug pairing by category id (constants map is incomplete vs D1)
-  const ruCats = await getBlogCategories('ru').catch(() => [])
-  const ukCats = await getBlogCategories('uk').catch(() => [])
-  const slugById = (list: BlogCategoryPublic[], id?: string) =>
-    id ? list.find((c) => c.id === id)?.slug : undefined
-  const canonical = slugById(ruCats, category.id) ?? resolveCategorySlug(rawCat)
-  const ukSlug = slugById(ukCats, category.id) ?? CATEGORY_SLUG_UK[canonical]
+  // D1-truth slug pairing (constants map is incomplete vs D1). Lightweight
+  // 2-column resolver by slug — NOT two full category-list reads, which made
+  // the cold render pay for the whole list twice more (1102 relief).
+  const pair = await resolvePublishedCategorySlug(rawCat).catch(() => null)
+  const canonical = pair?.ru ?? resolveCategorySlug(rawCat)
+  const ukSlug = pair?.uk ?? CATEGORY_SLUG_UK[canonical]
   const ukPath = ukSlug ? `/blog/kategoriya/${ukSlug}` : undefined
 
   return seoMetadata({

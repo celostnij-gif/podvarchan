@@ -7,7 +7,7 @@ import { SERVICES } from '@/constants'
 import { SERVICE_SLUG_UK, resolveServiceSlug } from '@/lib/slugMapping'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { serviceSchema, faqSchema, speakableSchema, breadcrumbSchema } from '@/lib/schema'
-import { getServiceBySlug, getServiceById, getServiceSidebar, getSEOMeta, resolvePublishedServiceSlug } from '@/lib/db/public'
+import { getServiceBySlug, getServiceSlugsById, getServiceSidebar, getSEOMeta, resolvePublishedServiceSlug } from '@/lib/db/public'
 import type { ServiceSidebarItem } from '@/lib/db/public'
 import { ClientServicePage } from '@/app/[locale]/uslugi/[slug]/client-page'
 
@@ -97,11 +97,12 @@ export async function generateServiceDetailMetadata({ params, catalog }: Service
       const seo = svc.id ? await getSEOMeta('service', svc.id, locale) : null
       const title = seo?.title ?? svc.title
       const description = seo?.description ?? svc.description ?? ''
-      const ukSibling = await getServiceById(svc.id, 'uk').catch(() => null)
-      const ruSibling = locale === 'uk' ? await getServiceById(svc.id, 'ru').catch(() => null) : null
-      const ukSlug = ukSibling?.slug ?? SERVICE_SLUG_UK[resolvedSlug]
+      // Light 2-column lookup — metadata needs only the sibling slugs, not the
+      // full sibling service payload (see getServiceSlugsById).
+      const siblingSlugs = await getServiceSlugsById(svc.id).catch(() => null)
+      const ukSlug = siblingSlugs?.uk ?? SERVICE_SLUG_UK[resolvedSlug]
       const ukPath = ukSlug ? `/poslugy/${ukSlug}` : undefined
-      const ruPathSlug = ruSibling?.slug ?? resolvedSlug
+      const ruPathSlug = siblingSlugs?.ru ?? resolvedSlug
       return seoMetadata({
         title,
         description,
