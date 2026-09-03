@@ -87,19 +87,35 @@ jobs:
           WARMUP_BASE_URL: https://podvarchan.com
 
       - name: Verify headers after deploy (site)
+        # no-cache forces a fresh render, so a cold isolate can 1102 (503 with
+        # no custom headers) even though the deployed worker is correct — the
+        # same cold-render lottery the warmup step absorbs. Retry per URL:
+        # a persistent header regression still fails all 4 attempts.
         run: |
+          check_url() {
+            u="$1"
+            for attempt in 1 2 3 4; do
+              h=$(curl -s -o /dev/null -D - --max-time 60 -H "Cache-Control: no-cache" "$u")
+              code=$(printf '%s\n' "$h" | head -1 | awk '{print $2}')
+              sig=$(printf '%s\n' "$h" | grep -ciE "^content-signal: ai-train=yes, search=yes, ai-input=yes" || true)
+              if [[ "$u" == *"/api/preview/"* ]]; then
+                cc=$(printf '%s\n' "$h" | grep -ciE "^cache-control:.*no-store" || true)
+                [[ "$sig" == "1" && "$cc" == "1" ]] && { echo "OK $code $u (attempt $attempt)"; return 0; }
+              else
+                swr=$(printf '%s\n' "$h" | grep -ciE "^cache-control:.*stale-while-revalidate=" || true)
+                sie=$(printf '%s\n' "$h" | grep -ciE "^cache-control:.*stale-if-error=" || true)
+                [[ "$sig" == "1" && "$swr" == "1" && "$sie" == "1" ]] && { echo "OK $code $u (attempt $attempt)"; return 0; }
+              fi
+              echo "retry $attempt for $u (code=$code)"
+              sleep 5
+            done
+            echo "FAIL: headers missing on $u after 4 attempts"; return 1
+          }
+          fail=0
           for u in "https://podvarchan.com/ru/" "https://podvarchan.com/ru/blog/" "https://podvarchan.com/sitemap.xml" "https://podvarchan.com/robots.txt" "https://podvarchan.com/llms.txt" "https://podvarchan.com/api/preview/"; do
-            h=$(curl -s -o /dev/null -D - -H "Cache-Control: no-cache" "$u")
-            code=$(printf '%s\n' "$h" | head -1 | awk '{print $2}')
-            printf '%s\n' "$h" | grep -qiE "^content-signal: ai-train=yes, search=yes, ai-input=yes" || { echo "FAIL: content-signal missing on $u"; exit 1; }
-            if [[ "$u" == *"/api/preview/"* ]]; then
-              printf '%s\n' "$h" | grep -qiE "^cache-control:.*no-store" || { echo "FAIL: preview not no-store on $u"; exit 1; }
-            else
-              printf '%s\n' "$h" | grep -qiE "^cache-control:.*stale-while-revalidate=" || { echo "FAIL: SWR missing on $u"; exit 1; }
-              printf '%s\n' "$h" | grep -qiE "^cache-control:.*stale-if-error=" || { echo "FAIL: stale-if-error missing on $u"; exit 1; }
-            fi
-            echo "OK $code $u"
+            check_url "$u" || fail=1
           done
+          exit $fail
 
       - name: SEO regression
         run: bash scripts/seo-regression.sh https://podvarchan.com
