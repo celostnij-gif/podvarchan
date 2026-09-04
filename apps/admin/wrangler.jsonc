@@ -3,6 +3,15 @@
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-06-27",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  // Explicitly empty cron list — removes the dashboard-created */10 schedule
+  // (2026-08-30) that had no scheduled() handler in code and threw
+  // "Handler does not export a scheduled() function" on every tick:
+  // 144 scriptThrewException/day since 2026-08-30 (Workers invocations
+  // analytics, 2026-09-04). The SCHEDULED post status / scheduledAt field
+  // remain unused in prod D1 (0 rows). If deferred publishing is ever needed,
+  // implement the scheduled handler FIRST (pattern: wrangler/worker.ts) and
+  // add the schedule back here.
+  "triggers": { "crons": [] },
   "assets": {
     "binding": "ASSETS",
     "directory": ".open-next/assets"
