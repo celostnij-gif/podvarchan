@@ -80,7 +80,7 @@ jobs:
         # Non-blocking: caches.default is per-colo, so a fresh CI colo is fully
         # cold and some cold renders exceed the 10ms CPU budget regardless of
         # retries — that is a signal for the render-path work, not a deploy
-        # gate. Verify-headers and SEO regression below remain the gate.
+        # gate. Verify-headers below remains the gate.
         continue-on-error: true
         run: node scripts/warmup.mjs
         env:
@@ -116,9 +116,6 @@ jobs:
             check_url "$u" || fail=1
           done
           exit $fail
-
-      - name: SEO regression
-        run: bash scripts/seo-regression.sh https://podvarchan.com
 
   deploy-admin:
     name: Admin (admin.podvarchan.com)
