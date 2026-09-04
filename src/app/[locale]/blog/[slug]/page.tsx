@@ -17,10 +17,14 @@ import { PageJsonLd } from '@/components/PageJsonLd'
  */
 function isClinicalArticle(categorySlug: string | null | undefined, slug: string): boolean {
   if (!categorySlug) return false
-  const clinicalCategories = new Set(['ptsr', 'trevoga'])
+  // Клинические категории, оба локаля: ptsr (RU=UK), trevoga/trivoga (RU/UK),
+  // trevoga-i-panichni-ataki (панические атаки, slug совпадает в RU и UK).
+  const clinicalCategories = new Set(['ptsr', 'trevoga', 'trivoga', 'trevoga-i-panichni-ataki'])
   if (clinicalCategories.has(categorySlug)) return true
-  // Также помечаем статьи о панических атаках
-  if (slug.includes('panicheskiye-ataki') || slug.includes('panichni-ataki')) return true
+  // Посты о панических атаках в любой категории. /panich/i покрывает все
+  // фактические написания slug'ов: panicheskiye-ataki, panicheskie-ataki,
+  // panicheskuyu-ataku (RU), panichni-ataki, panichnu-ataku (UK).
+  if (/panich/i.test(slug)) return true
   return false
 }
 
