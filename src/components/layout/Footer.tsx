@@ -10,7 +10,9 @@ import { getServiceSidebar, getBlogCategories, getContactChannels, getSiteSettin
 function FooterColumn({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div>
-      <h3 className="text-sm font-semibold text-text-primary tracking-wider uppercase mb-4">{title}</h3>
+      {/* h2, не h3 (AUDIT_REPORT.md headingIssues: h1→h3 skip на страницах без
+          h2-секций — disclaimer, privacy и т.п.): футер идёт сразу за hero <h1> */}
+      <h2 className="text-sm font-semibold text-text-primary tracking-wider uppercase mb-4">{title}</h2>
       <ul className="space-y-2.5">{children}</ul>
     </div>
   )

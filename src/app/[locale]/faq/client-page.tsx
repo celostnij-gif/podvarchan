@@ -29,7 +29,7 @@ export function ClientFaqPage({ items, breadcrumbs }: Props) {
         <div className="mt-10 space-y-3">
           {items.map((item, index) => (
             <AnimatedText key={index} direction="up" delay={index * 50}>
-              <FaqAccordion question={item.question} answer={item.answer} />
+              <FaqAccordion question={item.question} answer={item.answer} headingLevel="h2" />
             </AnimatedText>
           ))}
         </div>

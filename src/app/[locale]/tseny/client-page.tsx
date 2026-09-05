@@ -184,7 +184,9 @@ export function TsenyClient({ breadcrumbs, pricingPlans = [], d1Sections: _d1Sec
                   )}
 
                   <div className="mb-4">
-                    <h3 className="text-lg font-display text-text-primary">{title}</h3>
+                    {/* h2, не h3 (AUDIT_REPORT.md headingIssues): первая секция
+                        контента сразу после hero <h1>, h2-секции выше нет */}
+                    <h2 className="text-lg font-display text-text-primary">{title}</h2>
                     <p className="text-sm text-text-muted mt-1">{subtitle}</p>
                   </div>
 

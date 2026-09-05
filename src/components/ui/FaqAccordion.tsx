@@ -8,6 +8,10 @@ interface FaqAccordionProps {
   answer: string
   /** Smaller variant for pricing page etc. (default: false) */
   compact?: boolean
+  /** Heading level of the question. Default 'h3' (nested under an h2 section);
+   *  pass 'h2' when the accordion is the first content section after the page
+   *  <h1> — AGENTS §5 forbids heading-level skips (AUDIT_REPORT.md headingIssues). */
+  headingLevel?: 'h2' | 'h3'
 }
 
 const easePremium = [0.25, 0.1, 0, 1] as const
@@ -15,10 +19,11 @@ const easePremium = [0.25, 0.1, 0, 1] as const
 /**
  * Animated FAQ accordion with smooth open/close transitions.
  * Uses framer-motion for height + opacity animation on both enter and exit.
- * The question is wrapped in <h3> for proper heading outline structure.
+ * The question is wrapped in a heading tag for proper heading outline structure.
  */
-export default function FaqAccordion({ question, answer, compact = false }: FaqAccordionProps) {
+export default function FaqAccordion({ question, answer, compact = false, headingLevel = 'h3' }: FaqAccordionProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const HeadingTag = headingLevel
 
   return (
     <div
@@ -28,7 +33,7 @@ export default function FaqAccordion({ question, answer, compact = false }: FaqA
           : 'border-border-base'
       }`}
     >
-      <h3 className="m-0">
+      <HeadingTag className="m-0">
         <button
           onClick={() => setIsOpen(!isOpen)}
           aria-expanded={isOpen}
@@ -56,7 +61,7 @@ export default function FaqAccordion({ question, answer, compact = false }: FaqA
             <path d="M6 9l6 6 6-6" />
           </motion.svg>
         </button>
-      </h3>
+      </HeadingTag>
 
       <motion.div
         initial={false}

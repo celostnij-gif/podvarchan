@@ -11,6 +11,15 @@ const nextConfig = {
   reactStrictMode: true,
   compress: true,
 
+  /* AGENTS §5/§6 + AUDIT_REPORT.md (2026-09-04, metaInBody: 144 pages):
+     Next 15 Streaming Metadata renders canonical/hreflang/OG AFTER </head>
+     for every UA outside the default htmlLimitedBots list — including Googlebot
+     and all AI crawlers (GPTBot/PerplexityBot/ClaudeBot). Matching every UA
+     forces blocking metadata into <head> for everyone and, as a side effect,
+     makes the HTML UA-independent (the edge Cache API key has no UA — streamed
+     vs blocking variants could cross-populate the same cache entry). */
+  htmlLimitedBots: /.*/,
+
   experimental: {
     optimizePackageImports: ['lucide-react', 'framer-motion'],
   },
