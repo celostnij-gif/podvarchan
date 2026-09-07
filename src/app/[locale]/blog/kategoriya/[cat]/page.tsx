@@ -176,7 +176,7 @@ export default async function BlogCategoryPage({ params }: Props) {
     // 3) For posts still without image, extract first <img> from article body (one batch query)
     const missing = resolvedPosts.filter(r => !r.imageUrl)
     if (missing.length > 0) {
-      const firstImages = await getBlogFirstImageUrls(missing.map(r => r.post.id))
+      const firstImages = await getBlogFirstImageUrls(missing.map(r => r.post.id), locale as 'ru' | 'uk')
       for (const r of missing) {
         const url = firstImages.get(r.post.id)
         if (url) r.imageUrl = url

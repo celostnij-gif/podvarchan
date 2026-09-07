@@ -858,31 +858,58 @@ export function extractFirstImageUrl(html: string): string | null {
  * Batch fetch first image URL from contentHtml for multiple posts.
  * One query instead of N+1 lookups.
  */
-async function getBlogFirstImageUrlsUncached(ids: string[]): Promise<Map<string, string | null>> {
+async function getBlogFirstImageUrlsUncached(
+  ids: string[],
+  locale?: 'ru' | 'uk',
+): Promise<Map<string, string | null>> {
   if (ids.length === 0) return new Map()
   const db = getDB()
-  const rows = await db
-    .select({
-      id: blogPostTranslations.postId,
-      contentHtml: blogPostTranslations.contentHtml,
-    })
-    .from(blogPostTranslations)
-    .where(inArray(blogPostTranslations.postId, ids))
-    .all()
+  // Locale filter halves the payload: rows carry full contentHtml (~9KB avg
+  // each), and without the filter a cold category render parsed BOTH locales
+  // for every post (AGENTS §1: CPU budget; 1102 relief).
+  const rows = await (locale
+    ? db
+        .select({
+          id: blogPostTranslations.postId,
+          contentHtml: blogPostTranslations.contentHtml,
+        })
+        .from(blogPostTranslations)
+        .where(
+          and(
+            inArray(blogPostTranslations.postId, ids),
+            eq(blogPostTranslations.locale, locale),
+          ),
+        )
+        .all()
+    : db
+        .select({
+          id: blogPostTranslations.postId,
+          contentHtml: blogPostTranslations.contentHtml,
+        })
+        .from(blogPostTranslations)
+        .where(inArray(blogPostTranslations.postId, ids))
+        .all())
 
   const result = new Map<string, string | null>()
   for (const row of rows) {
-    if (row.contentHtml) {
+    // First <img> per post wins; a post may have 2 translation rows here —
+    // keep the first non-empty, don't overwrite (rows carry full contentHtml
+    // for BOTH locales: parse cost doubles on cold category renders, so this
+    // getter stays 2-column minimal by design, AGENTS §1/§3.5)
+    if (row.contentHtml && !result.has(row.id)) {
       result.set(row.id, extractFirstImageUrl(row.contentHtml))
     }
   }
   return result
 }
-export async function getBlogFirstImageUrls(ids: string[]): Promise<Map<string, string | null>> {
+export async function getBlogFirstImageUrls(
+  ids: string[],
+  locale?: 'ru' | 'uk',
+): Promise<Map<string, string | null>> {
   if (ids.length === 0) return new Map()
-  const key = cacheKeys.blogFirstImages([...ids].sort().join(','))
+  const key = cacheKeys.blogFirstImages(`${locale ?? 'all'}|${[...ids].sort().join(',')}`)
   const cached = await withCache<Record<string, string | null>>(key, TTL_BLOG, async () => {
-    const m = await getBlogFirstImageUrlsUncached(ids)
+    const m = await getBlogFirstImageUrlsUncached(ids, locale)
     return Object.fromEntries(m)
   })
   return new Map(Object.entries(cached))
