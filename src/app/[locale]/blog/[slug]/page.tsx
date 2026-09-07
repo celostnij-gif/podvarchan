@@ -13,22 +13,6 @@ import { GlobalJsonLd } from '@/components/GlobalJsonLd'
 import { PageJsonLd } from '@/components/PageJsonLd'
 
 /**
- * Определяет, является ли статья клинической (YMYL) для добавления reviewedBy.
- */
-function isClinicalArticle(categorySlug: string | null | undefined, slug: string): boolean {
-  if (!categorySlug) return false
-  // Клинические категории, оба локаля: ptsr (RU=UK), trevoga/trivoga (RU/UK),
-  // trevoga-i-panichni-ataki (панические атаки, slug совпадает в RU и UK).
-  const clinicalCategories = new Set(['ptsr', 'trevoga', 'trivoga', 'trevoga-i-panichni-ataki'])
-  if (clinicalCategories.has(categorySlug)) return true
-  // Посты о панических атаках в любой категории. /panich/i покрывает все
-  // фактические написания slug'ов: panicheskiye-ataki, panicheskie-ataki,
-  // panicheskuyu-ataku (RU), panichni-ataki, panichnu-ataku (UK).
-  if (/panich/i.test(slug)) return true
-  return false
-}
-
-/**
  * The page template renders the post title as the single <h1> (SEO §5: one h1
  * per page). Some D1 bodies were authored with a leading <h1> of their own —
  * strip only that leading one, mid-content headings are left untouched.
@@ -136,8 +120,6 @@ async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData 
         .slice(0, 4)
         .map((p) => ({ slug: p.slug, title: p.title ?? '' }))
 
-      const clinical = isClinicalArticle(post.categorySlug, slug)
-
       const schemas: Record<string, unknown>[] = []
 
       const jsonLd = articleSchema({
@@ -147,7 +129,6 @@ async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData 
         datePublished: post.publishedAt ?? new Date().toISOString(),
         dateModified: post.updatedAt ?? post.publishedAt ?? new Date().toISOString(),
         locale,
-        category: clinical ? 'clinical' : undefined,
       })
       schemas.push(jsonLd)
 
@@ -202,7 +183,6 @@ async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData 
     .slice(0, 4)
     .map((p) => ({ slug: p.slug, title: p.title }))
 
-  const clinical = isClinicalArticle(post.categorySlug, slug)
   const jsonLd = articleSchema({
     headline: post.title,
     description: post.description,
@@ -214,7 +194,6 @@ async function loadBlogPost(slug: string, locale: string): Promise<BlogPageData 
     imageCaption: post.title,
     authorName: post.author,
     locale,
-    category: clinical ? 'clinical' : undefined,
   })
   const fallbackSchemas = [speakableSchema('.blog-content p')]
 

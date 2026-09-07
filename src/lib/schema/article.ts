@@ -12,8 +12,6 @@ interface ArticleSchemaParams {
   imageCaption?: string
   authorName?: string
   locale?: string
-  /** Категория для YMYL-маркировки: 'clinical' для ПТСР/панические атаки/тревога */
-  category?: string
 }
 
 /**
@@ -33,7 +31,6 @@ export function articleSchema(params: ArticleSchemaParams): Record<string, unkno
     imageCaption,
     authorName,
     locale,
-    category,
   } = params
   const effectiveAuthorName = authorName ?? (locale === 'uk' ? AUTHOR.nameUk : AUTHOR.name)
 
@@ -84,8 +81,13 @@ export function articleSchema(params: ArticleSchemaParams): Record<string, unkno
     schema.image = imageSchema
   }
 
-  // YMYL: додаємо reviewedBy для клінічних категорій (ПТСР, панічні атаки, тривога)
-  if (category === 'clinical') {
+  // YMYL: reviewedBy/medicallyReviewedBy на КАЖДОЙ статье блога, без гейта
+  // по категории. Весь блог — психологическая тематика (тревога, ПТСР,
+  // самосаботаж, выгорание, эмиграция и т.д.), для YMYL-ниши блок
+  // подтверждения практикой обязателен везде (AGENTS §5). Автор —
+  // сертифицированный гипнотерапевт (ABH), практик НЛП (INLPTA), магистр
+  // музыкальной терапии (The University of Kansas).
+  {
     const reviewedByDesc = locale === 'uk'
       ? 'Автор — сертифікований гіпнотерапевт (ABH), практик НЛП (INLPTA), магістр музичної терапії (The University of Kansas). Матеріал базується на особистому досвіді роботи з клієнтами та професійній освіті.'
       : 'Автор — сертифицированный гипнотерапевт (ABH), практик НЛП (INLPTA), магистр музыкальной терапии (The University of Kansas). Материал базируется на личном опыте работы с клиентами и профессиональном образовании.'
