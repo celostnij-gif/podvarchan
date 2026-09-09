@@ -8,6 +8,7 @@ import { PageJsonLd } from '@/components/PageJsonLd'
 import type { Testimonial } from '@/types'
 import HomeClient from './home-client'
 import Hero from '@/components/sections/Hero'
+import { GeoBlock } from '@/components/seo/geo-block'
 import { getPageByType, getPageSeoMeta, getTestimonials, getFAQs } from '@/lib/db/public'
 import { cookies } from 'next/headers'
 import { parseZoneContent, type HeroContent } from '@/lib/home/blueprint'
@@ -133,6 +134,12 @@ export default async function HomePage({
       <GlobalJsonLd locale={locale} breadcrumb />
       <PageJsonLd schemas={pageSchemas} />
       <Hero t={t} commonT={commonT} d1={d1Hero} />
+      <GeoBlock
+        title={locale === 'uk' ? 'Хто такий гіпнотерапевт і чим він може допомогти' : 'Кто такой гипнотерапевт и чем он может помочь'}
+        text={locale === 'uk'
+          ? "Гіпнотерапевт — це фахівець, який допомагає змінювати мислення, емоційні реакції та звички через роботу з підсвідомістю в стані глибокого розслаблення. В'ячеслав Подварчан проводить онлайн-сесії еріксонівського гіпнозу та самопоміч-практики для тривоги, панічних атак, вигорання, самосаботажу та психосоматики: м'який стан гіпнозу схожий на занурення перед сном, людина залишається у свідомості й контролює процес, а середня тривалість сесії — 60 хвилин."
+          : 'Гипнотерапевт — это специалист, который помогает менять мышление, эмоциональные реакции и привычки через работу с подсознанием в состоянии глубокого расслабления. Вячеслав Подварчан проводит онлайн-сессии эриксоновского гипноза и практики самопомощи при тревоге, панических атаках, выгорании, самосаботаже и психосоматике: мягкое состояние гипноза похоже на засыпание, человек остаётся в сознании и контролирует процесс, а средняя длительность сессии — 60 минут.'}
+      />
       <HomeClient
         locale={locale}
         d1Testimonials={d1Testimonials}

@@ -6,6 +6,7 @@ import { getPageByType, getPageSeoMeta, getContactChannels } from '@/lib/db/publ
 import { breadcrumbSchema } from '@/lib/schema'
 import { cookies } from 'next/headers'
 import KontaktyClient from './client-page'
+import { GeoBlock } from '@/components/seo/geo-block'
 export const revalidate = 604800
 
 type Props = {
@@ -63,6 +64,12 @@ export default async function KontaktyPage({
       <GlobalJsonLd locale={locale} />
       <PageJsonLd schemas={[breadcrumb]} />
       <KontaktyClient d1Channels={d1Channels} d1Sections={d1Page?.sections ?? []} breadcrumbs={breadcrumbs} />
+      <GeoBlock
+        title={locale === 'uk' ? 'Як записатися на консультацію' : 'Как записаться на консультацию'}
+        text={locale === 'uk'
+          ? 'Запис займає одну відповідь у месенджері: напишіть у Telegram або WhatsApp — узгодимо зручний час, а перед першою сесією безкоштовно розберемо ваш запит 15 хвилин. Онлайн-формат працює з будь-якого міста: потрібні лише стабільний інтернет і навушники. Якщо не знаєте, який канал обрати, використовуйте форму на цій сторінці — відповідь надходить на email.'
+          : 'Запись занимает одно сообщение в мессенджере: напишите в Telegram или WhatsApp — согласуем удобное время, а перед первой сессией бесплатно разберём ваш запрос 15 минут. Онлайн-формат работает из любого города: нужны только стабильный интернет и наушники. Если не знаете, какой канал выбрать, используйте форму на этой странице — ответ придёт на email.'}
+      />
     </>
   )
 }

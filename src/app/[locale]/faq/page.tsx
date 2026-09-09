@@ -6,6 +6,7 @@ import { PageJsonLd } from '@/components/PageJsonLd'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { faqSchema, breadcrumbSchema } from '@/lib/schema'
 import { getFAQs, getPageSeoMeta } from '@/lib/db/public'
+import { GeoBlock } from '@/components/seo/geo-block'
 import { ClientFaqPage } from './client-page'
 import type { FAQItem } from '@/types'
 export const revalidate = 604800
@@ -64,12 +65,19 @@ export default async function FaqPage({
   ]
   const schemas: Record<string, unknown>[] = [schema]
   schemas.push(breadcrumbSchema({ items: breadcrumbs.map((b) => ({ name: b.label, url: b.href })), locale: (await _params).locale }))
+  const locale = (await _params).locale
 
   return (
     <>
-      <GlobalJsonLd locale={(await _params).locale} />
+      <GlobalJsonLd locale={locale} />
       <PageJsonLd schemas={schemas} />
       <ClientFaqPage items={faqItems} breadcrumbs={breadcrumbs} />
+      <GeoBlock
+        title={locale === 'uk' ? 'Коротко про гіпнотерапію онлайн' : 'Коротко о гипнотерапии онлайн'}
+        text={locale === 'uk'
+          ? 'Гіпноз онлайн проходить так само, як і очний: ви перебуваєте у свідомості, керуєте процесом і можете вийти з трансу будь-якої миті. Еріксонівський підхід використовує природні стани зосередження, тому не потребує втрати контролю. Більшість питань — про безпеку, кількість сесій і опір підсвідомості — розібрано у відповідях нижче.'
+          : 'Гипноз онлайн проходит так же, как и очный: вы находитесь в сознании, управляете процессом и можете выйти из транса в любой момент. Эриксоновский подход использует естественные состояния сосредоточения, поэтому не требует потери контроля. Большинство вопросов — о безопасности, количестве сессий и сопротивлении подсознания — разобраны в ответах ниже.'}
+      />
     </>
   )
 }

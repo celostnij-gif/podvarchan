@@ -7,6 +7,7 @@ import { breadcrumbSchema } from '@/lib/schema'
 import { getPageByType, getPageSeoMeta, getPricingPlans } from '@/lib/db/public'
 import { cookies } from 'next/headers'
 import { TsenyClient } from './client-page'
+import { GeoBlock } from '@/components/seo/geo-block'
 export const revalidate = 604800
 
 export async function generateMetadata({
@@ -110,6 +111,12 @@ export default async function TsenyPage({
       <GlobalJsonLd locale={locale} />
       <PageJsonLd schemas={schemas} />
       <TsenyClient breadcrumbs={breadcrumbs} pricingPlans={pricingPlans} d1Sections={d1Page?.sections ?? []} />
+      <GeoBlock
+        title={locale === 'uk' ? 'З чого складається вартість сесії' : 'Из чего складывается стоимость сессии'}
+        text={locale === 'uk'
+          ? 'Вартість залежить від формату: разова сесія, діагностична консультація або курс із кількох зустрічей із градацією «Преміум» та «Еліт». Точні суми й тривалість вказані в тарифах нижче — порівняння форматів допомагає обрати обсяг під запит. Якщо сумніваєтеся, почніть із безкоштовної 15-хвилинної діагностики: на ній підберемо відповідний варіант оплати.'
+          : 'Стоимость зависит от формата: разовая сессия, диагностическая консультация или курс из нескольких встреч с градацией «Премиум» и «Элит». Точные суммы и длительность указаны в тарифах ниже — сравнение форматов помогает выбрать объём под запрос. Если сомневаетесь, начните с бесплатной 15-минутной диагностики: на ней подберём подходящий вариант оплаты.'}
+      />
     </>
   )
 }

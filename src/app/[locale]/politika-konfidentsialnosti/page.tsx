@@ -6,6 +6,7 @@ import { getPageSeoMeta } from '@/lib/db/public'
 import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { breadcrumbSchema } from '@/lib/schema'
 import { MetadataPage } from '@/components/seo/metadata-page'
+import { GeoBlock } from '@/components/seo/geo-block'
 
 export async function generateMetadata({
   params,
@@ -43,6 +44,12 @@ export default async function PrivacyPage({
     <>
       <GlobalJsonLd locale={locale} />
       <PageJsonLd schemas={[breadcrumbSchema({ items: breadcrumbs.map((b) => ({ name: b.label, url: b.href })), locale })]} />
+      <GeoBlock
+        title={locale === 'uk' ? 'Коротко про політику конфіденційності' : 'Коротко о политике конфиденциальности'}
+        text={locale === 'uk'
+          ? 'Сайт збирає лише мінімально необхідні дані: контакт, який ви самі залишаєте при записі, та знеособлену статистику відвідувань для коректної роботи сервісу. Ми не продаємо і не передаємо особисті дані третім особам, листування в месенджерах залишається конфіденційним, а аналітика не пов\'язує відвідування з особою. Повний текст політики нижче пояснює кожен пункт детально.'
+          : 'Сайт собирает только минимально необходимые данные: контакт, который вы сами оставляете при записи, и обезличенную статистику посещений для корректной работы сервиса. Мы не продаём и не передаём личные данные третьим лицам, переписка в мессенджерах остаётся конфиденциальной, а аналитика не связывает посещения с личностью. Полный текст политики ниже раскрывает каждый пункт детально.'}
+      />
       <MetadataPage title={t('pageTitle')}
       content={t('content')}
       breadcrumbItems={breadcrumbs}

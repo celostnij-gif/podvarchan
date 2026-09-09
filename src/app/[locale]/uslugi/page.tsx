@@ -5,6 +5,7 @@ import { generateMetadata as seoMetadata } from '@/lib/seo/metadata'
 import { getServiceSidebar } from '@/lib/db/public'
 import { breadcrumbSchema } from '@/lib/schema'
 import { UslugiClient } from './page-client'
+import { GeoBlock } from '@/components/seo/geo-block'
 import type { ServiceSidebarItem } from '@/lib/db/public'
 
 export const revalidate = 604800
@@ -75,6 +76,12 @@ export default async function UslugiPage({
       <GlobalJsonLd locale={locale} />
       <PageJsonLd schemas={[breadcrumb]} />
       <UslugiClient services={services} breadcrumbs={breadcrumbs} />
+      <GeoBlock
+        title={locale === 'uk' ? 'Як вибрати напрямок роботи' : 'Как выбрать направление работы'}
+        text={locale === 'uk'
+          ? 'Кожен напрямок — окрема програма зі зрозумілою структурою: спочатку діагностика запиту, далі серія сесій еріксонівського гіпнозу та закріплення результату. У списку нижче зібрані послуги з описом симптомів і очікуваних змін. Якщо сумніваєтеся, що обрати, почніть із безкоштовної 15-хвилинної консультації — допоможу визначити корінну причину і підберемо формат роботи.'
+          : 'Каждое направление — отдельная программа с понятной структурой: сначала диагностика запроса, затем серия сессий эриксоновского гипноза и закрепление результата. В списке ниже собраны услуги с описанием симптомов и ожидаемых изменений. Если сомневаетесь, что выбрать, начните с бесплатной 15-минутной консультации — помогу определить корневую причину и подберём формат работы.'}
+      />
     </>
   )
 }

@@ -6,6 +6,7 @@ import { getPageByType, getPageSeoMeta } from '@/lib/db/public'
 import { breadcrumbSchema } from '@/lib/schema'
 import { cookies } from 'next/headers'
 import { ClientAboutPage } from './client-page'
+import { GeoBlock } from '@/components/seo/geo-block'
 import { SITE, AUTHOR } from '@/constants'
 export const revalidate = 604800
 
@@ -66,6 +67,12 @@ export default async function AboutPage({
       <GlobalJsonLd locale={locale} />
       <PageJsonLd schemas={[breadcrumb, creativeWork]} />
       <ClientAboutPage breadcrumbs={breadcrumbs} d1Sections={d1Page?.sections ?? []} />
+      <GeoBlock
+        title={locale === 'uk' ? 'Хто такий В\'ячеслав Подварчан' : 'Кто такой Вячеслав Подварчан'}
+        text={locale === 'uk'
+          ? "В'ячеслав Подварчан — сертифікований гіпнотерапевт, який працює онлайн з клієнтами з різних країн: еріксонівський гіпноз, авторські музичні програми та практичні техніки самодопомоги. Диплом Music Therapy, підтверджена кваліфікація і відгуки клієнтів зібрані на цій сторінці; формат консультацій — відео-сесії 60 хвилин за попереднім записом."
+          : 'Вячеслав Подварчан — сертифицированный гипнотерапевт, который работает онлайн с клиентами из разных стран: эриксоновский гипноз, авторские музыкальные программы и практические техники самопомощи. Диплом Music Therapy, подтверждённая квалификация и отзывы клиентов собраны на этой странице; формат консультаций — видео-сессии 60 минут по предварительной записи.'}
+      />
     </>
   )
 }
