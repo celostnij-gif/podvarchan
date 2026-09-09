@@ -116,14 +116,17 @@ export default async function LocaleLayout({
   // page's RSC flight payload pushes cold renders over the Workers 10ms CPU
   // budget (incident 1102 — intermittent 503 "Worker exceeded resource
   // limits"). Pass only the namespaces actually consumed client-side:
-  // the 19 namespaces used by "use client" components (useTranslations)
+  // the 20 namespaces used by "use client" components (useTranslations;
+  // NOTE: 'pages' is read via nested paths — useTranslations('pages.about') in
+  // ob-avtore/client-page, 'pages.metod' in metod pages — so the whole
+  // namespace must stay in the provider)
   // plus servicesData/faqData/diplomaData, which client fallbacks read via
   // useMessages (TestimonialsSection, ServicesSection, FAQSection,
   // ob-avtore/client-page). Server components are unaffected — they read
   // the full messages via getTranslations() from the request config.
   // When adding a client component with a new namespace, add it here.
   const CLIENT_MESSAGE_NAMESPACES = new Set([
-    'common', 'home', 'serviceSection', 'services', 'contacts', 'blog',
+    'common', 'pages', 'home', 'serviceSection', 'services', 'contacts', 'blog',
     'faq', 'faqSection', 'problems', 'method', 'search', 'tseny',
     'servicesSection', 'testimonials', 'authorPreview', 'diplomaShowcase',
     'disclaimer', 'cookie', 'contactForm',
