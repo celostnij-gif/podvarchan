@@ -61,15 +61,18 @@ for locale in ru uk; do
   if [[ "$locale" == "uk" ]]; then
     # UK services catalog is /uk/poslugy/ (cutover 2026-08-08)
     check_url "$BASE/uk/poslugy" "200or308"
+    # UK about/pricing live at localized slugs (ob-avtore/tseny are 301 there)
+    check_url "$BASE/uk/pro-avtora" "200or308"
   else
     check_url "$BASE/$locale/uslugi" "200or308"
+    check_url "$BASE/$locale/ob-avtore" "200or308"
   fi
   check_url "$BASE/$locale/blog" "200or308"
-  check_url "$BASE/$locale/ob-avtore" "200or308"
   check_url "$BASE/$locale/metod" "200or308"
   check_url "$BASE/$locale/faq" "200or308"
   check_url "$BASE/$locale/tseny" "200or308"
   check_url "$BASE/$locale/kontakty" "200or308"
+  check_url "$BASE/$locale/search" "200or308"
 done
 
 echo "--- UK aliases ---"
@@ -77,24 +80,25 @@ check_url "$BASE/uk/pro-avtora" "200or308"
 check_url "$BASE/uk/tsiny" "200or308"
 
 # ── 2. Service pages ──
+# Slugs synced with live sitemap 2026-09-09 (legacy slugs returned honest 404)
 echo "--- Service pages (RU) ---"
-for slug in gipnoterapiya-onlayn psikhosomatika-onlayn rabotonos-travma trevozhnye-rasstroystva; do
+for slug in trevoga-i-panicheskiye-ataki rabota-s-podsoznaniem psikhosomatika lichnostnyy-krizis; do
   check_url "$BASE/ru/uslugi/$slug" "200or308"
 done
 
 echo "--- Service pages (UK) ---"
-for slug in hipnoterapiya-onlayn psykhosomatyka-onlayn robotonos-trauma tryvozhni-rozlady; do
+for slug in trivoga-i-panichni-ataki robota-z-pidsvidomistyu psihosomatika osobistisna-kriza; do
   check_url "$BASE/uk/poslugy/$slug" "200or308"
 done
 
 # ── 3. Blog pages ──
 echo "--- Blog posts (RU) ---"
-for slug in chto-takoe-gipnoterapiya kak-prokhodit-priyom-u psikhosomatika-chto-eto trevoga-polnyy-putevoditel panicheskiye-ataki-chto-delat; do
+for slug in trevoga-i-panicheskie-ataki-posle-pereezda-za-granitsu psikhosomatika-chto-eto panicheskiye-ataki-chto-delat psihologicheskaya-pomosch-onlay chto-takoe-samosabotazh; do
   check_url "$BASE/ru/blog/$slug" "200or308"
 done
 
 echo "--- Blog posts (UK) ---"
-for slug in chto-takoe-gipnoterapiya yak-prokhodyt-pryyom-u psykhosomatyka-shcho-tse tryvoga-povnyy-putivnyk; do
+for slug in triviga-ta-panichni-ataki-pislyu-pereyzdu-za-kordon psihosomatika-shcho-tse panichni-ataki-shcho-robiti psihologichna-dopomoga-onlayn shcho-take-samosabotazh; do
   check_url "$BASE/uk/blog/$slug" "200or308"
 done
 
@@ -103,6 +107,7 @@ echo "--- Blog categories ---"
 check_url "$BASE/ru/blog/kategoriya/trevoga" "200or308"
 check_url "$BASE/ru/blog/kategoriya/ptsr" "200or308"
 check_url "$BASE/uk/blog/kategoriya/trivoga" "200or308"
+check_url "$BASE/uk/blog/kategoriya/psihosomatika" "200or308"
 
 # ── 5. Legal pages ──
 echo "--- Legal ---"
@@ -154,9 +159,10 @@ check_redirect "$BASE/ru/tsiny/" 301 "/ru/tseny/"
 check_redirect "$BASE/ru/pro-avtora/" 301 "/ru/ob-avtore/"
 
 # ── 8. 404 check ──
+# AGENTS.md §12: missing URL is an honest 404 — no soft-200.
 echo "--- 404 ---"
-check_url "$BASE/ru/etoy-stranitsy-ne-sushchestvuet" "200or308"
-check_url "$BASE/uk/neisnuyucha-storinka" "200or308"
+check_url "$BASE/ru/etoy-stranitsy-ne-sushchestvuet" "404"
+check_url "$BASE/uk/neisnuyucha-storinka" "404"
 
 # ── 9. SEO meta sanity: title/description present, no i18n key literals ──
 echo "--- SEO meta (static pages RU/UK) ---"
@@ -393,9 +399,11 @@ check_reviewed() {
   PASS=$((PASS + 1))
 }
 
+# Track C (2026-09-08): reviewedBy/medicallyReviewedBy extended to ALL YMYL
+# blog posts (was clinical-category only) — every post sample must have it.
 check_reviewed "$BASE/ru/blog/panicheskiye-ataki-chto-delat" "ru clinical post" present
 check_reviewed "$BASE/uk/blog/panichni-ataki-shcho-robiti" "uk clinical post" present
-check_reviewed "$BASE/ru/blog/chto-takoe-gipnoterapiya" "ru non-clinical post" absent
+check_reviewed "$BASE/ru/blog/chto-takoe-gipnoterapiya" "ru post (Track C: all posts)" present
 check_reviewed "$BASE/ru" "ru home" absent
 
 echo
