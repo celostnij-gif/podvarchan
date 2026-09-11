@@ -82,6 +82,9 @@ nul
 /scripts/run-d1-migration.mjs
 /tmp-git-log.bat
 
+# audit report — owner decision 2026-09-09: keep local, never commit
+/AUDIT_REPORT.md
+
 # editor workspace settings (local LSP server config)
 /.vscode/
 *.zip

@@ -6,7 +6,7 @@
  *
  * Free plan: keep each cache-miss path to 1–3 cheap queries (see AGENT.md §2).
  */
-import { eq, and, desc, inArray, isNotNull } from 'drizzle-orm'
+import { eq, and, desc, inArray, isNotNull, sql } from 'drizzle-orm'
 import { canPreview, canPreviewList } from '@/lib/preview'
 import { getDB } from '@/db'
 import { services, serviceTranslations } from '@/db/schema/services'
@@ -513,7 +513,11 @@ const blogListSelect = {
   slug: blogPostTranslations.slug,
   title: blogPostTranslations.title,
   excerpt: blogPostTranslations.excerpt,
-  faqJson: blogPostTranslations.faqJson,
+  // faqJson deliberately excluded (1102 render-path, 2026-09-09): both list
+  // consumers (/blog, categories) map posts without it and only the post
+  // DETAIL parses it — detail uses its own full-row select. Carrying ~1.3KB
+  // of faq JSON per post made it 60-70% of every cached list payload, paid
+  // back as JSON.parse on each cold render (AGENTS §1 CPU budget).
   categorySlug: blogCategoryTranslations.slug,
   categoryName: blogCategoryTranslations.name,
 }
@@ -528,7 +532,6 @@ type BlogListSelectRow = {
   slug: string
   title: string | null
   excerpt: string | null
-  faqJson: string | null
   categorySlug: string | null
   categoryName: string | null
 }
@@ -547,7 +550,7 @@ function mapBlogListSelectedRow(r: BlogListSelectRow): BlogPostPublic {
     readingMinutes: r.readingMinutes,
     publishedAt: r.publishedAt,
     updatedAt: r.updatedAt,
-    faqJson: r.faqJson,
+    faqJson: null,
   }
 }
 
@@ -867,12 +870,17 @@ async function getBlogFirstImageUrlsUncached(
   // Locale filter halves the payload: rows carry full contentHtml (~9KB avg
   // each), and without the filter a cold category render parsed BOTH locales
   // for every post (AGENTS §1: CPU budget; 1102 relief).
+  // substr(1, 8192): the first <img> lives in the lead section — grabbing the
+  // full body just to regex one URL moved ~80KB through the D1 JSON decoder
+  // per cold batch. A lead image deeper than 8KB is possible (renders without
+  // body thumb — same as today's no-image outcome, never a broken page).
+  const rowSelect = {
+    id: blogPostTranslations.postId,
+    contentHtml: sql<string>`substr(${blogPostTranslations.contentHtml}, 1, 8192)`.as('contentHtml'),
+  }
   const rows = await (locale
     ? db
-        .select({
-          id: blogPostTranslations.postId,
-          contentHtml: blogPostTranslations.contentHtml,
-        })
+        .select(rowSelect)
         .from(blogPostTranslations)
         .where(
           and(
@@ -882,10 +890,7 @@ async function getBlogFirstImageUrlsUncached(
         )
         .all()
     : db
-        .select({
-          id: blogPostTranslations.postId,
-          contentHtml: blogPostTranslations.contentHtml,
-        })
+        .select(rowSelect)
         .from(blogPostTranslations)
         .where(inArray(blogPostTranslations.postId, ids))
         .all())
