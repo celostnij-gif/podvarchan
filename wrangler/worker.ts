@@ -37,7 +37,13 @@ export { DOQueueHandler, DOShardedTagCache, BucketCachePurge };
  * handlers, whose artifact lives in KV, not in the URL-keyed caches).
  */
 const PAGE_WARM_SLICE = 40;
-const PAGE_WARM_BATCH = 8;
+// Sequential (batch=1) by design, 2026-09-11: renders only succeed on the
+// cron invocation's already-initialized isolate (external requests die at
+// 10ms CPU during isolate init — even the sitemap). Parallel self-fetches
+// spawn fresh cold isolates that die with 1102, so batches of 8 were silently
+// baking only a fraction of each slice. Sequential self-fetches run in the
+// cron invocation's context and fit the CPU budget; each URL retries once.
+const PAGE_WARM_ATTEMPTS = 2;
 const CRON_TICK_MS = 50 * 60 * 1000;
 
 async function scheduled(
@@ -75,19 +81,20 @@ async function scheduled(
           const count = Math.min(PAGE_WARM_SLICE, urls.length);
           const slice: string[] = [];
           for (let i = 0; i < count; i++) slice.push(urls[(offset + i) % urls.length]);
-          for (let i = 0; i < slice.length; i += PAGE_WARM_BATCH) {
-            await Promise.all(
-              slice.slice(i, i + PAGE_WARM_BATCH).map((u) =>
-                env.WORKER_SELF_REFERENCE.fetch(u)
-                  .then((res) => {
-                    if (!res.ok) console.error(`[scheduled] page warm ${res.status}: ${u}`);
-                    return res.arrayBuffer();
-                  })
-                  .catch((err: unknown) => {
-                    console.error(`[scheduled] page warm failed: ${u}`, err);
-                  }),
-              ),
-            );
+          for (const u of slice) {
+            for (let attempt = 1; attempt <= PAGE_WARM_ATTEMPTS; attempt++) {
+              try {
+                const res = await env.WORKER_SELF_REFERENCE.fetch(u);
+                await res.arrayBuffer(); // drain — populates ISR + edge caches
+                if (!res.ok) {
+                  console.error(`[scheduled] page warm ${res.status}: ${u} (attempt ${attempt})`);
+                  continue; // retry once on this tick
+                }
+                break;
+              } catch (err: unknown) {
+                console.error(`[scheduled] page warm failed: ${u} (attempt ${attempt})`, err);
+              }
+            }
           }
           console.log(
             `[scheduled] page warm done: ${slice.length}/${urls.length} (offset ${offset})`,
