@@ -176,7 +176,9 @@ function NavArrow({
   return (
     <button
       type="button"
-      onClick={onClick}
+      /* stopPropagation: стрелка лежит внутри оверлея с onClick={onClose} —
+         без него клик по стрелке закрывает модалку вместо навигации */
+      onClick={(e) => { e.stopPropagation(); onClick() }}
       disabled={disabled}
       className={`
         absolute top-1/2 -translate-y-1/2 z-20
@@ -363,7 +365,10 @@ export default function DiplomaShowcase({
   diplomas,
 }: DiplomaShowcaseProps) {
   const t = useTranslations('diplomaShowcase')
-  const { shouldReduceAnimations } = useDeviceCapabilities()
+  /* Бегущая строка зависит только от prefers-reduced-motion (доступность).
+     shouldReduceAnimations (= pointer:coarse, т.е. ВСЕ тач-девайсы) отключал
+     прокрутку на планшетах/смартфонах — оставлял блок полностью статичным. */
+  const { prefersReducedMotion } = useDeviceCapabilities()
   const resolvedTitle = title ?? t('defaultTitle')
   const resolvedSubtitle = subtitle ?? t('defaultSubtitle')
   const items = diplomas ?? DIPLOMAS
@@ -387,7 +392,7 @@ export default function DiplomaShowcase({
     setSelectedIndex(null)
   }, [])
 
-  const isAnimating = !shouldReduceAnimations && items.length > 2
+  const isAnimating = !prefersReducedMotion && items.length > 2
 
   return (
     <>
@@ -444,7 +449,8 @@ export default function DiplomaShowcase({
               ...(isAnimating
                 ? {
                     animation: `marquee-scroll ${MARQUEE_DURATION}s linear infinite`,
-                    animationPlayState: isPaused ? 'paused' : 'running',
+                    /* пауза: hover (десктоп) или открытая модалка (тач-девайсы) */
+                    animationPlayState: (isPaused || selectedIndex !== null) ? 'paused' : 'running',
                     willChange: 'transform',
                   }
                 : {}),
@@ -492,11 +498,13 @@ export default function DiplomaShowcase({
       </SectionContainer>
     </AnimatedSection>
 
-      {/* Lightbox Modal */}
+      {/* Lightbox Modal — статичный key: навигация не перемонтирует модалку
+          целиком (exit/enter каждый раз), а анимирует контент через внутренний
+          key={currentIndex}; закрытие/открытие по-прежнему exit/enter */}
       <AnimatePresence mode="wait">
         {selectedIndex !== null && (
           <DiplomaModal
-            key={selectedIndex}
+            key="diploma-modal"
             allDiplomas={items}
             currentIndex={selectedIndex}
             onNavigate={handleNavigate}
