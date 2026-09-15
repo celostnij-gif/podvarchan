@@ -18,22 +18,37 @@
  *     renders fine, and the success populates the edge cache;
  *   - 4xx (except 429) fail immediately — retrying cannot fix them.
  *
+ * Sitemap fetch (the URL source) is propagation-tolerant: the step runs
+ * seconds after `wrangler deploy` returns, and the runner's colo can serve the
+ * OLD build for up to ~60s — during a sitemap-rebuild defect window (deploy
+ * 528, 2026-09-15: fixed 3×2.5s ≈ 7s of retries died on 500 BEFORE warming a
+ * single URL, while the zone cache had just been purged). Now: escalating
+ * backoff up to ~2.5 min, and if the sitemap still won't answer, a FALLBACK
+ * warm of the structural paths from deploy-purge-paths.json (exactly what the
+ * purge step wipes), so "purge без прогрева" is never left true; the step is
+ * still marked failed (exit 1) for the operator to notice.
+ *
  * Exit code 1 if any URL never returned 200 after all attempts (persistent
- * 1102 = real defect that real visitors would hit).
+ * 1102 = real defect that real visitors would hit) or if the sitemap list
+ * could not be fetched at all.
  *
  * Usage (CI + local): node scripts/warmup.mjs
  * Env: WARMUP_BASE_URL (default https://podvarchan.com),
  *      WARMUP_CONCURRENCY (default 4 — low on purpose, §3.5 anti-stampede),
  *      WARMUP_ATTEMPTS (default 6), WARMUP_TIMEOUT_MS (default 45000),
  *      WARMUP_RETRY_DELAY_MS (default 2500 — база эскалации ретраев),
+ *      WARMUP_SITEMAP_ATTEMPTS (default 8),
  *      WARMUP_PACING_MS (default 250), WARMUP_RESCUE_PAUSE_MS (default 45000),
  *      WARMUP_BREAKER_THRESHOLD (default 5), WARMUP_BREAKER_PAUSE_MS (default 30000).
  */
+import { readFileSync } from 'node:fs'
+
 const BASE = (process.env.WARMUP_BASE_URL ?? 'https://podvarchan.com').replace(/\/+$/, '')
 const CONCURRENCY = parseInt(process.env.WARMUP_CONCURRENCY ?? '4', 10)
 const MAX_ATTEMPTS = parseInt(process.env.WARMUP_ATTEMPTS ?? '6', 10)
 const TIMEOUT_MS = parseInt(process.env.WARMUP_TIMEOUT_MS ?? '45000', 10)
 const RETRY_DELAY_MS = parseInt(process.env.WARMUP_RETRY_DELAY_MS ?? '2500', 10)
+const SITEMAP_ATTEMPTS = parseInt(process.env.WARMUP_SITEMAP_ATTEMPTS ?? '8', 10)
 // Anti-stampede: пауза каждого воркера между URL. Без неё раннер бьёт по
 // оринжу со скоростью ответов — 197 холодных рендеров + ретраи залпом.
 const PACING_MS = parseInt(process.env.WARMUP_PACING_MS ?? '250', 10)
@@ -56,9 +71,13 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
+// Эскалация бэкоффа на fetch sitemap: перекрывает до ~2.5 минут пропагации
+// новой версии воркера на colo раннера после `wrangler deploy` (см. шапку).
+const SITEMAP_BACKOFF_MS = [5000, 10000, 15000, 20000, 30000, 30000, 30000]
+
 async function fetchSitemapUrls() {
   let lastErr
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  for (let attempt = 1; attempt <= SITEMAP_ATTEMPTS; attempt++) {
     try {
       const res = await fetch(`${BASE}/sitemap.xml`, {
         headers: { 'User-Agent': 'WarmupBot/1.0 (+https://podvarchan.com)' },
@@ -69,10 +88,12 @@ async function fetchSitemapUrls() {
       }
       const xml = await res.text()
       const matches = [...xml.matchAll(/<loc>\s*(https?:\/\/[^<]+)\s*<\/loc>/gi)]
+      if (attempt > 1) console.log(`[warmup] sitemap.xml ожил на попытке ${attempt}/${SITEMAP_ATTEMPTS}`)
       return matches.map((m) => m[1].trim())
     } catch (err) {
       lastErr = err
-      if (attempt < 3) await sleep(RETRY_DELAY_MS)
+      console.log(`[warmup] sitemap.xml attempt ${attempt}/${SITEMAP_ATTEMPTS}: ${err.message}`)
+      if (attempt < SITEMAP_ATTEMPTS) await sleep(SITEMAP_BACKOFF_MS[Math.min(attempt - 1, SITEMAP_BACKOFF_MS.length - 1)])
     }
   }
   throw lastErr
@@ -156,10 +177,28 @@ async function runQueue(urls) {
   return results
 }
 
-const sitemapUrls = await fetchSitemapUrls()
-const urls = [...EXTRA_PATHS.map((p) => `${BASE}${p}`), ...sitemapUrls]
+/* Fallback-список = ровно то, что чистит purge-zone-cache.mjs (структурные
+ * пути + агрегаты): если sitemap-лист недоступен, греем хотя бы их, иначе
+ * §3.5 «purge без прогрева» остаётся нарушенным даже во время зелёного деплоя. */
+const FALLBACK_PATHS = JSON.parse(
+  readFileSync(new URL('./deploy-purge-paths.json', import.meta.url), 'utf8'),
+)
+
+let sitemapUrls
+let sitemapOk = true
+try {
+  sitemapUrls = await fetchSitemapUrls()
+} catch (err) {
+  sitemapOk = false
+  console.error(`[warmup] НЕ удалось получить список из sitemap.xml после ${SITEMAP_ATTEMPTS} попыток: ${err.message}`)
+  console.error(`[warmup] FALLBACK: грею ${FALLBACK_PATHS.length} структурных путей из deploy-purge-paths.json`)
+  sitemapUrls = []
+}
+const urls = sitemapOk
+  ? [...EXTRA_PATHS.map((p) => `${BASE}${p}`), ...sitemapUrls]
+  : FALLBACK_PATHS.map((p) => `${BASE}${p}`)
 console.log(
-  `[warmup] ${urls.length} URLs (${sitemapUrls.length} sitemap + ${EXTRA_PATHS.length} extra), ` +
+  `[warmup] ${urls.length} URLs (${sitemapUrls.length} sitemap + ${sitemapOk ? `${EXTRA_PATHS.length} extra` : `fallback`}), ` +
     `concurrency=${CONCURRENCY}, attempts<=${MAX_ATTEMPTS}, timeout=${TIMEOUT_MS}ms`,
 )
 
@@ -213,5 +252,9 @@ if (stillFailed.length > 0) {
   for (const r of stillFailed) {
     console.log(`  last status ${r.status}${r.err ? ` (${r.err})` : ''}: ${r.url}`)
   }
+  process.exitCode = 1
+}
+if (!sitemapOk) {
+  console.error('[warmup] ИТОГ: sitemap-лист недоступен — прогрет только fallback-набор, полноценный прогрев НЕ выполнен (сигнал оператору, step всё ещё non-blocking в CI).')
   process.exitCode = 1
 }
