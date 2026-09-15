@@ -186,12 +186,17 @@ export default async function Footer({ locale }: { locale: string }) {
                   className="text-xs text-text-muted hover:text-gold transition-colors duration-200">
               {t('disclaimer')}
             </Link>
-            <span className="text-xs text-border-light" aria-hidden="true">·</span>
-            <a href="https://magucen.gt.tc" target="_blank" rel="noopener noreferrer"
-               className="text-xs text-text-muted hover:text-gold transition-colors duration-200">
-              magucen.gt.tc
-            </a>
           </nav>
+
+          {/* Developer credit */}
+          <p className="flex items-center gap-1.5 text-xs text-text-muted">
+            <span aria-hidden="true">·</span>
+            <span>{t('footerDevelopment')}:</span>
+            <a href="https://maguchenko.gt.tc" target="_blank" rel="noopener noreferrer"
+               className="hover:text-gold transition-colors duration-200">
+              maguchenko.gt.tc
+            </a>
+          </p>
         </div>
       </div>
     </footer>

@@ -52,7 +52,8 @@
       "legal": "Юридична інформація"
     },
     "footerSearchPrompt": "Не знайшли що шукали?",
-    "footerSearchLink": "Скористайтеся пошуком"
+    "footerSearchLink": "Скористайтеся пошуком",
+    "footerDevelopment": "Розробка сайту"
   },
   "hero": {
     "ariaLabel": "Головний банер",
