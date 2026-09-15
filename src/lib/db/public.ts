@@ -276,48 +276,65 @@ export function getPricingPlans(locale: string): Promise<PricingPlanPublic[]> {
  * Max updated_at по каждой странице (pages.type), только PUBLISHED.
  * Возвращает Map type → Date (ISO и epoch-millis нормализуются через parseDate —
  * исторический mixed-формат в pages.updated_at).
+ *
+ * KV-контракт (kv-cache.ts: «Map/Set — не поддерживаются»): через withCache
+ * наружу уходит только plain JSON (Record<type, ISO-date>); Map собирается
+ * в обёртке ПОСЛЕ кеша. Наивный `withCache(..., () => Map)` сериализовал
+ * Map в "{}" и на hit отдавал plain object — buildEntries() в src/lib/sitemap.ts
+ * падал с «.get is not a function» на каждой пересборке sitemap (500, 2026-09-15).
  */
-async function getPageLastmodsUncached(): Promise<Map<string, Date>> {
+async function getPageLastmodsUncached(): Promise<Record<string, string>> {
   const db = getDB()
   const rows = await db
     .select({ type: pages.type, updatedAt: pages.updatedAt })
     .from(pages)
     .where(eq(pages.status, 'PUBLISHED'))
     .all()
-  const result = new Map<string, Date>()
+  const result: Record<string, string> = {}
   for (const row of rows) {
     const d = parseDate(row.updatedAt)
     if (!d) continue
-    const current = result.get(row.type)
-    if (!current || d.getTime() > current.getTime()) result.set(row.type, d)
+    const current = result[row.type]
+    if (!current || d.getTime() > new Date(current).getTime()) result[row.type] = d.toISOString()
   }
   return result
 }
-export function getPageLastmods(): Promise<Map<string, Date>> {
-  return withCache(cacheKeys.sitemapPageLastmods, TTL_BLOG, () => getPageLastmodsUncached())
+export async function getPageLastmods(): Promise<Map<string, Date>> {
+  const rec = await withCache<Record<string, string>>(
+    cacheKeys.sitemapPageLastmods,
+    TTL_BLOG,
+    () => getPageLastmodsUncached(),
+  )
+  return new Map(Object.entries(rec).map(([k, v]) => [k, new Date(v)]))
 }
 
 /**
  * Max updated_at опубликованных постов по category_id — lastmod категорий блога.
+ * Map собирается после KV-слоя — см. контракт сериализации в getPageLastmods.
  */
-async function getCategoryLastmodsUncached(): Promise<Map<string, Date>> {
+async function getCategoryLastmodsUncached(): Promise<Record<string, string>> {
   const db = getDB()
   const rows = await db
     .select({ categoryId: blogPosts.categoryId, updatedAt: blogPosts.updatedAt })
     .from(blogPosts)
     .where(and(eq(blogPosts.status, 'PUBLISHED'), isNotNull(blogPosts.categoryId)))
     .all()
-  const result = new Map<string, Date>()
+  const result: Record<string, string> = {}
   for (const row of rows) {
     const d = parseDate(row.updatedAt)
     if (!d || !row.categoryId) continue
-    const current = result.get(row.categoryId)
-    if (!current || d.getTime() > current.getTime()) result.set(row.categoryId, d)
+    const current = result[row.categoryId]
+    if (!current || d.getTime() > new Date(current).getTime()) result[row.categoryId] = d.toISOString()
   }
   return result
 }
-export function getCategoryLastmods(): Promise<Map<string, Date>> {
-  return withCache(cacheKeys.sitemapCatLastmods, TTL_BLOG, () => getCategoryLastmodsUncached())
+export async function getCategoryLastmods(): Promise<Map<string, Date>> {
+  const rec = await withCache<Record<string, string>>(
+    cacheKeys.sitemapCatLastmods,
+    TTL_BLOG,
+    () => getCategoryLastmodsUncached(),
+  )
+  return new Map(Object.entries(rec).map(([k, v]) => [k, new Date(v)]))
 }
 // ─── Service Sidebar (lightweight — only 5 fields for listing/sidebar) ───
 
