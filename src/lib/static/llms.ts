@@ -27,8 +27,7 @@ Allow: /faq/
 Allow: /kontakty/
 Allow: /tseny/
 
-# Disallow API and internal pages
-Disallow: /api/
+# Disallow internal paths
 Disallow: /search/
 Disallow: /_next/
 Disallow: /politika-konfidentsialnosti/
