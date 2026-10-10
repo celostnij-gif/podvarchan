@@ -86,7 +86,7 @@ export function ClientAboutPage({ breadcrumbs, d1Sections }: { breadcrumbs: Brea
       >
         <HeroBackgroundParallax />
 
-        <div className="max-w-container mx-auto px-gutter pt-16 pb-10 md:pt-20 md:pb-14">
+        <div className="max-w-container mx-auto px-gutter pt-16 pb-8 md:pt-20 md:pb-5">
           <div className="relative z-10">
             {/* Breadcrumbs */}
             <HeroBreadcrumbs />
@@ -157,9 +157,10 @@ export function ClientAboutPage({ breadcrumbs, d1Sections }: { breadcrumbs: Brea
       </section>
 
       {/* ════════════════════════════════════════
-           STATS — Цифры доверия
+           STATS — Цифры доверия (сразу под hero, без вертикального зазора —
+           регалии должны быть видны на первом экране)
            ════════════════════════════════════════ */}
-      <SectionContainer size="sm">
+      <SectionContainer size="full">
         <div className="grid grid-cols-3 gap-6 max-w-2xl mx-auto text-center">
           {[
             { value: '2000+', label: t('statsClients') },

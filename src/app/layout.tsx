@@ -106,8 +106,11 @@ export default async function RootLayout({
             font-family: var(--font-sans); line-height: 1.75;
             overflow-x: hidden;
           }
-          section[aria-label], .hero-section { min-height: 90vh; }
-          @media (min-width: 768px) { section[aria-label] { min-height: 100vh; } }
+          /* NB: hero min-heights live on the hero components themselves
+             (e.g. Hero.tsx min-h-[90vh] md:min-h-screen). A global
+             section[aria-label] rule here stretched every labelled section
+             to 100vh - ob-avtore/metod heroes sat on 346-407px of empty
+             space and pushed their stats below the fold (fixed 2026-10-10). */
         `}</style>
       <body
         className="bg-bg-base text-text-primary font-body antialiased flex flex-col min-h-screen"
