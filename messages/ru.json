@@ -1531,10 +1531,6 @@
       "ctaButton": "Записаться на бесплатную консультацию",
       "readMore": "Подробнее об авторе метода",
       "breadcrumb": "Метод"
-    },
-    "blog": {
-      "recommendedLabel": "Рекомендуем",
-      "readMoreService": "Подробнее о {service}"
     }
   },
   "home": {
@@ -1795,7 +1791,9 @@
     "ctaServiceDescription": "Узнайте, как гипнотерапия помогает в решении {serviceName}. Запишитесь на бесплатную консультацию.",
     "moreOnTopic": "Читайте также по теме",
     "showMore": "Показать ещё ({count})",
-    "readMoreLink": "Записаться на консультацию по этому направлению"
+    "readMoreLink": "Записаться на консультацию по этому направлению",
+    "recommendedLabel": "Рекомендуем",
+    "readMoreService": "Подробнее о {service}"
   },
   "search": {
     "metaTitle": "Поиск",

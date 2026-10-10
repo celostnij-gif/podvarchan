@@ -911,10 +911,6 @@
       "ctaButton": "Записатися на безкоштовну консультацію",
       "readMore": "Детальніше про автора методу",
       "breadcrumb": "Метод"
-    },
-    "blog": {
-      "recommendedLabel": "Рекомендуємо",
-      "readMoreService": "Детальніше про {service}"
     }
   },
   "home": {
@@ -1175,7 +1171,9 @@
     "showMore": "Показати ще ({count})",
     "moreOnTopic": "Читайте також за темою",
     "readMore": "Читати",
-    "readMoreLink": "Записатися на консультацію за цим напрямком"
+    "readMoreLink": "Записатися на консультацію за цим напрямком",
+    "recommendedLabel": "Рекомендуємо",
+    "readMoreService": "Детальніше про {service}"
   },
   "serviceSymptoms": {
     "gipnoterapiya-onlayn": [
