@@ -42,7 +42,6 @@ async function generateRobotsTxt(): Promise<string> {
     'User-agent: *',
     'Allow: /',
     'Allow: /_next/static/',
-    'Disallow: /api/',
     'Disallow: /search/',
     '',
     ...AI_BOTS.flatMap((userAgent) => [`User-agent: ${userAgent}`, 'Allow: /', '']),
